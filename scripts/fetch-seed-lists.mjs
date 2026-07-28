@@ -58,10 +58,26 @@ const collapse = (text) => text.replace(/\s+/g, ' ').trim();
 
 // --- Wikidata -------------------------------------------------------------
 
-async function sparql(query) {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * query.wikidata.org is a free shared endpoint and rate-limits accordingly:
+ * 429 when you go too fast, and an occasional 502 when the service itself is
+ * busy. Both are transient, and both were hit while building the award lists,
+ * so retry with exponential backoff rather than failing a whole fetch run over
+ * one unlucky request.
+ */
+async function sparql(query, attempt = 0) {
   const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(query)}&format=json`;
-  const body = await getText(url, { accept: 'application/sparql-results+json' });
-  return JSON.parse(body).results.bindings;
+  try {
+    const body = await getText(url, { accept: 'application/sparql-results+json' });
+    return JSON.parse(body).results.bindings;
+  } catch (error) {
+    const transient = /responded (429|502|503|504)/.test(error.message);
+    if (!transient || attempt >= 4) throw error;
+    await sleep(2000 * 2 ** attempt);
+    return sparql(query, attempt + 1);
+  }
 }
 
 /**
@@ -100,6 +116,7 @@ async function fetchCriterion() {
   return {
     slug: 'criterion-collection',
     name: 'The Criterion Collection',
+    category: 'collection',
     source: 'Wikidata — Criterion Collection spine number (P12279)',
     // The data comes from Wikidata, but query.wikidata.org isn't somewhere a
     // host can browse to cross-reference a title — criterion.com's own
@@ -110,6 +127,34 @@ async function fetchCriterion() {
     note: 'Wikipedia deleted its Criterion release list; Wikidata is the structured stand-in and supplies TMDB ids directly.',
     entries,
   };
+}
+
+/**
+ * Films that received a given award (P166), e.g. the Palme d'Or.
+ *
+ * The `wdt:P31 wd:Q11424` (instance of: film) constraint is load-bearing, not
+ * decoration: producers receive Best Picture too, so without it the query
+ * returns a mix of films and people — 228 "winners" for an award with 98
+ * actual films.
+ *
+ * These lists are unranked on purpose. An award has no internal ordering, and
+ * the ceremony year is release year + 1 for most of them, so `movies.year`
+ * already answers "winners from the 90s" without a separate award-year column.
+ */
+async function fetchWikidataAward(awardQid, meta) {
+  const rows = await sparql(`
+    SELECT ?film ?name ?date ?tmdb WHERE {
+      ?film wdt:P166 wd:${awardQid} ; wdt:P31 wd:Q11424 .
+      ?film rdfs:label ?name . FILTER(LANG(?name) = "en")
+      OPTIONAL { ?film wdt:P577 ?date . }
+      OPTIONAL { ?film wdt:P4947 ?tmdb . }
+    }`);
+
+  const entries = foldWikidataRows(rows)
+    .filter((entry) => entry.year === null || entry.year <= THIS_YEAR)
+    .sort((a, b) => (a.year ?? 0) - (b.year ?? 0) || a.title.localeCompare(b.title));
+
+  return { category: 'awards', ...meta, entries };
 }
 
 async function fetchWikidataSeries(seriesQid, meta) {
@@ -162,6 +207,7 @@ async function fetchSightAndSound() {
   return {
     slug: 'sight-and-sound',
     name: 'Sight & Sound Greatest Films (2022 critics’ poll)',
+    category: 'canon',
     source: 'British Film Institute — Sight and Sound 2022 critics’ poll',
     source_url: 'https://www.bfi.org.uk/sight-and-sound/greatest-films-all-time',
     note: "Wikipedia lists only the top 10 in prose; the BFI's own page carries the full ranking.",
@@ -206,6 +252,7 @@ async function fetchTspdt() {
   return {
     slug: 'tspdt-1000',
     name: 'TSPDT 1,000 Greatest Films',
+    category: 'canon',
     source: "They Shoot Pictures, Don't They? — the list's publisher",
     source_url: 'https://www.theyshootpictures.com/gf1000_all1000films.htm',
     note: 'Not on Wikipedia in any form; sourced from the publisher. Titles are upper-case at source and are matched case-insensitively.',
@@ -264,6 +311,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataSeries('Q56070713', {
         slug: 'disney-animated-canon',
+        category: 'collection',
         name: 'Disney Animated Canon',
         source: 'Wikidata — "Walt Disney Animation Studios feature film" series (Q56070713)',
         source_url: 'https://en.wikipedia.org/wiki/List_of_Walt_Disney_Animation_Studios_films',
@@ -275,6 +323,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataSeries('Q104830727', {
         slug: 'studio-ghibli',
+        category: 'collection',
         name: 'Studio Ghibli',
         source: 'Wikidata — "Studio Ghibli Feature Films" series (Q104830727)',
         source_url: 'https://en.wikipedia.org/wiki/List_of_Studio_Ghibli_works',
@@ -282,6 +331,78 @@ const SOURCES = [
       }),
   },
   { label: 'TMDB Top Rated 100', run: fetchTmdbTopRated },
+
+  // --- Awards -------------------------------------------------------------
+  //
+  // TMDB carries no awards data at all (its "oscar" keyword tags 9 films), so
+  // Wikidata is the only structured source. Each of these was measured against
+  // the existing pool before being included — the point of an awards list is
+  // the films it ADDS, not the label:
+  //
+  //     Golden Bear      86 films, 21% overlap  → 68 new
+  //     Best Picture     98 films, 43% overlap  → 56 new
+  //     Golden Lion      67 films, 40% overlap  → 40 new
+  //     Best International 71 films, 45% overlap → 39 new
+  //     Palme d'Or       83 films, 58% overlap  → 35 new
+  //
+  // Deliberately NOT included, and not because they're redundant — Wikidata's
+  // coverage of them is simply too incomplete to ship as "the winners":
+  // BAFTA Best Film (32 films for ~75 years of awards), César Best Film (26),
+  // Goya Best Film (12). Worth revisiting if that data fills in.
+  {
+    label: 'Oscar Best Picture',
+    run: () =>
+      fetchWikidataAward('Q102427', {
+        slug: 'award-oscar-best-picture',
+        name: 'Oscar — Best Picture',
+        source: 'Wikidata — award received (P166), Academy Award for Best Picture (Q102427)',
+        source_url: 'https://en.wikipedia.org/wiki/Academy_Award_for_Best_Picture',
+        note: 'Constrained to instance-of-film: the producers receive this award too, and without that constraint the query returns them alongside the films.',
+      }),
+  },
+  {
+    label: 'Oscar Best International',
+    run: () =>
+      fetchWikidataAward('Q105304', {
+        slug: 'award-oscar-international',
+        name: 'Oscar — Best International Feature',
+        source: 'Wikidata — award received (P166), Academy Award for Best International Feature Film (Q105304)',
+        source_url: 'https://en.wikipedia.org/wiki/Academy_Award_for_Best_International_Feature_Film',
+        note: 'Formerly Best Foreign Language Film; the Wikidata item covers both names.',
+      }),
+  },
+  {
+    label: 'Palme d’Or',
+    run: () =>
+      fetchWikidataAward('Q179808', {
+        slug: 'award-palme-dor',
+        name: 'Palme d’Or (Cannes)',
+        source: 'Wikidata — award received (P166), Palme d’Or (Q179808)',
+        source_url: 'https://en.wikipedia.org/wiki/Palme_d%27Or',
+        note: 'The most redundant of the award lists against a canon-heavy library (58% already present) — included for the axis rather than the additions.',
+      }),
+  },
+  {
+    label: 'Golden Lion',
+    run: () =>
+      fetchWikidataAward('Q209459', {
+        slug: 'award-golden-lion',
+        name: 'Golden Lion (Venice)',
+        source: 'Wikidata — award received (P166), Golden Lion (Q209459)',
+        source_url: 'https://en.wikipedia.org/wiki/Golden_Lion',
+      }),
+  },
+  {
+    label: 'Golden Bear',
+    run: () =>
+      fetchWikidataAward('Q154590', {
+        slug: 'award-golden-bear',
+        name: 'Golden Bear (Berlin)',
+        source: 'Wikidata — award received (P166), Golden Bear (Q154590)',
+        source_url: 'https://en.wikipedia.org/wiki/Golden_Bear',
+        note: 'Q154590 is the Berlinale prize. Note that a plain search for "Golden Bear" returns a US training ship first (Q2512671) — the qid here is the award.',
+      }),
+  },
 ];
 
 async function main() {
@@ -304,6 +425,10 @@ async function main() {
 
       const payload = {
         name: list.name,
+        // Must be carried through: seed.mjs reads it to group the list in the
+        // picker, and omitting it here would silently strip the category from
+        // an existing seed file on the next fetch run.
+        category: list.category ?? null,
         source: list.source,
         source_url: list.source_url,
         note: list.note,

@@ -270,6 +270,12 @@ is an obvious Explore action later.
 
 ## 4. Work items, in order
 
+**Status:** §0, 4.1 and 4.2 are done — list selection is view-level, ranks and
+categories are in, the grouped picker and Top-N are built, the occasion chips
+ship with Cinephile / Awards / Family, and five award lists are seeded from
+Wikidata. Still open: 4.3 (dynamic lists, which is what lights up the
+Crowd-pleasers chip), 4.4 (Replace), 4.5 (streaming badge), 4.6 (loop-closers).
+
 ### 4.1 + 4.2 — build these together
 
 **Sequencing note:** 4.1 is the cheapest item in isolation, but its Top-N

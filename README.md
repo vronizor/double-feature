@@ -65,7 +65,7 @@ docker compose exec double-feature node scripts/seed.mjs
 # or, without Docker:  npm run seed
 ```
 
-This resolves ~2,900 entries against TMDB and takes a few minutes. It's safe to
+This resolves ~3,300 entries against TMDB and takes a few minutes. It's safe to
 re-run — finished entries are skipped, so an interrupted run just continues.
 Seed lists arrive **active**, so you can draw immediately.
 
@@ -74,11 +74,21 @@ Seed lists arrive **active**, so you can draw immediately.
 **Lineup tab** — build up tonight's shortlist through any mix of three ways to
 add a film, then publish it as a vote once you're happy with it:
 
-- **Draw random films** — tick which lists are in play, optionally narrow the
-  pool by genre, language, year or runtime (tucked away in a collapsible "Pool
-  setup" section once you've set it how you like), pick how many to draw (1–10)
-  and hit Draw. A live "N films match" count updates as filters change, so you
-  see the size of the pool before spending a draw on it.
+- **Draw random films** — start from a **"Tonight is…"** preset (Cinephile,
+  Awards, Family — each sets both the lists and the filters that go with it),
+  or tick lists by hand in the collapsible **Pool setup** section. Lists are
+  grouped by category there, so "all the awards lists" is one click. Narrow
+  further by genre, language, year or runtime; ranked lists (TSPDT, Sight &
+  Sound) also get a **Top N** control, so "draw from the TSPDT top 100" is a
+  single number. Then pick how many to draw (1–10) and hit Draw. A live
+  "N films match" count updates as you go, so you see the size of the pool
+  before spending a draw on it.
+
+  Presets are a starting point, never a gate — Draw works with nothing
+  selected, and the moment you hand-edit anything the label switches to
+  *Custom* rather than claiming a preset it no longer matches. What you pick
+  here applies to tonight only; the **Lists** tab is where you set which lists
+  are in play *by default*.
 - **Add a specific film** — search TMDB by title, or paste a TMDB URL/id
   directly for the rare title search won't surface (some films — like Godard's
   *Histoire(s) du cinéma* — are catalogued on TMDB as a TV series rather than a
@@ -164,18 +174,33 @@ rewatches.
 
 The original spec assumed all six lists could be pulled from Wikipedia. Only two
 of them actually can, so each list is sourced from wherever it genuinely lives.
-Two more were added later, from their own publisher and (by hand, since its
-site blocks scripted access) a curator on SensCritique:
+Two more were added later, from their own publisher and (by hand, since its site
+blocks scripted access) a curator on SensCritique — then five award lists from
+Wikidata:
 
-| List | Source | Count |
-|---|---|---|
-| The Criterion Collection | Wikidata, spine number `P12279` | 1,251 |
-| Sight & Sound 2022 (critics) | bfi.org.uk — the poll's publisher | 264 |
-| TSPDT 1,000 Greatest Films | theyshootpictures.com — the list's publisher | 1,000 |
-| Disney Animated Canon | Wikidata, "WDAS feature film" series | 65 |
-| Studio Ghibli | Wikidata, "Studio Ghibli Feature Films" series | 23 |
-| BFI: Films to See by Age 15 | bfi.org.uk (2020 update of a 2005 list) | 64 |
-| Family Films (Ages 6+) | A user's curated list on SensCritique | 251 |
+| List | Category | Source | Count |
+|---|---|---|---|
+| The Criterion Collection | collection | Wikidata, spine number `P12279` | 1,251 |
+| Sight & Sound 2022 (critics) | canon | bfi.org.uk — the poll's publisher | 264 |
+| TSPDT 1,000 Greatest Films | canon | theyshootpictures.com — the list's publisher | 1,000 |
+| Disney Animated Canon | collection | Wikidata, "WDAS feature film" series | 65 |
+| Studio Ghibli | collection | Wikidata, "Studio Ghibli Feature Films" series | 23 |
+| BFI: Films to See by Age 15 | family | bfi.org.uk (2020 update of a 2005 list) | 64 |
+| Family Films (Ages 6+) | family | A user's curated list on SensCritique | 251 |
+| Oscar — Best Picture | awards | Wikidata, award received `P166` | 97 |
+| Oscar — Best International Feature | awards | Wikidata, award received `P166` | 71 |
+| Palme d'Or (Cannes) | awards | Wikidata, award received `P166` | 82 |
+| Golden Lion (Venice) | awards | Wikidata, award received `P166` | 66 |
+| Golden Bear (Berlin) | awards | Wikidata, award received `P166` | 86 |
+
+**On the awards lists:** TMDB carries no awards data at all — its `oscar`
+keyword tags nine films — so Wikidata is the only structured source. Each award
+was measured against the existing pool before being included, because the point
+of an awards list is the films it *adds*, not the label: Golden Bear turned out
+the most additive (21% already present), Palme d'Or the least (58%). BAFTA,
+César and Goya were left out — not as redundant, but because Wikidata's coverage
+of them is too incomplete to honestly ship as "the winners" (32, 26 and 12 films
+respectively, against many decades of awards).
 
 Why not Wikipedia:
 
