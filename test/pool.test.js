@@ -1,0 +1,296 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import { createTestDb } from '../server/db.js';
+import {
+  buildPoolQuery,
+  poolCount,
+  drawFromPool,
+  queryPool,
+  poolFacets,
+  languageName,
+} from '../server/pool.js';
+
+const GENRES = { drama: 18, horror: 27, scifi: 878, comedy: 35 };
+
+function seed() {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+    (1, 'Active', 'seed', 1),
+    (2, 'Inactive', 'seed', 0)`);
+  for (const [id, name] of Object.entries(GENRES)) {
+    db.prepare('INSERT INTO genres (id, name) VALUES (?, ?)').run(name, id);
+  }
+
+  const add = (tmdbId, title, year, lang, runtime, genres, { watched = 0, listId = 1 } = {}) => {
+    db.prepare(
+      `INSERT INTO movies (tmdb_id, title, year, runtime, original_language, watched)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(tmdbId, title, year, runtime, lang, watched);
+    for (const genre of genres) {
+      db.prepare('INSERT INTO movie_genres (tmdb_id, genre_id) VALUES (?, ?)').run(tmdbId, genre);
+    }
+    db.prepare(
+      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)
+       VALUES (?, ?, ?, ?, 'resolved')`,
+    ).run(listId, tmdbId, title, year);
+  };
+
+  add(1, 'Old Drama', 1955, 'en', 120, [GENRES.drama]);
+  add(2, 'Japanese Drama', 1960, 'ja', 200, [GENRES.drama]);
+  add(3, 'Modern Horror', 2015, 'en', 95, [GENRES.horror, GENRES.drama]);
+  add(4, 'Sci-Fi Epic', 1968, 'en', 149, [GENRES.scifi]);
+  add(5, 'Seen It', 1990, 'en', 100, [GENRES.comedy], { watched: 1 });
+  add(6, 'Off-list Film', 1970, 'fr', 90, [GENRES.drama], { listId: 2 });
+  return db;
+}
+
+test('the pool is only active lists, and excludes watched films by default', () => {
+  const db = seed();
+  assert.equal(poolCount(db, {}), 4);
+  assert.equal(poolCount(db, { includeWatched: true }), 5, 'rewatch toggle adds the watched film');
+});
+
+test('explicit null bounds behave exactly like omitted ones', () => {
+  // The client's default filter state sends { min: null, max: null } rather
+  // than omitting the keys. Number(null) is 0, not NaN, so a naive coercion
+  // turns "no bound" into "<= 0" and zeroes the whole pool — this is a
+  // regression test for exactly that bug.
+  const db = seed();
+  const explicitNulls = {
+    genres: { include: [], exclude: [] },
+    languages: { include: [], exclude: [] },
+    year: { min: null, max: null },
+    runtime: { min: null, max: null },
+    includeWatched: false,
+  };
+  assert.equal(poolCount(db, explicitNulls), poolCount(db, {}));
+  assert.equal(poolCount(db, explicitNulls), 4);
+});
+
+test('a film on two lists is counted once', () => {
+  const db = seed();
+  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (3, 'Overlap', 'seed', 1)`);
+  db.prepare(
+    `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)
+     VALUES (3, 1, 'Old Drama', 1955, 'resolved')`,
+  ).run();
+
+  // Deduplication by tmdb_id is the whole point of keying on TMDB rather than title.
+  assert.equal(poolCount(db, {}), 4);
+});
+
+test('genre include matches any of the chosen genres', () => {
+  const db = seed();
+  assert.equal(poolCount(db, { genres: { include: [GENRES.horror] } }), 1);
+  assert.equal(poolCount(db, { genres: { include: [GENRES.horror, GENRES.scifi] } }), 2);
+});
+
+test('genre exclude drops a film carrying any excluded genre', () => {
+  const db = seed();
+  // Modern Horror is both horror and drama, so excluding horror must drop it
+  // even though it is also a drama.
+  assert.equal(poolCount(db, { genres: { exclude: [GENRES.horror] } }), 3);
+  assert.equal(poolCount(db, { genres: { exclude: [GENRES.drama] } }), 1);
+});
+
+test('include and exclude combine', () => {
+  const db = seed();
+  const count = poolCount(db, {
+    genres: { include: [GENRES.drama], exclude: [GENRES.horror] },
+  });
+  assert.equal(count, 2, 'the two pure dramas, not the horror-drama');
+});
+
+test('language include/exclude, year and runtime filters narrow the pool', () => {
+  const db = seed();
+  assert.equal(poolCount(db, { languages: { include: ['ja'] } }), 1);
+  assert.equal(poolCount(db, { languages: { include: ['en', 'ja'] } }), 4);
+  assert.equal(poolCount(db, { year: { min: 1960, max: 1970 } }), 2);
+  assert.equal(poolCount(db, { year: { min: 2000 } }), 1);
+  assert.equal(poolCount(db, { runtime: { max: 120 } }), 2);
+  assert.equal(poolCount(db, { runtime: { min: 140 } }), 2);
+});
+
+test('language exclude drops a matching language but keeps an unknown one', () => {
+  const db = seed();
+  // 4 films total: 3 en, 1 ja. Excluding 'en' should leave just the ja film.
+  assert.equal(poolCount(db, { languages: { exclude: ['en'] } }), 1);
+
+  db.prepare('UPDATE movies SET original_language = NULL WHERE tmdb_id = 1').run();
+  // An unknown language must not be swept up by an exclude filter — SQL's
+  // `NULL NOT IN (...)` is NULL (falsy), which would otherwise drop it too.
+  assert.equal(poolCount(db, { languages: { exclude: ['en'] } }), 2);
+});
+
+test('language include and exclude combine', () => {
+  const db = seed();
+  const count = poolCount(db, {
+    languages: { include: ['en', 'ja'], exclude: ['ja'] },
+  });
+  assert.equal(count, 3, 'en+ja included, then ja excluded again leaves just en');
+});
+
+test('a film with an unknown year is excluded by a year filter', () => {
+  const db = seed();
+  db.prepare('UPDATE movies SET year = NULL WHERE tmdb_id = 1').run();
+  assert.equal(poolCount(db, { year: { min: 1900, max: 2100 } }), 3);
+  assert.equal(poolCount(db, {}), 4, 'but it stays in an unfiltered pool');
+});
+
+test('draws never exceed the requested size and return only pool members', () => {
+  const db = seed();
+  const drawn = drawFromPool(db, {}, 2);
+  assert.equal(drawn.length, 2);
+  assert.equal(new Set(drawn).size, 2, 'no duplicates within a draw');
+  for (const id of drawn) assert.ok([1, 2, 3, 4].includes(id));
+});
+
+test('an over-tight filter returns fewer than asked rather than throwing', () => {
+  const db = seed();
+  const drawn = drawFromPool(db, { languages: { include: ['ja'] } }, 5);
+  assert.equal(drawn.length, 1);
+});
+
+test('an empty pool draws nothing', () => {
+  const db = seed();
+  assert.deepEqual(drawFromPool(db, { languages: { include: ['zz'] } }, 5), []);
+});
+
+test('facets only describe the active pool', () => {
+  const db = seed();
+  const facets = poolFacets(db);
+
+  const languages = facets.languages.map((row) => row.code);
+  assert.ok(languages.includes('en') && languages.includes('ja'));
+  assert.ok(!languages.includes('fr'), 'the inactive list must not leak into the options');
+  assert.equal(facets.min_year, 1955);
+});
+
+test('filter values are coerced, so hand-crafted input cannot inject SQL', () => {
+  const db = seed();
+  const { params } = buildPoolQuery({
+    genres: { include: ["1); DROP TABLE movies;--", 27] },
+    year: { min: 'nonsense' },
+  });
+
+  assert.deepEqual(params, [27], 'non-numeric ids are dropped, not interpolated');
+  assert.doesNotThrow(() => poolCount(db, { genres: { include: ["1); DROP TABLE movies;--"] } }));
+  assert.equal(poolCount(db, {}), 4, 'the table is still there');
+});
+
+test('language names cover TMDB codes Intl does not know', () => {
+  assert.equal(languageName('en'), 'English');
+  assert.equal(languageName('ja'), 'Japanese');
+  assert.equal(languageName('cn'), 'Cantonese');
+});
+
+// --- queryPool: sorted, paginated browsing for the Explore tab -----------
+// Fixture (active, unwatched pool): 1 Old Drama (1955, 120min), 2 Japanese
+// Drama (1960, 200min), 3 Modern Horror (2015, 95min), 4 Sci-Fi Epic (1968, 149min).
+
+test('queryPool defaults to title order', () => {
+  const db = seed();
+  const ids = queryPool(db, {});
+  const titles = ids.map((id) => db.prepare('SELECT title FROM movies WHERE tmdb_id = ?').get(id).title);
+  assert.deepEqual(titles, ['Japanese Drama', 'Modern Horror', 'Old Drama', 'Sci-Fi Epic']);
+});
+
+test('queryPool sorts by year in both directions', () => {
+  const db = seed();
+  assert.deepEqual(queryPool(db, {}, { sort: 'year_desc' }), [3, 4, 2, 1]);
+  assert.deepEqual(queryPool(db, {}, { sort: 'year_asc' }), [1, 2, 4, 3]);
+});
+
+test('queryPool sorts by runtime, longest first', () => {
+  const db = seed();
+  assert.deepEqual(queryPool(db, {}, { sort: 'runtime' }), [2, 4, 1, 3]);
+});
+
+test('queryPool sorts by rating, unrated films last rather than first', () => {
+  const db = seed();
+  db.prepare('UPDATE movies SET vote_average = 8.5 WHERE tmdb_id = 3').run();
+  db.prepare('UPDATE movies SET vote_average = 6.0 WHERE tmdb_id = 1').run();
+  // 3 (8.5), 1 (6.0), then 2 and 4 (both NULL, tie-broken by title).
+  assert.deepEqual(queryPool(db, {}, { sort: 'rating' }), [3, 1, 2, 4]);
+});
+
+test('queryPool paginates with limit and offset', () => {
+  const db = seed();
+  const firstPage = queryPool(db, {}, { limit: 2, offset: 0 });
+  const secondPage = queryPool(db, {}, { limit: 2, offset: 2 });
+  assert.equal(firstPage.length, 2);
+  assert.equal(secondPage.length, 2);
+  assert.deepEqual([...firstPage, ...secondPage].sort(), [1, 2, 3, 4]);
+  assert.equal(new Set([...firstPage, ...secondPage]).size, 4, 'no overlap between pages');
+});
+
+test('queryPool falls back to title order for an unrecognised sort key', () => {
+  const db = seed();
+  assert.deepEqual(queryPool(db, {}, { sort: 'not-a-real-sort' }), queryPool(db, {}, { sort: 'title' }));
+});
+
+test('queryPool respects filters exactly like poolCount', () => {
+  const db = seed();
+  const ja = queryPool(db, { languages: { include: ['ja'] } });
+  assert.deepEqual(ja, [2]);
+});
+
+// --- search: title, original title, or director ---------------------------
+
+test('search matches title, original title, or director, case-insensitively', () => {
+  const db = seed();
+  db.prepare("UPDATE movies SET director = 'Akira Kurosawa' WHERE tmdb_id = 2").run();
+  db.prepare("UPDATE movies SET original_title = 'Aru Kagayaku Kioku' WHERE tmdb_id = 3").run();
+
+  assert.equal(poolCount(db, { search: 'drama' }), 2, '"Old Drama" and "Japanese Drama"');
+  assert.equal(poolCount(db, { search: 'KUROSAWA' }), 1, 'matches director, case-insensitively');
+  assert.equal(poolCount(db, { search: 'Kagayaku' }), 1, 'matches original_title');
+  assert.equal(poolCount(db, { search: 'nonexistent' }), 0);
+});
+
+test('search ignores surrounding whitespace and blank input', () => {
+  const db = seed();
+  assert.equal(poolCount(db, { search: '  Old Drama  ' }), 1);
+  assert.equal(poolCount(db, { search: '   ' }), 4, 'blank search is no filter at all');
+});
+
+test('search escapes LIKE wildcard characters so they match literally', () => {
+  const db = seed();
+  db.prepare("UPDATE movies SET title = '100% Real' WHERE tmdb_id = 1").run();
+  // Without escaping, the "%" in the search term would itself act as a
+  // wildcard and match every row, not just titles containing a literal "%".
+  assert.equal(poolCount(db, { search: '100%' }), 1);
+  assert.equal(poolCount(db, { search: '100% Real' }), 1);
+  assert.equal(poolCount(db, { search: '%' }), 1, 'a bare wildcard char is still just a literal search term');
+});
+
+// --- exclude: "don't hand back what's already staged" ---------------------
+
+test('exclude narrows the pool without being a persisted filter preference', () => {
+  const db = seed();
+  assert.equal(poolCount(db, {}, [1]), 3);
+  assert.equal(poolCount(db, {}, [1, 2]), 2);
+  assert.equal(poolCount(db, {}), 4, 'omitting it entirely still means no exclusion at all');
+});
+
+test('drawFromPool never returns an excluded id, even when it would otherwise win every draw', () => {
+  const db = seed();
+  for (let i = 0; i < 20; i += 1) {
+    const drawn = drawFromPool(db, {}, 3, [1]);
+    assert.equal(drawn.length, 3);
+    assert.ok(!drawn.includes(1));
+  }
+});
+
+test('exclude combines with ordinary filters rather than replacing them', () => {
+  const db = seed();
+  // Pool minus horror (3: films 1,2,4) minus excluded film 2 = films 1,4.
+  assert.equal(poolCount(db, { genres: { exclude: [GENRES.horror] } }, [2]), 2);
+});
+
+test('exclude tolerates non-numeric junk instead of breaking the query', () => {
+  const db = seed();
+  assert.doesNotThrow(() => poolCount(db, {}, ['not-a-number', null, undefined, 1]));
+  assert.equal(poolCount(db, {}, ['not-a-number', 1]), 3, 'the one valid id is still excluded');
+});

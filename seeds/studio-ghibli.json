@@ -1,0 +1,125 @@
+{
+  "name": "Studio Ghibli",
+  "source": "Wikidata — \"Studio Ghibli Feature Films\" series (Q104830727)",
+  "source_url": "https://en.wikipedia.org/wiki/List_of_Studio_Ghibli_works",
+  "note": "Feature films only; the Wikipedia \"works\" page also lists pre-Ghibli staff credits.",
+  "fetched_at": "2026-07-27",
+  "count": 23,
+  "entries": [
+    {
+      "title": "Nausicaä of the Valley of the Wind",
+      "year": 1984,
+      "tmdb_id": 81
+    },
+    {
+      "title": "Castle in the Sky",
+      "year": 1986,
+      "tmdb_id": 10515
+    },
+    {
+      "title": "My Neighbor Totoro",
+      "year": 1988,
+      "tmdb_id": 8392
+    },
+    {
+      "title": "Grave of the Fireflies",
+      "year": 1988,
+      "tmdb_id": 12477
+    },
+    {
+      "title": "Kiki's Delivery Service",
+      "year": 1989,
+      "tmdb_id": 16859
+    },
+    {
+      "title": "Only Yesterday",
+      "year": 1991,
+      "tmdb_id": 15080
+    },
+    {
+      "title": "Porco Rosso",
+      "year": 1992,
+      "tmdb_id": 11621
+    },
+    {
+      "title": "Ocean Waves",
+      "year": 1993,
+      "tmdb_id": 21057
+    },
+    {
+      "title": "Pom Poko",
+      "year": 1994,
+      "tmdb_id": 15283
+    },
+    {
+      "title": "Whisper of the Heart",
+      "year": 1995,
+      "tmdb_id": 37797
+    },
+    {
+      "title": "Princess Mononoke",
+      "year": 1997,
+      "tmdb_id": 128
+    },
+    {
+      "title": "My Neighbors the Yamadas",
+      "year": 1999,
+      "tmdb_id": 16198
+    },
+    {
+      "title": "Spirited Away",
+      "year": 2001,
+      "tmdb_id": 129
+    },
+    {
+      "title": "The Cat Returns",
+      "year": 2002,
+      "tmdb_id": 15370
+    },
+    {
+      "title": "Howl's Moving Castle",
+      "year": 2004,
+      "tmdb_id": 4935
+    },
+    {
+      "title": "Tales from Earthsea",
+      "year": 2006,
+      "tmdb_id": 37933
+    },
+    {
+      "title": "Ponyo",
+      "year": 2008,
+      "tmdb_id": 12429
+    },
+    {
+      "title": "Arrietty",
+      "year": 2010,
+      "tmdb_id": 51739
+    },
+    {
+      "title": "From Up on Poppy Hill",
+      "year": 2011,
+      "tmdb_id": 83389
+    },
+    {
+      "title": "The Wind Rises",
+      "year": 2013,
+      "tmdb_id": 149870
+    },
+    {
+      "title": "When Marnie Was There",
+      "year": 2014,
+      "tmdb_id": 242828
+    },
+    {
+      "title": "Earwig and the Witch",
+      "year": 2020,
+      "tmdb_id": 683127
+    },
+    {
+      "title": "The Boy and the Heron",
+      "year": 2023,
+      "tmdb_id": 508883
+    }
+  ]
+}

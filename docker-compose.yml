@@ -1,0 +1,30 @@
+services:
+  double-feature:
+    build: .
+    container_name: double-feature
+    restart: unless-stopped
+
+    # Host networking so the app can read the Pi's real LAN address for the QR
+    # code. Inside a bridge network it would only ever see 172.x and hand guests
+    # a URL that resolves to nothing.
+    #
+    # On Docker Desktop (macOS/Windows) host networking behaves differently —
+    # comment this out, uncomment the `ports` block below, and set HOST_LAN_IP
+    # in .env to the machine's LAN address.
+    network_mode: host
+    # ports:
+    #   - "8080:8080"
+
+    env_file:
+      - .env
+
+    volumes:
+      # The SQLite database. Keep it on a bind mount so it survives rebuilds.
+      - ./data:/app/data
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:'+(process.env.PORT||8080)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

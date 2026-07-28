@@ -1,0 +1,1413 @@
+{
+  "name": "Family Films (Ages 6+)",
+  "source": "SensCritique — user list \"Films pour enfants à partir de 6 ans\"",
+  "source_url": "https://www.senscritique.com/liste/films_pour_enfants_a_partir_de_6_ans/1334929",
+  "note": "A single user's personal list on SensCritique, not an institutional one — skews toward classic silent comedy (Chaplin, Keaton, Tex Avery) and animation. SensCritique blocks scripted requests (403), so this was exported by hand as CSV rather than fetched by fetch-seed-lists.mjs; re-fetching means re-exporting by hand. `title` uses the international/original release title for matching where the CSV supplied one (`french_title` kept alongside for reference); French-original films use the French title directly since that already is the TMDB title.",
+  "fetched_at": "2026-07-28",
+  "count": 251,
+  "entries": [
+    {
+      "title": "The Immigrant",
+      "french_title": "L'Émigrant",
+      "year": 1917,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "À pas de loup",
+      "year": 2012,
+      "director": "Olivier Ringer"
+    },
+    {
+      "title": "Neco z Alenky",
+      "french_title": "Alice",
+      "year": 1988,
+      "director": "Jan Švankmajer"
+    },
+    {
+      "title": "Karigurashi no Arrietty",
+      "french_title": "Arrietty - Le Petit monde des Chapardeurs",
+      "year": 2010,
+      "director": "Hiromasa Yonebayashi"
+    },
+    {
+      "title": "E.T. the Extra-Terrestrial",
+      "french_title": "E.T. l'extra-terrestre",
+      "year": 1982,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "En sortant de l'école",
+      "year": 2013,
+      "director": "Marie Larrivé, Camille Authouart, Lila Peuscet, Burcu Sankur, Geoffrey Godet, Armelle Renac, Caroline Lefevre, Marion Auvin"
+    },
+    {
+      "title": "Fantastic Mr. Fox",
+      "year": 2009,
+      "director": "Wes Anderson"
+    },
+    {
+      "title": "Jean de la Lune",
+      "year": 2012,
+      "director": "Stephan Schesch, Sarah Clara Weber"
+    },
+    {
+      "title": "Jour de fête",
+      "year": 1949,
+      "director": "Jacques Tati"
+    },
+    {
+      "title": "Die unendliche Geschichte",
+      "french_title": "L'Histoire sans fin",
+      "year": 1984,
+      "director": "Wolfgang Petersen"
+    },
+    {
+      "title": "L'Homme qui plantait des arbres",
+      "year": 1987,
+      "director": "Frédéric Back"
+    },
+    {
+      "title": "La Belle et la Bête",
+      "year": 1946,
+      "director": "Jean Cocteau"
+    },
+    {
+      "title": "The Navigator",
+      "french_title": "La Croisière du Navigator",
+      "year": 1924,
+      "director": "Donald Crisp, Buster Keaton"
+    },
+    {
+      "title": "Anne of the Indies",
+      "french_title": "La Flibustière des Antilles",
+      "year": 1951,
+      "director": "Jacques Tourneur"
+    },
+    {
+      "title": "La Prophétie des grenouilles",
+      "year": 2003,
+      "director": "Jacques-Rémy Girerd"
+    },
+    {
+      "title": "Up",
+      "french_title": "Là-haut",
+      "year": 2009,
+      "director": "Pete Docter, Bob Peterson"
+    },
+    {
+      "title": "The Cameraman",
+      "french_title": "L'Opérateur",
+      "year": 1928,
+      "director": "Buster Keaton, Edward Sedgwick"
+    },
+    {
+      "title": "Tenkû no shiro Rapyuta",
+      "french_title": "Le Château dans le ciel",
+      "year": 1986,
+      "director": "Hayao Miyazaki"
+    },
+    {
+      "title": "Die Höhle des gelben Hundes",
+      "french_title": "Le Chien jaune de Mongolie",
+      "year": 2005,
+      "director": "Byambasuren Davaa"
+    },
+    {
+      "title": "Le Chien, le Général et les Oiseaux",
+      "year": 2003,
+      "director": "Francis Nielsen"
+    },
+    {
+      "title": "The Crimson Pirate",
+      "french_title": "Le Corsaire rouge",
+      "year": 1952,
+      "director": "Robert Siodmak"
+    },
+    {
+      "title": "The General",
+      "french_title": "Le Mécano de la Générale",
+      "year": 1926,
+      "director": "Clyde Bruckman, Buster Keaton"
+    },
+    {
+      "title": "Le Roi et l'Oiseau",
+      "year": 1980,
+      "director": "Paul Grimault"
+    },
+    {
+      "title": "Hakuja den",
+      "french_title": "Le Serpent blanc",
+      "year": 1958,
+      "director": "Taiji Yabushita"
+    },
+    {
+      "title": "Le Tableau",
+      "year": 2011,
+      "director": "Jean-François Laguionie"
+    },
+    {
+      "title": "Les Contes de la nuit",
+      "year": 2011,
+      "director": "Michel Ocelot"
+    },
+    {
+      "title": "The Three Musketeers",
+      "french_title": "Les Trois Mousquetaires",
+      "year": 1948,
+      "director": "George Sidney"
+    },
+    {
+      "title": "Minuscule : La Vallée des fourmis perdues",
+      "year": 2014,
+      "director": "Thomas Szabo, Hélène Giraud"
+    },
+    {
+      "title": "Mon oncle",
+      "year": 1958,
+      "director": "Jacques Tati"
+    },
+    {
+      "title": "Phantom Boy",
+      "year": 2015,
+      "director": "Jean-Loup Felicioli, Alain Gagnol"
+    },
+    {
+      "title": "U",
+      "year": 2006,
+      "director": "Serge Elissalde, Grégoire Solotareff"
+    },
+    {
+      "title": "Wall-E",
+      "year": 2008,
+      "director": "Andrew Stanton"
+    },
+    {
+      "title": "Yoyo",
+      "year": 1964,
+      "director": "Pierre Étaix"
+    },
+    {
+      "title": "Zarafa",
+      "year": 2012,
+      "director": "Rémi Bezançon, Jean-Christophe Lie"
+    },
+    {
+      "title": "Le Grand Restaurant",
+      "year": 1966,
+      "director": "Jacques Besnard"
+    },
+    {
+      "title": "Fly Away Home",
+      "french_title": "L'Envolée sauvage",
+      "year": 1996,
+      "director": "Carroll Ballard"
+    },
+    {
+      "title": "Un animal, des animaux",
+      "year": 1996,
+      "director": "Nicolas Philibert"
+    },
+    {
+      "title": "Nénette",
+      "year": 2010,
+      "director": "Nicolas Philibert"
+    },
+    {
+      "title": "Le Territoire des autres",
+      "year": 1970,
+      "director": "Gérard Vienne, François Bel, Michel Fano, Jacqueline Lecompte"
+    },
+    {
+      "title": "Zazie dans le métro",
+      "year": 1960,
+      "director": "Louis Malle"
+    },
+    {
+      "title": "Those Magnificent Men in Their Flying Machines",
+      "french_title": "Ces merveilleux fous volants dans leurs drôles de machines",
+      "year": 1965,
+      "director": "Ken Annakin"
+    },
+    {
+      "title": "Course en sacs",
+      "year": 1896,
+      "director": "Louis Lumière"
+    },
+    {
+      "title": "La course à la saucisse",
+      "year": 1907,
+      "director": "Alice Guy"
+    },
+    {
+      "title": "Max prend un bain",
+      "year": 1910,
+      "director": "Lucien Nonguet, Max Linder"
+    },
+    {
+      "title": "Tramp, Tramp, Tramp",
+      "french_title": "Plein les bottes",
+      "year": 1925,
+      "director": "Harry Edwards"
+    },
+    {
+      "title": "L'École des facteurs",
+      "year": 1947,
+      "director": "Jacques Tati"
+    },
+    {
+      "title": "Pacific 231",
+      "year": 1949,
+      "director": "Jean Mitry"
+    },
+    {
+      "title": "Seven Chances",
+      "french_title": "Les Fiancées en folie",
+      "year": 1925,
+      "director": "Buster Keaton"
+    },
+    {
+      "title": "Red Hot Riding Hood",
+      "french_title": "Le Petit Chaperon chauffé à blanc",
+      "year": 1943,
+      "director": "Tex Avery"
+    },
+    {
+      "title": "Magical Maestro",
+      "french_title": "Le Chef d'orchestre illusionniste",
+      "year": 1952,
+      "director": "Tex Avery"
+    },
+    {
+      "title": "Speedy",
+      "french_title": "En vitesse",
+      "year": 1928,
+      "director": "Ted Wilde"
+    },
+    {
+      "title": "The Adventurer",
+      "french_title": "Charlot s'évade",
+      "year": 1917,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Cops",
+      "french_title": "Frigo déménageur",
+      "year": 1922,
+      "director": "Edward F. Cline, Buster Keaton"
+    },
+    {
+      "title": "College",
+      "french_title": "Sportif par amour",
+      "year": 1927,
+      "director": "James W. Horne, Buster Keaton"
+    },
+    {
+      "title": "King-Size Canary",
+      "french_title": "Drôle de canari",
+      "year": 1947,
+      "director": "Tex Avery"
+    },
+    {
+      "title": "Little Tinker",
+      "french_title": "Le Putois amoureux",
+      "year": 1948,
+      "director": "Tex Avery"
+    },
+    {
+      "title": "Droopy's Double Trouble",
+      "year": 1951,
+      "director": "Tex Avery"
+    },
+    {
+      "title": "The Flea Circus",
+      "french_title": "Le cirque des puces",
+      "year": 1954,
+      "director": "Tex Avery"
+    },
+    {
+      "title": "O Menino e o Mundo",
+      "french_title": "Le Garçon et le Monde",
+      "year": 2013,
+      "director": "Alê Abreu"
+    },
+    {
+      "title": "L'Homme-orchestre",
+      "year": 1900,
+      "director": "Georges Méliès"
+    },
+    {
+      "title": "The Playhouse",
+      "french_title": "Frigo Fregoli",
+      "year": 1921,
+      "director": "Buster Keaton"
+    },
+    {
+      "title": "Onésime contre Onésime",
+      "year": 1912,
+      "director": "Jean Durand"
+    },
+    {
+      "title": "Film",
+      "year": 1965,
+      "director": "Alan Schneider, Samuel Beckett"
+    },
+    {
+      "title": "Copy Shop",
+      "year": 2001,
+      "director": "Virgil Widrich"
+    },
+    {
+      "title": "Un Homme de têtes",
+      "year": 1898,
+      "director": "Georges Méliès"
+    },
+    {
+      "title": "Le Mélomane",
+      "year": 1903,
+      "director": "Georges Méliès"
+    },
+    {
+      "title": "Une bonne farce avec ma tête",
+      "year": 1904,
+      "director": "Georges Méliès"
+    },
+    {
+      "title": "L'Illusionniste double et la tête vivante",
+      "year": 1900,
+      "director": "Georges Méliès"
+    },
+    {
+      "title": "L'Enfant lion",
+      "year": 1993,
+      "director": "Patrick Grandperret"
+    },
+    {
+      "title": "The Count",
+      "french_title": "Charlot et le comte",
+      "year": 1916,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "A Woman",
+      "french_title": "Mam'zelle Charlot",
+      "year": 1915,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Annie",
+      "year": 1982,
+      "director": "John Huston"
+    },
+    {
+      "title": "Le Bossu",
+      "year": 1959,
+      "director": "André Hunebelle"
+    },
+    {
+      "title": "Three Ages",
+      "french_title": "Les Trois Âges",
+      "year": 1923,
+      "director": "Edward F. Cline, Buster Keaton"
+    },
+    {
+      "title": "Peau d'âne",
+      "year": 1970,
+      "director": "Jacques Demy"
+    },
+    {
+      "title": "City Lights",
+      "french_title": "Les Lumières de la ville",
+      "year": 1931,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Nanook of the North",
+      "french_title": "Nanouk l'Esquimau",
+      "year": 1922,
+      "director": "Robert Flaherty"
+    },
+    {
+      "title": "Mia et le Migou",
+      "year": 2008,
+      "director": "Jacques-Rémy Girerd"
+    },
+    {
+      "title": "The Gods Must Be Crazy",
+      "french_title": "Les dieux sont tombés sur la tête",
+      "year": 1980,
+      "director": "Jamie Uys"
+    },
+    {
+      "title": "Le Petit Dragon",
+      "year": 2009,
+      "director": "Bruno Collet"
+    },
+    {
+      "title": "Miss Harry's, femme serpent"
+    },
+    {
+      "title": "Nezha nao hai",
+      "french_title": "Le prince Nezha triomphe du roi dragon",
+      "year": 1979,
+      "director": "Yan Ding Xian, Wang Shuchen"
+    },
+    {
+      "title": "The Circus",
+      "french_title": "Le Cirque",
+      "year": 1928,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Behind the Screen",
+      "french_title": "Charlot machiniste",
+      "year": 1916,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Shoulder Arms",
+      "french_title": "Charlot soldat",
+      "year": 1918,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Kid Auto Races at Venice",
+      "french_title": "Charlot est content de lui",
+      "year": 1914,
+      "director": "Henry Lehrman"
+    },
+    {
+      "title": "The Rounders",
+      "french_title": "Charlot et Fatty font la bombe",
+      "year": 1914,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "A Film Johnnie",
+      "french_title": "Charlot fait du cinéma",
+      "year": 1914,
+      "director": "George Nichols"
+    },
+    {
+      "title": "The Champion",
+      "french_title": "Charlot boxeur",
+      "year": 1915,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "The Rink",
+      "french_title": "Charlot patine",
+      "year": 1916,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Sunnyside",
+      "french_title": "Une idylle aux champs",
+      "year": 1919,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "The Tramp",
+      "french_title": "Charlot Vagabond",
+      "year": 1915,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "A Dog's Life",
+      "french_title": "Une vie de chien",
+      "year": 1918,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "A Night in the Show",
+      "french_title": "Charlot au music-hall",
+      "year": 1915,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "The Property Man",
+      "french_title": "Charlot garçon de théâtre",
+      "year": 1914,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "One A.M.",
+      "french_title": "Charlot rentre tard",
+      "year": 1916,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Easy Street",
+      "french_title": "Charlot policeman",
+      "year": 1917,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Police",
+      "french_title": "Charlot cambrioleur",
+      "year": 1916,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "A Jitney Elopement",
+      "french_title": "Charlot veut se marier",
+      "year": 1915,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "A Day's Pleasure",
+      "french_title": "Une journée de plaisir",
+      "year": 1919,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "The Floorwalker",
+      "french_title": "Charlot chef de rayon",
+      "year": 1916,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "The Idle Class",
+      "french_title": "Charlot et le Masque de fer",
+      "year": 1921,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "The Masquerader",
+      "french_title": "Charlot grande coquette",
+      "year": 1914,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "The Bank",
+      "french_title": "Charlot garçon de banque",
+      "year": 1915,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Caught in a Cabaret",
+      "french_title": "Charlot garçon de café",
+      "year": 1914,
+      "director": "Mabel Normand"
+    },
+    {
+      "title": "The Pawnshop",
+      "french_title": "Charlot usurier",
+      "year": 1916,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Work",
+      "french_title": "Charlot apprenti",
+      "year": 1915,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Laughing Gas",
+      "french_title": "Charlot dentiste",
+      "year": 1914,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "His New Profession",
+      "french_title": "Charlot garde-malade",
+      "year": 1914,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Dough and Dynamite",
+      "french_title": "Charlot mitron",
+      "year": 1914,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Coney Island",
+      "french_title": "Fatty à la fête foraine",
+      "year": 1917,
+      "director": "Roscoe 'Fatty' Arbuckle"
+    },
+    {
+      "title": "Neighbors",
+      "french_title": "La Voisine de Malec",
+      "year": 1920,
+      "director": "Buster Keaton, Edward F. Cline"
+    },
+    {
+      "title": "Day Dreams",
+      "french_title": "Grandeur et Décadence",
+      "year": 1922,
+      "director": "Edward F. Cline, Buster Keaton"
+    },
+    {
+      "title": "The Electric House",
+      "french_title": "Frigo à l'Electric Hotel",
+      "year": 1922,
+      "director": "Edward F. Cline, Buster Keaton"
+    },
+    {
+      "title": "The Haunted House",
+      "french_title": "Malec chez les fantômes",
+      "year": 1921,
+      "director": "Edward F. Cline, Buster Keaton"
+    },
+    {
+      "title": "The Balloonatic",
+      "french_title": "Malec aéronaute",
+      "year": 1923,
+      "director": "Edward F. Cline, Buster Keaton"
+    },
+    {
+      "title": "The Garage",
+      "french_title": "Le Garage infernal",
+      "year": 1920,
+      "director": "Roscoe 'Fatty' Arbuckle"
+    },
+    {
+      "title": "The Frozen North",
+      "french_title": "Frigo l'esquimau",
+      "year": 1922,
+      "director": "Edward F. Cline, Buster Keaton"
+    },
+    {
+      "title": "Our Hospitality",
+      "french_title": "Les Lois de l'hospitalité",
+      "year": 1923,
+      "director": "John G. Blystone, Buster Keaton"
+    },
+    {
+      "title": "Go West",
+      "french_title": "Ma vache et moi",
+      "year": 1925,
+      "director": "Buster Keaton"
+    },
+    {
+      "title": "Scarecrow",
+      "french_title": "L'Épouvantail",
+      "year": 1973,
+      "director": "Jerry Schatzberg"
+    },
+    {
+      "title": "Out West",
+      "french_title": "Fatty bistro",
+      "year": 1918,
+      "director": "Roscoe 'Fatty' Arbuckle"
+    },
+    {
+      "title": "The Paleface",
+      "french_title": "Malec chez les Indiens",
+      "year": 1922,
+      "director": "Buster Keaton"
+    },
+    {
+      "title": "The Cook",
+      "french_title": "Fatty cuisinier",
+      "year": 1918,
+      "director": "Roscoe 'Fatty' Arbuckle"
+    },
+    {
+      "title": "The Love Nest",
+      "french_title": "Frigo et la baleine",
+      "year": 1923,
+      "director": "Buster Keaton, Edward F. Cline"
+    },
+    {
+      "title": "Hard Luck",
+      "french_title": "La Guigne de Malec",
+      "year": 1921,
+      "director": "Buster Keaton, Edward F. Cline"
+    },
+    {
+      "title": "The Goat",
+      "french_title": "Malec l'insaisissable",
+      "year": 1921,
+      "director": "Buster Keaton, Malcolm St. Clair"
+    },
+    {
+      "title": "Petite Lumière",
+      "year": 2003,
+      "director": "Alain Gomis"
+    },
+    {
+      "title": "The Polar Express",
+      "french_title": "Le Pôle Express",
+      "year": 2004,
+      "director": "Robert Zemeckis"
+    },
+    {
+      "title": "Ukradená vzducholod",
+      "french_title": "Le Dirigeable volé",
+      "year": 1967,
+      "director": "Karel Zeman"
+    },
+    {
+      "title": "Kiss Me Deadly",
+      "french_title": "En quatrième vitesse",
+      "year": 1955,
+      "director": "Robert Aldrich"
+    },
+    {
+      "title": "L'Arrivée d'un train à La Ciotat",
+      "year": 1896,
+      "director": "Auguste Lumière, Louis Lumière"
+    },
+    {
+      "title": "Passage d'un tunnel en chemin de fer",
+      "year": 1898,
+      "director": "Auguste Lumière, Louis Lumière"
+    },
+    {
+      "title": "The Great Train Robbery",
+      "french_title": "Le Vol du grand rapide",
+      "year": 1903,
+      "director": "Edwin S. Porter"
+    },
+    {
+      "title": "Jeux des reflets et de la vitesse",
+      "year": 1925,
+      "director": "Henri Chomette"
+    },
+    {
+      "title": "Chat écoutant la musique",
+      "year": 1988,
+      "director": "Chris Marker"
+    },
+    {
+      "title": "Les Dingues",
+      "year": 1990,
+      "director": "Les Drew"
+    },
+    {
+      "title": "Koneko monogatari",
+      "french_title": "Les Aventures de Chatran",
+      "year": 1986,
+      "director": "Masanori Hata"
+    },
+    {
+      "title": "La Table tournante",
+      "year": 1988,
+      "director": "Paul Grimault, Jacques Demy"
+    },
+    {
+      "title": "Heureux Anniversaire",
+      "year": 1961,
+      "director": "Pierre Étaix, Jean-Claude Carrière"
+    },
+    {
+      "title": "Twice two",
+      "french_title": "Les joies du mariage",
+      "year": 1933,
+      "director": "James Parrott"
+    },
+    {
+      "title": "L'Enfant au grelot",
+      "year": 1998,
+      "director": "Jacques-Rémy Girerd"
+    },
+    {
+      "title": "Le Balayeur",
+      "year": 1990,
+      "director": "Serge Elissalde"
+    },
+    {
+      "title": "Zangu-E Tafrih",
+      "french_title": "La Récréation",
+      "year": 1972,
+      "director": "Abbas Kiarostami"
+    },
+    {
+      "title": "Le Ballon rouge",
+      "year": 1956,
+      "director": "Albert Lamorisse"
+    },
+    {
+      "title": "Hugo",
+      "french_title": "Hugo Cabret",
+      "year": 2011,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "A Boy of the Streets",
+      "french_title": "Le gosse des rues",
+      "director": "Charles J. Hunt"
+    },
+    {
+      "title": "Safety Last!",
+      "french_title": "Monte là-dessus",
+      "year": 1923,
+      "director": "Fred C. Newmeyer, Sam Taylor"
+    },
+    {
+      "title": "Wallace and Gromit: The Curse of the Were-Rabbit",
+      "french_title": "Wallace et Gromit - Le Mystère du Lapin-garou",
+      "year": 2005,
+      "director": "Nick Park, Steve Box"
+    },
+    {
+      "title": "Who Framed Roger Rabbit",
+      "french_title": "Qui veut la peau de Roger Rabbit",
+      "year": 1988,
+      "director": "Robert Zemeckis"
+    },
+    {
+      "title": "Tsumiki no ie",
+      "french_title": "La Maison en petits cubes",
+      "year": 2008,
+      "director": "Kunio Kato"
+    },
+    {
+      "title": "Mighty Like a Moose",
+      "french_title": "À visage découvert",
+      "year": 1926,
+      "director": "Leo McCarey"
+    },
+    {
+      "title": "La Guerre des boutons",
+      "year": 1962,
+      "director": "Yves Robert"
+    },
+    {
+      "title": "Ice Age",
+      "french_title": "L'Âge de glace",
+      "year": 2002,
+      "director": "Chris Wedge, Carlos Saldanha"
+    },
+    {
+      "title": "The Pirates ! Band of Misfits",
+      "french_title": "Les Pirates ! Bons à rien, mauvais en tout",
+      "year": 2012,
+      "director": "Peter Lord, Jeff Newitt"
+    },
+    {
+      "title": "Harry Potter and the Goblet of Fire",
+      "french_title": "Harry Potter et la coupe de feu",
+      "year": 2005,
+      "director": "Mike Newell"
+    },
+    {
+      "title": "Panique au village",
+      "year": 2009,
+      "director": "Vincent Patar, Stéphane Aubier"
+    },
+    {
+      "title": "Loulou : L'Incroyable Secret",
+      "year": 2013,
+      "director": "Éric Omond"
+    },
+    {
+      "title": "The Jungle Book",
+      "french_title": "Le Livre de la jungle",
+      "year": 2016,
+      "director": "Jon Favreau"
+    },
+    {
+      "title": "Ice Age: The Meltdown",
+      "french_title": "L'Âge de glace 2",
+      "year": 2006,
+      "director": "Carlos Saldanha"
+    },
+    {
+      "title": "Tangled",
+      "french_title": "Raiponce",
+      "year": 2010,
+      "director": "Byron Howard, Nathan Greno"
+    },
+    {
+      "title": "Die Abenteuer des Prinzen Achmed",
+      "french_title": "Les Aventures du prince Ahmed",
+      "year": 1926,
+      "director": "Lotte Reiniger"
+    },
+    {
+      "title": "The Adventures of Robin Hood",
+      "french_title": "Les Aventures de Robin des Bois",
+      "year": 1938,
+      "director": "Michael Curtiz, William Keighley"
+    },
+    {
+      "title": "Les Demoiselles de Rochefort",
+      "year": 1967,
+      "director": "Jacques Demy"
+    },
+    {
+      "title": "Otona no miru ehon - Umarete wa mita keredo",
+      "french_title": "Gosses de Tokyo",
+      "year": 1932,
+      "director": "Yasujirō Ozu"
+    },
+    {
+      "title": "Jason and the Argonauts",
+      "french_title": "Jason et les Argonautes",
+      "year": 1963,
+      "director": "Don Chaffey"
+    },
+    {
+      "title": "The Incredible Shrinking Man",
+      "french_title": "L'Homme qui rétrécit",
+      "year": 1957,
+      "director": "Jack Arnold"
+    },
+    {
+      "title": "Little Fugitive",
+      "french_title": "Le Petit Fugitif",
+      "year": 1953,
+      "director": "Morris Engel, Ruth Orkin, Ray Ashley"
+    },
+    {
+      "title": "La sortie de l'usine Lumière à Lyon",
+      "year": 1895,
+      "director": "Louis Lumière"
+    },
+    {
+      "title": "Attelage d'un camion",
+      "year": 1897,
+      "director": "Auguste Lumière, Louis Lumière"
+    },
+    {
+      "title": "Le Village de Namo: panorama pris d'une chaise a porteurs",
+      "year": 1900,
+      "director": "Gabriel Veyre"
+    },
+    {
+      "title": "La petite fille et son chat",
+      "year": 1899,
+      "director": "Louis Lumière"
+    },
+    {
+      "title": "Le Déshabillage impossible",
+      "year": 1900,
+      "director": "Georges Méliès"
+    },
+    {
+      "title": "Les Kiriki, acrobates japonais",
+      "year": 1907,
+      "director": "Segundo de Chomón"
+    },
+    {
+      "title": "Fantasmagorie",
+      "year": 1908,
+      "director": "Émile Cohl"
+    },
+    {
+      "title": "Sculpteur moderne",
+      "year": 1908,
+      "director": "Segundo de Chomón"
+    },
+    {
+      "title": "Gertie the Dinosaur",
+      "french_title": "Gertie le dinosaure",
+      "year": 1914,
+      "director": "Winsor McCay"
+    },
+    {
+      "title": "Le Voyage dans la Lune",
+      "year": 1902,
+      "director": "Georges Méliès"
+    },
+    {
+      "title": "Hōhokekyo tonari no Yamada-kun",
+      "french_title": "Mes voisins les Yamada",
+      "year": 1999,
+      "director": "Isao Takahata"
+    },
+    {
+      "title": "The Errand Boy",
+      "french_title": "Le Zinzin d'Hollywood",
+      "year": 1961,
+      "director": "Jerry Lewis"
+    },
+    {
+      "title": "Gwen, le livre de sable",
+      "year": 1985,
+      "director": "Jean-François Laguionie"
+    },
+    {
+      "title": "Blind Vaysha",
+      "french_title": "Vaysha, l'aveugle",
+      "year": 2016,
+      "director": "Theodore Ushev"
+    },
+    {
+      "title": "Alenkiy tsvetochek",
+      "french_title": "La Fleur écarlate",
+      "year": 1952,
+      "director": "Lev Atamanov"
+    },
+    {
+      "title": "Carevna lyagushka",
+      "french_title": "La princesse grenouille",
+      "year": 1954,
+      "director": "Mikhaïl Tsekhanovski"
+    },
+    {
+      "title": "Skazka o tsare Saltane",
+      "french_title": "Le Conte du Tsar Saltan",
+      "year": 1984,
+      "director": "Ivan Ivanov-Vano, Lev Milchin"
+    },
+    {
+      "title": "La Flûte et le Grelot",
+      "year": 1982,
+      "director": "Tang Cheng, Wu Qiang"
+    },
+    {
+      "title": "The Clown",
+      "director": "Robert Z. Leonard"
+    },
+    {
+      "title": "Danao Tiangong",
+      "french_title": "Le Roi des singes",
+      "year": 1965,
+      "director": "Wan Laiming"
+    },
+    {
+      "title": "Madagascar",
+      "year": 2005,
+      "director": "Eric Darnell, Tom McGrath"
+    },
+    {
+      "title": "Dream Of A Rarebit Fiend",
+      "french_title": "Rêve d'un fondu de fondue",
+      "year": 1906,
+      "director": "Wallace McCutcheon, Edwin S. Porter"
+    },
+    {
+      "title": "The Five Thousand Fingers of Dr. T",
+      "french_title": "Les 5000 doigts du Dr. T",
+      "year": 1952,
+      "director": "Roy Rowland"
+    },
+    {
+      "title": "The Secret of NIMH",
+      "french_title": "Brisby et le Secret de NIMH",
+      "year": 1982,
+      "director": "Don Bluth"
+    },
+    {
+      "title": "Sing",
+      "french_title": "Tous en scène",
+      "year": 2016,
+      "director": "Garth Jennings"
+    },
+    {
+      "title": "L'Empereur",
+      "year": 2017,
+      "director": "Luc Jacquet"
+    },
+    {
+      "title": "Anastasia",
+      "year": 1997,
+      "director": "Don Bluth, Gary Goldman"
+    },
+    {
+      "title": "Ivan Tsarevitch et la princesse changeante",
+      "year": 2016,
+      "director": "Michel Ocelot"
+    },
+    {
+      "title": "Pinocchio",
+      "year": 1940,
+      "director": "Jack Kinney, Bill Roberts, Ben Sharpsteen, Wilfred Jackson, Hamilton Luske, Norman Ferguson, T. Hee"
+    },
+    {
+      "title": "Alice in Wonderland",
+      "french_title": "Alice au pays des merveilles",
+      "year": 1951,
+      "director": "Clyde Geronimi, Wilfred Jackson, Hamilton Luske"
+    },
+    {
+      "title": "Toy Story",
+      "year": 1995,
+      "director": "John Lasseter"
+    },
+    {
+      "title": "Toy Story 2",
+      "year": 1999,
+      "director": "John Lasseter, Ash Brannon, Lee Unkrich"
+    },
+    {
+      "title": "Toy Story 3",
+      "year": 2010,
+      "director": "Lee Unkrich"
+    },
+    {
+      "title": "Mary Poppins",
+      "year": 1964,
+      "director": "Robert Stevenson"
+    },
+    {
+      "title": "Lilo & Stitch",
+      "year": 2002,
+      "director": "Chris Sanders, Dean Deblois"
+    },
+    {
+      "title": "The Sword in the Stone",
+      "french_title": "Merlin l'Enchanteur",
+      "year": 1963,
+      "director": "Wolfgang Reitherman"
+    },
+    {
+      "title": "Born in China",
+      "french_title": "Nés en Chine",
+      "year": 2017,
+      "director": "Lu Chuan"
+    },
+    {
+      "title": "Tout en haut du monde",
+      "year": 2016,
+      "director": "Rémi Chayé"
+    },
+    {
+      "title": "The Thief of Bagdad",
+      "french_title": "Le Voleur de Bagdad",
+      "year": 1940,
+      "director": "Ludwig Berger, Michael Powell, Tim Whelan"
+    },
+    {
+      "title": "A Gong",
+      "french_title": "Grandpa",
+      "year": 2018,
+      "director": "Tena Galovic, Zozo Jhen, Marine Varguy"
+    },
+    {
+      "title": "Une vie de chat",
+      "year": 2010,
+      "director": "Jean-Loup Felicioli, Alain Gagnol"
+    },
+    {
+      "title": "À travers la brume",
+      "year": 2011,
+      "director": "Thoé Boubounelle, Violaine Briat, Marie-Clémence Gauthier, Clément Girard, Aude Guibourt, Clara Voisin, Maïté Xia"
+    },
+    {
+      "title": "Allez hop !",
+      "year": 2013,
+      "director": "Juliette Baily"
+    },
+    {
+      "title": "Burn Out",
+      "year": 2017,
+      "director": "Cécile Carre"
+    },
+    {
+      "title": "He Done His Best",
+      "french_title": "Une invention moderne",
+      "year": 1926,
+      "director": "Charles R. Bowers, Harold L. Muller"
+    },
+    {
+      "title": "Now You Tell One",
+      "french_title": "Non, tu exagères",
+      "year": 1926,
+      "director": "Charles R. Bowers, Harold L. Muller"
+    },
+    {
+      "title": "Many a Slip",
+      "french_title": "Bricolo inventeur",
+      "year": 1927,
+      "director": "Charles R. Bowers, Harold L. Muller"
+    },
+    {
+      "title": "Fatal Footsteps",
+      "french_title": "Le Roi du charleston",
+      "year": 1926,
+      "director": "Charles R. Bowers"
+    },
+    {
+      "title": "Contact",
+      "year": 2017,
+      "director": "Katy Wang"
+    },
+    {
+      "title": "La Légende du Crabe Phare",
+      "year": 2015,
+      "director": "Mengjing Yang, Alexandre Veaux, Claire Vandermeersch, Benjamin Lebourgeois, Gaëtan Borde"
+    },
+    {
+      "title": "Astérix et Cléopâtre",
+      "year": 1968,
+      "director": "René Goscinny, Albert Uderzo"
+    },
+    {
+      "title": "The SpongeBob SquarePants Movie",
+      "french_title": "Bob l'éponge, le film",
+      "year": 2004,
+      "director": "Stephen Hillenburg, Mark Osborne"
+    },
+    {
+      "title": "Matilda",
+      "year": 1996,
+      "director": "Danny DeVito"
+    },
+    {
+      "title": "Hotel Transylvania",
+      "french_title": "Hôtel Transylvanie",
+      "year": 2012,
+      "director": "Genndy Tartakovsky"
+    },
+    {
+      "title": "Spirit: Stallion of the Cimarron",
+      "french_title": "Spirit, l'étalon des plaines",
+      "year": 2002,
+      "director": "Kelly Asbury, Lorna Cook"
+    },
+    {
+      "title": "An American Tail",
+      "french_title": "Fievel et le Nouveau Monde",
+      "year": 1986,
+      "director": "Don Bluth"
+    },
+    {
+      "title": "The Vagabond",
+      "french_title": "Charlot musicien",
+      "year": 1915,
+      "director": "Charlie Chaplin"
+    },
+    {
+      "title": "Lisboa Orchestra",
+      "year": 2012,
+      "director": "Guillaume Delaperrière"
+    },
+    {
+      "title": "Star Wars",
+      "french_title": "La Guerre des étoiles",
+      "year": 1977,
+      "director": "George Lucas"
+    },
+    {
+      "title": "Star Wars Episode VI: Return of the Jedi",
+      "french_title": "Le Retour du Jedi",
+      "year": 1983,
+      "director": "Richard Marquand"
+    },
+    {
+      "title": "Star Wars: Episode II - Attack of the Clones",
+      "french_title": "Star Wars - Épisode II : L'Attaque des clones",
+      "year": 2002,
+      "director": "George Lucas"
+    },
+    {
+      "title": "Star Wars: Episode III - Revenge of the Sith",
+      "french_title": "Star Wars - Épisode III : La Revanche des Sith",
+      "year": 2005,
+      "director": "George Lucas"
+    },
+    {
+      "title": "Star Wars: The Force Awakens",
+      "french_title": "Star Wars - Le Réveil de la Force",
+      "year": 2015,
+      "director": "J.J. Abrams"
+    },
+    {
+      "title": "Star Wars: Episode I - The Phantom Menace",
+      "french_title": "Star Wars - Épisode I : La Menace fantôme",
+      "year": 1999,
+      "director": "George Lucas"
+    },
+    {
+      "title": "Mysterious Island",
+      "french_title": "L'Île mystérieuse",
+      "year": 1961,
+      "director": "Cy Endfield"
+    },
+    {
+      "title": "Vynález zkázy",
+      "french_title": "Aventures fantastiques",
+      "year": 1958,
+      "director": "Karel Zeman"
+    },
+    {
+      "title": "Willy Wonka and the Chocolate Factory",
+      "french_title": "Charlie et la Chocolaterie",
+      "year": 1971,
+      "director": "Mel Stuart"
+    },
+    {
+      "title": "Chicken Run",
+      "year": 2000,
+      "director": "Peter Lord, Nick Park"
+    },
+    {
+      "title": "The Mark of Zorro",
+      "french_title": "Le Signe de Zorro",
+      "year": 1940,
+      "director": "Rouben Mamoulian"
+    },
+    {
+      "title": "Tigres à la queue leu leu",
+      "year": 2014,
+      "director": "Benoît Chieux"
+    },
+    {
+      "title": "Father and Daughter",
+      "french_title": "Père et fille",
+      "year": 2000,
+      "director": "Michael Dudok de Wit"
+    },
+    {
+      "title": "Max et Jane veulent faire du théâtre",
+      "year": 1911,
+      "director": "Max Linder, René Leprince"
+    },
+    {
+      "title": "How to Train Your Dragon",
+      "french_title": "Dragons",
+      "year": 2010,
+      "director": "Chris Sanders, Dean Deblois"
+    },
+    {
+      "title": "Rise of the Guardians",
+      "french_title": "Les Cinq Légendes",
+      "year": 2012,
+      "director": "Peter Ramsey"
+    },
+    {
+      "title": "The LEGO Movie 2: The Second Part",
+      "french_title": "La Grande Aventure LEGO 2",
+      "year": 2019,
+      "director": "Mike Mitchell"
+    },
+    {
+      "title": "Babe",
+      "french_title": "Babe, le cochon devenu berger",
+      "year": 1995,
+      "director": "Chris Noonan"
+    },
+    {
+      "title": "Kung Fu Panda : Secrets of the Furious Five",
+      "french_title": "Kung Fu Panda : Les Secrets des 5 cyclones",
+      "year": 2008,
+      "director": "Raman Hui"
+    },
+    {
+      "title": "Inside Out",
+      "french_title": "Vice-versa",
+      "year": 2015,
+      "director": "Pete Docter, Ronnie del Carmen"
+    },
+    {
+      "title": "Chang : A Drama of the Wilderness",
+      "french_title": "Chang",
+      "year": 1927,
+      "director": "Merian C. Cooper, Ernest B. Schoedsack"
+    },
+    {
+      "title": "Le Cerf-volant du bout du monde",
+      "year": 1958,
+      "director": "Roger Pigaut"
+    },
+    {
+      "title": "Bovines",
+      "year": 2012,
+      "director": "Emmanuel Gras"
+    },
+    {
+      "title": "La Saint-Festin",
+      "year": 2007,
+      "director": "Anne-Laure Daffis, Léo Marchand"
+    },
+    {
+      "title": "Pattie et la colère de Poséidon",
+      "year": 2023,
+      "director": "David Alaux"
+    }
+  ]
+}

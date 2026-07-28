@@ -1,0 +1,335 @@
+{
+  "name": "Disney Animated Canon",
+  "source": "Wikidata — \"Walt Disney Animation Studios feature film\" series (Q56070713)",
+  "source_url": "https://en.wikipedia.org/wiki/List_of_Walt_Disney_Animation_Studios_films",
+  "note": "Unreleased announced titles are filtered out.",
+  "fetched_at": "2026-07-27",
+  "count": 65,
+  "entries": [
+    {
+      "title": "Snow White and the Seven Dwarfs",
+      "year": 1937,
+      "tmdb_id": 408
+    },
+    {
+      "title": "Fantasia",
+      "year": 1940,
+      "tmdb_id": 756
+    },
+    {
+      "title": "Pinocchio",
+      "year": 1940,
+      "tmdb_id": 10895
+    },
+    {
+      "title": "Dumbo",
+      "year": 1941,
+      "tmdb_id": 11360
+    },
+    {
+      "title": "Bambi",
+      "year": 1942,
+      "tmdb_id": 3170
+    },
+    {
+      "title": "Saludos Amigos",
+      "year": 1942,
+      "tmdb_id": 14906
+    },
+    {
+      "title": "The Three Caballeros",
+      "year": 1944,
+      "tmdb_id": 15947
+    },
+    {
+      "title": "Make Mine Music",
+      "year": 1946,
+      "tmdb_id": 20343
+    },
+    {
+      "title": "Fun and Fancy Free",
+      "year": 1947,
+      "tmdb_id": 46929
+    },
+    {
+      "title": "Melody Time",
+      "year": 1948,
+      "tmdb_id": 13757
+    },
+    {
+      "title": "The Adventures of Ichabod and Mr. Toad",
+      "year": 1949,
+      "tmdb_id": 13465
+    },
+    {
+      "title": "Cinderella",
+      "year": 1950,
+      "tmdb_id": 11224
+    },
+    {
+      "title": "Alice in Wonderland",
+      "year": 1951,
+      "tmdb_id": 12092
+    },
+    {
+      "title": "Peter Pan",
+      "year": 1953,
+      "tmdb_id": 10693
+    },
+    {
+      "title": "Lady and the Tramp",
+      "year": 1955,
+      "tmdb_id": 10340
+    },
+    {
+      "title": "Sleeping Beauty",
+      "year": 1959,
+      "tmdb_id": 10882
+    },
+    {
+      "title": "One Hundred and One Dalmatians",
+      "year": 1961,
+      "tmdb_id": 12230
+    },
+    {
+      "title": "The Sword in the Stone",
+      "year": 1963,
+      "tmdb_id": 9078
+    },
+    {
+      "title": "The Jungle Book",
+      "year": 1967,
+      "tmdb_id": 9325
+    },
+    {
+      "title": "The Aristocats",
+      "year": 1970,
+      "tmdb_id": 10112
+    },
+    {
+      "title": "Robin Hood",
+      "year": 1973,
+      "tmdb_id": 11886
+    },
+    {
+      "title": "The Rescuers",
+      "year": 1977,
+      "tmdb_id": 11319
+    },
+    {
+      "title": "The Many Adventures of Winnie the Pooh",
+      "year": 1977,
+      "tmdb_id": 250480
+    },
+    {
+      "title": "The Fox and the Hound",
+      "year": 1981,
+      "tmdb_id": 10948
+    },
+    {
+      "title": "The Black Cauldron",
+      "year": 1985,
+      "tmdb_id": 10957
+    },
+    {
+      "title": "The Great Mouse Detective",
+      "year": 1986,
+      "tmdb_id": 9994
+    },
+    {
+      "title": "Oliver & Company",
+      "year": 1988,
+      "tmdb_id": 12233
+    },
+    {
+      "title": "The Little Mermaid",
+      "year": 1989,
+      "tmdb_id": 10144
+    },
+    {
+      "title": "The Rescuers Down Under",
+      "year": 1990,
+      "tmdb_id": 11135
+    },
+    {
+      "title": "Beauty and the Beast",
+      "year": 1991,
+      "tmdb_id": 10020
+    },
+    {
+      "title": "Aladdin",
+      "year": 1992,
+      "tmdb_id": 812
+    },
+    {
+      "title": "The Lion King",
+      "year": 1994,
+      "tmdb_id": 8587
+    },
+    {
+      "title": "Pocahontas",
+      "year": 1995,
+      "tmdb_id": 10530
+    },
+    {
+      "title": "The Hunchback of Notre Dame",
+      "year": 1996,
+      "tmdb_id": 10545
+    },
+    {
+      "title": "Hercules",
+      "year": 1997,
+      "tmdb_id": 11970
+    },
+    {
+      "title": "Mulan",
+      "year": 1998,
+      "tmdb_id": 10674
+    },
+    {
+      "title": "Fantasia 2000",
+      "year": 1999,
+      "tmdb_id": 49948
+    },
+    {
+      "title": "Tarzan",
+      "year": 1999,
+      "tmdb_id": 37135
+    },
+    {
+      "title": "Dinosaur",
+      "year": 2000,
+      "tmdb_id": 10567
+    },
+    {
+      "title": "The Emperor's New Groove",
+      "year": 2000,
+      "tmdb_id": 11688
+    },
+    {
+      "title": "Atlantis: The Lost Empire",
+      "year": 2001,
+      "tmdb_id": 10865
+    },
+    {
+      "title": "Lilo & Stitch",
+      "year": 2002,
+      "tmdb_id": 11544
+    },
+    {
+      "title": "Treasure Planet",
+      "year": 2002,
+      "tmdb_id": 9016
+    },
+    {
+      "title": "Brother Bear",
+      "year": 2003,
+      "tmdb_id": 10009
+    },
+    {
+      "title": "Home on the Range",
+      "year": 2004,
+      "tmdb_id": 13700
+    },
+    {
+      "title": "Chicken Little",
+      "year": 2005,
+      "tmdb_id": 9982
+    },
+    {
+      "title": "Meet the Robinsons",
+      "year": 2007,
+      "tmdb_id": 1267
+    },
+    {
+      "title": "Bolt",
+      "year": 2008,
+      "tmdb_id": 13053
+    },
+    {
+      "title": "The Princess and the Frog",
+      "year": 2009,
+      "tmdb_id": 10198
+    },
+    {
+      "title": "Tangled",
+      "year": 2010,
+      "tmdb_id": 38757
+    },
+    {
+      "title": "Winnie the Pooh",
+      "year": 2011,
+      "tmdb_id": 51162
+    },
+    {
+      "title": "Wreck-It Ralph",
+      "year": 2012,
+      "tmdb_id": 82690
+    },
+    {
+      "title": "Frozen",
+      "year": 2013,
+      "tmdb_id": 109445
+    },
+    {
+      "title": "Big Hero 6",
+      "year": 2014,
+      "tmdb_id": 177572
+    },
+    {
+      "title": "Zootopia",
+      "year": 2016,
+      "tmdb_id": 269149
+    },
+    {
+      "title": "Moana",
+      "year": 2016,
+      "tmdb_id": 277834
+    },
+    {
+      "title": "Ralph Breaks the Internet",
+      "year": 2018,
+      "tmdb_id": 404368
+    },
+    {
+      "title": "Frozen 2",
+      "year": 2019,
+      "tmdb_id": 330457
+    },
+    {
+      "title": "Gigantic",
+      "year": 2020,
+      "tmdb_id": null
+    },
+    {
+      "title": "Raya and the Last Dragon",
+      "year": 2021,
+      "tmdb_id": 527774
+    },
+    {
+      "title": "Encanto",
+      "year": 2021,
+      "tmdb_id": 568124
+    },
+    {
+      "title": "Strange World",
+      "year": 2022,
+      "tmdb_id": 877269
+    },
+    {
+      "title": "Wish",
+      "year": 2023,
+      "tmdb_id": 1022796
+    },
+    {
+      "title": "Moana 2",
+      "year": 2024,
+      "tmdb_id": 1241982
+    },
+    {
+      "title": "Zootopia 2",
+      "year": 2025,
+      "tmdb_id": 1084242
+    }
+  ]
+}

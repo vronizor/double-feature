@@ -1,0 +1,394 @@
+{
+  "name": "BFI: Films to See by Age 15",
+  "source": "British Film Institute (BFI Education, with Into Film — 2020 update)",
+  "source_url": "https://www.bfi.org.uk/lists/50-films-see-age-15",
+  "note": "Originally published in 2005 as \"50 films you should see by the age of 14\"; the Wikipedia article for that title was deleted, but BFI itself updated and still hosts the list, broadened to roughly 65 films across four categories (Perfect for Primary, Super for Secondary, Wonders from Around the World, Growing Up Greats). Extracted by hand from the BFI page rather than by fetch-seed-lists.mjs; the page is a themed grid of poster cards, not a plain table, so an automated scraper for it doesn't exist yet. One entry — a \"Short Films by Lotte Reiniger\" anthology spanning 1953-1955 — is a compilation rather than a single catalogued film, and is left out rather than forced onto a single fake year.",
+  "fetched_at": "2026-07-28",
+  "count": 64,
+  "entries": [
+    {
+      "title": "Wallay",
+      "year": 2017,
+      "director": "Berni Goldblat",
+      "country": "France-Burkina Faso"
+    },
+    {
+      "title": "My Life as a Courgette",
+      "year": 2016,
+      "director": "Claude Barras",
+      "country": "France"
+    },
+    {
+      "title": "Hunt for the Wilderpeople",
+      "year": 2016,
+      "director": "Taika Waititi",
+      "country": "New Zealand"
+    },
+    {
+      "title": "Your Name",
+      "year": 2016,
+      "director": "Makoto Shinkai",
+      "country": "Japan"
+    },
+    {
+      "title": "He Named Me Malala",
+      "year": 2015,
+      "director": "Davis Guggenheim",
+      "country": "UK"
+    },
+    {
+      "title": "The Song of the Sea",
+      "year": 2014,
+      "director": "Tomm Moore",
+      "country": "Ireland"
+    },
+    {
+      "title": "Wadjda",
+      "year": 2012,
+      "director": "Haifaa Al-Mansour",
+      "country": "Saudi Arabia/Netherlands"
+    },
+    {
+      "title": "I Wish",
+      "year": 2011,
+      "director": "Hirokazu Kore-eda",
+      "country": "Japan"
+    },
+    {
+      "title": "Tomboy",
+      "year": 2011,
+      "director": "Celine Sciamma",
+      "country": "France"
+    },
+    {
+      "title": "Persepolis",
+      "year": 2007,
+      "director": "Vincent Paronnaud, Marjane Satrapi",
+      "country": "France/US"
+    },
+    {
+      "title": "The Cave of the Yellow Dog",
+      "year": 2005,
+      "director": "Byambasuren Davaa",
+      "country": "Germany/Mongolia"
+    },
+    {
+      "title": "Shaun the Sheep Movie",
+      "year": 2015,
+      "director": "Richard Starzak, Mark Burton",
+      "country": "UK"
+    },
+    {
+      "title": "Finding Nemo",
+      "year": 2003,
+      "director": "Andrew Stanton, Lee Unkrich",
+      "country": "US"
+    },
+    {
+      "title": "Bend It Like Beckham",
+      "year": 2002,
+      "director": "Gurinder Chadha",
+      "country": "UK"
+    },
+    {
+      "title": "Rabbit-Proof Fence",
+      "year": 2002,
+      "director": "Phillip Noyce",
+      "country": "Australia"
+    },
+    {
+      "title": "To Be and To Have",
+      "year": 2002,
+      "director": "Nicolas Philibert",
+      "country": "France"
+    },
+    {
+      "title": "Whale Rider",
+      "year": 2002,
+      "director": "Niki Caro",
+      "country": "New Zealand"
+    },
+    {
+      "title": "Spirited Away",
+      "year": 2001,
+      "director": "Hayao Miyazaki",
+      "country": "Japan"
+    },
+    {
+      "title": "Billy Elliot",
+      "year": 2000,
+      "director": "Stephen Daldry",
+      "country": "UK"
+    },
+    {
+      "title": "The Iron Giant",
+      "year": 1999,
+      "director": "Brad Bird",
+      "country": "US"
+    },
+    {
+      "title": "Show Me Love",
+      "year": 1998,
+      "director": "Lukas Moodysson",
+      "country": "Sweden"
+    },
+    {
+      "title": "Romeo + Juliet",
+      "year": 1996,
+      "director": "Baz Luhrmann",
+      "country": "Australia"
+    },
+    {
+      "title": "The White Balloon",
+      "year": 1995,
+      "director": "Jafar Panahi",
+      "country": "Iran"
+    },
+    {
+      "title": "Toy Story",
+      "year": 1995,
+      "director": "John Lasseter",
+      "country": "US"
+    },
+    {
+      "title": "The Secret Garden",
+      "year": 1993,
+      "director": "Agnieszka Holland",
+      "country": "UK/US"
+    },
+    {
+      "title": "Beauty and the Beast",
+      "year": 1991,
+      "director": "Gary Trousdale, Kirk Wise",
+      "country": "US"
+    },
+    {
+      "title": "Edward Scissorhands",
+      "year": 1990,
+      "director": "Tim Burton",
+      "country": "US"
+    },
+    {
+      "title": "My Neighbour Totoro",
+      "year": 1988,
+      "director": "Hayao Miyazaki",
+      "country": "Japan"
+    },
+    {
+      "title": "Kirikou and the Sorceress",
+      "year": 1988,
+      "director": "Michel Ocelot, Raymond Burlet",
+      "country": "France"
+    },
+    {
+      "title": "Au Revoir les Enfants",
+      "year": 1987,
+      "director": "Louis Malle",
+      "country": "France"
+    },
+    {
+      "title": "The Princess Bride",
+      "year": 1987,
+      "director": "Rob Reiner",
+      "country": "US"
+    },
+    {
+      "title": "Where Is the Friend's House?",
+      "year": 1987,
+      "director": "Abbas Kiarostami",
+      "country": "Iran"
+    },
+    {
+      "title": "Back to the Future",
+      "year": 1985,
+      "director": "Robert Zemeckis",
+      "country": "US"
+    },
+    {
+      "title": "My Life as a Dog",
+      "year": 1985,
+      "director": "Lasse Hallström",
+      "country": "Sweden"
+    },
+    {
+      "title": "The Outsiders",
+      "year": 1983,
+      "director": "Francis Ford Coppola",
+      "country": "US"
+    },
+    {
+      "title": "E.T. the Extra-Terrestrial",
+      "year": 1982,
+      "director": "Steven Spielberg",
+      "country": "US"
+    },
+    {
+      "title": "Raiders of the Lost Ark",
+      "year": 1981,
+      "director": "Steven Spielberg",
+      "country": "US"
+    },
+    {
+      "title": "Star Wars",
+      "year": 1977,
+      "director": "George Lucas",
+      "country": "US"
+    },
+    {
+      "title": "The Spirit of the Beehive",
+      "year": 1973,
+      "director": "Víctor Erice",
+      "country": "Spain"
+    },
+    {
+      "title": "Walkabout",
+      "year": 1971,
+      "director": "Nicolas Roeg",
+      "country": "UK"
+    },
+    {
+      "title": "The Railway Children",
+      "year": 1970,
+      "director": "Lionel Jeffries",
+      "country": "UK"
+    },
+    {
+      "title": "Kes",
+      "year": 1969,
+      "director": "Ken Loach",
+      "country": "UK"
+    },
+    {
+      "title": "Playtime",
+      "year": 1967,
+      "director": "Jacques Tati",
+      "country": "France"
+    },
+    {
+      "title": "Jason and the Argonauts",
+      "year": 1963,
+      "director": "Don Chaffey",
+      "country": "US"
+    },
+    {
+      "title": "To Kill a Mockingbird",
+      "year": 1962,
+      "director": "Robert Mulligan",
+      "country": "US"
+    },
+    {
+      "title": "Whistle Down the Wind",
+      "year": 1961,
+      "director": "Bryan Forbes",
+      "country": "UK"
+    },
+    {
+      "title": "The 400 Blows",
+      "year": 1959,
+      "director": "François Truffaut",
+      "country": "France"
+    },
+    {
+      "title": "Some Like It Hot",
+      "year": 1959,
+      "director": "Billy Wilder",
+      "country": "US"
+    },
+    {
+      "title": "The Red Balloon",
+      "year": 1956,
+      "director": "Albert Lamorisse",
+      "country": "France"
+    },
+    {
+      "title": "The Night of the Hunter",
+      "year": 1955,
+      "director": "Charles Laughton",
+      "country": "US"
+    },
+    {
+      "title": "Pather Panchali",
+      "year": 1955,
+      "director": "Satyajit Ray",
+      "country": "India"
+    },
+    {
+      "title": "Mr Hulot's Holiday",
+      "year": 1953,
+      "director": "Jacques Tati",
+      "country": "France"
+    },
+    {
+      "title": "Singin' in the Rain",
+      "year": 1952,
+      "director": "Stanley Donen, Gene Kelly",
+      "country": "US"
+    },
+    {
+      "title": "Oliver Twist",
+      "year": 1948,
+      "director": "David Lean",
+      "country": "UK"
+    },
+    {
+      "title": "Bicycle Thieves",
+      "year": 1948,
+      "director": "Vittorio De Sica",
+      "country": "Italy"
+    },
+    {
+      "title": "It's a Wonderful Life",
+      "year": 1946,
+      "director": "Frank Capra",
+      "country": "US"
+    },
+    {
+      "title": "Beauty and the Beast",
+      "year": 1946,
+      "director": "Jean Cocteau, René Clément",
+      "country": "France"
+    },
+    {
+      "title": "The Wizard of Oz",
+      "year": 1939,
+      "director": "Victor Fleming",
+      "country": "US"
+    },
+    {
+      "title": "The Adventures of Robin Hood",
+      "year": 1938,
+      "director": "Michael Curtiz, William Keighley",
+      "country": "US"
+    },
+    {
+      "title": "Snow White and the Seven Dwarfs",
+      "year": 1937,
+      "director": "David Hand",
+      "country": "US"
+    },
+    {
+      "title": "A Day at the Races",
+      "year": 1937,
+      "director": "Sam Wood",
+      "country": "US"
+    },
+    {
+      "title": "King Kong",
+      "year": 1933,
+      "director": "Merian C. Cooper, Ernest B. Schoedsack",
+      "country": "US"
+    },
+    {
+      "title": "The Kid",
+      "year": 1921,
+      "director": "Charles Chaplin",
+      "country": "US"
+    },
+    {
+      "title": "A Trip to the Moon",
+      "year": 1902,
+      "director": "Georges Méliès",
+      "country": "France"
+    }
+  ]
+}

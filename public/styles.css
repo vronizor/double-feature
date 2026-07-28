@@ -1,0 +1,422 @@
+:root {
+  --bg: #0d0f14;
+  --bg-raised: #161a22;
+  --bg-sunken: #0a0c11;
+  --border: #262c38;
+  --border-strong: #38414f;
+  --text: #e8eaf0;
+  --text-dim: #9aa3b4;
+  --text-faint: #6b7383;
+  --accent: #e8b64c;
+  --accent-ink: #201703;
+  --danger: #e5674f;
+  --ok: #5cb87a;
+  --radius: 10px;
+  --shadow: 0 8px 24px rgb(0 0 0 / 45%);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+body { min-height: 100dvh; display: flex; flex-direction: column; }
+
+.app { flex: 1; width: min(1100px, 100%); margin: 0 auto; padding: 20px 16px 40px; }
+
+h1, h2, h3 { line-height: 1.2; margin: 0; font-weight: 650; }
+h1 { font-size: 1.5rem; letter-spacing: -0.02em; }
+h2 { font-size: 1.15rem; }
+h3 { font-size: 0.95rem; }
+
+a { color: var(--accent); }
+.loading { color: var(--text-dim); padding: 40px 0; text-align: center; }
+.muted { color: var(--text-dim); }
+.faint { color: var(--text-faint); font-size: 0.85rem; }
+.error { color: var(--danger); }
+.stack { display: grid; gap: 16px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.spacer { flex: 1; }
+
+/* --- Header / tabs ------------------------------------------------------ */
+
+.masthead {
+  display: flex; align-items: baseline; gap: 12px;
+  padding-bottom: 14px; margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.masthead h1 span { color: var(--accent); }
+
+.tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.tab {
+  background: none; border: 1px solid transparent; color: var(--text-dim);
+  padding: 6px 12px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.9rem;
+}
+.tab:hover { color: var(--text); background: var(--bg-raised); }
+.tab[aria-current="true"] { color: var(--accent); border-color: var(--border-strong); background: var(--bg-raised); }
+
+/* --- Controls ----------------------------------------------------------- */
+
+button, .btn {
+  font: inherit; cursor: pointer; border-radius: 8px; padding: 9px 16px;
+  border: 1px solid var(--border-strong); background: var(--bg-raised); color: var(--text);
+  transition: background 120ms, border-color 120ms, opacity 120ms;
+}
+button:hover:not(:disabled) { border-color: var(--text-faint); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 620;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+.btn-danger { color: var(--danger); }
+.btn-sm { padding: 5px 10px; font-size: 0.85rem; }
+.btn-icon { padding: 6px 9px; line-height: 1; }
+
+input[type="text"], input[type="number"], input[type="search"], select, textarea {
+  font: inherit; color: var(--text); background: var(--bg-sunken);
+  border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; width: 100%;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+textarea { min-height: 130px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; }
+label { display: block; }
+.field-label { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.check { display: flex; gap: 9px; align-items: center; cursor: pointer; }
+.check input { width: 17px; height: 17px; accent-color: var(--accent); flex: none; }
+
+.card {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+}
+
+/* --- Lists -------------------------------------------------------------- */
+
+.list-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg-raised);
+  /* Safety net: with the shrink fix below this shouldn't be needed, but
+     without it, any overflow bleeds into the next grid card instead of
+     staying inside this one. */
+  overflow: hidden;
+}
+.list-row + .list-row { margin-top: 8px; }
+.list-row.is-active { border-color: var(--border-strong); }
+/* Flex items default to min-width:auto (sized to fit their content), so the
+   checkbox+name label wouldn't actually shrink for a long list name — it just
+   overflowed the row, which then bled into the next card in the compact grid
+   below since .list-row didn't clip. min-width:0 lets it shrink so the name's
+   own ellipsis rule (below) can actually take effect. */
+/* A fixed basis (rather than flex-grow, which competed with .spacer for
+   leftover space) keeps the name column the same width on every row, so the
+   kind badge right after it starts at the same X position instead of drifting
+   with each list's name length. Overridden for the Draw tab's stacked compact
+   picker below, which wants the name on its own full-width line instead. */
+.list-row .check { flex: 0 1 320px; min-width: 0; }
+.badge-kind { display: inline-block; min-width: 56px; text-align: center; }
+.list-name {
+  font-weight: 560; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+
+/* The Draw tab's list picker is just a checkbox + name + two badges per row —
+   full page width is wasted on it once there's room for more than one column. */
+.list-picker-grid { display: grid; gap: 8px; }
+@media (min-width: 820px) {
+  .list-picker-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .list-picker-grid .list-row + .list-row { margin-top: 0; }
+}
+
+/* At 280–320px there isn't room for name + both badges on one line without
+   cramming or wrapping mid-word (the badge pill itself wrapping its text) —
+   so the picker's rows stack the name and its badges on two lines instead. */
+.list-row--picker { flex-wrap: wrap; row-gap: 6px; }
+.list-row--picker .check { flex: 1 1 100%; }
+.list-row-badges { display: flex; gap: 6px; flex: 1 1 100%; }
+.badge {
+  font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  background: var(--bg-sunken); color: var(--text-dim); border: 1px solid var(--border);
+}
+.badge-warn { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+/* --- Reconciliation candidates ------------------------------------------ */
+
+.candidate-list { display: grid; gap: 8px; }
+.candidate-card {
+  display: flex; align-items: flex-start; gap: 12px; padding: 10px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg-sunken);
+  /* align-items defaults to stretch, which would force the fixed-aspect-ratio
+     poster to match its sibling's (variable, text-driven) height instead of
+     its own — cropping the image far more than the 2:3 ratio implies. */
+}
+.candidate-poster { width: 46px; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; flex: none; }
+.candidate-poster--empty {
+  display: grid; place-items: center; background: var(--bg-raised); font-size: 1.1rem;
+}
+.candidate-body { display: grid; gap: 6px; flex: 1; min-width: 0; overflow-wrap: break-word; }
+.candidate-title {
+  background: none; border: none; padding: 0; margin: 0; font: inherit; font-weight: 700;
+  color: var(--text); cursor: pointer; text-align: left;
+}
+.candidate-title:hover, .candidate-title:focus-visible { color: var(--accent); text-decoration: underline; }
+.candidate-overview {
+  margin: 0; font-size: 0.82rem; color: var(--text-dim); line-height: 1.4;
+  overflow-wrap: break-word;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* --- Filters ------------------------------------------------------------ */
+
+/* Genres and Language need real room to lay out their chips in more than one
+   or two columns; Year and Runtime are each just a label and a pair of number
+   inputs. Equal-width auto-fit columns left the latter two mostly empty while
+   the former two were squeezed tall — so give genres/language double the
+   share instead of splitting evenly. */
+.filters {
+  display: grid; gap: 14px 20px;
+  grid-template-columns: minmax(240px, 2fr) minmax(200px, 2fr) minmax(170px, 1fr);
+}
+@media (max-width: 780px) { .filters { grid-template-columns: 1fr; } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-size: 0.82rem; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border-strong); background: var(--bg-sunken); color: var(--text-dim);
+}
+.chip[data-state="include"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip[data-state="exclude"] {
+  background: color-mix(in srgb, var(--danger) 22%, transparent);
+  color: var(--danger); border-color: var(--danger); text-decoration: line-through;
+}
+.range { display: flex; align-items: center; gap: 8px; }
+.range input { width: 100%; }
+
+.pool-count { font-variant-numeric: tabular-nums; }
+.pool-count strong { color: var(--accent); font-size: 1.05rem; }
+
+/* The Draw tab's two ways to add a film to the lineup — random draw and a
+   specific search — side by side, since neither has priority over the other. */
+.tools-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 780px) { .tools-row { grid-template-columns: 1fr; } }
+
+/* --- Movie grid --------------------------------------------------------- */
+
+.movie-grid {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+.movie-grid.is-vote { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+
+.movie {
+  position: relative; background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column;
+}
+.movie-poster {
+  aspect-ratio: 2 / 3; width: 100%; object-fit: cover; display: block;
+  background: var(--bg-sunken); color: transparent;
+}
+.movie-poster--empty {
+  display: grid; place-items: center; color: var(--text-faint);
+  font-size: 0.8rem; text-align: center; padding: 10px;
+}
+.movie-body {
+  padding: 9px 11px 11px; display: grid; gap: 3px;
+  /* Grid/flex items default to min-width:auto, so an unbroken long word (a
+     title like "Symbiopsychotaxiplasm:") would otherwise force this item —
+     and the card around it — wider than the grid column, with the overflow
+     then hard-cropped by .movie's overflow:hidden instead of wrapping. */
+  min-width: 0;
+}
+.movie-title {
+  font-weight: 580; font-size: 0.92rem; line-height: 1.25; overflow-wrap: break-word;
+}
+/* Used as a <button> on Draw/Explore cards (title opens the detail overlay);
+   these reset button chrome to plain text and add a hover cue so it still
+   reads as clickable. Harmless no-ops on the plain <div> the vote screen
+   uses instead, which keeps its own separate "Read more" (see browse.js). */
+button.movie-title {
+  background: none; border: none; padding: 0; margin: 0; display: block; width: 100%;
+  font: inherit; font-weight: 580; color: var(--text); text-align: left; cursor: pointer;
+}
+button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent); text-decoration: underline; }
+.original-title {
+  font-style: italic; font-weight: 460; color: var(--text-dim);
+  font-size: 0.85em; line-height: 1.25; overflow-wrap: break-word;
+}
+.movie-meta { font-size: 0.78rem; color: var(--text-dim); overflow-wrap: break-word; }
+.movie-rating { color: var(--accent); font-weight: 620; white-space: nowrap; }
+.movie-overview {
+  margin: 3px 0 0; font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;
+  overflow-wrap: break-word;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+.movie-actions { padding: 0 11px 11px; }
+.expand-link {
+  background: none; border: none; padding: 0; margin: 2px 11px 0;
+  color: var(--accent); font-size: 0.78rem; cursor: pointer; text-align: left;
+  font: inherit;
+}
+.expand-link:hover { text-decoration: underline; }
+
+/* --- Movie detail modal -------------------------------------------------- */
+
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgb(0 0 0 / 65%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 100;
+}
+/* Grid, not flex: poster + info form a two-column top row (row 1), and the
+   trailer is a full-width row underneath (row 2) — a grid row naturally
+   starts below whichever of the two columns above is taller, which is
+   exactly "sits below whatever is lowest in the 2-column part". */
+.modal-card {
+  position: relative; background: var(--bg-raised); border: 1px solid var(--border-strong);
+  border-radius: var(--radius); max-width: 760px; width: 100%; max-height: 90vh;
+  overflow-y: auto; padding: 24px; box-shadow: var(--shadow);
+  display: grid; grid-template-columns: 190px 1fr; align-items: start; gap: 10px 20px;
+  /* align-items:start (grid's default is stretch) keeps the poster at its
+     own aspect-ratio height instead of being stretched to match a taller
+     info column, which would over-crop it via object-fit:cover. */
+}
+@media (max-width: 620px) {
+  .modal-card { grid-template-columns: 1fr; }
+  .modal-poster, .modal-poster--empty { grid-column: 1; grid-row: 1; }
+  .modal-info { grid-column: 1; grid-row: 2; padding-right: 0; }
+  .modal-trailer-row { grid-column: 1; grid-row: 3; }
+}
+.modal-close {
+  position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
+  border-radius: 50%; padding: 0; display: grid; place-items: center; line-height: 1;
+  background: var(--bg-sunken); border: 1px solid var(--border-strong);
+}
+.modal-poster { width: 190px; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; grid-column: 1; grid-row: 1; }
+.modal-poster--empty {
+  display: grid; place-items: center; color: var(--text-faint);
+  background: var(--bg-sunken); font-size: 0.8rem; grid-column: 1; grid-row: 1;
+}
+.modal-info {
+  display: grid; gap: 8px; align-content: start; min-width: 0; padding-right: 24px;
+  overflow-wrap: break-word; grid-column: 2; grid-row: 1;
+}
+.modal-overview { margin: 6px 0 0; font-size: 0.92rem; line-height: 1.55; color: var(--text); }
+.modal-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 4px; }
+.modal-links a { font-size: 0.85rem; }
+.modal-trailer-row { grid-column: 1 / -1; grid-row: 2; margin-top: 6px; }
+.modal-trailer {
+  position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 8px;
+  overflow: hidden; background: var(--bg-sunken);
+}
+.modal-trailer iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* Tap-to-rank */
+.movie--tappable { cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.movie--tappable:active { transform: scale(0.985); }
+.movie--ranked { border-color: var(--accent); }
+.rank-badge {
+  position: absolute; top: 8px; left: 8px; z-index: 2;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 700; font-size: 1rem;
+  background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow);
+}
+.movie--ranked .movie-poster { opacity: 0.72; }
+.watched-flag {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  background: rgb(0 0 0 / 70%); color: var(--text-dim);
+  font-size: 0.7rem; padding: 3px 7px; border-radius: 999px;
+}
+
+/* --- Publish / QR ------------------------------------------------------- */
+
+.publish { display: grid; gap: 18px; grid-template-columns: minmax(200px, 260px) 1fr; align-items: start; }
+@media (max-width: 640px) { .publish { grid-template-columns: 1fr; } }
+
+.qr { background: #fff; padding: 12px; border-radius: var(--radius); }
+.qr svg { display: block; width: 100%; height: auto; }
+
+/* Plain selectable text, deliberately not wrapped in a link or button so that
+   native long-press-to-select works on a guest's phone. */
+.vote-url {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1rem;
+  background: var(--bg-sunken); border: 1px solid var(--border-strong);
+  border-radius: 8px; padding: 10px 12px; word-break: break-all;
+  user-select: all; -webkit-user-select: all;
+}
+
+.tally-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.tally-bar { height: 6px; border-radius: 3px; background: var(--accent); min-width: 2px; }
+.tally-points { font-variant-numeric: tabular-nums; color: var(--text-dim); font-size: 0.85rem; }
+
+/* --- Results ------------------------------------------------------------ */
+
+.winner {
+  display: flex; gap: 16px; align-items: center; padding: 16px;
+  border: 1px solid var(--accent); border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-raised));
+}
+.winner img { width: 90px; border-radius: 6px; flex: none; }
+.winner-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.coin-flip {
+  border-left: 3px solid var(--accent); padding: 8px 12px;
+  background: var(--bg-sunken); border-radius: 0 6px 6px 0; font-size: 0.9rem;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { color: var(--text-dim); font-weight: 560; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-scroll { overflow-x: auto; }
+
+/* --- History ------------------------------------------------------------ */
+
+.history-row {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-raised); cursor: pointer; text-align: left; width: 100%;
+}
+.history-row:hover { border-color: var(--border-strong); }
+.history-posters { display: flex; }
+.history-posters img {
+  width: 34px; aspect-ratio: 2/3; object-fit: cover; border-radius: 3px;
+  border: 1px solid var(--bg); margin-right: -10px; background: var(--bg-sunken);
+}
+.history-posters img:last-child { margin-right: 0; }
+
+/* --- Vote screen -------------------------------------------------------- */
+
+.vote-shell { width: min(680px, 100%); margin: 0 auto; }
+.vote-sticky {
+  position: sticky; bottom: 0; z-index: 5; padding: 12px 0 max(12px, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 72%, transparent);
+}
+
+/* --- Toast -------------------------------------------------------------- */
+
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+  background: var(--bg-raised); border: 1px solid var(--border-strong);
+  padding: 10px 16px; border-radius: 999px; box-shadow: var(--shadow);
+  z-index: 50; font-size: 0.9rem; transition: opacity 500ms;
+}
+.toast--error { border-color: var(--danger); color: var(--danger); }
+.toast--ok { border-color: var(--ok); }
+.toast.is-leaving { opacity: 0; }
+
+.credit {
+  text-align: center; color: var(--text-faint); font-size: 0.72rem;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+}
+
+.empty {
+  text-align: center; padding: 44px 20px; color: var(--text-dim);
+  border: 1px dashed var(--border-strong); border-radius: var(--radius);
+}

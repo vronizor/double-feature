@@ -1,0 +1,6010 @@
+{
+  "name": "TSPDT 1,000 Greatest Films",
+  "source": "They Shoot Pictures, Don't They? — the list's publisher",
+  "source_url": "https://www.theyshootpictures.com/gf1000_all1000films.htm",
+  "note": "Not on Wikipedia in any form; sourced from the publisher. Titles are upper-case at source and are matched case-insensitively.",
+  "fetched_at": "2026-07-27",
+  "count": 1000,
+  "entries": [
+    {
+      "title": "CITIZEN KANE",
+      "year": 1941,
+      "rank": 1,
+      "director": "Orson Welles"
+    },
+    {
+      "title": "VERTIGO",
+      "year": 1958,
+      "rank": 2,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "2001: A SPACE ODYSSEY",
+      "year": 1968,
+      "rank": 3,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "TOKYO STORY",
+      "year": 1953,
+      "rank": 4,
+      "director": "Yasujiro Ozu"
+    },
+    {
+      "title": "THE RULES OF THE GAME",
+      "year": 1939,
+      "rank": 5,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "THE GODFATHER",
+      "year": 1972,
+      "rank": 6,
+      "director": "Francis Ford Coppola"
+    },
+    {
+      "title": "8½",
+      "year": 1963,
+      "rank": 7,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "SUNRISE: A SONG OF TWO HUMANS",
+      "year": 1927,
+      "rank": 8,
+      "director": "F.W. Murnau"
+    },
+    {
+      "title": "THE SEARCHERS",
+      "year": 1956,
+      "rank": 9,
+      "director": "John Ford"
+    },
+    {
+      "title": "SEVEN SAMURAI",
+      "year": 1954,
+      "rank": 10,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "SINGIN' IN THE RAIN",
+      "year": 1952,
+      "rank": 11,
+      "director": "Stanley Donen & Gene Kelly"
+    },
+    {
+      "title": "JEANNE DIELMAN, 23 QUAI DU COMMERCE, 1080 BRUXELLES",
+      "year": 1975,
+      "rank": 12,
+      "director": "Chantal Akerman"
+    },
+    {
+      "title": "APOCALYPSE NOW",
+      "year": 1979,
+      "rank": 13,
+      "director": "Francis Ford Coppola"
+    },
+    {
+      "title": "TAXI DRIVER",
+      "year": 1976,
+      "rank": 14,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "BICYCLE THIEVES",
+      "year": 1948,
+      "rank": 15,
+      "director": "Vittorio De Sica"
+    },
+    {
+      "title": "PERSONA",
+      "year": 1966,
+      "rank": 16,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "IN THE MOOD FOR LOVE",
+      "year": 2000,
+      "rank": 17,
+      "director": "Wong Kar-wai"
+    },
+    {
+      "title": "BREATHLESS",
+      "year": 1960,
+      "rank": 18,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "THE PASSION OF JOAN OF ARC",
+      "year": 1928,
+      "rank": 19,
+      "director": "Carl Theodor Dreyer"
+    },
+    {
+      "title": "BATTLESHIP POTEMKIN",
+      "year": 1925,
+      "rank": 20,
+      "director": "Sergei Eisenstein"
+    },
+    {
+      "title": "L'ATALANTE",
+      "year": 1934,
+      "rank": 21,
+      "director": "Jean Vigo"
+    },
+    {
+      "title": "MAN WITH A MOVIE CAMERA",
+      "year": 1929,
+      "rank": 22,
+      "director": "Dziga Vertov"
+    },
+    {
+      "title": "MIRROR",
+      "year": 1975,
+      "rank": 23,
+      "director": "Andrei Tarkovsky"
+    },
+    {
+      "title": "PSYCHO",
+      "year": 1960,
+      "rank": 24,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "RASHOMON",
+      "year": 1950,
+      "rank": 25,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "CITY LIGHTS",
+      "year": 1931,
+      "rank": 26,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "THE 400 BLOWS",
+      "year": 1959,
+      "rank": 27,
+      "director": "François Truffaut"
+    },
+    {
+      "title": "ANDREI RUBLEV",
+      "year": 1966,
+      "rank": 28,
+      "director": "Andrei Tarkovsky"
+    },
+    {
+      "title": "MULHOLLAND DR.",
+      "year": 2001,
+      "rank": 29,
+      "director": "David Lynch"
+    },
+    {
+      "title": "THE GODFATHER PART II",
+      "year": 1974,
+      "rank": 30,
+      "director": "Francis Ford Coppola"
+    },
+    {
+      "title": "SOME LIKE IT HOT",
+      "year": 1959,
+      "rank": 31,
+      "director": "Billy Wilder"
+    },
+    {
+      "title": "AU HASARD BALTHAZAR",
+      "year": 1966,
+      "rank": 32,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "LA DOLCE VITA",
+      "year": 1960,
+      "rank": 33,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "ORDET",
+      "year": 1955,
+      "rank": 34,
+      "director": "Carl Theodor Dreyer"
+    },
+    {
+      "title": "RAGING BULL",
+      "year": 1980,
+      "rank": 35,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "THE NIGHT OF THE HUNTER",
+      "year": 1955,
+      "rank": 36,
+      "director": "Charles Laughton"
+    },
+    {
+      "title": "CASABLANCA",
+      "year": 1942,
+      "rank": 37,
+      "director": "Michael Curtiz"
+    },
+    {
+      "title": "L'AVVENTURA",
+      "year": 1960,
+      "rank": 38,
+      "director": "Michelangelo Antonioni"
+    },
+    {
+      "title": "BLADE RUNNER",
+      "year": 1982,
+      "rank": 39,
+      "director": "Ridley Scott"
+    },
+    {
+      "title": "REAR WINDOW",
+      "year": 1954,
+      "rank": 40,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "SUNSET BLVD.",
+      "year": 1950,
+      "rank": 41,
+      "director": "Billy Wilder"
+    },
+    {
+      "title": "TOUCH OF EVIL",
+      "year": 1958,
+      "rank": 42,
+      "director": "Orson Welles"
+    },
+    {
+      "title": "BARRY LYNDON",
+      "year": 1975,
+      "rank": 43,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "CONTEMPT",
+      "year": 1963,
+      "rank": 44,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "PLAYTIME",
+      "year": 1967,
+      "rank": 45,
+      "director": "Jacques Tati"
+    },
+    {
+      "title": "PATHER PANCHALI",
+      "year": 1955,
+      "rank": 46,
+      "director": "Satyajit Ray"
+    },
+    {
+      "title": "CLOSE-UP",
+      "year": 1990,
+      "rank": 47,
+      "director": "Abbas Kiarostami"
+    },
+    {
+      "title": "LAWRENCE OF ARABIA",
+      "year": 1962,
+      "rank": 48,
+      "director": "David Lean"
+    },
+    {
+      "title": "STALKER",
+      "year": 1979,
+      "rank": 49,
+      "director": "Andrei Tarkovsky"
+    },
+    {
+      "title": "THE GENERAL",
+      "year": 1926,
+      "rank": 50,
+      "director": "Buster Keaton & Clyde Bruckman"
+    },
+    {
+      "title": "MODERN TIMES",
+      "year": 1936,
+      "rank": 51,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "BEAU TRAVAIL",
+      "year": 1999,
+      "rank": 52,
+      "director": "Claire Denis"
+    },
+    {
+      "title": "M",
+      "year": 1931,
+      "rank": 53,
+      "director": "Fritz Lang"
+    },
+    {
+      "title": "THE THIRD MAN",
+      "year": 1949,
+      "rank": 54,
+      "director": "Carol Reed"
+    },
+    {
+      "title": "LATE SPRING",
+      "year": 1949,
+      "rank": 55,
+      "director": "Yasujiro Ozu"
+    },
+    {
+      "title": "THE APARTMENT",
+      "year": 1960,
+      "rank": 56,
+      "director": "Billy Wilder"
+    },
+    {
+      "title": "NORTH BY NORTHWEST",
+      "year": 1959,
+      "rank": 57,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "UGETSU MONOGATARI",
+      "year": 1953,
+      "rank": 58,
+      "director": "Kenji Mizoguchi"
+    },
+    {
+      "title": "GOODFELLAS",
+      "year": 1990,
+      "rank": 59,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "THE BATTLE OF ALGIERS",
+      "year": 1966,
+      "rank": 60,
+      "director": "Gillo Pontecorvo"
+    },
+    {
+      "title": "LA GRANDE ILLUSION",
+      "year": 1937,
+      "rank": 61,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "WILD STRAWBERRIES",
+      "year": 1957,
+      "rank": 62,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "RIO BRAVO",
+      "year": 1959,
+      "rank": 63,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "FANNY AND ALEXANDER",
+      "year": 1982,
+      "rank": 64,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "DR. STRANGELOVE OR: HOW I LEARNED TO STOP WORRYING AND LOVE THE BOMB",
+      "year": 1964,
+      "rank": 65,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "SHOAH",
+      "year": 1985,
+      "rank": 66,
+      "director": "Claude Lanzmann"
+    },
+    {
+      "title": "ONCE UPON A TIME IN THE WEST",
+      "year": 1968,
+      "rank": 67,
+      "director": "Sergio Leone"
+    },
+    {
+      "title": "CHINATOWN",
+      "year": 1974,
+      "rank": 68,
+      "director": "Roman Polanski"
+    },
+    {
+      "title": "JOURNEY TO ITALY",
+      "year": 1954,
+      "rank": 69,
+      "director": "Roberto Rossellini"
+    },
+    {
+      "title": "PIERROT LE FOU",
+      "year": 1965,
+      "rank": 70,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "DO THE RIGHT THING",
+      "year": 1989,
+      "rank": 71,
+      "director": "Spike Lee"
+    },
+    {
+      "title": "METROPOLIS",
+      "year": 1927,
+      "rank": 72,
+      "director": "Fritz Lang"
+    },
+    {
+      "title": "A WOMAN UNDER THE INFLUENCE",
+      "year": 1974,
+      "rank": 73,
+      "director": "John Cassavetes"
+    },
+    {
+      "title": "LES ENFANTS DU PARADIS",
+      "year": 1945,
+      "rank": 74,
+      "director": "Marcel Carné"
+    },
+    {
+      "title": "LA STRADA",
+      "year": 1954,
+      "rank": 75,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "THE LEOPARD",
+      "year": 1963,
+      "rank": 76,
+      "director": "Luchino Visconti"
+    },
+    {
+      "title": "AMARCORD",
+      "year": 1973,
+      "rank": 77,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "IT'S A WONDERFUL LIFE",
+      "year": 1946,
+      "rank": 78,
+      "director": "Frank Capra"
+    },
+    {
+      "title": "THE WILD BUNCH",
+      "year": 1969,
+      "rank": 79,
+      "director": "Sam Peckinpah"
+    },
+    {
+      "title": "PULP FICTION",
+      "year": 1994,
+      "rank": 80,
+      "director": "Quentin Tarantino"
+    },
+    {
+      "title": "VIRIDIANA",
+      "year": 1961,
+      "rank": 81,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "JAWS",
+      "year": 1975,
+      "rank": 82,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "THE SHINING",
+      "year": 1980,
+      "rank": 83,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "A MAN ESCAPED",
+      "year": 1956,
+      "rank": 84,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "BLUE VELVET",
+      "year": 1986,
+      "rank": 85,
+      "director": "David Lynch"
+    },
+    {
+      "title": "SANSHO THE BAILIFF",
+      "year": 1954,
+      "rank": 86,
+      "director": "Kenji Mizoguchi"
+    },
+    {
+      "title": "THE CONFORMIST",
+      "year": 1970,
+      "rank": 87,
+      "director": "Bernardo Bertolucci"
+    },
+    {
+      "title": "THE SEVENTH SEAL",
+      "year": 1957,
+      "rank": 88,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "THE MAN WHO SHOT LIBERTY VALANCE",
+      "year": 1962,
+      "rank": 89,
+      "director": "John Ford"
+    },
+    {
+      "title": "NASHVILLE",
+      "year": 1975,
+      "rank": 90,
+      "director": "Robert Altman"
+    },
+    {
+      "title": "THE MAGNIFICENT AMBERSONS",
+      "year": 1942,
+      "rank": 91,
+      "director": "Orson Welles"
+    },
+    {
+      "title": "PICKPOCKET",
+      "year": 1959,
+      "rank": 92,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "THE GOLD RUSH",
+      "year": 1925,
+      "rank": 93,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "LA JETéE",
+      "year": 1962,
+      "rank": 94,
+      "director": "Chris Marker"
+    },
+    {
+      "title": "GERTRUD",
+      "year": 1964,
+      "rank": 95,
+      "director": "Carl Theodor Dreyer"
+    },
+    {
+      "title": "SANS SOLEIL",
+      "year": 1983,
+      "rank": 96,
+      "director": "Chris Marker"
+    },
+    {
+      "title": "CLéO FROM 5 TO 7",
+      "year": 1962,
+      "rank": 97,
+      "director": "Agnès Varda"
+    },
+    {
+      "title": "JULES ET JIM",
+      "year": 1962,
+      "rank": 98,
+      "director": "François Truffaut"
+    },
+    {
+      "title": "TO BE OR NOT TO BE",
+      "year": 1942,
+      "rank": 99,
+      "director": "Ernst Lubitsch"
+    },
+    {
+      "title": "MESHES OF THE AFTERNOON",
+      "year": 1943,
+      "rank": 100,
+      "director": "Maya Deren & Alexander Hammid"
+    },
+    {
+      "title": "THE MOTHER AND THE WHORE",
+      "year": 1973,
+      "rank": 101,
+      "director": "Jean Eustache"
+    },
+    {
+      "title": "SáTáNTANGó",
+      "year": 1994,
+      "rank": 102,
+      "director": "Béla Tarr"
+    },
+    {
+      "title": "MADAME DE...",
+      "year": 1953,
+      "rank": 103,
+      "director": "Max Ophüls"
+    },
+    {
+      "title": "SHERLOCK JR.",
+      "year": 1924,
+      "rank": 104,
+      "director": "Buster Keaton"
+    },
+    {
+      "title": "A CLOCKWORK ORANGE",
+      "year": 1971,
+      "rank": 105,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "IKIRU",
+      "year": 1952,
+      "rank": 106,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "ALI: FEAR EATS THE SOUL",
+      "year": 1974,
+      "rank": 107,
+      "director": "Rainer Werner Fassbinder"
+    },
+    {
+      "title": "AGUIRRE, THE WRATH OF GOD",
+      "year": 1972,
+      "rank": 108,
+      "director": "Werner Herzog"
+    },
+    {
+      "title": "COME AND SEE",
+      "year": 1985,
+      "rank": 109,
+      "director": "Elem Klimov"
+    },
+    {
+      "title": "ANNIE HALL",
+      "year": 1977,
+      "rank": 110,
+      "director": "Woody Allen"
+    },
+    {
+      "title": "THE SPIRIT OF THE BEEHIVE",
+      "year": 1973,
+      "rank": 111,
+      "director": "Víctor Erice"
+    },
+    {
+      "title": "LAST YEAR AT MARIENBAD",
+      "year": 1961,
+      "rank": 112,
+      "director": "Alain Resnais"
+    },
+    {
+      "title": "ONCE UPON A TIME IN AMERICA",
+      "year": 1984,
+      "rank": 113,
+      "director": "Sergio Leone"
+    },
+    {
+      "title": "GREED",
+      "year": 1924,
+      "rank": 114,
+      "director": "Erich von Stroheim"
+    },
+    {
+      "title": "THE WIZARD OF OZ",
+      "year": 1939,
+      "rank": 115,
+      "director": "Victor Fleming"
+    },
+    {
+      "title": "THE PIANO",
+      "year": 1993,
+      "rank": 116,
+      "director": "Jane Campion"
+    },
+    {
+      "title": "A BRIGHTER SUMMER DAY",
+      "year": 1991,
+      "rank": 117,
+      "director": "Edward Yang"
+    },
+    {
+      "title": "YI YI",
+      "year": 2000,
+      "rank": 118,
+      "director": "Edward Yang"
+    },
+    {
+      "title": "DON'T LOOK NOW",
+      "year": 1973,
+      "rank": 119,
+      "director": "Nicolas Roeg"
+    },
+    {
+      "title": "HIROSHIMA MON AMOUR",
+      "year": 1959,
+      "rank": 120,
+      "director": "Alain Resnais"
+    },
+    {
+      "title": "THE RED SHOES",
+      "year": 1948,
+      "rank": 121,
+      "director": "Michael Powell & Emeric Pressburger"
+    },
+    {
+      "title": "ALIEN",
+      "year": 1979,
+      "rank": 122,
+      "director": "Ridley Scott"
+    },
+    {
+      "title": "E.T. THE EXTRA-TERRESTRIAL",
+      "year": 1982,
+      "rank": 123,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "BRINGING UP BABY",
+      "year": 1938,
+      "rank": 124,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "BLOW-UP",
+      "year": 1966,
+      "rank": 125,
+      "director": "Michelangelo Antonioni"
+    },
+    {
+      "title": "A DAY IN THE COUNTRY",
+      "year": 1936,
+      "rank": 126,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "NOTORIOUS",
+      "year": 1946,
+      "rank": 127,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "VIVRE SA VIE",
+      "year": 1962,
+      "rank": 128,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "INTOLERANCE",
+      "year": 1916,
+      "rank": 129,
+      "director": "D.W. Griffith"
+    },
+    {
+      "title": "L'ECLISSE",
+      "year": 1962,
+      "rank": 130,
+      "director": "Michelangelo Antonioni"
+    },
+    {
+      "title": "SPIRITED AWAY",
+      "year": 2001,
+      "rank": 131,
+      "director": "Hayao Miyazaki"
+    },
+    {
+      "title": "A MATTER OF LIFE AND DEATH",
+      "year": 1946,
+      "rank": 132,
+      "director": "Michael Powell & Emeric Pressburger"
+    },
+    {
+      "title": "LETTER FROM AN UNKNOWN WOMAN",
+      "year": 1948,
+      "rank": 133,
+      "director": "Max Ophüls"
+    },
+    {
+      "title": "ALL ABOUT EVE",
+      "year": 1950,
+      "rank": 134,
+      "director": "Joseph L. Mankiewicz"
+    },
+    {
+      "title": "LOS OLVIDADOS",
+      "year": 1950,
+      "rank": 135,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "THE EXTERMINATING ANGEL",
+      "year": 1962,
+      "rank": 136,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "STAR WARS",
+      "year": 1977,
+      "rank": 137,
+      "director": "George Lucas"
+    },
+    {
+      "title": "IMITATION OF LIFE",
+      "year": 1959,
+      "rank": 138,
+      "director": "Douglas Sirk"
+    },
+    {
+      "title": "HIS GIRL FRIDAY",
+      "year": 1940,
+      "rank": 139,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "HISTOIRE(S) DU CINéMA",
+      "year": 1988,
+      "rank": 140,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "GONE WITH THE WIND",
+      "year": 1939,
+      "rank": 141,
+      "director": "Victor Fleming"
+    },
+    {
+      "title": "NOSFERATU",
+      "year": 1922,
+      "rank": 142,
+      "director": "F.W. Murnau"
+    },
+    {
+      "title": "THERE WILL BE BLOOD",
+      "year": 2007,
+      "rank": 143,
+      "director": "Paul Thomas Anderson"
+    },
+    {
+      "title": "MY DARLING CLEMENTINE",
+      "year": 1946,
+      "rank": 144,
+      "director": "John Ford"
+    },
+    {
+      "title": "ROME, OPEN CITY",
+      "year": 1945,
+      "rank": 145,
+      "director": "Roberto Rossellini"
+    },
+    {
+      "title": "DAISIES",
+      "year": 1966,
+      "rank": 146,
+      "director": "Věra Chytilová"
+    },
+    {
+      "title": "WANDA",
+      "year": 1970,
+      "rank": 147,
+      "director": "Barbara Loden"
+    },
+    {
+      "title": "CéLINE AND JULIE GO BOATING",
+      "year": 1974,
+      "rank": 148,
+      "director": "Jacques Rivette"
+    },
+    {
+      "title": "THE GOSPEL ACCORDING TO ST. MATTHEW",
+      "year": 1964,
+      "rank": 149,
+      "director": "Pier Paolo Pasolini"
+    },
+    {
+      "title": "ONE FLEW OVER THE CUCKOO'S NEST",
+      "year": 1975,
+      "rank": 150,
+      "director": "Milos Forman"
+    },
+    {
+      "title": "THE UMBRELLAS OF CHERBOURG",
+      "year": 1964,
+      "rank": 151,
+      "director": "Jacques Demy"
+    },
+    {
+      "title": "THE CONVERSATION",
+      "year": 1974,
+      "rank": 152,
+      "director": "Francis Ford Coppola"
+    },
+    {
+      "title": "KILLER OF SHEEP",
+      "year": 1977,
+      "rank": 153,
+      "director": "Charles Burnett"
+    },
+    {
+      "title": "UN CHIEN ANDALOU",
+      "year": 1928,
+      "rank": 154,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "DAYS OF HEAVEN",
+      "year": 1978,
+      "rank": 155,
+      "director": "Terrence Malick"
+    },
+    {
+      "title": "THE GOOD, THE BAD AND THE UGLY",
+      "year": 1966,
+      "rank": 156,
+      "director": "Sergio Leone"
+    },
+    {
+      "title": "DOUBLE INDEMNITY",
+      "year": 1944,
+      "rank": 157,
+      "director": "Billy Wilder"
+    },
+    {
+      "title": "TROUBLE IN PARADISE",
+      "year": 1932,
+      "rank": 158,
+      "director": "Ernst Lubitsch"
+    },
+    {
+      "title": "THE DEER HUNTER",
+      "year": 1978,
+      "rank": 159,
+      "director": "Michael Cimino"
+    },
+    {
+      "title": "L'ARGENT",
+      "year": 1983,
+      "rank": 160,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "CHUNGKING EXPRESS",
+      "year": 1994,
+      "rank": 161,
+      "director": "Wong Kar-wai"
+    },
+    {
+      "title": "MY NEIGHBOUR TOTORO",
+      "year": 1988,
+      "rank": 162,
+      "director": "Hayao Miyazaki"
+    },
+    {
+      "title": "CRIES AND WHISPERS",
+      "year": 1972,
+      "rank": 163,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "TROPICAL MALADY",
+      "year": 2004,
+      "rank": 164,
+      "director": "Apichatpong Weerasethakul"
+    },
+    {
+      "title": "MANHATTAN",
+      "year": 1979,
+      "rank": 165,
+      "director": "Woody Allen"
+    },
+    {
+      "title": "ROSEMARY'S BABY",
+      "year": 1968,
+      "rank": 166,
+      "director": "Roman Polanski"
+    },
+    {
+      "title": "THE PASSENGER",
+      "year": 1975,
+      "rank": 167,
+      "director": "Michelangelo Antonioni"
+    },
+    {
+      "title": "BADLANDS",
+      "year": 1973,
+      "rank": 168,
+      "director": "Terrence Malick"
+    },
+    {
+      "title": "L'âGE D'OR",
+      "year": 1930,
+      "rank": 169,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "THE TEXAS CHAIN SAW MASSACRE",
+      "year": 1974,
+      "rank": 170,
+      "director": "Tobe Hooper"
+    },
+    {
+      "title": "DEKALOG",
+      "year": 1989,
+      "rank": 171,
+      "director": "Krzysztof Kieslowski"
+    },
+    {
+      "title": "THE DISCREET CHARM OF THE BOURGEOISIE",
+      "year": 1972,
+      "rank": 172,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "PORTRAIT OF A LADY ON FIRE",
+      "year": 2019,
+      "rank": 173,
+      "director": "Céline Sciamma"
+    },
+    {
+      "title": "RAIDERS OF THE LOST ARK",
+      "year": 1981,
+      "rank": 174,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "ONLY ANGELS HAVE WINGS",
+      "year": 1939,
+      "rank": 175,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "STAGECOACH",
+      "year": 1939,
+      "rank": 176,
+      "director": "John Ford"
+    },
+    {
+      "title": "BRIEF ENCOUNTER",
+      "year": 1945,
+      "rank": 177,
+      "director": "David Lean"
+    },
+    {
+      "title": "TOUKI BOUKI",
+      "year": 1973,
+      "rank": 178,
+      "director": "Djibril Diop Mambéty"
+    },
+    {
+      "title": "DUCK SOUP",
+      "year": 1933,
+      "rank": 179,
+      "director": "Leo McCarey"
+    },
+    {
+      "title": "CLOSE ENCOUNTERS OF THE THIRD KIND",
+      "year": 1977,
+      "rank": 180,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "THE BIRDS",
+      "year": 1963,
+      "rank": 181,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "JOHNNY GUITAR",
+      "year": 1954,
+      "rank": 182,
+      "director": "Nicholas Ray"
+    },
+    {
+      "title": "RAN",
+      "year": 1985,
+      "rank": 183,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "MOUCHETTE",
+      "year": 1967,
+      "rank": 184,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "THE COLOUR OF POMEGRANATES",
+      "year": 1969,
+      "rank": 185,
+      "director": "Sergei Parajanov"
+    },
+    {
+      "title": "EARTH",
+      "year": 1930,
+      "rank": 186,
+      "director": "Alexander Dovzhenko"
+    },
+    {
+      "title": "VAMPYR",
+      "year": 1932,
+      "rank": 187,
+      "director": "Carl Theodor Dreyer"
+    },
+    {
+      "title": "NAPOLéON",
+      "year": 1927,
+      "rank": 188,
+      "director": "Abel Gance"
+    },
+    {
+      "title": "OUT OF THE PAST",
+      "year": 1947,
+      "rank": 189,
+      "director": "Jacques Tourneur"
+    },
+    {
+      "title": "PARIS, TEXAS",
+      "year": 1984,
+      "rank": 190,
+      "director": "Wim Wenders"
+    },
+    {
+      "title": "THE RIVER",
+      "year": 1951,
+      "rank": 191,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "THE TREE OF LIFE",
+      "year": 2011,
+      "rank": 192,
+      "director": "Terrence Malick"
+    },
+    {
+      "title": "CHIMES AT MIDNIGHT",
+      "year": 1965,
+      "rank": 193,
+      "director": "Orson Welles"
+    },
+    {
+      "title": "BLACK NARCISSUS",
+      "year": 1947,
+      "rank": 194,
+      "director": "Michael Powell & Emeric Pressburger"
+    },
+    {
+      "title": "THE GLEANERS & I",
+      "year": 2000,
+      "rank": 195,
+      "director": "Agnès Varda"
+    },
+    {
+      "title": "LA NOTTE",
+      "year": 1961,
+      "rank": 196,
+      "director": "Michelangelo Antonioni"
+    },
+    {
+      "title": "PAISAN",
+      "year": 1946,
+      "rank": 197,
+      "director": "Roberto Rossellini"
+    },
+    {
+      "title": "KING KONG",
+      "year": 1933,
+      "rank": 198,
+      "director": "Merian C. Cooper & Ernest B. Schoedsack"
+    },
+    {
+      "title": "NIGHTS OF CABIRIA",
+      "year": 1957,
+      "rank": 199,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "ROCCO AND HIS BROTHERS",
+      "year": 1960,
+      "rank": 200,
+      "director": "Luchino Visconti"
+    },
+    {
+      "title": "SPRING IN A SMALL TOWN",
+      "year": 1948,
+      "rank": 201,
+      "director": "Fei Mu"
+    },
+    {
+      "title": "SAL&Ograve;, OR THE 120 DAYS OF SODOM",
+      "year": 1975,
+      "rank": 202,
+      "director": "Pier Paolo Pasolini"
+    },
+    {
+      "title": "THE LADY EVE",
+      "year": 1941,
+      "rank": 203,
+      "director": "Preston Sturges"
+    },
+    {
+      "title": "ON THE WATERFRONT",
+      "year": 1954,
+      "rank": 204,
+      "director": "Elia Kazan"
+    },
+    {
+      "title": "THE LAST LAUGH",
+      "year": 1924,
+      "rank": 205,
+      "director": "F.W. Murnau"
+    },
+    {
+      "title": "A CITY OF SADNESS",
+      "year": 1989,
+      "rank": 206,
+      "director": "Hou Hsiao-hsien"
+    },
+    {
+      "title": "NEWS FROM HOME",
+      "year": 1976,
+      "rank": 207,
+      "director": "Chantal Akerman"
+    },
+    {
+      "title": "THE THING",
+      "year": 1982,
+      "rank": 208,
+      "director": "John Carpenter"
+    },
+    {
+      "title": "VAGABOND",
+      "year": 1985,
+      "rank": 209,
+      "director": "Agnès Varda"
+    },
+    {
+      "title": "THE GREAT DICTATOR",
+      "year": 1940,
+      "rank": 210,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "MAGNOLIA",
+      "year": 1999,
+      "rank": 211,
+      "director": "Paul Thomas Anderson"
+    },
+    {
+      "title": "DEATH IN VENICE",
+      "year": 1971,
+      "rank": 212,
+      "director": "Luchino Visconti"
+    },
+    {
+      "title": "WINGS OF DESIRE",
+      "year": 1987,
+      "rank": 213,
+      "director": "Wim Wenders"
+    },
+    {
+      "title": "THE LIFE AND DEATH OF COLONEL BLIMP",
+      "year": 1943,
+      "rank": 214,
+      "director": "Michael Powell & Emeric Pressburger"
+    },
+    {
+      "title": "MOONLIGHT",
+      "year": 2016,
+      "rank": 215,
+      "director": "Barry Jenkins"
+    },
+    {
+      "title": "BREAKING THE WAVES",
+      "year": 1996,
+      "rank": 216,
+      "director": "Lars von Trier"
+    },
+    {
+      "title": "SOLARIS",
+      "year": 1972,
+      "rank": 217,
+      "director": "Andrei Tarkovsky"
+    },
+    {
+      "title": "THE QUIET MAN",
+      "year": 1952,
+      "rank": 218,
+      "director": "John Ford"
+    },
+    {
+      "title": "WAVELENGTH",
+      "year": 1967,
+      "rank": 219,
+      "director": "Michael Snow"
+    },
+    {
+      "title": "BRAZIL",
+      "year": 1985,
+      "rank": 220,
+      "director": "Terry Gilliam"
+    },
+    {
+      "title": "LE SAMOURA&Iuml;",
+      "year": 1967,
+      "rank": 221,
+      "director": "Jean-Pierre Melville"
+    },
+    {
+      "title": "KES",
+      "year": 1969,
+      "rank": 222,
+      "director": "Ken Loach"
+    },
+    {
+      "title": "ZERO FOR CONDUCT",
+      "year": 1933,
+      "rank": 223,
+      "director": "Jean Vigo"
+    },
+    {
+      "title": "UMBERTO D.",
+      "year": 1952,
+      "rank": 224,
+      "director": "Vittorio De Sica"
+    },
+    {
+      "title": "WHERE IS THE FRIEND'S HOUSE?",
+      "year": 1987,
+      "rank": 225,
+      "director": "Abbas Kiarostami"
+    },
+    {
+      "title": "THE GRAPES OF WRATH",
+      "year": 1940,
+      "rank": 226,
+      "director": "John Ford"
+    },
+    {
+      "title": "THE BIG LEBOWSKI",
+      "year": 1998,
+      "rank": 227,
+      "director": "Joel Coen & Ethan Coen"
+    },
+    {
+      "title": "ETERNAL SUNSHINE OF THE SPOTLESS MIND",
+      "year": 2004,
+      "rank": 228,
+      "director": "Michel Gondry"
+    },
+    {
+      "title": "THE BEST YEARS OF OUR LIVES",
+      "year": 1946,
+      "rank": 229,
+      "director": "William Wyler"
+    },
+    {
+      "title": "THE LIFE OF OHARU",
+      "year": 1952,
+      "rank": 230,
+      "director": "Kenji Mizoguchi"
+    },
+    {
+      "title": "PARASITE",
+      "year": 2019,
+      "rank": 231,
+      "director": "Bong Joon-ho"
+    },
+    {
+      "title": "SULLIVAN'S TRAVELS",
+      "year": 1941,
+      "rank": 232,
+      "director": "Preston Sturges"
+    },
+    {
+      "title": "BACK TO THE FUTURE",
+      "year": 1985,
+      "rank": 233,
+      "director": "Robert Zemeckis"
+    },
+    {
+      "title": "THE MATRIX",
+      "year": 1999,
+      "rank": 234,
+      "director": "Lana Wachowski & Lilly Wachowski"
+    },
+    {
+      "title": "MCCABE & MRS. MILLER",
+      "year": 1971,
+      "rank": 235,
+      "director": "Robert Altman"
+    },
+    {
+      "title": "THE TRAVELLING PLAYERS",
+      "year": 1975,
+      "rank": 236,
+      "director": "Theo Angelopoulos"
+    },
+    {
+      "title": "BLACK GOD, WHITE DEVIL",
+      "year": 1964,
+      "rank": 237,
+      "director": "Glauber Rocha"
+    },
+    {
+      "title": "LOVE STREAMS",
+      "year": 1984,
+      "rank": 238,
+      "director": "John Cassavetes"
+    },
+    {
+      "title": "THE HOUSE IS BLACK",
+      "year": 1963,
+      "rank": 239,
+      "director": "Forugh Farrokhzad"
+    },
+    {
+      "title": "GERMANY, YEAR ZERO",
+      "year": 1948,
+      "rank": 240,
+      "director": "Roberto Rossellini"
+    },
+    {
+      "title": "THE CROWD",
+      "year": 1928,
+      "rank": 241,
+      "director": "King Vidor"
+    },
+    {
+      "title": "ASHES AND DIAMONDS",
+      "year": 1958,
+      "rank": 242,
+      "director": "Andrzej Wajda"
+    },
+    {
+      "title": "RED DESERT",
+      "year": 1964,
+      "rank": 243,
+      "director": "Michelangelo Antonioni"
+    },
+    {
+      "title": "MEMORIES OF UNDERDEVELOPMENT",
+      "year": 1968,
+      "rank": 244,
+      "director": "Tomás Gutiérrez Alea"
+    },
+    {
+      "title": "ERASERHEAD",
+      "year": 1977,
+      "rank": 245,
+      "director": "David Lynch"
+    },
+    {
+      "title": "IVAN THE TERRIBLE, PART II",
+      "year": 1946,
+      "rank": 246,
+      "director": "Sergei Eisenstein"
+    },
+    {
+      "title": "IN A LONELY PLACE",
+      "year": 1950,
+      "rank": 247,
+      "director": "Nicholas Ray"
+    },
+    {
+      "title": "THE BAND WAGON",
+      "year": 1953,
+      "rank": 248,
+      "director": "Vincente Minnelli"
+    },
+    {
+      "title": "THE GRADUATE",
+      "year": 1967,
+      "rank": 249,
+      "director": "Mike Nichols"
+    },
+    {
+      "title": "IVAN THE TERRIBLE, PART I",
+      "year": 1944,
+      "rank": 250,
+      "director": "Sergei Eisenstein"
+    },
+    {
+      "title": "SCHINDLER'S LIST",
+      "year": 1993,
+      "rank": 251,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "CACHé",
+      "year": 2005,
+      "rank": 252,
+      "director": "Michael Haneke"
+    },
+    {
+      "title": "AN AUTUMN AFTERNOON",
+      "year": 1962,
+      "rank": 253,
+      "director": "Yasujiro Ozu"
+    },
+    {
+      "title": "PERFORMANCE",
+      "year": 1970,
+      "rank": 254,
+      "director": "Nicolas Roeg & Donald Cammell"
+    },
+    {
+      "title": "THE EXORCIST",
+      "year": 1973,
+      "rank": 255,
+      "director": "William Friedkin"
+    },
+    {
+      "title": "HEAT",
+      "year": 1995,
+      "rank": 256,
+      "director": "Michael Mann"
+    },
+    {
+      "title": "MEET ME IN ST. LOUIS",
+      "year": 1944,
+      "rank": 257,
+      "director": "Vincente Minnelli"
+    },
+    {
+      "title": "THE THIN RED LINE",
+      "year": 1998,
+      "rank": 258,
+      "director": "Terrence Malick"
+    },
+    {
+      "title": "CINEMA PARADISO",
+      "year": 1988,
+      "rank": 259,
+      "director": "Giuseppe Tornatore"
+    },
+    {
+      "title": "DAUGHTERS OF THE DUST",
+      "year": 1991,
+      "rank": 260,
+      "director": "Julie Dash"
+    },
+    {
+      "title": "BELLE DE JOUR",
+      "year": 1967,
+      "rank": 261,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "THE GREEN RAY",
+      "year": 1986,
+      "rank": 262,
+      "director": "Eric Rohmer"
+    },
+    {
+      "title": "EYES WIDE SHUT",
+      "year": 1999,
+      "rank": 263,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "EL VERDUGO",
+      "year": 1963,
+      "rank": 264,
+      "director": "Luis García Berlanga"
+    },
+    {
+      "title": "FARGO",
+      "year": 1996,
+      "rank": 265,
+      "director": "Joel Coen & Ethan Coen"
+    },
+    {
+      "title": "DIARY OF A COUNTRY PRIEST",
+      "year": 1951,
+      "rank": 266,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "UNCLE BOONMEE WHO CAN RECALL HIS PAST LIVES",
+      "year": 2010,
+      "rank": 267,
+      "director": "Apichatpong Weerasethakul"
+    },
+    {
+      "title": "THE TREASURE OF THE SIERRA MADRE",
+      "year": 1948,
+      "rank": 268,
+      "director": "John Huston"
+    },
+    {
+      "title": "F FOR FAKE",
+      "year": 1973,
+      "rank": 269,
+      "director": "Orson Welles"
+    },
+    {
+      "title": "THE CABINET OF DR. CALIGARI",
+      "year": 1920,
+      "rank": 270,
+      "director": "Robert Wiene"
+    },
+    {
+      "title": "RED RIVER",
+      "year": 1948,
+      "rank": 271,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "TABU",
+      "year": 1931,
+      "rank": 272,
+      "director": "F.W. Murnau"
+    },
+    {
+      "title": "NIGHT AND FOG",
+      "year": 1955,
+      "rank": 273,
+      "director": "Alain Resnais"
+    },
+    {
+      "title": "LA CIéNAGA",
+      "year": 2001,
+      "rank": 274,
+      "director": "Lucrecia Martel"
+    },
+    {
+      "title": "THREE COLOURS: BLUE",
+      "year": 1993,
+      "rank": 275,
+      "director": "Krzysztof Kieslowski"
+    },
+    {
+      "title": "KIND HEARTS AND CORONETS",
+      "year": 1949,
+      "rank": 276,
+      "director": "Robert Hamer"
+    },
+    {
+      "title": "SWEET SMELL OF SUCCESS",
+      "year": 1957,
+      "rank": 277,
+      "director": "Alexander Mackendrick"
+    },
+    {
+      "title": "TASTE OF CHERRY",
+      "year": 1997,
+      "rank": 278,
+      "director": "Abbas Kiarostami"
+    },
+    {
+      "title": "DAY OF WRATH",
+      "year": 1943,
+      "rank": 279,
+      "director": "Carl Theodor Dreyer"
+    },
+    {
+      "title": "MY NIGHT AT MAUD'S",
+      "year": 1969,
+      "rank": 280,
+      "director": "Eric Rohmer"
+    },
+    {
+      "title": "BLACK GIRL",
+      "year": 1966,
+      "rank": 281,
+      "director": "Ousmane Sembene"
+    },
+    {
+      "title": "ALL THAT JAZZ",
+      "year": 1979,
+      "rank": 282,
+      "director": "Bob Fosse"
+    },
+    {
+      "title": "GROUNDHOG DAY",
+      "year": 1993,
+      "rank": 283,
+      "director": "Harold Ramis"
+    },
+    {
+      "title": "THE SHOP AROUND THE CORNER",
+      "year": 1940,
+      "rank": 284,
+      "director": "Ernst Lubitsch"
+    },
+    {
+      "title": "PATHS OF GLORY",
+      "year": 1957,
+      "rank": 285,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "THE ASCENT",
+      "year": 1977,
+      "rank": 286,
+      "director": "Larisa Shepitko"
+    },
+    {
+      "title": "THE STORY OF THE LAST CHRYSANTHEMUMS",
+      "year": 1939,
+      "rank": 287,
+      "director": "Kenji Mizoguchi"
+    },
+    {
+      "title": "GOODBYE, DRAGON INN",
+      "year": 2003,
+      "rank": 288,
+      "director": "Tsai Ming-liang"
+    },
+    {
+      "title": "PANDORA'S BOX",
+      "year": 1929,
+      "rank": 289,
+      "director": "G.W. Pabst"
+    },
+    {
+      "title": "INDIA SONG",
+      "year": 1975,
+      "rank": 290,
+      "director": "Marguerite Duras"
+    },
+    {
+      "title": "ARMY OF SHADOWS",
+      "year": 1969,
+      "rank": 291,
+      "director": "Jean-Pierre Melville"
+    },
+    {
+      "title": "THRONE OF BLOOD",
+      "year": 1957,
+      "rank": 292,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "2 OR 3 THINGS I KNOW ABOUT HER",
+      "year": 1967,
+      "rank": 293,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "ALL THAT HEAVEN ALLOWS",
+      "year": 1955,
+      "rank": 294,
+      "director": "Douglas Sirk"
+    },
+    {
+      "title": "THE SACRIFICE",
+      "year": 1986,
+      "rank": 295,
+      "director": "Andrei Tarkovsky"
+    },
+    {
+      "title": "CABARET",
+      "year": 1972,
+      "rank": 296,
+      "director": "Bob Fosse"
+    },
+    {
+      "title": "ALL ABOUT MY MOTHER",
+      "year": 1999,
+      "rank": 297,
+      "director": "Pedro Almodóvar"
+    },
+    {
+      "title": "THREE COLOURS: RED",
+      "year": 1994,
+      "rank": 298,
+      "director": "Krzysztof Kieslowski"
+    },
+    {
+      "title": "CITY OF GOD",
+      "year": 2002,
+      "rank": 299,
+      "director": "Fernando Meirelles & Kátia Lund"
+    },
+    {
+      "title": "UNFORGIVEN",
+      "year": 1992,
+      "rank": 300,
+      "director": "Clint Eastwood"
+    },
+    {
+      "title": "THE BIG SLEEP",
+      "year": 1946,
+      "rank": 301,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "MEAN STREETS",
+      "year": 1973,
+      "rank": 302,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "DISTANT VOICES, STILL LIVES",
+      "year": 1988,
+      "rank": 303,
+      "director": "Terence Davies"
+    },
+    {
+      "title": "HAPPY TOGETHER",
+      "year": 1997,
+      "rank": 304,
+      "director": "Wong Kar-wai"
+    },
+    {
+      "title": "THE EMPIRE STRIKES BACK",
+      "year": 1980,
+      "rank": 305,
+      "director": "Irvin Kershner"
+    },
+    {
+      "title": "THE MALTESE FALCON",
+      "year": 1941,
+      "rank": 306,
+      "director": "John Huston"
+    },
+    {
+      "title": "WERCKMEISTER HARMONIES",
+      "year": 2000,
+      "rank": 307,
+      "director": "Béla Tarr"
+    },
+    {
+      "title": "TERRA EM TRANSE",
+      "year": 1967,
+      "rank": 308,
+      "director": "Glauber Rocha"
+    },
+    {
+      "title": "THE MUSIC ROOM",
+      "year": 1958,
+      "rank": 309,
+      "director": "Satyajit Ray"
+    },
+    {
+      "title": "MR. HULOT'S HOLIDAY",
+      "year": 1953,
+      "rank": 310,
+      "director": "Jacques Tati"
+    },
+    {
+      "title": "A SEPARATION",
+      "year": 2011,
+      "rank": 311,
+      "director": "Asghar Farhadi"
+    },
+    {
+      "title": "FLOATING CLOUDS",
+      "year": 1955,
+      "rank": 312,
+      "director": "Mikio Naruse"
+    },
+    {
+      "title": "FREAKS",
+      "year": 1932,
+      "rank": 313,
+      "director": "Tod Browning"
+    },
+    {
+      "title": "MIDNIGHT COWBOY",
+      "year": 1969,
+      "rank": 314,
+      "director": "John Schlesinger"
+    },
+    {
+      "title": "CHARULATA",
+      "year": 1964,
+      "rank": 315,
+      "director": "Satyajit Ray"
+    },
+    {
+      "title": "NANOOK OF THE NORTH",
+      "year": 1922,
+      "rank": 316,
+      "director": "Robert J. Flaherty"
+    },
+    {
+      "title": "THE WORLD OF APU",
+      "year": 1959,
+      "rank": 317,
+      "director": "Satyajit Ray"
+    },
+    {
+      "title": "FACES",
+      "year": 1968,
+      "rank": 318,
+      "director": "John Cassavetes"
+    },
+    {
+      "title": "MELANCHOLIA",
+      "year": 2011,
+      "rank": 319,
+      "director": "Lars von Trier"
+    },
+    {
+      "title": "AMADEUS",
+      "year": 1984,
+      "rank": 320,
+      "director": "Milos Forman"
+    },
+    {
+      "title": "HIGH AND LOW",
+      "year": 1963,
+      "rank": 321,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "THE KING OF COMEDY",
+      "year": 1982,
+      "rank": 322,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "IN THE REALM OF THE SENSES",
+      "year": 1976,
+      "rank": 323,
+      "director": "Nagisa Oshima"
+    },
+    {
+      "title": "VIDEODROME",
+      "year": 1983,
+      "rank": 324,
+      "director": "David Cronenberg"
+    },
+    {
+      "title": "I AM CUBA",
+      "year": 1964,
+      "rank": 325,
+      "director": "Mikhail Kalatozov"
+    },
+    {
+      "title": "MONSIEUR VERDOUX",
+      "year": 1947,
+      "rank": 326,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "HAROLD AND MAUDE",
+      "year": 1971,
+      "rank": 327,
+      "director": "Hal Ashby"
+    },
+    {
+      "title": "HUSBANDS",
+      "year": 1970,
+      "rank": 328,
+      "director": "John Cassavetes"
+    },
+    {
+      "title": "LOLA MONTèS",
+      "year": 1955,
+      "rank": 329,
+      "director": "Max Ophüls"
+    },
+    {
+      "title": "PYAASA",
+      "year": 1957,
+      "rank": 330,
+      "director": "Guru Dutt"
+    },
+    {
+      "title": "KINGS OF THE ROAD",
+      "year": 1976,
+      "rank": 331,
+      "director": "Wim Wenders"
+    },
+    {
+      "title": "LA BELLE ET LA BêTE",
+      "year": 1946,
+      "rank": 332,
+      "director": "Jean Cocteau"
+    },
+    {
+      "title": "THE PHILADELPHIA STORY",
+      "year": 1940,
+      "rank": 333,
+      "director": "George Cukor"
+    },
+    {
+      "title": "DOG DAY AFTERNOON",
+      "year": 1975,
+      "rank": 334,
+      "director": "Sidney Lumet"
+    },
+    {
+      "title": "BERLIN ALEXANDERPLATZ",
+      "year": 1980,
+      "rank": 335,
+      "director": "Rainer Werner Fassbinder"
+    },
+    {
+      "title": "A CANTERBURY TALE",
+      "year": 1944,
+      "rank": 336,
+      "director": "Michael Powell & Emeric Pressburger"
+    },
+    {
+      "title": "THE KID",
+      "year": 1921,
+      "rank": 337,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "THE YOUNG GIRLS OF ROCHEFORT",
+      "year": 1967,
+      "rank": 338,
+      "director": "Jacques Demy"
+    },
+    {
+      "title": "WEST SIDE STORY",
+      "year": 1961,
+      "rank": 339,
+      "director": "Robert Wise & Jerome Robbins"
+    },
+    {
+      "title": "THE WAGES OF FEAR",
+      "year": 1953,
+      "rank": 340,
+      "director": "Henri-Georges Clouzot"
+    },
+    {
+      "title": "MAD MAX: FURY ROAD",
+      "year": 2015,
+      "rank": 341,
+      "director": "George Miller"
+    },
+    {
+      "title": "TIE XI QU: WEST OF THE TRACKS",
+      "year": 2003,
+      "rank": 342,
+      "director": "Wang Bing"
+    },
+    {
+      "title": "BONNIE AND CLYDE",
+      "year": 1967,
+      "rank": 343,
+      "director": "Arthur Penn"
+    },
+    {
+      "title": "SOME CAME RUNNING",
+      "year": 1958,
+      "rank": 344,
+      "director": "Vincente Minnelli"
+    },
+    {
+      "title": "GET OUT",
+      "year": 2017,
+      "rank": 345,
+      "director": "Jordan Peele"
+    },
+    {
+      "title": "THE TIME TO LIVE AND THE TIME TO DIE",
+      "year": 1985,
+      "rank": 346,
+      "director": "Hou Hsiao-hsien"
+    },
+    {
+      "title": "BROKEN BLOSSOMS",
+      "year": 1919,
+      "rank": 347,
+      "director": "D.W. Griffith"
+    },
+    {
+      "title": "KISS ME DEADLY",
+      "year": 1955,
+      "rank": 348,
+      "director": "Robert Aldrich"
+    },
+    {
+      "title": "UNDERGROUND",
+      "year": 1995,
+      "rank": 349,
+      "director": "Emir Kusturica"
+    },
+    {
+      "title": "THE TREE OF WOODEN CLOGS",
+      "year": 1978,
+      "rank": 350,
+      "director": "Ermanno Olmi"
+    },
+    {
+      "title": "THE DOUBLE LIFE OF VéRONIQUE",
+      "year": 1991,
+      "rank": 351,
+      "director": "Krzysztof Kieslowski"
+    },
+    {
+      "title": "ALIENS",
+      "year": 1986,
+      "rank": 352,
+      "director": "James Cameron"
+    },
+    {
+      "title": "THE LAST PICTURE SHOW",
+      "year": 1971,
+      "rank": 353,
+      "director": "Peter Bogdanovich"
+    },
+    {
+      "title": "IT HAPPENED ONE NIGHT",
+      "year": 1934,
+      "rank": 354,
+      "director": "Frank Capra"
+    },
+    {
+      "title": "THE ELEPHANT MAN",
+      "year": 1980,
+      "rank": 355,
+      "director": "David Lynch"
+    },
+    {
+      "title": "WEEKEND",
+      "year": 1967,
+      "rank": 356,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "OPENING NIGHT",
+      "year": 1977,
+      "rank": 357,
+      "director": "John Cassavetes"
+    },
+    {
+      "title": "THE CRANES ARE FLYING",
+      "year": 1957,
+      "rank": 358,
+      "director": "Mikhail Kalatozov"
+    },
+    {
+      "title": "A TOUCH OF ZEN",
+      "year": 1971,
+      "rank": 359,
+      "director": "King Hu"
+    },
+    {
+      "title": "THE PUPPETMASTER",
+      "year": 1993,
+      "rank": 360,
+      "director": "Hou Hsiao-hsien"
+    },
+    {
+      "title": "THE CLOUD-CAPPED STAR",
+      "year": 1960,
+      "rank": 361,
+      "director": "Ritwik Ghatak"
+    },
+    {
+      "title": "THE SILENCE OF THE LAMBS",
+      "year": 1991,
+      "rank": 362,
+      "director": "Jonathan Demme"
+    },
+    {
+      "title": "NIGHT OF THE LIVING DEAD",
+      "year": 1968,
+      "rank": 363,
+      "director": "George A. Romero"
+    },
+    {
+      "title": "LAST TANGO IN PARIS",
+      "year": 1972,
+      "rank": 364,
+      "director": "Bernardo Bertolucci"
+    },
+    {
+      "title": "THE TURIN HORSE",
+      "year": 2011,
+      "rank": 365,
+      "director": "Béla Tarr"
+    },
+    {
+      "title": "HOW GREEN WAS MY VALLEY",
+      "year": 1941,
+      "rank": 366,
+      "director": "John Ford"
+    },
+    {
+      "title": "WRITTEN ON THE WIND",
+      "year": 1956,
+      "rank": 367,
+      "director": "Douglas Sirk"
+    },
+    {
+      "title": "EL",
+      "year": 1953,
+      "rank": 368,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "SAFE",
+      "year": 1995,
+      "rank": 369,
+      "director": "Todd Haynes"
+    },
+    {
+      "title": "PEEPING TOM",
+      "year": 1960,
+      "rank": 370,
+      "director": "Michael Powell"
+    },
+    {
+      "title": "ALL THE PRESIDENT'S MEN",
+      "year": 1976,
+      "rank": 371,
+      "director": "Alan J. Pakula"
+    },
+    {
+      "title": "OUT 1",
+      "year": 1971,
+      "rank": 372,
+      "director": "Jacques Rivette"
+    },
+    {
+      "title": "THE QUINCE TREE SUN",
+      "year": 1992,
+      "rank": 373,
+      "director": "Víctor Erice"
+    },
+    {
+      "title": "MAKE WAY FOR TOMORROW",
+      "year": 1937,
+      "rank": 374,
+      "director": "Leo McCarey"
+    },
+    {
+      "title": "HEAVEN'S GATE",
+      "year": 1980,
+      "rank": 375,
+      "director": "Michael Cimino"
+    },
+    {
+      "title": "THE KILLING OF A CHINESE BOOKIE",
+      "year": 1976,
+      "rank": 376,
+      "director": "John Cassavetes"
+    },
+    {
+      "title": "YOJIMBO",
+      "year": 1961,
+      "rank": 377,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "MURIEL",
+      "year": 1963,
+      "rank": 378,
+      "director": "Alain Resnais"
+    },
+    {
+      "title": "FITZCARRALDO",
+      "year": 1982,
+      "rank": 379,
+      "director": "Werner Herzog"
+    },
+    {
+      "title": "THROUGH THE OLIVE TREES",
+      "year": 1994,
+      "rank": 380,
+      "director": "Abbas Kiarostami"
+    },
+    {
+      "title": "MARNIE",
+      "year": 1964,
+      "rank": 381,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "THIS IS SPINAL TAP",
+      "year": 1984,
+      "rank": 382,
+      "director": "Rob Reiner"
+    },
+    {
+      "title": "THE WHITE RIBBON",
+      "year": 2009,
+      "rank": 383,
+      "director": "Michael Haneke"
+    },
+    {
+      "title": "TWO-LANE BLACKTOP",
+      "year": 1971,
+      "rank": 384,
+      "director": "Monte Hellman"
+    },
+    {
+      "title": "STROMBOLI",
+      "year": 1950,
+      "rank": 385,
+      "director": "Roberto Rossellini"
+    },
+    {
+      "title": "AN AFFAIR TO REMEMBER",
+      "year": 1957,
+      "rank": 386,
+      "director": "Leo McCarey"
+    },
+    {
+      "title": "TEOREMA",
+      "year": 1968,
+      "rank": 387,
+      "director": "Pier Paolo Pasolini"
+    },
+    {
+      "title": "LOST HIGHWAY",
+      "year": 1997,
+      "rank": 388,
+      "director": "David Lynch"
+    },
+    {
+      "title": "I WAS BORN, BUT...",
+      "year": 1932,
+      "rank": 389,
+      "director": "Yasujiro Ozu"
+    },
+    {
+      "title": "STRANGER THAN PARADISE",
+      "year": 1984,
+      "rank": 390,
+      "director": "Jim Jarmusch"
+    },
+    {
+      "title": "DOGVILLE",
+      "year": 2003,
+      "rank": 391,
+      "director": "Lars von Trier"
+    },
+    {
+      "title": "UNDER THE SKIN",
+      "year": 2013,
+      "rank": 392,
+      "director": "Jonathan Glazer"
+    },
+    {
+      "title": "TRISTANA",
+      "year": 1970,
+      "rank": 393,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "THE HOUR OF THE FURNACES",
+      "year": 1968,
+      "rank": 394,
+      "director": "Octavio Getino & Fernando E. Solanas"
+    },
+    {
+      "title": "WOMAN IN THE DUNES",
+      "year": 1964,
+      "rank": 395,
+      "director": "Hiroshi Teshigahara"
+    },
+    {
+      "title": "MON ONCLE",
+      "year": 1958,
+      "rank": 396,
+      "director": "Jacques Tati"
+    },
+    {
+      "title": "DAY FOR NIGHT",
+      "year": 1973,
+      "rank": 397,
+      "director": "François Truffaut"
+    },
+    {
+      "title": "THE LONG GOODBYE",
+      "year": 1973,
+      "rank": 398,
+      "director": "Robert Altman"
+    },
+    {
+      "title": "IN A YEAR WITH 13 MOONS",
+      "year": 1978,
+      "rank": 399,
+      "director": "Rainer Werner Fassbinder"
+    },
+    {
+      "title": "NOSTALGHIA",
+      "year": 1983,
+      "rank": 400,
+      "director": "Andrei Tarkovsky"
+    },
+    {
+      "title": "LIMITE",
+      "year": 1931,
+      "rank": 401,
+      "director": "Mario Peixoto"
+    },
+    {
+      "title": "THE THIN BLUE LINE",
+      "year": 1988,
+      "rank": 402,
+      "director": "Errol Morris"
+    },
+    {
+      "title": "ORLANDO",
+      "year": 1992,
+      "rank": 403,
+      "director": "Sally Potter"
+    },
+    {
+      "title": "FANTASIA",
+      "year": 1940,
+      "rank": 404,
+      "director": "Various Directors"
+    },
+    {
+      "title": "THE FLOWERS OF ST. FRANCIS",
+      "year": 1950,
+      "rank": 405,
+      "director": "Roberto Rossellini"
+    },
+    {
+      "title": "EYES WITHOUT A FACE",
+      "year": 1960,
+      "rank": 406,
+      "director": "Georges Franju"
+    },
+    {
+      "title": "THE TENANT",
+      "year": 1976,
+      "rank": 407,
+      "director": "Roman Polanski"
+    },
+    {
+      "title": "THE BIRTH OF A NATION",
+      "year": 1915,
+      "rank": 408,
+      "director": "D.W. Griffith"
+    },
+    {
+      "title": "DAWN OF THE DEAD",
+      "year": 1978,
+      "rank": 409,
+      "director": "George A. Romero"
+    },
+    {
+      "title": "CRIMES AND MISDEMEANORS",
+      "year": 1989,
+      "rank": 410,
+      "director": "Woody Allen"
+    },
+    {
+      "title": "THE HEADLESS WOMAN",
+      "year": 2008,
+      "rank": 411,
+      "director": "Lucrecia Martel"
+    },
+    {
+      "title": "SUSPIRIA",
+      "year": 1977,
+      "rank": 412,
+      "director": "Dario Argento"
+    },
+    {
+      "title": "I KNOW WHERE I'M GOING!",
+      "year": 1945,
+      "rank": 413,
+      "director": "Michael Powell & Emeric Pressburger"
+    },
+    {
+      "title": "1900",
+      "year": 1976,
+      "rank": 414,
+      "director": "Bernardo Bertolucci"
+    },
+    {
+      "title": "LOST IN TRANSLATION",
+      "year": 2003,
+      "rank": 415,
+      "director": "Sofia Coppola"
+    },
+    {
+      "title": "TONI ERDMANN",
+      "year": 2016,
+      "rank": 416,
+      "director": "Maren Ade"
+    },
+    {
+      "title": "ORPHEUS",
+      "year": 1950,
+      "rank": 417,
+      "director": "Jean Cocteau"
+    },
+    {
+      "title": "SNOW WHITE AND THE SEVEN DWARFS",
+      "year": 1937,
+      "rank": 418,
+      "director": "David Hand"
+    },
+    {
+      "title": "MIRACLE IN MILAN",
+      "year": 1951,
+      "rank": 419,
+      "director": "Vittorio De Sica"
+    },
+    {
+      "title": "SPLENDOR IN THE GRASS",
+      "year": 1961,
+      "rank": 420,
+      "director": "Elia Kazan"
+    },
+    {
+      "title": "LE PLAISIR",
+      "year": 1952,
+      "rank": 421,
+      "director": "Max Ophüls"
+    },
+    {
+      "title": "TWENTY YEARS LATER",
+      "year": 1984,
+      "rank": 422,
+      "director": "Eduardo Coutinho"
+    },
+    {
+      "title": "THE INNOCENTS",
+      "year": 1961,
+      "rank": 423,
+      "director": "Jack Clayton"
+    },
+    {
+      "title": "EUROPA '51",
+      "year": 1952,
+      "rank": 424,
+      "director": "Roberto Rossellini"
+    },
+    {
+      "title": "NETWORK",
+      "year": 1976,
+      "rank": 425,
+      "director": "Sidney Lumet"
+    },
+    {
+      "title": "LE BONHEUR",
+      "year": 1965,
+      "rank": 426,
+      "director": "Agnès Varda"
+    },
+    {
+      "title": "SCENES FROM A MARRIAGE",
+      "year": 1973,
+      "rank": 427,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "HOLY MOTORS",
+      "year": 2012,
+      "rank": 428,
+      "director": "Leos Carax"
+    },
+    {
+      "title": "THE AWFUL TRUTH",
+      "year": 1937,
+      "rank": 429,
+      "director": "Leo McCarey"
+    },
+    {
+      "title": "AN ANGEL AT MY TABLE",
+      "year": 1990,
+      "rank": 430,
+      "director": "Jane Campion"
+    },
+    {
+      "title": "CHELSEA GIRLS",
+      "year": 1966,
+      "rank": 431,
+      "director": "Andy Warhol"
+    },
+    {
+      "title": "BRIDE OF FRANKENSTEIN",
+      "year": 1935,
+      "rank": 432,
+      "director": "James Whale"
+    },
+    {
+      "title": "A.I. ARTIFICIAL INTELLIGENCE",
+      "year": 2001,
+      "rank": 433,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "SALVATORE GIULIANO",
+      "year": 1962,
+      "rank": 434,
+      "director": "Francesco Rosi"
+    },
+    {
+      "title": "DAYS OF BEING WILD",
+      "year": 1990,
+      "rank": 435,
+      "director": "Wong Kar-wai"
+    },
+    {
+      "title": "POSSESSION",
+      "year": 1981,
+      "rank": 436,
+      "director": "Andrzej Żuławski"
+    },
+    {
+      "title": "CASINO",
+      "year": 1995,
+      "rank": 437,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "NAKED",
+      "year": 1993,
+      "rank": 438,
+      "director": "Mike Leigh"
+    },
+    {
+      "title": "NO COUNTRY FOR OLD MEN",
+      "year": 2007,
+      "rank": 439,
+      "director": "Joel Coen & Ethan Coen"
+    },
+    {
+      "title": "PHANTOM THREAD",
+      "year": 2017,
+      "rank": 440,
+      "director": "Paul Thomas Anderson"
+    },
+    {
+      "title": "IF….",
+      "year": 1968,
+      "rank": 441,
+      "director": "Lindsay Anderson"
+    },
+    {
+      "title": "A STAR IS BORN",
+      "year": 1954,
+      "rank": 442,
+      "director": "George Cukor"
+    },
+    {
+      "title": "WINTER LIGHT",
+      "year": 1963,
+      "rank": 443,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "FRENCH CANCAN",
+      "year": 1955,
+      "rank": 444,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "SHADOWS OF FORGOTTEN ANCESTORS",
+      "year": 1965,
+      "rank": 445,
+      "director": "Sergei Parajanov"
+    },
+    {
+      "title": "CARRIE",
+      "year": 1976,
+      "rank": 446,
+      "director": "Brian De Palma"
+    },
+    {
+      "title": "BOOGIE NIGHTS",
+      "year": 1997,
+      "rank": 447,
+      "director": "Paul Thomas Anderson"
+    },
+    {
+      "title": "THE ACT OF KILLING",
+      "year": 2012,
+      "rank": 448,
+      "director": "Joshua Oppenheimer"
+    },
+    {
+      "title": "THE SHAWSHANK REDEMPTION",
+      "year": 1994,
+      "rank": 449,
+      "director": "Frank Darabont"
+    },
+    {
+      "title": "LISTEN TO BRITAIN",
+      "year": 1942,
+      "rank": 450,
+      "director": "Humphrey Jennings & Stewart McAllister"
+    },
+    {
+      "title": "SONGS FROM THE SECOND FLOOR",
+      "year": 2000,
+      "rank": 451,
+      "director": "Roy Andersson"
+    },
+    {
+      "title": "IVAN'S CHILDHOOD",
+      "year": 1962,
+      "rank": 452,
+      "director": "Andrei Tarkovsky"
+    },
+    {
+      "title": "ACCATTONE",
+      "year": 1961,
+      "rank": 453,
+      "director": "Pier Paolo Pasolini"
+    },
+    {
+      "title": "LIMELIGHT",
+      "year": 1952,
+      "rank": 454,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "THE CAMERAMAN",
+      "year": 1928,
+      "rank": 455,
+      "director": "Buster Keaton & Edward Sedgwick"
+    },
+    {
+      "title": "THE SCARLET EMPRESS",
+      "year": 1934,
+      "rank": 456,
+      "director": "Josef von Sternberg"
+    },
+    {
+      "title": "LA TERRA TREMA",
+      "year": 1948,
+      "rank": 457,
+      "director": "Luchino Visconti"
+    },
+    {
+      "title": "THE WIND",
+      "year": 1928,
+      "rank": 458,
+      "director": "Victor Sjöström"
+    },
+    {
+      "title": "SYNDROMES AND A CENTURY",
+      "year": 2006,
+      "rank": 459,
+      "director": "Apichatpong Weerasethakul"
+    },
+    {
+      "title": "THE CRIME OF MONSIEUR LANGE",
+      "year": 1936,
+      "rank": 460,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "FESTEN",
+      "year": 1998,
+      "rank": 461,
+      "director": "Thomas Vinterberg"
+    },
+    {
+      "title": "OCTOBER",
+      "year": 1928,
+      "rank": 462,
+      "director": "Sergei Eisenstein & Grigori Aleksandrov"
+    },
+    {
+      "title": "FLOWERS OF SHANGHAI",
+      "year": 1998,
+      "rank": 463,
+      "director": "Hou Hsiao-hsien"
+    },
+    {
+      "title": "A TRIP TO THE MOON",
+      "year": 1902,
+      "rank": 464,
+      "director": "Georges Méliès"
+    },
+    {
+      "title": "IN VANDA'S ROOM",
+      "year": 2000,
+      "rank": 465,
+      "director": "Pedro Costa"
+    },
+    {
+      "title": "PAN'S LABYRINTH",
+      "year": 2006,
+      "rank": 466,
+      "director": "Guillermo del Toro"
+    },
+    {
+      "title": "à NOS AMOURS",
+      "year": 1983,
+      "rank": 467,
+      "director": "Maurice Pialat"
+    },
+    {
+      "title": "KOYAANISQATSI",
+      "year": 1982,
+      "rank": 468,
+      "director": "Godfrey Reggio"
+    },
+    {
+      "title": "DERSU UZALA",
+      "year": 1975,
+      "rank": 469,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "PINOCCHIO",
+      "year": 1940,
+      "rank": 470,
+      "director": "Ben Sharpsteen & Hamilton Luske"
+    },
+    {
+      "title": "LOLA",
+      "year": 1961,
+      "rank": 471,
+      "director": "Jacques Demy"
+    },
+    {
+      "title": "GRAVE OF THE FIREFLIES",
+      "year": 1988,
+      "rank": 472,
+      "director": "Isao Takahata"
+    },
+    {
+      "title": "BARREN LIVES",
+      "year": 1963,
+      "rank": 473,
+      "director": "Nelson Pereira dos Santos"
+    },
+    {
+      "title": "THE DEAD",
+      "year": 1987,
+      "rank": 474,
+      "director": "John Huston"
+    },
+    {
+      "title": "SHOOT THE PIANO PLAYER",
+      "year": 1960,
+      "rank": 475,
+      "director": "François Truffaut"
+    },
+    {
+      "title": "PLATFORM",
+      "year": 2000,
+      "rank": 476,
+      "director": "Jia Zhangke"
+    },
+    {
+      "title": "ONCE UPON A TIME IN ANATOLIA",
+      "year": 2011,
+      "rank": 477,
+      "director": "Nuri Bilge Ceylan"
+    },
+    {
+      "title": "ELEPHANT",
+      "year": 2003,
+      "rank": 478,
+      "director": "Gus Van Sant"
+    },
+    {
+      "title": "WAGON MASTER",
+      "year": 1950,
+      "rank": 479,
+      "director": "John Ford"
+    },
+    {
+      "title": "OLDBOY",
+      "year": 2003,
+      "rank": 480,
+      "director": "Park Chan-wook"
+    },
+    {
+      "title": "PARIS IS BURNING",
+      "year": 1990,
+      "rank": 481,
+      "director": "Jennie Livingston"
+    },
+    {
+      "title": "HIGH NOON",
+      "year": 1952,
+      "rank": 482,
+      "director": "Fred Zinnemann"
+    },
+    {
+      "title": "TO KILL A MOCKINGBIRD",
+      "year": 1962,
+      "rank": 483,
+      "director": "Robert Mulligan"
+    },
+    {
+      "title": "TALK TO HER",
+      "year": 2002,
+      "rank": 484,
+      "director": "Pedro Almodóvar"
+    },
+    {
+      "title": "WITHNAIL & I",
+      "year": 1987,
+      "rank": 485,
+      "director": "Bruce Robinson"
+    },
+    {
+      "title": "HARLAN COUNTY, U.S.A.",
+      "year": 1976,
+      "rank": 486,
+      "director": "Barbara Kopple"
+    },
+    {
+      "title": "STEAMBOAT BILL, JR.",
+      "year": 1928,
+      "rank": 487,
+      "director": "Buster Keaton & Charles Reisner"
+    },
+    {
+      "title": "LA RéGION CENTRALE",
+      "year": 1971,
+      "rank": 488,
+      "director": "Michael Snow"
+    },
+    {
+      "title": "FIVE EASY PIECES",
+      "year": 1970,
+      "rank": 489,
+      "director": "Bob Rafelson"
+    },
+    {
+      "title": "THE PALM BEACH STORY",
+      "year": 1942,
+      "rank": 490,
+      "director": "Preston Sturges"
+    },
+    {
+      "title": "SENSO",
+      "year": 1954,
+      "rank": 491,
+      "director": "Luchino Visconti"
+    },
+    {
+      "title": "FIGHT CLUB",
+      "year": 1999,
+      "rank": 492,
+      "director": "David Fincher"
+    },
+    {
+      "title": "THE DEATH OF MR. LAZARESCU",
+      "year": 2005,
+      "rank": 493,
+      "director": "Cristi Puiu"
+    },
+    {
+      "title": "LANDSCAPE IN THE MIST",
+      "year": 1988,
+      "rank": 494,
+      "director": "Theo Angelopoulos"
+    },
+    {
+      "title": "BY THE BLUEST OF SEAS",
+      "year": 1936,
+      "rank": 495,
+      "director": "Boris Barnet"
+    },
+    {
+      "title": "ZAMA",
+      "year": 2017,
+      "rank": 496,
+      "director": "Lucrecia Martel"
+    },
+    {
+      "title": "SECRETS & LIES",
+      "year": 1996,
+      "rank": 497,
+      "director": "Mike Leigh"
+    },
+    {
+      "title": "CHILDREN OF MEN",
+      "year": 2006,
+      "rank": 498,
+      "director": "Alfonso Cuarón"
+    },
+    {
+      "title": "RESERVOIR DOGS",
+      "year": 1992,
+      "rank": 499,
+      "director": "Quentin Tarantino"
+    },
+    {
+      "title": "RAISE THE RED LANTERN",
+      "year": 1991,
+      "rank": 500,
+      "director": "Zhang Yimou"
+    },
+    {
+      "title": "THE HUSTLER",
+      "year": 1961,
+      "rank": 501,
+      "director": "Robert Rossen"
+    },
+    {
+      "title": "THE LIVES OF OTHERS",
+      "year": 2006,
+      "rank": 502,
+      "director": "Florian Henckel von Donnersmarck"
+    },
+    {
+      "title": "PUNCH-DRUNK LOVE",
+      "year": 2002,
+      "rank": 503,
+      "director": "Paul Thomas Anderson"
+    },
+    {
+      "title": "MEMORIES OF MURDER",
+      "year": 2003,
+      "rank": 504,
+      "director": "Bong Joon-ho"
+    },
+    {
+      "title": "TWIN PEAKS: FIRE WALK WITH ME",
+      "year": 1992,
+      "rank": 505,
+      "director": "David Lynch"
+    },
+    {
+      "title": "DIE HARD",
+      "year": 1988,
+      "rank": 506,
+      "director": "John McTiernan"
+    },
+    {
+      "title": "SHANE",
+      "year": 1953,
+      "rank": 507,
+      "director": "George Stevens"
+    },
+    {
+      "title": "AFTER LIFE",
+      "year": 1998,
+      "rank": 508,
+      "director": "Hirokazu Koreeda"
+    },
+    {
+      "title": "INLAND EMPIRE",
+      "year": 2006,
+      "rank": 509,
+      "director": "David Lynch"
+    },
+    {
+      "title": "BLOW OUT",
+      "year": 1981,
+      "rank": 510,
+      "director": "Brian De Palma"
+    },
+    {
+      "title": "THE BITTER TEARS OF PETRA VON KANT",
+      "year": 1972,
+      "rank": 511,
+      "director": "Rainer Werner Fassbinder"
+    },
+    {
+      "title": "THE BRIDGE ON THE RIVER KWAI",
+      "year": 1957,
+      "rank": 512,
+      "director": "David Lean"
+    },
+    {
+      "title": "EARLY SUMMER",
+      "year": 1951,
+      "rank": 513,
+      "director": "Yasujiro Ozu"
+    },
+    {
+      "title": "TWIN PEAKS: THE RETURN",
+      "year": 2017,
+      "rank": 514,
+      "director": "David Lynch"
+    },
+    {
+      "title": "PRINCESS MONONOKE",
+      "year": 1997,
+      "rank": 515,
+      "director": "Hayao Miyazaki"
+    },
+    {
+      "title": "TO HAVE AND HAVE NOT",
+      "year": 1944,
+      "rank": 516,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "CRASH",
+      "year": 1996,
+      "rank": 517,
+      "director": "David Cronenberg"
+    },
+    {
+      "title": "BEING THERE",
+      "year": 1979,
+      "rank": 518,
+      "director": "Hal Ashby"
+    },
+    {
+      "title": "OUR HOSPITALITY",
+      "year": 1923,
+      "rank": 519,
+      "director": "Buster Keaton & John G. Blystone"
+    },
+    {
+      "title": "MONTY PYTHON'S LIFE OF BRIAN",
+      "year": 1979,
+      "rank": 520,
+      "director": "Terry Jones"
+    },
+    {
+      "title": "MASCULIN FéMININ",
+      "year": 1966,
+      "rank": 521,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "12 ANGRY MEN",
+      "year": 1957,
+      "rank": 522,
+      "director": "Sidney Lumet"
+    },
+    {
+      "title": "CLOSELY WATCHED TRAINS",
+      "year": 1966,
+      "rank": 523,
+      "director": "Jirí Menzel"
+    },
+    {
+      "title": "JURASSIC PARK",
+      "year": 1993,
+      "rank": 524,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "MARKETA LAZAROVá",
+      "year": 1967,
+      "rank": 525,
+      "director": "Frantisek Vlácil"
+    },
+    {
+      "title": "DEAD RINGERS",
+      "year": 1988,
+      "rank": 526,
+      "director": "David Cronenberg"
+    },
+    {
+      "title": "ALICE IN THE CITIES",
+      "year": 1974,
+      "rank": 527,
+      "director": "Wim Wenders"
+    },
+    {
+      "title": "EAST OF EDEN",
+      "year": 1955,
+      "rank": 528,
+      "director": "Elia Kazan"
+    },
+    {
+      "title": "MAD MAX 2",
+      "year": 1981,
+      "rank": 529,
+      "director": "George Miller"
+    },
+    {
+      "title": "THE FRENCH CONNECTION",
+      "year": 1971,
+      "rank": 530,
+      "director": "William Friedkin"
+    },
+    {
+      "title": "SHORT CUTS",
+      "year": 1993,
+      "rank": 531,
+      "director": "Robert Altman"
+    },
+    {
+      "title": "THE SOUND OF MUSIC",
+      "year": 1965,
+      "rank": 532,
+      "director": "Robert Wise"
+    },
+    {
+      "title": "DOCTOR ZHIVAGO",
+      "year": 1965,
+      "rank": 533,
+      "director": "David Lean"
+    },
+    {
+      "title": "BUTCH CASSIDY AND THE SUNDANCE KID",
+      "year": 1969,
+      "rank": 534,
+      "director": "George Roy Hill"
+    },
+    {
+      "title": "A MOMENT OF INNOCENCE",
+      "year": 1996,
+      "rank": 535,
+      "director": "Mohsen Makhmalbaf"
+    },
+    {
+      "title": "SE7EN",
+      "year": 1995,
+      "rank": 536,
+      "director": "David Fincher"
+    },
+    {
+      "title": "THE AGE OF INNOCENCE",
+      "year": 1993,
+      "rank": 537,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "HANNAH AND HER SISTERS",
+      "year": 1986,
+      "rank": 538,
+      "director": "Woody Allen"
+    },
+    {
+      "title": "BOYHOOD",
+      "year": 2014,
+      "rank": 539,
+      "director": "Richard Linklater"
+    },
+    {
+      "title": "A NIGHT AT THE OPERA",
+      "year": 1935,
+      "rank": 540,
+      "director": "Sam Wood"
+    },
+    {
+      "title": "AND LIFE GOES ON...",
+      "year": 1992,
+      "rank": 541,
+      "director": "Abbas Kiarostami"
+    },
+    {
+      "title": "FAUST",
+      "year": 1926,
+      "rank": 542,
+      "director": "F.W. Murnau"
+    },
+    {
+      "title": "MORVERN CALLAR",
+      "year": 2002,
+      "rank": 543,
+      "director": "Lynne Ramsay"
+    },
+    {
+      "title": "THE DEVIL, PROBABLY",
+      "year": 1977,
+      "rank": 544,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "LES VAMPIRES",
+      "year": 1915,
+      "rank": 545,
+      "director": "Louis Feuillade"
+    },
+    {
+      "title": "THE ENIGMA OF KASPAR HAUSER",
+      "year": 1974,
+      "rank": 546,
+      "director": "Werner Herzog"
+    },
+    {
+      "title": "THE DAMNED",
+      "year": 1969,
+      "rank": 547,
+      "director": "Luchino Visconti"
+    },
+    {
+      "title": "ALEXANDER NEVSKY",
+      "year": 1938,
+      "rank": 548,
+      "director": "Sergei Eisenstein"
+    },
+    {
+      "title": "THE WIND WILL CARRY US",
+      "year": 1999,
+      "rank": 549,
+      "director": "Abbas Kiarostami"
+    },
+    {
+      "title": "STRANGERS ON A TRAIN",
+      "year": 1951,
+      "rank": 550,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "LA HAINE",
+      "year": 1995,
+      "rank": 551,
+      "director": "Mathieu Kassovitz"
+    },
+    {
+      "title": "NOSTALGIA FOR THE LIGHT",
+      "year": 2010,
+      "rank": 552,
+      "director": "Patricio Guzmán"
+    },
+    {
+      "title": "YEELEN",
+      "year": 1987,
+      "rank": 553,
+      "director": "Souleymane Cissé"
+    },
+    {
+      "title": "BLUE",
+      "year": 1993,
+      "rank": 554,
+      "director": "Derek Jarman"
+    },
+    {
+      "title": "TOOTSIE",
+      "year": 1982,
+      "rank": 555,
+      "director": "Sydney Pollack"
+    },
+    {
+      "title": "THE MASTER",
+      "year": 2012,
+      "rank": 556,
+      "director": "Paul Thomas Anderson"
+    },
+    {
+      "title": "APARAJITO",
+      "year": 1956,
+      "rank": 557,
+      "director": "Satyajit Ray"
+    },
+    {
+      "title": "THE LADY FROM SHANGHAI",
+      "year": 1948,
+      "rank": 558,
+      "director": "Orson Welles"
+    },
+    {
+      "title": "PICNIC AT HANGING ROCK",
+      "year": 1975,
+      "rank": 559,
+      "director": "Peter Weir"
+    },
+    {
+      "title": "ROSETTA",
+      "year": 1999,
+      "rank": 560,
+      "director": "Jean-Pierre Dardenne & Luc Dardenne"
+    },
+    {
+      "title": "TERMINATOR 2: JUDGMENT DAY",
+      "year": 1991,
+      "rank": 561,
+      "director": "James Cameron"
+    },
+    {
+      "title": "THE TERMINATOR",
+      "year": 1984,
+      "rank": 562,
+      "director": "James Cameron"
+    },
+    {
+      "title": "RUSSIAN ARK",
+      "year": 2002,
+      "rank": 563,
+      "director": "Aleksandr Sokurov"
+    },
+    {
+      "title": "NINOTCHKA",
+      "year": 1939,
+      "rank": 564,
+      "director": "Ernst Lubitsch"
+    },
+    {
+      "title": "YOUNG MR. LINCOLN",
+      "year": 1939,
+      "rank": 565,
+      "director": "John Ford"
+    },
+    {
+      "title": "AS I WAS MOVING AHEAD OCCASIONALLY I SAW BRIEF GLIMPSES OF BEAUTY",
+      "year": 2000,
+      "rank": 566,
+      "director": "Jonas Mekas"
+    },
+    {
+      "title": "POINT BLANK",
+      "year": 1967,
+      "rank": 567,
+      "director": "John Boorman"
+    },
+    {
+      "title": "FORREST GUMP",
+      "year": 1994,
+      "rank": 568,
+      "director": "Robert Zemeckis"
+    },
+    {
+      "title": "AMéLIE",
+      "year": 2001,
+      "rank": 569,
+      "director": "Jean-Pierre Jeunet"
+    },
+    {
+      "title": "BIGGER THAN LIFE",
+      "year": 1956,
+      "rank": 570,
+      "director": "Nicholas Ray"
+    },
+    {
+      "title": "MAN OF ARAN",
+      "year": 1934,
+      "rank": 571,
+      "director": "Robert J. Flaherty"
+    },
+    {
+      "title": "I WALKED WITH A ZOMBIE",
+      "year": 1943,
+      "rank": 572,
+      "director": "Jacques Tourneur"
+    },
+    {
+      "title": "CROUCHING TIGER, HIDDEN DRAGON",
+      "year": 2000,
+      "rank": 573,
+      "director": "Ang Lee"
+    },
+    {
+      "title": "LAND WITHOUT BREAD",
+      "year": 1933,
+      "rank": 574,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "JE, TU, IL, ELLE",
+      "year": 1974,
+      "rank": 575,
+      "director": "Chantal Akerman"
+    },
+    {
+      "title": "WALL-E",
+      "year": 2008,
+      "rank": 576,
+      "director": "Andrew Stanton"
+    },
+    {
+      "title": "THE BLUE ANGEL",
+      "year": 1930,
+      "rank": 577,
+      "director": "Josef von Sternberg"
+    },
+    {
+      "title": "BROKEBACK MOUNTAIN",
+      "year": 2005,
+      "rank": 578,
+      "director": "Ang Lee"
+    },
+    {
+      "title": "LAURA",
+      "year": 1944,
+      "rank": 579,
+      "director": "Otto Preminger"
+    },
+    {
+      "title": "CAT PEOPLE",
+      "year": 1942,
+      "rank": 580,
+      "director": "Jacques Tourneur"
+    },
+    {
+      "title": "HALLOWEEN",
+      "year": 1978,
+      "rank": 581,
+      "director": "John Carpenter"
+    },
+    {
+      "title": "DEAD MAN",
+      "year": 1995,
+      "rank": 582,
+      "director": "Jim Jarmusch"
+    },
+    {
+      "title": "KAGEMUSHA",
+      "year": 1980,
+      "rank": 583,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "FELLINI SATYRICON",
+      "year": 1969,
+      "rank": 584,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "THE TESTAMENT OF DR. MABUSE",
+      "year": 1933,
+      "rank": 585,
+      "director": "Fritz Lang"
+    },
+    {
+      "title": "SHADOW OF A DOUBT",
+      "year": 1943,
+      "rank": 586,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "DELIVERANCE",
+      "year": 1972,
+      "rank": 587,
+      "director": "John Boorman"
+    },
+    {
+      "title": "THAT OBSCURE OBJECT OF DESIRE",
+      "year": 1977,
+      "rank": 588,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "ZODIAC",
+      "year": 2007,
+      "rank": 589,
+      "director": "David Fincher"
+    },
+    {
+      "title": "ROCKY",
+      "year": 1976,
+      "rank": 590,
+      "director": "John G. Avildsen"
+    },
+    {
+      "title": "THE LORD OF THE RINGS: THE FELLOWSHIP OF THE RING",
+      "year": 2001,
+      "rank": 591,
+      "director": "Peter Jackson"
+    },
+    {
+      "title": "THE WEDDING MARCH",
+      "year": 1928,
+      "rank": 592,
+      "director": "Erich von Stroheim"
+    },
+    {
+      "title": "WHEN HARRY MET SALLY...",
+      "year": 1989,
+      "rank": 593,
+      "director": "Rob Reiner"
+    },
+    {
+      "title": "YELLOW EARTH",
+      "year": 1984,
+      "rank": 594,
+      "director": "Chen Kaige"
+    },
+    {
+      "title": "SAMBIZANGA",
+      "year": 1972,
+      "rank": 595,
+      "director": "Sarah Maldoror"
+    },
+    {
+      "title": "FULL METAL JACKET",
+      "year": 1987,
+      "rank": 596,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "LOVES OF A BLONDE",
+      "year": 1965,
+      "rank": 597,
+      "director": "Milos Forman"
+    },
+    {
+      "title": "REPULSION",
+      "year": 1965,
+      "rank": 598,
+      "director": "Roman Polanski"
+    },
+    {
+      "title": "EASY RIDER",
+      "year": 1969,
+      "rank": 599,
+      "director": "Dennis Hopper"
+    },
+    {
+      "title": "HATARI!",
+      "year": 1962,
+      "rank": 600,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "THE SERVANT",
+      "year": 1963,
+      "rank": 601,
+      "director": "Joseph Losey"
+    },
+    {
+      "title": "AMOUR",
+      "year": 2012,
+      "rank": 602,
+      "director": "Michael Haneke"
+    },
+    {
+      "title": "THE SILENCE",
+      "year": 1963,
+      "rank": 603,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "PLáCIDO",
+      "year": 1961,
+      "rank": 604,
+      "director": "Luis García Berlanga"
+    },
+    {
+      "title": "THE ASPHALT JUNGLE",
+      "year": 1950,
+      "rank": 605,
+      "director": "John Huston"
+    },
+    {
+      "title": "REBECCA",
+      "year": 1940,
+      "rank": 606,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "BARTON FINK",
+      "year": 1991,
+      "rank": 607,
+      "director": "Joel Coen & Ethan Coen"
+    },
+    {
+      "title": "D'EST",
+      "year": 1993,
+      "rank": 608,
+      "director": "Chantal Akerman"
+    },
+    {
+      "title": "FELLINI'S ROMA",
+      "year": 1972,
+      "rank": 609,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "GREY GARDENS",
+      "year": 1975,
+      "rank": 610,
+      "director": "David Maysles, Albert Maysles, Ellen Hovde & Muffie Meyer"
+    },
+    {
+      "title": "SEVEN CHANCES",
+      "year": 1925,
+      "rank": 611,
+      "director": "Buster Keaton"
+    },
+    {
+      "title": "BANDE à PART",
+      "year": 1964,
+      "rank": 612,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "SHADOWS",
+      "year": 1959,
+      "rank": 613,
+      "director": "John Cassavetes"
+    },
+    {
+      "title": "EDVARD MUNCH",
+      "year": 1974,
+      "rank": 614,
+      "director": "Peter Watkins"
+    },
+    {
+      "title": "COLOSSAL YOUTH",
+      "year": 2006,
+      "rank": 615,
+      "director": "Pedro Costa"
+    },
+    {
+      "title": "THE TAKING OF POWER BY LOUIS XIV",
+      "year": 1966,
+      "rank": 616,
+      "director": "Roberto Rossellini"
+    },
+    {
+      "title": "SYMBIOPSYCHOTAXIPLASM: TAKE ONE",
+      "year": 1968,
+      "rank": 617,
+      "director": "William Greaves"
+    },
+    {
+      "title": "THE PIANO TEACHER",
+      "year": 2001,
+      "rank": 618,
+      "director": "Michael Haneke"
+    },
+    {
+      "title": "FRANKENSTEIN",
+      "year": 1931,
+      "rank": 619,
+      "director": "James Whale"
+    },
+    {
+      "title": "WEST INDIES: THE FUGITIVE SLAVES OF LIBERTY",
+      "year": 1979,
+      "rank": 620,
+      "director": "Med Hondo"
+    },
+    {
+      "title": "TALE OF TALES",
+      "year": 1979,
+      "rank": 621,
+      "director": "Yuriy Norshteyn"
+    },
+    {
+      "title": "PROVIDENCE",
+      "year": 1977,
+      "rank": 622,
+      "director": "Alain Resnais"
+    },
+    {
+      "title": "GENTLEMEN PREFER BLONDES",
+      "year": 1953,
+      "rank": 623,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "THE DEVILS",
+      "year": 1971,
+      "rank": 624,
+      "director": "Ken Russell"
+    },
+    {
+      "title": "SYNECDOCHE, NEW YORK",
+      "year": 2008,
+      "rank": 625,
+      "director": "Charlie Kaufman"
+    },
+    {
+      "title": "THE WICKER MAN",
+      "year": 1973,
+      "rank": 626,
+      "director": "Robin Hardy"
+    },
+    {
+      "title": "3 WOMEN",
+      "year": 1977,
+      "rank": 627,
+      "director": "Robert Altman"
+    },
+    {
+      "title": "THE LONG DAY CLOSES",
+      "year": 1992,
+      "rank": 628,
+      "director": "Terence Davies"
+    },
+    {
+      "title": "RAISING ARIZONA",
+      "year": 1987,
+      "rank": 629,
+      "director": "Joel Coen & Ethan Coen"
+    },
+    {
+      "title": "DOWN BY LAW",
+      "year": 1986,
+      "rank": 630,
+      "director": "Jim Jarmusch"
+    },
+    {
+      "title": "DON'T LOOK BACK",
+      "year": 1967,
+      "rank": 631,
+      "director": "D.A. Pennebaker"
+    },
+    {
+      "title": "THE LADIES MAN",
+      "year": 1961,
+      "rank": 632,
+      "director": "Jerry Lewis"
+    },
+    {
+      "title": "THE ROYAL TENENBAUMS",
+      "year": 2001,
+      "rank": 633,
+      "director": "Wes Anderson"
+    },
+    {
+      "title": "THE ROUND-UP",
+      "year": 1966,
+      "rank": 634,
+      "director": "Miklós Jancsó"
+    },
+    {
+      "title": "MY FRIEND IVAN LAPSHIN",
+      "year": 1985,
+      "rank": 635,
+      "director": "Aleksei German"
+    },
+    {
+      "title": "I VITELLONI",
+      "year": 1953,
+      "rank": 636,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "THE RED CIRCLE",
+      "year": 1970,
+      "rank": 637,
+      "director": "Jean-Pierre Melville"
+    },
+    {
+      "title": "LES AMANTS DU PONT-NEUF",
+      "year": 1991,
+      "rank": 638,
+      "director": "Leos Carax"
+    },
+    {
+      "title": "MR. SMITH GOES TO WASHINGTON",
+      "year": 1939,
+      "rank": 639,
+      "director": "Frank Capra"
+    },
+    {
+      "title": "FAT CITY",
+      "year": 1972,
+      "rank": 640,
+      "director": "John Huston"
+    },
+    {
+      "title": "TITANIC",
+      "year": 1997,
+      "rank": 641,
+      "director": "James Cameron"
+    },
+    {
+      "title": "BOUDU SAVED FROM DROWNING",
+      "year": 1932,
+      "rank": 642,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "WALKABOUT",
+      "year": 1971,
+      "rank": 643,
+      "director": "Nicolas Roeg"
+    },
+    {
+      "title": "HARAKIRI",
+      "year": 1962,
+      "rank": 644,
+      "director": "Masaki Kobayashi"
+    },
+    {
+      "title": "SCORPIO RISING",
+      "year": 1963,
+      "rank": 645,
+      "director": "Kenneth Anger"
+    },
+    {
+      "title": "PINK FLAMINGOS",
+      "year": 1972,
+      "rank": 646,
+      "director": "John Waters"
+    },
+    {
+      "title": "HOUR OF THE WOLF",
+      "year": 1968,
+      "rank": 647,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "THE DARK KNIGHT",
+      "year": 2008,
+      "rank": 648,
+      "director": "Christopher Nolan"
+    },
+    {
+      "title": "ACE IN THE HOLE",
+      "year": 1951,
+      "rank": 649,
+      "director": "Billy Wilder"
+    },
+    {
+      "title": "HANA-BI",
+      "year": 1997,
+      "rank": 650,
+      "director": "Takeshi Kitano"
+    },
+    {
+      "title": "A PROPHET",
+      "year": 2009,
+      "rank": 651,
+      "director": "Jacques Audiard"
+    },
+    {
+      "title": "NAZARíN",
+      "year": 1958,
+      "rank": 652,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "ALPHAVILLE",
+      "year": 1965,
+      "rank": 653,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "PORTRAIT OF JASON",
+      "year": 1967,
+      "rank": 654,
+      "director": "Shirley Clarke"
+    },
+    {
+      "title": "CASQUE D'OR",
+      "year": 1952,
+      "rank": 655,
+      "director": "Jacques Becker"
+    },
+    {
+      "title": "Y TU MAMá TAMBIéN",
+      "year": 2001,
+      "rank": 656,
+      "director": "Alfonso Cuarón"
+    },
+    {
+      "title": "MILLENNIUM MAMBO",
+      "year": 2001,
+      "rank": 657,
+      "director": "Hou Hsiao-hsien"
+    },
+    {
+      "title": "PAT GARRETT AND BILLY THE KID",
+      "year": 1973,
+      "rank": 658,
+      "director": "Sam Peckinpah"
+    },
+    {
+      "title": "MALCOLM X",
+      "year": 1992,
+      "rank": 659,
+      "director": "Spike Lee"
+    },
+    {
+      "title": "THE GOLDEN COACH",
+      "year": 1952,
+      "rank": 660,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "ROBOCOP",
+      "year": 1987,
+      "rank": 661,
+      "director": "Paul Verhoeven"
+    },
+    {
+      "title": "FERRIS BUELLER'S DAY OFF",
+      "year": 1986,
+      "rank": 662,
+      "director": "John Hughes"
+    },
+    {
+      "title": "SILENT LIGHT",
+      "year": 2007,
+      "rank": 663,
+      "director": "Carlos Reygadas"
+    },
+    {
+      "title": "RATCATCHER",
+      "year": 1999,
+      "rank": 664,
+      "director": "Lynne Ramsay"
+    },
+    {
+      "title": "SCARFACE",
+      "year": 1932,
+      "rank": 665,
+      "director": "Howard Hawks"
+    },
+    {
+      "title": "HOOP DREAMS",
+      "year": 1994,
+      "rank": 666,
+      "director": "Steve James"
+    },
+    {
+      "title": "THE WATERMELON WOMAN",
+      "year": 1996,
+      "rank": 667,
+      "director": "Cheryl Dunye"
+    },
+    {
+      "title": "THE VIRGIN SPRING",
+      "year": 1960,
+      "rank": 668,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "STRIKE",
+      "year": 1925,
+      "rank": 669,
+      "director": "Sergei Eisenstein"
+    },
+    {
+      "title": "TOP HAT",
+      "year": 1935,
+      "rank": 670,
+      "director": "Mark Sandrich"
+    },
+    {
+      "title": "YOUNG FRANKENSTEIN",
+      "year": 1974,
+      "rank": 671,
+      "director": "Mel Brooks"
+    },
+    {
+      "title": "ARREBATO",
+      "year": 1979,
+      "rank": 672,
+      "director": "Iván Zulueta"
+    },
+    {
+      "title": "MY OWN PRIVATE IDAHO",
+      "year": 1991,
+      "rank": 673,
+      "director": "Gus Van Sant"
+    },
+    {
+      "title": "THEY LIVE BY NIGHT",
+      "year": 1948,
+      "rank": 674,
+      "director": "Nicholas Ray"
+    },
+    {
+      "title": "BRING ME THE HEAD OF ALFREDO GARCIA",
+      "year": 1974,
+      "rank": 675,
+      "director": "Sam Peckinpah"
+    },
+    {
+      "title": "DR. MABUSE, THE GAMBLER",
+      "year": 1922,
+      "rank": 676,
+      "director": "Fritz Lang"
+    },
+    {
+      "title": "THE LADY VANISHES",
+      "year": 1938,
+      "rank": 677,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "THE MARRIAGE OF MARIA BRAUN",
+      "year": 1979,
+      "rank": 678,
+      "director": "Rainer Werner Fassbinder"
+    },
+    {
+      "title": "AKIRA",
+      "year": 1988,
+      "rank": 679,
+      "director": "Katsuhiro Otomo"
+    },
+    {
+      "title": "THE MANCHURIAN CANDIDATE",
+      "year": 1962,
+      "rank": 680,
+      "director": "John Frankenheimer"
+    },
+    {
+      "title": "THE NAVIGATOR",
+      "year": 1924,
+      "rank": 681,
+      "director": "Buster Keaton & Donald Crisp"
+    },
+    {
+      "title": "WAKE IN FRIGHT",
+      "year": 1971,
+      "rank": 682,
+      "director": "Ted Kotcheff"
+    },
+    {
+      "title": "RUSHMORE",
+      "year": 1998,
+      "rank": 683,
+      "director": "Wes Anderson"
+    },
+    {
+      "title": "XALA",
+      "year": 1975,
+      "rank": 684,
+      "director": "Ousmane Sembene"
+    },
+    {
+      "title": "AN AMERICAN WEREWOLF IN LONDON",
+      "year": 1981,
+      "rank": 685,
+      "director": "John Landis"
+    },
+    {
+      "title": "IL POSTO",
+      "year": 1961,
+      "rank": 686,
+      "director": "Ermanno Olmi"
+    },
+    {
+      "title": "A PLACE IN THE SUN",
+      "year": 1951,
+      "rank": 687,
+      "director": "George Stevens"
+    },
+    {
+      "title": "DANCER IN THE DARK",
+      "year": 2000,
+      "rank": 688,
+      "director": "Lars von Trier"
+    },
+    {
+      "title": "HYèNES",
+      "year": 1992,
+      "rank": 689,
+      "director": "Djibril Diop Mambéty"
+    },
+    {
+      "title": "THE PURPLE ROSE OF CAIRO",
+      "year": 1985,
+      "rank": 690,
+      "director": "Woody Allen"
+    },
+    {
+      "title": "CHRONICLE OF A SUMMER",
+      "year": 1961,
+      "rank": 691,
+      "director": "Jean Rouch & Edgar Morin"
+    },
+    {
+      "title": "TRAINSPOTTING",
+      "year": 1996,
+      "rank": 692,
+      "director": "Danny Boyle"
+    },
+    {
+      "title": "BAMBI",
+      "year": 1942,
+      "rank": 693,
+      "director": "David Hand"
+    },
+    {
+      "title": "THE KILLING",
+      "year": 1956,
+      "rank": 694,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "THE GHOST AND MRS. MUIR",
+      "year": 1947,
+      "rank": 695,
+      "director": "Joseph L. Mankiewicz"
+    },
+    {
+      "title": "THE GREAT BEAUTY",
+      "year": 2013,
+      "rank": 696,
+      "director": "Paolo Sorrentino"
+    },
+    {
+      "title": "FAREWELL, MY CONCUBINE",
+      "year": 1993,
+      "rank": 697,
+      "director": "Chen Kaige"
+    },
+    {
+      "title": "THE INTRUDER",
+      "year": 2004,
+      "rank": 698,
+      "director": "Claire Denis"
+    },
+    {
+      "title": "A HARD DAY'S NIGHT",
+      "year": 1964,
+      "rank": 699,
+      "director": "Richard Lester"
+    },
+    {
+      "title": "TOY STORY",
+      "year": 1995,
+      "rank": 700,
+      "director": "John Lasseter"
+    },
+    {
+      "title": "WILD AT HEART",
+      "year": 1990,
+      "rank": 701,
+      "director": "David Lynch"
+    },
+    {
+      "title": "CAROL",
+      "year": 2015,
+      "rank": 702,
+      "director": "Todd Haynes"
+    },
+    {
+      "title": "THE SORROW AND THE PITY",
+      "year": 1969,
+      "rank": 703,
+      "director": "Marcel Ophüls"
+    },
+    {
+      "title": "THELMA & LOUISE",
+      "year": 1991,
+      "rank": 704,
+      "director": "Ridley Scott"
+    },
+    {
+      "title": "GIMME SHELTER",
+      "year": 1970,
+      "rank": 705,
+      "director": "Albert Maysles, David Maysles & Charlotte Zwerin"
+    },
+    {
+      "title": "CHRONICLE OF ANNA MAGDALENA BACH",
+      "year": 1968,
+      "rank": 706,
+      "director": "Jean-Marie Straub"
+    },
+    {
+      "title": "ROMA",
+      "year": 2018,
+      "rank": 707,
+      "director": "Alfonso Cuarón"
+    },
+    {
+      "title": "CURE",
+      "year": 1997,
+      "rank": 708,
+      "director": "Kiyoshi Kurosawa"
+    },
+    {
+      "title": "SALESMAN",
+      "year": 1969,
+      "rank": 709,
+      "director": "Albert Maysles, David Maysles & Charlotte Zwerin"
+    },
+    {
+      "title": "WR: MYSTERIES OF THE ORGANISM",
+      "year": 1971,
+      "rank": 710,
+      "director": "Du&scaron;an Makavejev"
+    },
+    {
+      "title": "4 MONTHS, 3 WEEKS AND 2 DAYS",
+      "year": 2007,
+      "rank": 711,
+      "director": "Cristian Mungiu"
+    },
+    {
+      "title": "BEFORE SUNSET",
+      "year": 2004,
+      "rank": 712,
+      "director": "Richard Linklater"
+    },
+    {
+      "title": "DISTANT",
+      "year": 2002,
+      "rank": 713,
+      "director": "Nuri Bilge Ceylan"
+    },
+    {
+      "title": "LOCAL HERO",
+      "year": 1983,
+      "rank": 714,
+      "director": "Bill Forsyth"
+    },
+    {
+      "title": "THE HOLY MOUNTAIN",
+      "year": 1973,
+      "rank": 715,
+      "director": "Alejandro Jodorowsky"
+    },
+    {
+      "title": "THE SOCIAL NETWORK",
+      "year": 2010,
+      "rank": 716,
+      "director": "David Fincher"
+    },
+    {
+      "title": "BEN-HUR",
+      "year": 1959,
+      "rank": 717,
+      "director": "William Wyler"
+    },
+    {
+      "title": "LANCELOT DU LAC",
+      "year": 1974,
+      "rank": 718,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "MEMENTO",
+      "year": 2000,
+      "rank": 719,
+      "director": "Christopher Nolan"
+    },
+    {
+      "title": "7 WOMEN",
+      "year": 1965,
+      "rank": 720,
+      "director": "John Ford"
+    },
+    {
+      "title": "ONCE UPON A TIME... IN HOLLYWOOD",
+      "year": 2019,
+      "rank": 721,
+      "director": "Quentin Tarantino"
+    },
+    {
+      "title": "THE PARTY",
+      "year": 1968,
+      "rank": 722,
+      "director": "Blake Edwards"
+    },
+    {
+      "title": "IL GRIDO",
+      "year": 1957,
+      "rank": 723,
+      "director": "Michelangelo Antonioni"
+    },
+    {
+      "title": "THE PHANTOM OF LIBERTY",
+      "year": 1974,
+      "rank": 724,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "THE FIREMEN'S BALL",
+      "year": 1967,
+      "rank": 725,
+      "director": "Milos Forman"
+    },
+    {
+      "title": "FISH TANK",
+      "year": 2009,
+      "rank": 726,
+      "director": "Andrea Arnold"
+    },
+    {
+      "title": "PAPER MOON",
+      "year": 1973,
+      "rank": 727,
+      "director": "Peter Bogdanovich"
+    },
+    {
+      "title": "SAUVE QUI PEUT (LA VIE)",
+      "year": 1980,
+      "rank": 728,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "KAAGAZ KE PHOOL",
+      "year": 1959,
+      "rank": 729,
+      "director": "Guru Dutt"
+    },
+    {
+      "title": "THE SUN SHINES BRIGHT",
+      "year": 1953,
+      "rank": 730,
+      "director": "John Ford"
+    },
+    {
+      "title": "THE ADVENTURES OF PRINCE ACHMED",
+      "year": 1926,
+      "rank": 731,
+      "director": "Lotte Reiniger"
+    },
+    {
+      "title": "BIG DEAL ON MADONNA STREET",
+      "year": 1958,
+      "rank": 732,
+      "director": "Mario Monicelli"
+    },
+    {
+      "title": "GOOD MORNING",
+      "year": 1959,
+      "rank": 733,
+      "director": "Yasujiro Ozu"
+    },
+    {
+      "title": "DAZED AND CONFUSED",
+      "year": 1993,
+      "rank": 734,
+      "director": "Richard Linklater"
+    },
+    {
+      "title": "NOUVELLE VAGUE",
+      "year": 1990,
+      "rank": 735,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "RED BEARD",
+      "year": 1965,
+      "rank": 736,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "LOVE ME TONIGHT",
+      "year": 1932,
+      "rank": 737,
+      "director": "Rouben Mamoulian"
+    },
+    {
+      "title": "HUNGER",
+      "year": 2008,
+      "rank": 738,
+      "director": "Steve McQueen"
+    },
+    {
+      "title": "THE IDIOTS",
+      "year": 1998,
+      "rank": 739,
+      "director": "Lars von Trier"
+    },
+    {
+      "title": "MOONFLEET",
+      "year": 1955,
+      "rank": 740,
+      "director": "Fritz Lang"
+    },
+    {
+      "title": "A NEW LEAF",
+      "year": 1971,
+      "rank": 741,
+      "director": "Elaine May"
+    },
+    {
+      "title": "THE HAWKS AND THE SPARROWS",
+      "year": 1966,
+      "rank": 742,
+      "director": "Pier Paolo Pasolini"
+    },
+    {
+      "title": "THE EMPEROR'S NAKED ARMY MARCHES ON",
+      "year": 1987,
+      "rank": 743,
+      "director": "Kazuo Hara"
+    },
+    {
+      "title": "THE BIG HEAT",
+      "year": 1953,
+      "rank": 744,
+      "director": "Fritz Lang"
+    },
+    {
+      "title": "MOULIN ROUGE!",
+      "year": 2001,
+      "rank": 745,
+      "director": "Baz Luhrmann"
+    },
+    {
+      "title": "STAND BY ME",
+      "year": 1986,
+      "rank": 746,
+      "director": "Rob Reiner"
+    },
+    {
+      "title": "ANTONIO DAS MORTES",
+      "year": 1969,
+      "rank": 747,
+      "director": "Glauber Rocha"
+    },
+    {
+      "title": "A STREETCAR NAMED DESIRE",
+      "year": 1951,
+      "rank": 748,
+      "director": "Elia Kazan"
+    },
+    {
+      "title": "LES DAMES DU BOIS DE BOULOGNE",
+      "year": 1945,
+      "rank": 749,
+      "director": "Robert Bresson"
+    },
+    {
+      "title": "THE FLY",
+      "year": 1986,
+      "rank": 750,
+      "director": "David Cronenberg"
+    },
+    {
+      "title": "MILLER'S CROSSING",
+      "year": 1990,
+      "rank": 751,
+      "director": "Joel Coen & Ethan Coen"
+    },
+    {
+      "title": "TITICUT FOLLIES",
+      "year": 1967,
+      "rank": 752,
+      "director": "Frederick Wiseman"
+    },
+    {
+      "title": "A SHORT FILM ABOUT KILLING",
+      "year": 1987,
+      "rank": 753,
+      "director": "Krzysztof Kieslowski"
+    },
+    {
+      "title": "REBEL WITHOUT A CAUSE",
+      "year": 1955,
+      "rank": 754,
+      "director": "Nicholas Ray"
+    },
+    {
+      "title": "OH, SUN",
+      "year": 1970,
+      "rank": 755,
+      "director": "Med Hondo"
+    },
+    {
+      "title": "THE BAD AND THE BEAUTIFUL",
+      "year": 1952,
+      "rank": 756,
+      "director": "Vincente Minnelli"
+    },
+    {
+      "title": "THE TIGER OF ESCHNAPUR",
+      "year": 1958,
+      "rank": 757,
+      "director": "Fritz Lang"
+    },
+    {
+      "title": "35 SHOTS OF RUM",
+      "year": 2008,
+      "rank": 758,
+      "director": "Claire Denis"
+    },
+    {
+      "title": "THE CIRCUS",
+      "year": 1928,
+      "rank": 759,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "ONE WAY OR ANOTHER",
+      "year": 1977,
+      "rank": 760,
+      "director": "Sara Gómez"
+    },
+    {
+      "title": "DESIGN FOR LIVING",
+      "year": 1933,
+      "rank": 761,
+      "director": "Ernst Lubitsch"
+    },
+    {
+      "title": "LOLITA",
+      "year": 1962,
+      "rank": 762,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "PHANTOM OF THE PARADISE",
+      "year": 1974,
+      "rank": 763,
+      "director": "Brian De Palma"
+    },
+    {
+      "title": "TRIUMPH OF THE WILL",
+      "year": 1935,
+      "rank": 764,
+      "director": "Leni Riefenstahl"
+    },
+    {
+      "title": "JFK",
+      "year": 1991,
+      "rank": 765,
+      "director": "Oliver Stone"
+    },
+    {
+      "title": "BORN IN FLAMES",
+      "year": 1983,
+      "rank": 766,
+      "director": "Lizzie Borden"
+    },
+    {
+      "title": "NEW YORK, NEW YORK",
+      "year": 1977,
+      "rank": 767,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "THE NEW WORLD",
+      "year": 2005,
+      "rank": 768,
+      "director": "Terrence Malick"
+    },
+    {
+      "title": "DIARIES, NOTES AND SKETCHES",
+      "year": 1969,
+      "rank": 769,
+      "director": "Jonas Mekas"
+    },
+    {
+      "title": "SUBARNAREKHA",
+      "year": 1965,
+      "rank": 770,
+      "director": "Ritwik Ghatak"
+    },
+    {
+      "title": "THE COOK, THE THIEF, HIS WIFE & HER LOVER",
+      "year": 1989,
+      "rank": 771,
+      "director": "Peter Greenaway"
+    },
+    {
+      "title": "THE WILD CHILD",
+      "year": 1970,
+      "rank": 772,
+      "director": "François Truffaut"
+    },
+    {
+      "title": "CLUELESS",
+      "year": 1995,
+      "rank": 773,
+      "director": "Amy Heckerling"
+    },
+    {
+      "title": "FORT APACHE",
+      "year": 1948,
+      "rank": 774,
+      "director": "John Ford"
+    },
+    {
+      "title": "DIABOLIQUE",
+      "year": 1955,
+      "rank": 775,
+      "director": "Henri-Georges Clouzot"
+    },
+    {
+      "title": "OSSESSIONE",
+      "year": 1943,
+      "rank": 776,
+      "director": "Luchino Visconti"
+    },
+    {
+      "title": "MäDCHEN IN UNIFORM",
+      "year": 1931,
+      "rank": 777,
+      "director": "Leontine Sagan"
+    },
+    {
+      "title": "DETOUR",
+      "year": 1945,
+      "rank": 778,
+      "director": "Edgar G. Ulmer"
+    },
+    {
+      "title": "LA BELLE NOISEUSE",
+      "year": 1991,
+      "rank": 779,
+      "director": "Jacques Rivette"
+    },
+    {
+      "title": "TWO ENGLISH GIRLS",
+      "year": 1971,
+      "rank": 780,
+      "director": "François Truffaut"
+    },
+    {
+      "title": "FLAMING CREATURES",
+      "year": 1963,
+      "rank": 781,
+      "director": "Jack Smith"
+    },
+    {
+      "title": "THE MAN WHO WOULD BE KING",
+      "year": 1975,
+      "rank": 782,
+      "director": "John Huston"
+    },
+    {
+      "title": "VIVE L'AMOUR",
+      "year": 1994,
+      "rank": 783,
+      "director": "Tsai Ming-liang"
+    },
+    {
+      "title": "HELLZAPOPPIN'",
+      "year": 1941,
+      "rank": 784,
+      "director": "H.C. Potter"
+    },
+    {
+      "title": "THE AGE OF THE EARTH",
+      "year": 1980,
+      "rank": 785,
+      "director": "Glauber Rocha"
+    },
+    {
+      "title": "EDWARD SCISSORHANDS",
+      "year": 1990,
+      "rank": 786,
+      "director": "Tim Burton"
+    },
+    {
+      "title": "GREAT EXPECTATIONS",
+      "year": 1946,
+      "rank": 787,
+      "director": "David Lean"
+    },
+    {
+      "title": "BLISSFULLY YOURS",
+      "year": 2002,
+      "rank": 788,
+      "director": "Apichatpong Weerasethakul"
+    },
+    {
+      "title": "VERONIKA VOSS",
+      "year": 1982,
+      "rank": 789,
+      "director": "Rainer Werner Fassbinder"
+    },
+    {
+      "title": "MOTHER AND SON",
+      "year": 1997,
+      "rank": 790,
+      "director": "Aleksandr Sokurov"
+    },
+    {
+      "title": "CODE UNKNOWN",
+      "year": 2000,
+      "rank": 791,
+      "director": "Michael Haneke"
+    },
+    {
+      "title": "MY LIFE AS A DOG",
+      "year": 1985,
+      "rank": 792,
+      "director": "Lasse Hallström"
+    },
+    {
+      "title": "THE TRIAL",
+      "year": 1962,
+      "rank": 793,
+      "director": "Orson Welles"
+    },
+    {
+      "title": "AIRPLANE!",
+      "year": 1980,
+      "rank": 794,
+      "director": "Jim Abrahams, David Zucker & Jerry Zucker"
+    },
+    {
+      "title": "FOOLISH WIVES",
+      "year": 1922,
+      "rank": 795,
+      "director": "Erich von Stroheim"
+    },
+    {
+      "title": "EL SUR",
+      "year": 1983,
+      "rank": 796,
+      "director": "Víctor Erice"
+    },
+    {
+      "title": "MAMMA ROMA",
+      "year": 1962,
+      "rank": 797,
+      "director": "Pier Paolo Pasolini"
+    },
+    {
+      "title": "MOROCCO",
+      "year": 1930,
+      "rank": 798,
+      "director": "Josef von Sternberg"
+    },
+    {
+      "title": "THE 39 STEPS",
+      "year": 1935,
+      "rank": 799,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "MIKEY AND NICKY",
+      "year": 1976,
+      "rank": 800,
+      "director": "Elaine May"
+    },
+    {
+      "title": "SCARFACE",
+      "year": 1983,
+      "rank": 801,
+      "director": "Brian De Palma"
+    },
+    {
+      "title": "CHIKAMATSU MONOGATARI",
+      "year": 1954,
+      "rank": 802,
+      "director": "Kenji Mizoguchi"
+    },
+    {
+      "title": "WINGS",
+      "year": 1966,
+      "rank": 803,
+      "director": "Larisa Shepitko"
+    },
+    {
+      "title": "TROUBLE EVERY DAY",
+      "year": 2001,
+      "rank": 804,
+      "director": "Claire Denis"
+    },
+    {
+      "title": "REQUIEM FOR A DREAM",
+      "year": 2000,
+      "rank": 805,
+      "director": "Darren Aronofsky"
+    },
+    {
+      "title": "DOG STAR MAN",
+      "year": 1964,
+      "rank": 806,
+      "director": "Stan Brakhage"
+    },
+    {
+      "title": "UN CHANT D'AMOUR",
+      "year": 1950,
+      "rank": 807,
+      "director": "Jean Genet"
+    },
+    {
+      "title": "EVIL DEAD II",
+      "year": 1987,
+      "rank": 808,
+      "director": "Sam Raimi"
+    },
+    {
+      "title": "THE THIEF OF BAGDAD",
+      "year": 1940,
+      "rank": 809,
+      "director": "Michael Powell, Ludwig Berger & Tim Whelan"
+    },
+    {
+      "title": "CAIRO STATION",
+      "year": 1958,
+      "rank": 810,
+      "director": "Youssef Chahine"
+    },
+    {
+      "title": "LET THE RIGHT ONE IN",
+      "year": 2008,
+      "rank": 811,
+      "director": "Tomas Alfredson"
+    },
+    {
+      "title": "ZELIG",
+      "year": 1983,
+      "rank": 812,
+      "director": "Woody Allen"
+    },
+    {
+      "title": "BROADCAST NEWS",
+      "year": 1987,
+      "rank": 813,
+      "director": "James L. Brooks"
+    },
+    {
+      "title": "MARGARET",
+      "year": 2011,
+      "rank": 814,
+      "director": "Kenneth Lonergan"
+    },
+    {
+      "title": "ALL QUIET ON THE WESTERN FRONT",
+      "year": 1930,
+      "rank": 815,
+      "director": "Lewis Milestone"
+    },
+    {
+      "title": "FASTER, PUSSYCAT! KILL! KILL!",
+      "year": 1965,
+      "rank": 816,
+      "director": "Russ Meyer"
+    },
+    {
+      "title": "THE GREAT ESCAPE",
+      "year": 1963,
+      "rank": 817,
+      "director": "John Sturges"
+    },
+    {
+      "title": "SAVING PRIVATE RYAN",
+      "year": 1998,
+      "rank": 818,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "FUNNY GAMES",
+      "year": 1997,
+      "rank": 819,
+      "director": "Michael Haneke"
+    },
+    {
+      "title": "TAIPEI STORY",
+      "year": 1985,
+      "rank": 820,
+      "director": "Edward Yang"
+    },
+    {
+      "title": "A WOMAN OF PARIS",
+      "year": 1923,
+      "rank": 821,
+      "director": "Charles Chaplin"
+    },
+    {
+      "title": "DUMBO",
+      "year": 1941,
+      "rank": 822,
+      "director": "Ben Sharpsteen"
+    },
+    {
+      "title": "INGLOURIOUS BASTERDS",
+      "year": 2009,
+      "rank": 823,
+      "director": "Quentin Tarantino"
+    },
+    {
+      "title": "THE PRODUCERS",
+      "year": 1968,
+      "rank": 824,
+      "director": "Mel Brooks"
+    },
+    {
+      "title": "SHE WORE A YELLOW RIBBON",
+      "year": 1949,
+      "rank": 825,
+      "director": "John Ford"
+    },
+    {
+      "title": "SMILES OF A SUMMER NIGHT",
+      "year": 1955,
+      "rank": 826,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "FORBIDDEN GAMES",
+      "year": 1952,
+      "rank": 827,
+      "director": "René Clément"
+    },
+    {
+      "title": "STILL LIFE",
+      "year": 2006,
+      "rank": 828,
+      "director": "Jia Zhangke"
+    },
+    {
+      "title": "VAN GOGH",
+      "year": 1991,
+      "rank": 829,
+      "director": "Maurice Pialat"
+    },
+    {
+      "title": "SHOCK CORRIDOR",
+      "year": 1963,
+      "rank": 830,
+      "director": "Samuel Fuller"
+    },
+    {
+      "title": "GRIZZLY MAN",
+      "year": 2005,
+      "rank": 831,
+      "director": "Werner Herzog"
+    },
+    {
+      "title": "WOMEN ON THE VERGE OF A NERVOUS BREAKDOWN",
+      "year": 1988,
+      "rank": 832,
+      "director": "Pedro Almodóvar"
+    },
+    {
+      "title": "AFTER HOURS",
+      "year": 1985,
+      "rank": 833,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "ABRAHAM'S VALLEY",
+      "year": 1993,
+      "rank": 834,
+      "director": "Manoel de Oliveira"
+    },
+    {
+      "title": "PASSION",
+      "year": 1982,
+      "rank": 835,
+      "director": "Jean-Luc Godard"
+    },
+    {
+      "title": "MY LITTLE LOVES",
+      "year": 1974,
+      "rank": 836,
+      "director": "Jean Eustache"
+    },
+    {
+      "title": "GUMMO",
+      "year": 1997,
+      "rank": 837,
+      "director": "Harmony Korine"
+    },
+    {
+      "title": "SHANGHAI EXPRESS",
+      "year": 1932,
+      "rank": 838,
+      "director": "Josef von Sternberg"
+    },
+    {
+      "title": "INVASION OF THE BODY SNATCHERS",
+      "year": 1956,
+      "rank": 839,
+      "director": "Don Siegel"
+    },
+    {
+      "title": "ROSE HOBART",
+      "year": 1936,
+      "rank": 840,
+      "director": "Joseph Cornell"
+    },
+    {
+      "title": "BLUE IS THE WARMEST COLOUR",
+      "year": 2013,
+      "rank": 841,
+      "director": "Abdellatif Kechiche"
+    },
+    {
+      "title": "FUNERAL PARADE OF ROSES",
+      "year": 1969,
+      "rank": 842,
+      "director": "Toshio Matsumoto"
+    },
+    {
+      "title": "PETITE MAMAN",
+      "year": 2021,
+      "rank": 843,
+      "director": "Céline Sciamma"
+    },
+    {
+      "title": "AMORES PERROS",
+      "year": 2000,
+      "rank": 844,
+      "director": "Alejandro González Iñárritu"
+    },
+    {
+      "title": "POINT BREAK",
+      "year": 1991,
+      "rank": 845,
+      "director": "Kathryn Bigelow"
+    },
+    {
+      "title": "THE SON",
+      "year": 2002,
+      "rank": 846,
+      "director": "Jean-Pierre Dardenne & Luc Dardenne"
+    },
+    {
+      "title": "O LUCKY MAN!",
+      "year": 1973,
+      "rank": 847,
+      "director": "Lindsay Anderson"
+    },
+    {
+      "title": "DEEP END",
+      "year": 1970,
+      "rank": 848,
+      "director": "Jerzy Skolimowski"
+    },
+    {
+      "title": "STREET OF SHAME",
+      "year": 1956,
+      "rank": 849,
+      "director": "Kenji Mizoguchi"
+    },
+    {
+      "title": "WHITE HEAT",
+      "year": 1949,
+      "rank": 850,
+      "director": "Raoul Walsh"
+    },
+    {
+      "title": "LA COMMUNE",
+      "year": 1871,
+      "rank": 851,
+      "director": "PARIS"
+    },
+    {
+      "title": "TOUTE UNE NUIT",
+      "year": 1982,
+      "rank": 852,
+      "director": "Chantal Akerman"
+    },
+    {
+      "title": "LOSING GROUND",
+      "year": 1982,
+      "rank": 853,
+      "director": "Kathleen Collins"
+    },
+    {
+      "title": "IRRéVERSIBLE",
+      "year": 2002,
+      "rank": 854,
+      "director": "Gaspar Noé"
+    },
+    {
+      "title": "THE RED AND THE WHITE",
+      "year": 1967,
+      "rank": 855,
+      "director": "Miklós Jancsó"
+    },
+    {
+      "title": "THE NAKED ISLAND",
+      "year": 1960,
+      "rank": 856,
+      "director": "Kaneto Shindo"
+    },
+    {
+      "title": "WHO'S AFRAID OF VIRGINIA WOOLF?",
+      "year": 1966,
+      "rank": 857,
+      "director": "Mike Nichols"
+    },
+    {
+      "title": "SPIONE",
+      "year": 1928,
+      "rank": 858,
+      "director": "Fritz Lang"
+    },
+    {
+      "title": "DODES'KA-DEN",
+      "year": 1970,
+      "rank": 859,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "THE ASTHENIC SYNDROME",
+      "year": 1989,
+      "rank": 860,
+      "director": "Kira Muratova"
+    },
+    {
+      "title": "STARSHIP TROOPERS",
+      "year": 1997,
+      "rank": 861,
+      "director": "Paul Verhoeven"
+    },
+    {
+      "title": "PERSEPOLIS",
+      "year": 2007,
+      "rank": 862,
+      "director": "Vincent Paronnaud & Marjane Satrapi"
+    },
+    {
+      "title": "L'AMOUR FOU",
+      "year": 1969,
+      "rank": 863,
+      "director": "Jacques Rivette"
+    },
+    {
+      "title": "ANGEL",
+      "year": 1937,
+      "rank": 864,
+      "director": "Ernst Lubitsch"
+    },
+    {
+      "title": "THE ADVENTURES OF ROBIN HOOD",
+      "year": 1938,
+      "rank": 865,
+      "director": "Michael Curtiz & William Keighley"
+    },
+    {
+      "title": "MON ONCLE D'AMéRIQUE",
+      "year": 1980,
+      "rank": 866,
+      "director": "Alain Resnais"
+    },
+    {
+      "title": "THE RIGHT STUFF",
+      "year": 1983,
+      "rank": 867,
+      "director": "Philip Kaufman"
+    },
+    {
+      "title": "THEY WERE EXPENDABLE",
+      "year": 1945,
+      "rank": 868,
+      "director": "John Ford"
+    },
+    {
+      "title": "FEMALE TROUBLE",
+      "year": 1974,
+      "rank": 869,
+      "director": "John Waters"
+    },
+    {
+      "title": "CLAIRE'S KNEE",
+      "year": 1970,
+      "rank": 870,
+      "director": "Eric Rohmer"
+    },
+    {
+      "title": "TIME OF THE GYPSIES",
+      "year": 1988,
+      "rank": 871,
+      "director": "Emir Kusturica"
+    },
+    {
+      "title": "HITLER: A FILM FROM GERMANY",
+      "year": 1977,
+      "rank": 872,
+      "director": "Hans-Jürgen Syberberg"
+    },
+    {
+      "title": "THE UNKNOWN",
+      "year": 1927,
+      "rank": 873,
+      "director": "Tod Browning"
+    },
+    {
+      "title": "THE TIN DRUM",
+      "year": 1979,
+      "rank": 874,
+      "director": "Volker Schlöndorff"
+    },
+    {
+      "title": "TOO EARLY, TOO LATE",
+      "year": 1981,
+      "rank": 875,
+      "director": "Jean-Marie Straub & Danièle Huillet"
+    },
+    {
+      "title": "WELFARE",
+      "year": 1975,
+      "rank": 876,
+      "director": "Frederick Wiseman"
+    },
+    {
+      "title": "BREAKFAST AT TIFFANY'S",
+      "year": 1961,
+      "rank": 877,
+      "director": "Blake Edwards"
+    },
+    {
+      "title": "THE LAST DETAIL",
+      "year": 1973,
+      "rank": 878,
+      "director": "Hal Ashby"
+    },
+    {
+      "title": "SHOWGIRLS",
+      "year": 1995,
+      "rank": 879,
+      "director": "Paul Verhoeven"
+    },
+    {
+      "title": "SHAME",
+      "year": 1968,
+      "rank": 880,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "MYSTERIES OF LISBON",
+      "year": 2010,
+      "rank": 881,
+      "director": "Raúl Ruiz"
+    },
+    {
+      "title": "THE PRINCESS BRIDE",
+      "year": 1987,
+      "rank": 882,
+      "director": "Rob Reiner"
+    },
+    {
+      "title": "SICILIA!",
+      "year": 1999,
+      "rank": 883,
+      "director": "Jean-Marie Straub & Danièle Huillet"
+    },
+    {
+      "title": "ATLANTICS",
+      "year": 2019,
+      "rank": 884,
+      "director": "Mati Diop"
+    },
+    {
+      "title": "WE ALL LOVED EACH OTHER SO MUCH",
+      "year": 1974,
+      "rank": 885,
+      "director": "Ettore Scola"
+    },
+    {
+      "title": "GLORIA",
+      "year": 1980,
+      "rank": 886,
+      "director": "John Cassavetes"
+    },
+    {
+      "title": "CRíA CUERVOS",
+      "year": 1976,
+      "rank": 887,
+      "director": "Carlos Saura"
+    },
+    {
+      "title": "JULIET OF THE SPIRITS",
+      "year": 1965,
+      "rank": 888,
+      "director": "Federico Fellini"
+    },
+    {
+      "title": "EXCALIBUR",
+      "year": 1981,
+      "rank": 889,
+      "director": "John Boorman"
+    },
+    {
+      "title": "ELEPHANT",
+      "year": 1989,
+      "rank": 890,
+      "director": "Alan Clarke"
+    },
+    {
+      "title": "MONTY PYTHON AND THE HOLY GRAIL",
+      "year": 1975,
+      "rank": 891,
+      "director": "Terry Gilliam & Terry Jones"
+    },
+    {
+      "title": "THE MISFITS",
+      "year": 1961,
+      "rank": 892,
+      "director": "John Huston"
+    },
+    {
+      "title": "OUTSKIRTS",
+      "year": 1933,
+      "rank": 893,
+      "director": "Boris Barnet"
+    },
+    {
+      "title": "WENDY AND LUCY",
+      "year": 2008,
+      "rank": 894,
+      "director": "Kelly Reichardt"
+    },
+    {
+      "title": "AVATAR",
+      "year": 2009,
+      "rank": 895,
+      "director": "James Cameron"
+    },
+    {
+      "title": "PORT OF SHADOWS",
+      "year": 1938,
+      "rank": 896,
+      "director": "Marcel Carné"
+    },
+    {
+      "title": "RED SORGHUM",
+      "year": 1987,
+      "rank": 897,
+      "director": "Zhang Yimou"
+    },
+    {
+      "title": "THE MIRACLE OF MORGAN'S CREEK",
+      "year": 1944,
+      "rank": 898,
+      "director": "Preston Sturges"
+    },
+    {
+      "title": "THE AFRICAN QUEEN",
+      "year": 1951,
+      "rank": 899,
+      "director": "John Huston"
+    },
+    {
+      "title": "SPRING, SUMMER, AUTUMN, WINTER… AND SPRING",
+      "year": 2003,
+      "rank": 900,
+      "director": "Kim Ki-duk"
+    },
+    {
+      "title": "THE WOMAN NEXT DOOR",
+      "year": 1981,
+      "rank": 901,
+      "director": "François Truffaut"
+    },
+    {
+      "title": "THE BRIDGES OF MADISON COUNTY",
+      "year": 1995,
+      "rank": 902,
+      "director": "Clint Eastwood"
+    },
+    {
+      "title": "THEY LIVE",
+      "year": 1988,
+      "rank": 903,
+      "director": "John Carpenter"
+    },
+    {
+      "title": "THE NIGHT OF COUNTING THE YEARS",
+      "year": 1969,
+      "rank": 904,
+      "director": "Shadi Abdel Salam"
+    },
+    {
+      "title": "L'ENFANCE NUE",
+      "year": 1968,
+      "rank": 905,
+      "director": "Maurice Pialat"
+    },
+    {
+      "title": "THE TARNISHED ANGELS",
+      "year": 1957,
+      "rank": 906,
+      "director": "Douglas Sirk"
+    },
+    {
+      "title": "SHAUN OF THE DEAD",
+      "year": 2004,
+      "rank": 907,
+      "director": "Edgar Wright"
+    },
+    {
+      "title": "EXOTICA",
+      "year": 1994,
+      "rank": 908,
+      "director": "Atom Egoyan"
+    },
+    {
+      "title": "CARO DIARIO",
+      "year": 1993,
+      "rank": 909,
+      "director": "Nanni Moretti"
+    },
+    {
+      "title": "AKIRA KUROSAWA'S DREAMS",
+      "year": 1990,
+      "rank": 910,
+      "director": "Akira Kurosawa"
+    },
+    {
+      "title": "STROSZEK",
+      "year": 1977,
+      "rank": 911,
+      "director": "Werner Herzog"
+    },
+    {
+      "title": "THE SEASONS",
+      "year": 1975,
+      "rank": 912,
+      "director": "Artavazd Peleshian"
+    },
+    {
+      "title": "MEEK'S CUTOFF",
+      "year": 2010,
+      "rank": 913,
+      "director": "Kelly Reichardt"
+    },
+    {
+      "title": "THE FOUNTAINHEAD",
+      "year": 1949,
+      "rank": 914,
+      "director": "King Vidor"
+    },
+    {
+      "title": "SIDEWAYS",
+      "year": 2004,
+      "rank": 915,
+      "director": "Alexander Payne"
+    },
+    {
+      "title": "TABU",
+      "year": 2012,
+      "rank": 916,
+      "director": "Miguel Gomes"
+    },
+    {
+      "title": "DEEP RED",
+      "year": 1975,
+      "rank": 917,
+      "director": "Dario Argento"
+    },
+    {
+      "title": "TONGUES UNTIED",
+      "year": 1989,
+      "rank": 918,
+      "director": "Marlon Riggs"
+    },
+    {
+      "title": "ASSAULT ON PRECINCT 13",
+      "year": 1976,
+      "rank": 919,
+      "director": "John Carpenter"
+    },
+    {
+      "title": "THE PHANTOM CARRIAGE",
+      "year": 1921,
+      "rank": 920,
+      "director": "Victor Sjöström"
+    },
+    {
+      "title": "PEOPLE ON SUNDAY",
+      "year": 1930,
+      "rank": 921,
+      "director": "Robert Siodmak & Edgar G. Ulmer"
+    },
+    {
+      "title": "ZABRISKIE POINT",
+      "year": 1970,
+      "rank": 922,
+      "director": "Michelangelo Antonioni"
+    },
+    {
+      "title": "THE BLUES BROTHERS",
+      "year": 1980,
+      "rank": 923,
+      "director": "John Landis"
+    },
+    {
+      "title": "IT'S A GIFT",
+      "year": 1934,
+      "rank": 924,
+      "director": "Norman Z. McLeod"
+    },
+    {
+      "title": "HEIMAT",
+      "year": 1984,
+      "rank": 925,
+      "director": "Edgar Reitz"
+    },
+    {
+      "title": "SEVEN BEAUTIES",
+      "year": 1975,
+      "rank": 926,
+      "director": "Lina Wertmüller"
+    },
+    {
+      "title": "REDS",
+      "year": 1981,
+      "rank": 927,
+      "director": "Warren Beatty"
+    },
+    {
+      "title": "THE RIVER",
+      "year": 1997,
+      "rank": 928,
+      "director": "Tsai Ming-liang"
+    },
+    {
+      "title": "SHOLAY",
+      "year": 1975,
+      "rank": 929,
+      "director": "Ramesh Sippy"
+    },
+    {
+      "title": "NIGHT OF THE DEMON",
+      "year": 1957,
+      "rank": 930,
+      "director": "Jacques Tourneur"
+    },
+    {
+      "title": "THE END OF SUMMER",
+      "year": 1961,
+      "rank": 931,
+      "director": "Yasujiro Ozu"
+    },
+    {
+      "title": "THE CRIMINAL LIFE OF ARCHIBALDO DE LA CRUZ",
+      "year": 1955,
+      "rank": 932,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "CEDDO",
+      "year": 1977,
+      "rank": 933,
+      "director": "Ousmane Sembene"
+    },
+    {
+      "title": "A HISTORY OF VIOLENCE",
+      "year": 2005,
+      "rank": 934,
+      "director": "David Cronenberg"
+    },
+    {
+      "title": "LE TROU",
+      "year": 1960,
+      "rank": 935,
+      "director": "Jacques Becker"
+    },
+    {
+      "title": "DUEL",
+      "year": 1971,
+      "rank": 936,
+      "director": "Steven Spielberg"
+    },
+    {
+      "title": "LA FLOR",
+      "year": 2018,
+      "rank": 937,
+      "director": "Mariano Llinás"
+    },
+    {
+      "title": "SIMON OF THE DESERT",
+      "year": 1965,
+      "rank": 938,
+      "director": "Luis Buñuel"
+    },
+    {
+      "title": "ANATOMY OF A MURDER",
+      "year": 1959,
+      "rank": 939,
+      "director": "Otto Preminger"
+    },
+    {
+      "title": "AN AMERICAN IN PARIS",
+      "year": 1951,
+      "rank": 940,
+      "director": "Vincente Minnelli"
+    },
+    {
+      "title": "KWAIDAN",
+      "year": 1964,
+      "rank": 941,
+      "director": "Masaki Kobayashi"
+    },
+    {
+      "title": "LE BOUCHER",
+      "year": 1970,
+      "rank": 942,
+      "director": "Claude Chabrol"
+    },
+    {
+      "title": "THE STRAIGHT STORY",
+      "year": 1999,
+      "rank": 943,
+      "director": "David Lynch"
+    },
+    {
+      "title": "THE LAST TEMPTATION OF CHRIST",
+      "year": 1988,
+      "rank": 944,
+      "director": "Martin Scorsese"
+    },
+    {
+      "title": "CARLITO'S WAY",
+      "year": 1993,
+      "rank": 945,
+      "director": "Brian De Palma"
+    },
+    {
+      "title": "ROMAN HOLIDAY",
+      "year": 1953,
+      "rank": 946,
+      "director": "William Wyler"
+    },
+    {
+      "title": "ZORNS LEMMA",
+      "year": 1970,
+      "rank": 947,
+      "director": "Hollis Frampton"
+    },
+    {
+      "title": "THE HURT LOCKER",
+      "year": 2008,
+      "rank": 948,
+      "director": "Kathryn Bigelow"
+    },
+    {
+      "title": "COOL HAND LUKE",
+      "year": 1967,
+      "rank": 949,
+      "director": "Stuart Rosenberg"
+    },
+    {
+      "title": "PORTRAIT OF JENNIE",
+      "year": 1948,
+      "rank": 950,
+      "director": "William Dieterle"
+    },
+    {
+      "title": "NO HOME MOVIE",
+      "year": 2015,
+      "rank": 951,
+      "director": "Chantal Akerman"
+    },
+    {
+      "title": "MOTHLIGHT",
+      "year": 1963,
+      "rank": 952,
+      "director": "Stan Brakhage"
+    },
+    {
+      "title": "BEFORE SUNRISE",
+      "year": 1995,
+      "rank": 953,
+      "director": "Richard Linklater"
+    },
+    {
+      "title": "7TH HEAVEN",
+      "year": 1927,
+      "rank": 954,
+      "director": "Frank Borzage"
+    },
+    {
+      "title": "NEAR DARK",
+      "year": 1987,
+      "rank": 955,
+      "director": "Kathryn Bigelow"
+    },
+    {
+      "title": "THE KILLER",
+      "year": 1989,
+      "rank": 956,
+      "director": "John Woo"
+    },
+    {
+      "title": "THE GODFATHER PART III",
+      "year": 1990,
+      "rank": 957,
+      "director": "Francis Ford Coppola"
+    },
+    {
+      "title": "Z",
+      "year": 1969,
+      "rank": 958,
+      "director": "Constantin Costa-Gavras"
+    },
+    {
+      "title": "THE LORD OF THE RINGS: THE RETURN OF THE KING",
+      "year": 2003,
+      "rank": 959,
+      "director": "Peter Jackson"
+    },
+    {
+      "title": "AMERICAN GRAFFITI",
+      "year": 1973,
+      "rank": 960,
+      "director": "George Lucas"
+    },
+    {
+      "title": "BLOOD SIMPLE",
+      "year": 1984,
+      "rank": 961,
+      "director": "Joel Coen & Ethan Coen"
+    },
+    {
+      "title": "DIRTY HARRY",
+      "year": 1971,
+      "rank": 962,
+      "director": "Don Siegel"
+    },
+    {
+      "title": "IL SORPASSO",
+      "year": 1962,
+      "rank": 963,
+      "director": "Dino Risi"
+    },
+    {
+      "title": "ENTER THE DRAGON",
+      "year": 1973,
+      "rank": 964,
+      "director": "Robert Clouse"
+    },
+    {
+      "title": "LA CHIENNE",
+      "year": 1931,
+      "rank": 965,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "FROM THE CLOUDS TO THE RESISTANCE",
+      "year": 1979,
+      "rank": 966,
+      "director": "Jean-Marie Straub & Danièle Huillet"
+    },
+    {
+      "title": "OTHELLO",
+      "year": 1951,
+      "rank": 967,
+      "director": "Orson Welles"
+    },
+    {
+      "title": "DOOMED LOVE",
+      "year": 1978,
+      "rank": 968,
+      "director": "Manoel de Oliveira"
+    },
+    {
+      "title": "THE RETURN",
+      "year": 2003,
+      "rank": 969,
+      "director": "Andrey Zvyagintsev"
+    },
+    {
+      "title": "A PAGE OF MADNESS",
+      "year": 1926,
+      "rank": 970,
+      "director": "Teinosuke Kinugasa"
+    },
+    {
+      "title": "GHOSTBUSTERS",
+      "year": 1984,
+      "rank": 971,
+      "director": "Ivan Reitman"
+    },
+    {
+      "title": "AMERICAN BEAUTY",
+      "year": 1999,
+      "rank": 972,
+      "director": "Sam Mendes"
+    },
+    {
+      "title": "KHRUSTALYOV, MY CAR!",
+      "year": 1998,
+      "rank": 973,
+      "director": "Aleksei German"
+    },
+    {
+      "title": "DUEL IN THE SUN",
+      "year": 1946,
+      "rank": 974,
+      "director": "King Vidor"
+    },
+    {
+      "title": "THE LAST EMPEROR",
+      "year": 1987,
+      "rank": 975,
+      "director": "Bernardo Bertolucci"
+    },
+    {
+      "title": "SPARTACUS",
+      "year": 1960,
+      "rank": 976,
+      "director": "Stanley Kubrick"
+    },
+    {
+      "title": "DIARY",
+      "year": 1983,
+      "rank": 977,
+      "director": "David Perlov"
+    },
+    {
+      "title": "BERLIN: SYMPHONY OF A GREAT CITY",
+      "year": 1927,
+      "rank": 978,
+      "director": "Walter Ruttmann"
+    },
+    {
+      "title": "ELEVATOR TO THE GALLOWS",
+      "year": 1958,
+      "rank": 979,
+      "director": "Louis Malle"
+    },
+    {
+      "title": "THE HOST",
+      "year": 2006,
+      "rank": 980,
+      "director": "Bong Joon-ho"
+    },
+    {
+      "title": "THE RECKLESS MOMENT",
+      "year": 1949,
+      "rank": 981,
+      "director": "Max Ophüls"
+    },
+    {
+      "title": "DEAD POETS SOCIETY",
+      "year": 1989,
+      "rank": 982,
+      "director": "Peter Weir"
+    },
+    {
+      "title": "GUN CRAZY",
+      "year": 1950,
+      "rank": 983,
+      "director": "Joseph H. Lewis"
+    },
+    {
+      "title": "THE BREAKFAST CLUB",
+      "year": 1985,
+      "rank": 984,
+      "director": "John Hughes"
+    },
+    {
+      "title": "LA BêTE HUMAINE",
+      "year": 1938,
+      "rank": 985,
+      "director": "Jean Renoir"
+    },
+    {
+      "title": "PERFUMED NIGHTMARE",
+      "year": 1977,
+      "rank": 986,
+      "director": "Kidlat Tahimik"
+    },
+    {
+      "title": "FOX AND HIS FRIENDS",
+      "year": 1975,
+      "rank": 987,
+      "director": "Rainer Werner Fassbinder"
+    },
+    {
+      "title": "OLYMPIA",
+      "year": 1938,
+      "rank": 988,
+      "director": "Leni Riefenstahl"
+    },
+    {
+      "title": "THE ICE STORM",
+      "year": 1997,
+      "rank": 989,
+      "director": "Ang Lee"
+    },
+    {
+      "title": "THE PIANIST",
+      "year": 2002,
+      "rank": 990,
+      "director": "Roman Polanski"
+    },
+    {
+      "title": "LéON",
+      "year": 1994,
+      "rank": 991,
+      "director": "Luc Besson"
+    },
+    {
+      "title": "SATURDAY NIGHT AND SUNDAY MORNING",
+      "year": 1960,
+      "rank": 992,
+      "director": "Karel Reisz"
+    },
+    {
+      "title": "TRUE HEART SUSIE",
+      "year": 1919,
+      "rank": 993,
+      "director": "D.W. Griffith"
+    },
+    {
+      "title": "ED WOOD",
+      "year": 1994,
+      "rank": 994,
+      "director": "Tim Burton"
+    },
+    {
+      "title": "THE LONG FAREWELL",
+      "year": 1971,
+      "rank": 995,
+      "director": "Kira Muratova"
+    },
+    {
+      "title": "ROPE",
+      "year": 1948,
+      "rank": 996,
+      "director": "Alfred Hitchcock"
+    },
+    {
+      "title": "LADY WINDERMERE'S FAN",
+      "year": 1925,
+      "rank": 997,
+      "director": "Ernst Lubitsch"
+    },
+    {
+      "title": "SAWDUST AND TINSEL",
+      "year": 1953,
+      "rank": 998,
+      "director": "Ingmar Bergman"
+    },
+    {
+      "title": "RIDE THE HIGH COUNTRY",
+      "year": 1962,
+      "rank": 999,
+      "director": "Sam Peckinpah"
+    },
+    {
+      "title": "L.A. CONFIDENTIAL",
+      "year": 1997,
+      "rank": 1000,
+      "director": "Curtis Hanson"
+    }
+  ]
+}

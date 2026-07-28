@@ -1,0 +1,240 @@
+# Double Feature
+
+A self-hosted movie-night app for a Raspberry Pi. Build tonight's shortlist
+from curated lists — drawn at random, searched for by name, or added by hand —
+then run a ranked-choice (Borda count) vote so everyone in the room picks the
+winner together from their phones.
+
+No accounts, no auth, no internet exposure — it's a tool for a trusted group of
+friends on one Wi-Fi network.
+
+```
+Curated lists → build a lineup → publish → guests vote via QR → Borda count → winner
+```
+
+Node/Express backend, a vanilla JS frontend with no build step, and SQLite for
+storage — the whole thing runs as one process, no database server or bundler
+required.
+
+## Setup
+
+### 1. Prerequisite: give the Pi a static LAN IP
+
+**Do this first.** Guests reach the app at `http://<pi-lan-ip>:8080`, and that
+address is baked into the QR code at publish time. If the Pi's IP changes, old
+links break.
+
+Reserve it in your router's DHCP settings (usually "DHCP reservation" or
+"static lease", keyed to the Pi's MAC address). The app can't do this for you.
+
+A `.local` hostname is deliberately **not** used — mDNS resolution is unreliable
+on guest Android phones, which is exactly when you can least afford it to fail.
+
+### 2. Get a TMDB API key
+
+TMDB supplies all film metadata (posters, directors, genres, runtimes). A key is
+free for personal use: https://www.themoviedb.org/settings/api
+
+```bash
+cp .env.example .env
+# then edit .env and set TMDB_API_KEY (or TMDB_ACCESS_TOKEN for a v4 token)
+```
+
+Set `HOST_LAN_IP` too if the Pi has both Ethernet and Wi-Fi up and you want to
+pin which address guests get.
+
+### 3. Start it
+
+```bash
+docker compose up -d --build
+```
+
+Or without Docker (Node 24+):
+
+```bash
+npm install
+npm start
+```
+
+Open `http://<pi-lan-ip>:8080` on the host machine.
+
+### 4. Load the built-in lists
+
+```bash
+docker compose exec double-feature node scripts/seed.mjs
+# or, without Docker:  npm run seed
+```
+
+This resolves ~2,900 entries against TMDB and takes a few minutes. It's safe to
+re-run — finished entries are skipped, so an interrupted run just continues.
+Seed lists arrive **active**, so you can draw immediately.
+
+## Using it
+
+**Lineup tab** — build up tonight's shortlist through any mix of three ways to
+add a film, then publish it as a vote once you're happy with it:
+
+- **Draw random films** — tick which lists are in play, optionally narrow the
+  pool by genre, language, year or runtime (tucked away in a collapsible "Pool
+  setup" section once you've set it how you like), pick how many to draw (1–10)
+  and hit Draw. A live "N films match" count updates as filters change, so you
+  see the size of the pool before spending a draw on it.
+- **Add a specific film** — search TMDB by title, or paste a TMDB URL/id
+  directly for the rare title search won't surface (some films — like Godard's
+  *Histoire(s) du cinéma* — are catalogued on TMDB as a TV series rather than a
+  movie; pasting the link handles that automatically).
+- **Add it manually** — for the rarer case still: a film not on TMDB at all.
+  Give it a title and, optionally, a year, and it joins the lineup with no
+  poster or metadata attached.
+
+However a film got there, drawing or searching again just adds more — nothing
+is discarded until you remove it (or hit "Clear all"), and nothing is saved
+until you publish. Click any title to see the full synopsis and, when TMDB has
+one, an embedded trailer (or a one-tap YouTube search link when it doesn't).
+
+**Explore tab** — browse the whole active library outside of building a vote:
+the same filters as the Lineup tab, sortable, paginated, with a search box.
+Useful for settling "wait, do we even have that?" arguments, and every card
+here can also be added straight to the Lineup with one click.
+
+**Publish** — turns the lineup into a vote session at an unguessable URL like
+`/vote/x7f2k9`. The host screen shows a QR code, the same URL as plain
+selectable text with a copy button, and a one-tap "Open" link for the host's
+own phone (no need to scan your own QR code). Guests scan, rank by tapping
+(first tap = #1, tapping a ranked film again removes it and renumbers the
+rest), enter a name and submit. The host's running tally updates every 3.5s.
+
+**Close voting** ends the session and shows the result — final for that draw,
+so another round means building a new lineup. **Cancel** is the other option
+while voting is still open: it throws the whole thing away instead, including
+any ballots already cast, and it never appears in history — for when a vote
+was started by mistake.
+
+**History tab** — every published vote, with its date, the filters applied, the
+films, the vote count and the winner. Click any row for its full results.
+
+### Anonymous voting
+
+Ticking **anonymous** before publishing means individual ballots are hidden from
+*everyone once voting closes, including the host* — only aggregate points and
+vote counts are ever shown.
+
+This is enforced when the ballot is written, not filtered on the way out: no
+name and no timestamp are stored at all, and the rank rows are shuffled. Opening
+`data/double-feature.db` by hand won't tell you who voted for what either. The
+running tally is also withheld from the host while an anonymous session is open.
+
+### Scoring
+
+Borda count: with N films, a 1st-place vote is worth N−1 points, 2nd is N−2, and
+so on down to 0. Highest total wins.
+
+- Films a voter left unranked score 0, so a partial ballot still counts.
+- Ties go to the film with most 1st-place votes.
+- If that's still tied, the winner is picked at random and the results screen
+  says so plainly — it's shown as a coin flip, never silently resolved. The
+  outcome is recorded at close, so revisiting the result never re-rolls it.
+
+## Adding your own list
+
+On the **Lists** tab, create a named list, then import into it by pasting text
+or uploading a file:
+
+- **Plain text** — one title per line. `Vertigo (1958)`, `Vertigo, 1958` or bare
+  `Vertigo` all work.
+- **CSV** — with a `title,year` header, or just two columns.
+- **JSON** — `[{"title": "Vertigo", "year": 1958}]`, or an array of strings. A
+  `tmdb_id` field is used directly if you have one.
+
+Every title is resolved to a TMDB id. Anything TMDB can't confidently match is
+flagged for review rather than dropped — open the list and either pick from the
+suggested candidates, search TMDB by hand, or drop the entry. The rare boxset
+entry (Criterion's Qatsi Trilogy, bundled as one spine number) can be split into
+its separate films instead of resolved to one.
+
+Because identity is the TMDB id and not the title string, a film on two lists
+collapses to one entry in the pool and can't be drawn twice. That also survives
+accents, alternate titles and "The" prefixes, which plain title matching would
+miss.
+
+Mark films **watched** to exclude them from future draws; a filter toggle allows
+rewatches.
+
+## Where the seed lists come from
+
+The original spec assumed all six lists could be pulled from Wikipedia. Only two
+of them actually can, so each list is sourced from wherever it genuinely lives.
+Two more were added later, from their own publisher and (by hand, since its
+site blocks scripted access) a curator on SensCritique:
+
+| List | Source | Count |
+|---|---|---|
+| The Criterion Collection | Wikidata, spine number `P12279` | 1,251 |
+| Sight & Sound 2022 (critics) | bfi.org.uk — the poll's publisher | 264 |
+| TSPDT 1,000 Greatest Films | theyshootpictures.com — the list's publisher | 1,000 |
+| Disney Animated Canon | Wikidata, "WDAS feature film" series | 65 |
+| Studio Ghibli | Wikidata, "Studio Ghibli Feature Films" series | 23 |
+| BFI: Films to See by Age 15 | bfi.org.uk (2020 update of a 2005 list) | 64 |
+| Family Films (Ages 6+) | A user's curated list on SensCritique | 251 |
+
+Why not Wikipedia:
+
+- Its **Criterion** release list was deleted, and criterion.com blocks scripted
+  requests. Wikidata is both a legitimate source and a better one: 1,222 of the
+  1,251 entries carry a TMDB id already, so most need no lookup at all.
+- Its **Sight & Sound 2022** article lists only the top 10 in prose. The BFI's
+  own page carries the full 264.
+- The **TSPDT** list isn't on Wikipedia in any form.
+- Its **BFI "films to see by 14"** article was deleted too, but BFI itself still
+  hosts an updated version of the list on their own site.
+
+**On "IMDb Top 100":** the spec asked for one while ruling out the IMDb API
+(commercially priced) and scraping IMDb, leaving no legitimate source for an
+IMDb-*ranked* list. TMDB's own `/movie/top_rated` was considered as a
+replacement, but it turned out to be a poor stand-in: it's a raw average
+rather than a vote-weighted score, so it mixes real classics in with obscure
+titles that a handful of enthusiastic fans pushed above their vote count's
+worth. Two curated, human-picked lists (above) filled that slot instead. Swap
+in your own via the custom-list import if you want a specific ranking.
+
+Refresh the first five from source with `npm run fetch-seeds`; the committed
+JSON means a normal install never touches those sites. BFI and the SensCritique
+list were captured by hand instead (the latter blocks scripted access outright)
+and don't have a re-fetch script — updating them means repeating that by hand.
+
+## Notes
+
+- **Polling, not WebSockets.** A handful of people on one LAN submitting one
+  ballot each doesn't justify a socket layer; a few seconds of lag before the
+  host's screen updates is a non-issue, and it's far less to run on a Pi.
+- **No ballot-stuffing prevention.** Nothing stops someone voting twice. That's
+  the trusted-friend model, on purpose.
+- **LAN only.** The app binds `0.0.0.0` so phones on the same Wi-Fi can reach
+  it. Don't port-forward it — there's no authentication anywhere by design.
+- **Posters hot-link to TMDB**, so the Pi needs internet access (the LAN it
+  runs on is assumed to have it). Nothing is cached to disk but metadata.
+- **TMDB's terms cap cached data at six months.** A background job refreshes any
+  entry older than five months, and runs a minute after boot then daily.
+
+## Development
+
+```bash
+npm install
+npm test          # Borda scoring, ranking, parsing, filters, full API pass
+npm run dev       # auto-restarting server
+```
+
+The frontend is plain ES modules with no build step — edit files in `public/`
+and reload.
+
+```
+server/    express app, SQLite schema, TMDB client, Borda scoring, pool filters
+public/    the SPA (host screens + guest voting), no framework
+seeds/     committed seed list JSON
+scripts/   fetch-seed-lists.mjs (sources → JSON), seed.mjs (JSON → SQLite)
+test/      node:test suites
+```
+
+---
+
+This product uses the TMDB API but is not endorsed or certified by TMDB.
