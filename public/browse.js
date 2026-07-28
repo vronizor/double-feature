@@ -6,6 +6,7 @@
 import { h, posterUrl, toast, formatRating, openMovieModal, originalTitleLine } from './dom.js';
 import { api } from './api.js';
 import { poolState } from './pool-state.js';
+import { availableOccasions } from './occasions.js';
 
 // Re-exported so views can keep importing the filter shape from here alongside
 // everything else they use; it lives in pool-state.js because the singleton
@@ -204,6 +205,48 @@ export function renderListPicker(lists, openGroups, onChange) {
           : null,
       );
     }),
+  );
+}
+
+/**
+ * The "Tonight is…" chip row. Applying a preset replaces the pool setup
+ * wholesale; the summary line underneath then shows what that produced, and
+ * any hand-edit afterwards demotes the label back to "Custom" (poolState
+ * handles that) so the UI never claims an occasion it is no longer showing.
+ *
+ * Renders nothing when no occasion can produce a pool — on a fresh install
+ * with no lists, an empty row of dead chips would be worse than no row.
+ */
+export function renderOccasionChips(lists, facets, onApply) {
+  const available = availableOccasions({ lists, facets });
+  if (available.length === 0) return null;
+
+  return h(
+    'div',
+    {},
+    h('div', { class: 'field-label' }, 'Tonight is…'),
+    h(
+      'div',
+      { class: 'chips' },
+      ...available.map(({ occasion, filters }) =>
+        h(
+          'button',
+          {
+            class: 'chip chip--occasion',
+            dataset: { state: poolState.occasion === occasion.id ? 'include' : 'off' },
+            title: occasion.hint,
+            onClick: () => {
+              poolState.applyOccasion(occasion.id, filters);
+              onApply();
+            },
+          },
+          occasion.label,
+        ),
+      ),
+      poolState.occasion === null
+        ? h('span', { class: 'faint', style: 'align-self:center' }, 'Custom')
+        : null,
+    ),
   );
 }
 

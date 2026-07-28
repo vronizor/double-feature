@@ -1,7 +1,13 @@
 import { h, clear, toast, plural, posterUrl, tmdbUrl, parseTmdbInput, openMovieModal } from '../dom.js';
 import { api } from '../api.js';
 import { renderSessionPanel } from './session.js';
-import { renderFilterPanel, renderListPicker, renderTopN, movieCard } from '../browse.js';
+import {
+  renderFilterPanel,
+  renderListPicker,
+  renderTopN,
+  renderOccasionChips,
+  movieCard,
+} from '../browse.js';
 import { lineup } from '../lineup.js';
 import { poolState } from '../pool-state.js';
 
@@ -193,6 +199,17 @@ export async function renderDraw(container) {
       'div',
       { class: 'card stack' },
       h('h2', {}, 'Draw random films'),
+      // Occasion chips sit inside this card, immediately above Pool setup,
+      // because that is exactly what they configure — "Add a specific film"
+      // next door is deliberately untouched by them.
+      renderOccasionChips(state.lists, state.facets, () => {
+        // Applying a preset changes the whole pool, so the setup panel opens
+        // to show what it actually did rather than leaving the host to take
+        // a one-line summary on faith.
+        state.poolSetupOpen = true;
+        refreshCount();
+        paint();
+      }),
       poolSetup(),
       h(
         'div',
