@@ -294,3 +294,103 @@ test('exclude tolerates non-numeric junk instead of breaking the query', () => {
   assert.doesNotThrow(() => poolCount(db, {}, ['not-a-number', null, undefined, 1]));
   assert.equal(poolCount(db, {}, ['not-a-number', 1]), 3, 'the one valid id is still excluded');
 });
+
+// --- List selection (roadmap §0) and Top-N (4.1) ---------------------------
+
+/**
+ * Two lists, one active one not, with ranks on the active one so the "top N"
+ * cut and the unranked-list case can both be exercised.
+ *
+ *   list 1 "Ranked"   (active)   films 10,11,12 at ranks 1,2,3
+ *   list 2 "Unranked" (inactive) films 20,21    with rank NULL
+ */
+function seedRanked() {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+    (1, 'Ranked', 'seed', 1),
+    (2, 'Unranked', 'seed', 0)`);
+
+  const add = (tmdbId, title, listId, rank) => {
+    db.prepare('INSERT INTO movies (tmdb_id, title, year) VALUES (?, ?, 1970)').run(tmdbId, title);
+    db.prepare(
+      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, rank, status)
+       VALUES (?, ?, ?, 1970, ?, 'resolved')`,
+    ).run(listId, tmdbId, title, rank);
+  };
+
+  add(10, 'First', 1, 1);
+  add(11, 'Second', 1, 2);
+  add(12, 'Third', 1, 3);
+  add(20, 'Unranked A', 2, null);
+  add(21, 'Unranked B', 2, null);
+  return db;
+}
+
+test('an absent list selection falls back to is_active, so old clients keep working', () => {
+  const db = seedRanked();
+  assert.equal(poolCount(db, {}), 3, 'only the active list');
+  assert.equal(poolCount(db, { lists: null }), 3, 'null is treated as absent, not as empty');
+});
+
+test('an explicitly EMPTY list selection means an empty pool, never the whole library', () => {
+  // The dangerous failure: treating [] as "no constraint" would widen the pool
+  // to every cached film at the exact moment the host deselected everything.
+  const db = seedRanked();
+  assert.equal(poolCount(db, { lists: [] }), 0);
+  assert.deepEqual(drawFromPool(db, { lists: [] }, 5), []);
+});
+
+test('an explicit selection overrides is_active in both directions', () => {
+  const db = seedRanked();
+  assert.equal(poolCount(db, { lists: [2] }), 2, 'an INACTIVE list can be selected for tonight');
+  assert.equal(poolCount(db, { lists: [1, 2] }), 5, 'both lists at once');
+  assert.equal(
+    poolCount(db, {}),
+    3,
+    'and selecting one for a draw does not mutate what is_active says',
+  );
+});
+
+test('topN narrows a ranked list', () => {
+  const db = seedRanked();
+  assert.equal(poolCount(db, { lists: [1], topN: 2 }), 2);
+  assert.equal(poolCount(db, { lists: [1], topN: 1 }), 1);
+  assert.equal(poolCount(db, { lists: [1], topN: 99 }), 3, 'a topN past the end keeps everything');
+});
+
+test('topN keeps unranked lists whole instead of deleting them from the pool', () => {
+  // rank IS NULL means "this list simply is not ranked" (Criterion, Ghibli),
+  // NOT "rank worse than N". Excluding those would make "top 10" silently drop
+  // every unranked list, which is the opposite of narrowing.
+  const db = seedRanked();
+  assert.equal(poolCount(db, { lists: [2], topN: 1 }), 2, 'both unranked films survive topN=1');
+  assert.equal(
+    poolCount(db, { lists: [1, 2], topN: 1 }),
+    3,
+    'ranked list cut to 1, unranked list untouched (1 + 2)',
+  );
+});
+
+test('topN is ignored when absent, zero or negative rather than emptying the pool', () => {
+  const db = seedRanked();
+  assert.equal(poolCount(db, { lists: [1] }), 3);
+  assert.equal(poolCount(db, { lists: [1], topN: null }), 3);
+  assert.equal(poolCount(db, { lists: [1], topN: 0 }), 3);
+  assert.equal(poolCount(db, { lists: [1], topN: -5 }), 3);
+});
+
+test('list selection and topN survive the round trip through buildPoolQuery params', () => {
+  // Guards the params/placeholder ordering: the list ids are bound inside the
+  // membership subquery and topN right after them, so an off-by-one in that
+  // push order would bind a list id as the rank cut.
+  const { where, params } = buildPoolQuery({ lists: [7, 9], topN: 25 });
+  assert.match(where, /l\.id IN \(\?, \?\)/);
+  assert.match(where, /lm\.rank IS NULL OR lm\.rank <= \?/);
+  assert.deepEqual(params, [7, 9, 25]);
+});
+
+test('topN combines with ordinary filters instead of replacing them', () => {
+  const db = seedRanked();
+  assert.equal(poolCount(db, { lists: [1], topN: 2, search: 'Second' }), 1);
+  assert.equal(poolCount(db, { lists: [1], topN: 1, search: 'Second' }), 0, 'cut out by topN');
+});

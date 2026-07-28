@@ -13,7 +13,8 @@
     "test": "node --test \"test/*.test.js\"",
     "fetch-seeds": "node scripts/fetch-seed-lists.mjs",
     "seed": "node scripts/seed.mjs",
-    "backfill": "node scripts/backfill.mjs"
+    "backfill": "node scripts/backfill.mjs",
+    "backfill-ranks": "node scripts/backfill-ranks.mjs"
   },
   "dependencies": {
     "express": "^5.1.0",

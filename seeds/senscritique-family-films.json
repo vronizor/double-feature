@@ -1,5 +1,6 @@
 {
   "name": "Family Films (Ages 6+)",
+  "category": "family",
   "source": "SensCritique — user list \"Films pour enfants à partir de 6 ans\"",
   "source_url": "https://www.senscritique.com/liste/films_pour_enfants_a_partir_de_6_ans/1334929",
   "note": "A single user's personal list on SensCritique, not an institutional one — skews toward classic silent comedy (Chaplin, Keaton, Tex Avery) and animation. SensCritique blocks scripted requests (403), so this was exported by hand as CSV rather than fetched by fetch-seed-lists.mjs; re-fetching means re-exporting by hand. `title` uses the international/original release title for matching where the CSV supplied one (`french_title` kept alongside for reference); French-original films use the French title directly since that already is the TMDB title.",

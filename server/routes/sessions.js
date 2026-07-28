@@ -63,10 +63,27 @@ router.post('/', (req, res) => {
     .map((row) => row.tmdb_id);
   if (known.length !== tmdbIds.length) throw fail('That draw contains unknown movies', 400);
 
-  const activeLists = db
-    .prepare('SELECT name FROM lists WHERE is_active = 1 ORDER BY name')
-    .all()
-    .map((row) => row.name);
+  // Which lists this draw actually came from. The client sends its own
+  // selection (see the `lists` filter), because `is_active` is only the
+  // opens-by-default preference now — reading it here would mislabel any draw
+  // where the host picked something different for tonight. Falls back to
+  // is_active when the client sends no selection at all.
+  const selectedListIds = Array.isArray(req.body?.filters?.lists)
+    ? req.body.filters.lists.map(Number).filter(Number.isInteger)
+    : null;
+
+  const sourceLists = (
+    selectedListIds === null
+      ? db.prepare('SELECT name FROM lists WHERE is_active = 1 ORDER BY name').all()
+      : selectedListIds.length === 0
+        ? []
+        : db
+            .prepare(
+              `SELECT name FROM lists WHERE id IN (${selectedListIds.map(() => '?').join(', ')})
+               ORDER BY name`,
+            )
+            .all(...selectedListIds)
+  ).map((row) => row.name);
 
   let slug;
   for (let attempt = 0; ; attempt += 1) {
@@ -81,7 +98,7 @@ router.post('/', (req, res) => {
   ).run(
     slug,
     req.body?.anonymous ? 1 : 0,
-    describeFilters(db, req.body?.filters ?? {}, activeLists),
+    describeFilters(db, req.body?.filters ?? {}, sourceLists),
   );
 
   const insert = db.prepare(

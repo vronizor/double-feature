@@ -1,5 +1,6 @@
 {
   "name": "BFI: Films to See by Age 15",
+  "category": "family",
   "source": "British Film Institute (BFI Education, with Into Film — 2020 update)",
   "source_url": "https://www.bfi.org.uk/lists/50-films-see-age-15",
   "note": "Originally published in 2005 as \"50 films you should see by the age of 14\"; the Wikipedia article for that title was deleted, but BFI itself updated and still hosts the list, broadened to roughly 65 films across four categories (Perfect for Primary, Super for Secondary, Wonders from Around the World, Growing Up Greats). Extracted by hand from the BFI page rather than by fetch-seed-lists.mjs; the page is a themed grid of poster cards, not a plain table, so an automated scraper for it doesn't exist yet. One entry — a \"Short Films by Lotte Reiniger\" anthology spanning 1953-1955 — is a compilation rather than a single catalogued film, and is left out rather than forced onto a single fake year.",

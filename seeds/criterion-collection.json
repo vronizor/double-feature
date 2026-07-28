@@ -1,5 +1,6 @@
 {
   "name": "The Criterion Collection",
+  "category": "collection",
   "source": "Wikidata — Criterion Collection spine number (P12279)",
   "source_url": "https://www.criterion.com/shop/browse/list?sort=spine",
   "note": "Wikipedia deleted its Criterion release list; Wikidata is the structured stand-in and supplies TMDB ids directly.",

@@ -38,6 +38,22 @@ const asSearch = (value) => {
   return s || null;
 };
 
+/**
+ * Deliberately NOT asIntList: this has three states, not two.
+ *
+ *   undefined/null → no selection sent; fall back to whatever `is_active` says
+ *   []             → an explicit "no lists selected", i.e. an EMPTY pool
+ *   [1, 4]         → exactly those lists
+ *
+ * Collapsing the first two would make "the host deselected every list" look
+ * identical to "the client didn't mention lists at all", and the pool would
+ * silently widen to the entire library at the exact moment the user asked for
+ * nothing. The absent case exists so older clients (and the API's own
+ * defaults) keep working while the UI moves over.
+ */
+const asListSelection = (value) =>
+  value === undefined || value === null ? null : asIntList(value);
+
 export function normalizeFilters(raw = {}) {
   return {
     genres: {
@@ -52,6 +68,8 @@ export function normalizeFilters(raw = {}) {
     runtime: { min: asInt(raw.runtime?.min), max: asInt(raw.runtime?.max) },
     includeWatched: Boolean(raw.includeWatched),
     search: asSearch(raw.search),
+    lists: asListSelection(raw.lists),
+    topN: asInt(raw.topN),
   };
 }
 
@@ -65,14 +83,38 @@ export function normalizeFilters(raw = {}) {
  */
 export function buildPoolQuery(filters, exclude = []) {
   const f = normalizeFilters(filters);
-  const clauses = [
-    `m.tmdb_id IN (
+  const clauses = [];
+  const params = [];
+
+  // --- Which lists are in play -------------------------------------------
+  //
+  // An explicitly empty selection means an empty pool. Returning `1 = 0` (as
+  // opposed to skipping the clause) is the whole point: without it, "no lists
+  // selected" would fall through to no membership constraint at all and match
+  // every movie ever cached, including films from lists the host just turned
+  // off.
+  if (f.lists !== null && f.lists.length === 0) {
+    clauses.push('1 = 0');
+  } else {
+    const scope = f.lists === null ? 'l.is_active = 1' : `l.id IN (${f.lists.map(() => '?').join(', ')})`;
+    const scopeParams = f.lists === null ? [] : f.lists;
+
+    // A "top N" cut applies per list, and only to lists that actually carry
+    // ranks. NULL rank means the list simply isn't ranked (Criterion, Ghibli),
+    // and those films must stay in — otherwise asking for "the top 100" would
+    // silently delete every unranked list from the pool rather than narrowing
+    // the ranked ones.
+    const topN = f.topN !== null && f.topN > 0;
+    clauses.push(
+      `m.tmdb_id IN (
        SELECT lm.tmdb_id FROM list_movies lm
        JOIN lists l ON l.id = lm.list_id
-       WHERE l.is_active = 1 AND lm.tmdb_id IS NOT NULL
+       WHERE ${scope} AND lm.tmdb_id IS NOT NULL${topN ? '\n         AND (lm.rank IS NULL OR lm.rank <= ?)' : ''}
      )`,
-  ];
-  const params = [];
+    );
+    params.push(...scopeParams);
+    if (topN) params.push(f.topN);
+  }
 
   // Not a filter preference (like "no horror") — a per-request "don't hand
   // back what's already staged" instruction, so it's a separate argument
@@ -257,6 +299,7 @@ export function describeFilters(db, filters, activeListNames) {
   if (f.languages.exclude.length) parts.push(`no ${f.languages.exclude.map(languageName).join('/')}`);
   if (f.genres.include.length) parts.push(f.genres.include.map(nameFor).join('/'));
   if (f.genres.exclude.length) parts.push(`no ${f.genres.exclude.map(nameFor).join('/')}`);
+  if (f.topN !== null && f.topN > 0) parts.push(`top ${f.topN}`);
   if (f.includeWatched) parts.push('incl. watched');
   if (f.search) parts.push(`"${f.search}"`);
 

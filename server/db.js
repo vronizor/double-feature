@@ -5,10 +5,25 @@ import { dirname } from 'node:path';
 import { config } from './config.js';
 
 const SCHEMA = `
+-- category groups lists in the picker ('canon', 'awards', 'family', ...) so
+-- that selecting "all the awards lists" is one action rather than five. It is
+-- deliberately a display grouping, not a taxonomy: a list may honestly belong
+-- to two (the BFI list is both family and canon), but one category per list is
+-- what keeps each list rendering exactly once in a grouped picker.
+--
+-- NULL means "not categorised yet" rather than defaulting to a lie — the
+-- picker renders those under "Uncategorised", which is also where custom
+-- lists land until the user files them.
+--
+-- is_active means "in play by default when the app opens", and is written
+-- ONLY from the Lists tab. Draw/Explore hold their list selection in view
+-- state instead, so choosing an occasion for tonight never silently rewrites
+-- a stored preference or leaks across tabs.
 CREATE TABLE IF NOT EXISTS lists (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   name        TEXT    NOT NULL UNIQUE,
   kind        TEXT    NOT NULL CHECK (kind IN ('seed', 'custom')),
+  category    TEXT,
   is_active   INTEGER NOT NULL DEFAULT 0,
   source      TEXT,
   source_url  TEXT,
@@ -70,12 +85,20 @@ CREATE INDEX IF NOT EXISTS movie_genres_genre ON movie_genres(genre_id);
 
 -- The raw entered title/year is kept alongside each row for provenance and for
 -- manual reconciliation of anything TMDB could not confidently match.
+--
+-- rank is the film's position on THIS list (TSPDT #1, Sight & Sound #12) and
+-- is therefore per-membership, not per-film — the same movie can be #3 on one
+-- list and unranked on another, which is why it lives here and not on movies.
+-- NULL means the list simply isn't ranked (Criterion, Ghibli); a "top N" filter
+-- must treat NULL as "always included" rather than excluding those lists
+-- wholesale.
 CREATE TABLE IF NOT EXISTS list_movies (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   list_id         INTEGER NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
   tmdb_id         INTEGER          REFERENCES movies(tmdb_id) ON DELETE SET NULL,
   raw_title       TEXT    NOT NULL,
   raw_year        INTEGER,
+  rank            INTEGER,
   status          TEXT    NOT NULL CHECK (status IN ('resolved', 'needs_review', 'unmatched')),
   candidates_json TEXT,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
@@ -151,6 +174,11 @@ function migrate(target) {
   ensureColumn(target, 'movies', 'is_manual', 'INTEGER NOT NULL DEFAULT 0');
   ensureColumn(target, 'lists', 'source', 'TEXT');
   ensureColumn(target, 'lists', 'source_url', 'TEXT');
+  ensureColumn(target, 'lists', 'category', 'TEXT');
+  // Populated from the seed files by scripts/backfill-ranks.mjs, NOT by a
+  // re-run of the seeder: seed.mjs deliberately skips entries that already
+  // landed, so rows seeded before this column existed would stay NULL forever.
+  ensureColumn(target, 'list_movies', 'rank', 'INTEGER');
 }
 
 let db;
