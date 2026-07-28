@@ -3,6 +3,9 @@ data/*.db
 data/*.db-journal
 data/*.db-wal
 data/*.db-shm
+# Manual backups taken before a migration (e.g. double-feature.db.pre-v2) —
+# the patterns above only match names ending in .db, so these need their own.
+data/*.db.*
 .env
 .DS_Store
 .claude/
