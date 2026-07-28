@@ -5,17 +5,247 @@
  */
 import { h, posterUrl, toast, formatRating, openMovieModal, originalTitleLine } from './dom.js';
 import { api } from './api.js';
+import { poolState } from './pool-state.js';
 
-export const emptyFilters = () => ({
-  genres: { include: [], exclude: [] },
-  languages: { include: [], exclude: [] },
-  year: { min: null, max: null },
-  runtime: { min: null, max: null },
-  includeWatched: true,
-  // Only surfaced in the UI on the Explore tab; Draw carries it inertly since
-  // both share this same filters shape.
-  search: '',
-});
+// Re-exported so views can keep importing the filter shape from here alongside
+// everything else they use; it lives in pool-state.js because the singleton
+// owns it.
+export { emptyFilters } from './pool-state.js';
+
+// Display order and labels for the list picker's groups. A list's category is
+// free text (no CHECK constraint — this codebase already learned that lesson
+// with media_type), so anything unrecognised, including NULL, falls through to
+// "Uncategorised" rather than vanishing from the picker.
+const CATEGORY_ORDER = ['canon', 'awards', 'festivals', 'family', 'collection', 'dynamic'];
+const CATEGORY_LABELS = {
+  canon: 'The canon',
+  awards: 'Awards',
+  festivals: 'Festivals',
+  family: 'Family',
+  collection: 'Collections',
+  dynamic: 'Auto-updating',
+  __other: 'Uncategorised',
+};
+
+const categoryKeyOf = (list) =>
+  CATEGORY_ORDER.includes(list.category) ? list.category : '__other';
+
+export function groupListsByCategory(lists) {
+  const groups = new Map();
+  for (const list of lists) {
+    const key = categoryKeyOf(list);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(list);
+  }
+  const order = [...CATEGORY_ORDER, '__other'];
+  return [...groups.entries()]
+    .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
+    .map(([key, items]) => ({
+      key,
+      label: CATEGORY_LABELS[key] ?? key,
+      lists: items.sort((a, b) => a.name.localeCompare(b.name)),
+    }));
+}
+
+/**
+ * The grouped list picker, shared by Draw and Explore.
+ *
+ * Selection is held in `poolState`, NOT written to the database: `is_active` is
+ * the "opens by default" preference and belongs to the Lists tab. Ticking a box
+ * here therefore changes tonight's pool without rewriting that preference or
+ * leaking the change into the other tab's idea of what's in play.
+ *
+ * `openGroups` is a Set owned by the calling view, so which groups are expanded
+ * survives that view's repaints.
+ */
+export function renderListPicker(lists, openGroups, onChange) {
+  if (lists.length === 0) {
+    return h(
+      'div',
+      { class: 'empty' },
+      'No lists yet. Add one on the ',
+      h('a', { href: '#lists' }, 'Lists'),
+      ' tab, or run the seed script.',
+    );
+  }
+
+  const groups = groupListsByCategory(lists);
+  const allIds = lists.map((list) => list.id);
+  const selectedCount = lists.filter((list) => poolState.isSelected(list.id)).length;
+
+  const bulk = (label, ids, on) =>
+    h(
+      'button',
+      {
+        class: 'btn-sm',
+        onClick: () => {
+          poolState.setMany(ids, on);
+          onChange();
+        },
+      },
+      label,
+    );
+
+  return h(
+    'div',
+    { class: 'stack', style: 'gap:10px' },
+    h(
+      'div',
+      { class: 'row' },
+      h('span', { class: 'faint' }, `${selectedCount} of ${lists.length} lists selected`),
+      h('span', { class: 'spacer' }),
+      bulk('Select all', allIds, true),
+      bulk('Deselect all', allIds, false),
+    ),
+    ...groups.map((group) => {
+      const ids = group.lists.map((list) => list.id);
+      const selected = ids.filter((id) => poolState.isSelected(id)).length;
+      const films = group.lists.reduce((sum, list) => sum + (list.resolved_count ?? 0), 0);
+      // A group the host is actually using stays open across repaints; the
+      // rest stay out of the way. With ~20 lists this is what keeps the panel
+      // readable at all.
+      const isOpen = openGroups.has(group.key) || (selected > 0 && !openGroups.has(`!${group.key}`));
+
+      // Interacting with a group pins it open. Without this, unchecking the
+      // last selected list in a group would drop `selected` to 0 and collapse
+      // the group instantly — yanking the very checkbox being clicked out from
+      // under the cursor.
+      const pinOpen = () => {
+        openGroups.delete(`!${group.key}`);
+        openGroups.add(group.key);
+      };
+
+      const groupBulk = (label, on) =>
+        h(
+          'button',
+          {
+            class: 'btn-sm',
+            onClick: () => {
+              pinOpen();
+              poolState.setMany(ids, on);
+              onChange();
+            },
+          },
+          label,
+        );
+
+      return h(
+        'div',
+        { class: `list-group${selected > 0 ? ' is-active' : ''}` },
+        h(
+          'div',
+          { class: 'row list-group-head' },
+          h(
+            'button',
+            {
+              class: 'expand-link',
+              onClick: () => {
+                // Two markers, not one: `key` forces open, `!key` forces
+                // closed. Without the explicit closed marker, collapsing a
+                // group that has selections would spring straight back open
+                // on the next repaint.
+                if (isOpen) {
+                  openGroups.delete(group.key);
+                  openGroups.add(`!${group.key}`);
+                } else {
+                  openGroups.delete(`!${group.key}`);
+                  openGroups.add(group.key);
+                }
+                onChange();
+              },
+            },
+            `${isOpen ? '▾' : '▸'} ${group.label}`,
+          ),
+          h(
+            'span',
+            { class: 'faint' },
+            `${group.lists.length} ${group.lists.length === 1 ? 'list' : 'lists'} · ${films.toLocaleString()} films` +
+              (selected > 0 ? ` · ${selected} on` : ''),
+          ),
+          h('span', { class: 'spacer' }),
+          groupBulk('all', true),
+          groupBulk('none', false),
+        ),
+        isOpen
+          ? h(
+              'div',
+              { class: 'list-picker-grid' },
+              group.lists.map((list) =>
+                h(
+                  'div',
+                  {
+                    class: `list-row list-row--picker${poolState.isSelected(list.id) ? ' is-active' : ''}`,
+                  },
+                  h(
+                    'label',
+                    { class: 'check' },
+                    h('input', {
+                      type: 'checkbox',
+                      checked: poolState.isSelected(list.id),
+                      onChange: (event) => {
+                        pinOpen();
+                        poolState.setSelected(list.id, event.target.checked);
+                        onChange();
+                      },
+                    }),
+                    h('span', { class: 'list-name' }, list.name),
+                  ),
+                  h(
+                    'div',
+                    { class: 'list-row-badges' },
+                    h('span', { class: 'badge' }, `${list.resolved_count} films`),
+                    list.review_count > 0
+                      ? h('span', { class: 'badge badge-warn' }, `${list.review_count} to review`)
+                      : null,
+                  ),
+                ),
+              ),
+            )
+          : null,
+      );
+    }),
+  );
+}
+
+/**
+ * "Top N of each ranked list" — rendered only when a selected list actually
+ * carries ranks. Showing it against Criterion or Ghibli would be meaningless,
+ * since an unranked list is deliberately unaffected by the cut.
+ */
+export function renderTopN(lists, onChange) {
+  const rankedSelected = lists.filter(
+    (list) => list.ranked_count > 0 && poolState.isSelected(list.id),
+  );
+  if (rankedSelected.length === 0) return null;
+
+  return h(
+    'div',
+    {},
+    h('div', { class: 'field-label' }, 'Ranked lists'),
+    h(
+      'div',
+      { class: 'row' },
+      h('span', { class: 'muted' }, 'Top'),
+      h('input', {
+        type: 'number',
+        min: '1',
+        placeholder: 'all',
+        value: poolState.filters.topN ?? '',
+        style: 'width:88px',
+        onInput: (event) => {
+          const raw = event.target.value.trim();
+          poolState.setTopN(raw === '' ? null : Number(raw));
+          onChange();
+        },
+      }),
+      h(
+        'span',
+        { class: 'faint' },
+        `of ${rankedSelected.map((l) => l.name).join(', ')} — unranked lists are unaffected`,
+      ),
+    ),
+  );
+}
 
 /**
  * Shared include/exclude chip row for both genres and languages: neutral →

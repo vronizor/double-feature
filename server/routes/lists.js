@@ -16,7 +16,9 @@ function listWithCounts(db, id) {
               (SELECT COUNT(*) FROM list_movies lm
                 WHERE lm.list_id = l.id AND lm.status = 'resolved')     AS resolved_count,
               (SELECT COUNT(*) FROM list_movies lm
-                WHERE lm.list_id = l.id AND lm.status <> 'resolved')    AS review_count
+                WHERE lm.list_id = l.id AND lm.status <> 'resolved')    AS review_count,
+              (SELECT COUNT(lm.rank) FROM list_movies lm
+                WHERE lm.list_id = l.id)                               AS ranked_count
        FROM lists l WHERE l.id = ?`,
     )
     .get(id);
@@ -30,7 +32,13 @@ router.get('/', (req, res) => {
               (SELECT COUNT(*) FROM list_movies lm
                 WHERE lm.list_id = l.id AND lm.status = 'resolved')  AS resolved_count,
               (SELECT COUNT(*) FROM list_movies lm
-                WHERE lm.list_id = l.id AND lm.status <> 'resolved') AS review_count
+                WHERE lm.list_id = l.id AND lm.status <> 'resolved') AS review_count,
+              -- COUNT(col) skips NULLs, so this is "how many rows on this list
+              -- carry a rank" — 0 means the list simply isn't a ranked one,
+              -- which is what the Top-N control keys off to decide whether it
+              -- is worth showing at all.
+              (SELECT COUNT(lm.rank) FROM list_movies lm
+                WHERE lm.list_id = l.id)                             AS ranked_count
        FROM lists l ORDER BY l.kind DESC, l.name`,
     )
     .all();

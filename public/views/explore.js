@@ -1,7 +1,8 @@
 import { h, clear, plural, toast } from '../dom.js';
 import { api } from '../api.js';
-import { emptyFilters, renderFilterPanel, movieCard } from '../browse.js';
+import { renderFilterPanel, renderListPicker, renderTopN, movieCard } from '../browse.js';
 import { lineup } from '../lineup.js';
+import { poolState } from '../pool-state.js';
 
 const PAGE_SIZE = 60;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -24,7 +25,11 @@ export async function renderExplore(container) {
   const state = {
     lists: [],
     facets: null,
-    filters: emptyFilters(),
+    // Explore's own, deliberately NOT in the shared pool state: it's a
+    // transient "find me this thing" action, and sharing it would mean typing
+    // a title here silently shrank the Draw pool with no visible cause.
+    search: '',
+    openGroups: new Set(),
     sort: 'title',
     movies: [],
     total: 0,
@@ -36,6 +41,7 @@ export async function renderExplore(container) {
     const [{ lists }, facets] = await Promise.all([api.lists(), api.facets()]);
     state.lists = lists;
     state.facets = facets;
+    poolState.seedFrom(lists);
   }
 
   /** `reset: true` replaces the grid (filters/sort changed); otherwise appends the next page ("Load more"). */
@@ -45,7 +51,7 @@ export async function renderExplore(container) {
     paint();
 
     try {
-      const { movies, total } = await api.poolMovies(state.filters, {
+      const { movies, total } = await api.poolMovies(poolState.filtersFor({ search: state.search }), {
         sort: state.sort,
         limit: PAGE_SIZE,
         offset: state.offset,
@@ -61,39 +67,7 @@ export async function renderExplore(container) {
 
   function listPicker() {
     if (state.lists.length === 0) return null;
-
-    return h(
-      'div',
-      { class: 'list-picker-grid' },
-      state.lists.map((list) =>
-        h(
-          'div',
-          { class: `list-row list-row--picker${list.is_active ? ' is-active' : ''}` },
-          h(
-            'label',
-            { class: 'check' },
-            h('input', {
-              type: 'checkbox',
-              checked: Boolean(list.is_active),
-              onChange: async (event) => {
-                await api.updateList(list.id, { is_active: event.target.checked });
-                await refreshData();
-                await loadPage({ reset: true });
-              },
-            }),
-            h('span', { class: 'list-name' }, list.name),
-          ),
-          h(
-            'div',
-            { class: 'list-row-badges' },
-            h('span', { class: 'badge' }, `${list.resolved_count} films`),
-            list.review_count > 0
-              ? h('span', { class: 'badge badge-warn' }, `${list.review_count} to review`)
-              : null,
-          ),
-        ),
-      ),
-    );
+    return renderListPicker(state.lists, state.openGroups, () => loadPage({ reset: true }));
   }
 
   let searchDebounce = null;
@@ -105,10 +79,10 @@ export async function renderExplore(container) {
         type: 'search',
         id: SEARCH_INPUT_ID,
         placeholder: 'Search by title or director…',
-        value: state.filters.search,
+        value: state.search,
         style: 'max-width:340px',
         onInput: (event) => {
-          state.filters.search = event.target.value;
+          state.search = event.target.value;
           clearTimeout(searchDebounce);
           // Debounced rather than firing per keystroke — this repaints (the
           // results grid has to update), and a repaint mid-keystroke would
@@ -121,11 +95,18 @@ export async function renderExplore(container) {
 
   function filterPanel() {
     if (!state.facets) return null;
-    return renderFilterPanel(state.filters, state.facets, {
-      onChipChange: () => loadPage({ reset: true }),
-      onValueChange: () => loadPage({ reset: true }),
+    return renderFilterPanel(poolState.filters, state.facets, {
+      onChipChange: () => {
+        poolState.markCustom();
+        loadPage({ reset: true });
+      },
+      onValueChange: () => {
+        poolState.markCustom();
+        loadPage({ reset: true });
+      },
       onClear: () => {
-        state.filters = emptyFilters();
+        poolState.clearFilters();
+        state.search = '';
         loadPage({ reset: true });
       },
     });
@@ -232,6 +213,7 @@ export async function renderExplore(container) {
         ),
         listPicker(),
         searchBox(),
+        renderTopN(state.lists, () => loadPage({ reset: true })),
         filterPanel(),
         sortControl(),
         resultsGrid(),

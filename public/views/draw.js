@@ -1,8 +1,9 @@
 import { h, clear, toast, plural, posterUrl, tmdbUrl, parseTmdbInput, openMovieModal } from '../dom.js';
 import { api } from '../api.js';
 import { renderSessionPanel } from './session.js';
-import { emptyFilters, renderFilterPanel, movieCard } from '../browse.js';
+import { renderFilterPanel, renderListPicker, renderTopN, movieCard } from '../browse.js';
 import { lineup } from '../lineup.js';
+import { poolState } from '../pool-state.js';
 
 const MIN_DRAW_SIZE = 1;
 const MAX_DRAW_SIZE = 10;
@@ -32,8 +33,11 @@ export async function renderDraw(container) {
   const state = {
     lists: [],
     facets: null,
-    filters: emptyFilters(),
     poolSetupOpen: false,
+    // Which picker categories are expanded. Lives here (not in poolState)
+    // because it's presentation, not pool definition — but it must outlive a
+    // repaint, which is why it isn't a local in the render function.
+    openGroups: new Set(),
     size: 2,
     searchResults: [],
     anonymous: false,
@@ -51,6 +55,9 @@ export async function renderDraw(container) {
     const [{ lists }, facets] = await Promise.all([api.lists(), api.facets()]);
     state.lists = lists;
     state.facets = facets;
+    // First load only — adopts whatever the Lists tab marked active by
+    // default. Subsequent mounts keep whatever the host chose for tonight.
+    poolState.seedFrom(lists);
     state.poolCount = facets.total;
   }
 
@@ -58,7 +65,7 @@ export async function renderDraw(container) {
   async function refreshCount() {
     const token = ++countToken;
     try {
-      const { count } = await api.poolCount(state.filters, lineup.ids());
+      const { count } = await api.poolCount(poolState.filters, lineup.ids());
       if (token === countToken) {
         state.poolCount = count;
         paintCount();
@@ -93,11 +100,13 @@ export async function renderDraw(container) {
   // A compact one-line readout of the pool config, shown next to the
   // collapsed toggle so it's still visible at a glance without expanding it.
   function poolSetupSummary() {
-    const activeCount = state.lists.filter((list) => list.is_active).length;
-    if (activeCount === 0) return 'No lists active — tap to choose';
+    const selected = poolState.selectedLists();
+    const count = selected === null ? state.lists.filter((l) => l.is_active).length : selected.length;
+    if (count === 0) return 'No lists selected — tap to choose';
 
-    const parts = [`${plural(activeCount, 'list')} active`];
-    const f = state.filters;
+    const parts = [`${plural(count, 'list')}`];
+    const f = poolState.filters;
+    if (f.topN) parts.push(`top ${f.topN}`);
     const genreName = (id) => state.facets?.genres.find((g) => g.id === id)?.name ?? `#${id}`;
     const langName = (code) => state.facets?.languages.find((l) => l.code === code)?.name ?? code;
 
@@ -144,68 +153,30 @@ export async function renderDraw(container) {
             'div',
             { class: 'stack', style: 'margin-top:10px' },
             h('div', { class: 'field-label' }, 'Lists in play'),
-            listPicker(),
+            renderListPicker(state.lists, state.openGroups, () => {
+              refreshCount();
+              paint();
+            }),
+            renderTopN(state.lists, () => refreshCount()),
             state.facets ? filterPanel() : null,
           )
         : null,
     );
   }
 
-  function listPicker() {
-    if (state.lists.length === 0) {
-      return h(
-        'div',
-        { class: 'empty' },
-        'No lists yet. Add one on the ',
-        h('a', { href: '#lists' }, 'Lists'),
-        ' tab, or run the seed script.',
-      );
-    }
-
-    return h(
-      'div',
-      { class: 'list-picker-grid' },
-      state.lists.map((list) =>
-        h(
-          'div',
-          { class: `list-row list-row--picker${list.is_active ? ' is-active' : ''}` },
-          h(
-            'label',
-            { class: 'check' },
-            h('input', {
-              type: 'checkbox',
-              checked: Boolean(list.is_active),
-              onChange: async (event) => {
-                await api.updateList(list.id, { is_active: event.target.checked });
-                await refreshData();
-                await refreshCount();
-                paint();
-              },
-            }),
-            h('span', { class: 'list-name' }, list.name),
-          ),
-          h(
-            'div',
-            { class: 'list-row-badges' },
-            h('span', { class: 'badge' }, `${list.resolved_count} films`),
-            list.review_count > 0
-              ? h('span', { class: 'badge badge-warn' }, `${list.review_count} to review`)
-              : null,
-          ),
-        ),
-      ),
-    );
-  }
-
   function filterPanel() {
-    return renderFilterPanel(state.filters, state.facets, {
+    return renderFilterPanel(poolState.filters, state.facets, {
       onChipChange: () => {
+        poolState.markCustom();
         refreshCount();
         paint();
       },
-      onValueChange: () => refreshCount(),
+      onValueChange: () => {
+        poolState.markCustom();
+        refreshCount();
+      },
       onClear: () => {
-        state.filters = emptyFilters();
+        poolState.clearFilters();
         refreshCount();
         paint();
       },
@@ -280,7 +251,7 @@ export async function renderDraw(container) {
     state.busy = true;
     paint();
     try {
-      const result = await api.draw(state.size, state.filters, lineup.ids());
+      const result = await api.draw(state.size, poolState.filters, lineup.ids());
       lineup.addAll(result.movies);
       if (result.shortfall > 0) {
         toast(
@@ -609,7 +580,7 @@ export async function renderDraw(container) {
     state.busy = true;
     paint();
     try {
-      const session = await api.publish(lineup.ids(), state.anonymous, state.filters);
+      const session = await api.publish(lineup.ids(), state.anonymous, poolState.filters);
       showSession(session.slug);
     } catch (error) {
       toast(error.message, 'error');

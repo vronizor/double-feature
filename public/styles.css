@@ -134,6 +134,20 @@ label { display: block; }
   .list-picker-grid .list-row + .list-row { margin-top: 0; }
 }
 
+/* Category groups in the list picker. With ~20 lists a flat checkbox grid stops
+   being readable, so lists are grouped and only the groups in use stay open. */
+.list-group {
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; background: var(--bg-sunken);
+}
+.list-group + .list-group { margin-top: 8px; }
+.list-group.is-active { border-color: var(--border-strong); }
+.list-group-head { gap: 8px; }
+/* The group header's expand-link carries the .expand-link margin meant for
+   standalone use, which would indent it out of line with the row here. */
+.list-group-head .expand-link { margin: 0; font-size: 0.85rem; font-weight: 560; }
+.list-group .list-picker-grid { margin-top: 8px; }
+
 /* At 280–320px there isn't room for name + both badges on one line without
    cramming or wrapping mid-word (the badge pill itself wrapping its text) —
    so the picker's rows stack the name and its badges on two lines instead. */

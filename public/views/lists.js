@@ -1,5 +1,6 @@
 import { h, clear, posterUrl, toast, plural, tmdbUrl, openMovieModal, parseTmdbInput } from '../dom.js';
 import { api } from '../api.js';
+import { poolState } from '../pool-state.js';
 
 export async function renderLists(container) {
   const state = {
@@ -508,7 +509,15 @@ export async function renderLists(container) {
             type: 'checkbox',
             checked: Boolean(list.is_active),
             onChange: async (event) => {
-              await api.updateList(list.id, { is_active: event.target.checked });
+              const on = event.target.checked;
+              await api.updateList(list.id, { is_active: on });
+              // This tab is where the "in play by default" preference is
+              // curated, so a change here applies to tonight as well —
+              // otherwise you'd switch a list on, walk over to the Lineup tab,
+              // and find it conspicuously absent from the pool. Draw/Explore
+              // work the other way round: what you pick there is tonight-only
+              // and never rewrites this preference.
+              poolState.setSelected(list.id, on);
               await refresh();
               paint();
             },
