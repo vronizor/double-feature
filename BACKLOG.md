@@ -166,6 +166,24 @@ family of lists should arrive with a category rather than as loose entries.
 
 ## Unscheduled
 
+- **Alternative ratings on hover (IMDb, Letterboxd, SensCritique).** Show a
+  second opinion beside TMDB's score on the card or in the detail overlay.
+  Needs an assessment of what is actually obtainable — partial notes from the
+  session that raised it:
+
+  | Source | Status | Notes |
+  |---|---|---|
+  | **IMDb** | ✅ verified obtainable | Official dataset `title.ratings.tsv.gz`, **8 MB**, every title, updated daily, free for personal/non-commercial use. Joins exactly via `imdb_id`, which TMDB already returns in the detail response — no fuzzy matching. Would need an `imdb_id` column plus a backfill. |
+  | **SensCritique** | ❌ verified blocked | Returns 403 to scripted requests, same as criterion.com. The family-films seed list had to be exported by hand for this reason. |
+  | **Letterboxd** | ❓ unassessed | No public API historically; believed to be invite/beta only. Needs checking before any design — do not assume scraping is acceptable, their terms are the deciding factor. |
+
+  Design notes if picked up: the licence on the IMDb data is
+  personal/non-commercial, which fits this app but means **the dataset must not
+  be committed to the repo** — fetch at setup/refresh time and store only the
+  derived numbers. Worth deciding whether this is display-only (a second score
+  in the overlay) or feeds a metric, because the popularity-vs-acclaim finding
+  above showed that a bigger sample does **not** fix the language skew.
+
 Nothing here is committed to a version. The measurement write-ups above are
 kept because the v3 items in `ROADMAP.md` reference their evidence.
 
