@@ -268,13 +268,16 @@ is an obvious Explore action later.
 
 ---
 
-## 4. Finish v2
+## 4. v2 — done
 
-What remains to make the shipped feature set correct, coherent and documented.
-Everything genuinely new lives in §5 (v3) or `BACKLOG.md`.
+Shipped. Kept for the reasoning and the traps, which stay true.
 
-Ordered: verified bugs first, then the cheap completions, then the one
-medium-sized build, then docs.
+F1 facet counts, F2 the Modern Classics rename, F3 mark the winner watched,
+F4 reset the lineup on close, F5 lineup provenance, F6 Replace N,
+F7 the seen-set, F8 the fetcher shrink guard, F10 docs.
+
+F9 (streaming badge) moved to §5 — informational rather than urgent, and the
+only piece with no bearing on whether the rest is correct.
 
 ### F1 — facet counts must respect the list selection
 
@@ -356,20 +359,6 @@ source plus a comparison against the `count` field already present in every
 seed JSON, refusing to overwrite on a large shrink. ~15 lines, and it protects
 every future fetcher including box office.
 
-### F9 — streaming badge
-
-Card meta line and modal only — **never a pool filter**. Measured FR flatrate
-coverage is ~30% of this library and 0% pre-1930, so filtering on it would gut
-the arthouse canon. Absent must mean "unknown", not "excluded".
-
-Free to fetch: `append_to_response=watch/providers` rides the detail call the
-refresh job already makes. Needs a providers join table (same shape as
-`movie_genres`), a region setting in `.env` beside `HOST_LAN_IP`, and display.
-
-One knock-on: provider data goes stale far faster than the rest. Tightening the
-refresh cycle from 150 days to ~14 costs `2455 / 14 ≈ 175` films/day, below the
-existing 250/day budget — a cadence change, not new infrastructure.
-
 ### F10 — docs sweep
 
 `README.md` still says 13 lists (there are 16) and describes categories rather
@@ -380,6 +369,20 @@ vocabulary exists.
 ## 5. v3
 
 Agreed direction, not yet started.
+
+- **Streaming badge.** Moved here from v2: it is the only remaining piece with
+  no user-visible urgency, being deliberately informational rather than a
+  filter. Card meta line and modal only — **never a pool filter**. Measured FR
+  flatrate coverage is ~30% of this library and 0% pre-1930, so filtering on it
+  would gut the arthouse canon. Absent must mean "unknown", not "excluded".
+
+  Free to fetch: `append_to_response=watch/providers` rides the detail call the
+  refresh job already makes. Needs a providers join table (same shape as
+  `movie_genres`), a region setting in `.env` beside `HOST_LAN_IP`, and display.
+
+  One knock-on: provider data goes stale far faster than the rest. Tightening
+  the refresh cycle from 150 days to ~14 costs `2455 / 14 approx 175` films/day,
+  below the existing 250/day budget — a cadence change, not new infrastructure.
 
 - **Box-office per country — France and Spain first.** National popularity
   cannot be derived from TMDB or IMDb: their vote counts measure international
