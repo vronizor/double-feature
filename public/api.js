@@ -67,7 +67,10 @@ export const api = {
   addManualMovie: (title, year) =>
     request('/api/movies/manual', { method: 'POST', body: { title, year } }),
 
-  facets: () => request('/api/pool/facets'),
+  // Omitting `lists` falls back to is_active server-side, which is what the
+  // very first paint wants — the client has no selection of its own yet.
+  facets: (lists = null) =>
+    request(`/api/pool/facets${lists ? `?lists=${lists.join(',')}` : ''}`),
   poolCount: (filters, exclude) =>
     request('/api/pool/count', { method: 'POST', body: { filters, exclude } }),
   draw: (size, filters, exclude) =>

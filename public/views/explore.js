@@ -48,7 +48,7 @@ export async function renderExplore(container) {
   async function refreshData() {
     const [{ lists }, facets, { tags }] = await Promise.all([
       api.lists(),
-      api.facets(),
+      api.facets(poolState.selectedLists()),
       api.tags(),
     ]);
     state.lists = lists;
@@ -78,12 +78,31 @@ export async function renderExplore(container) {
     }
   }
 
+  // Same reasoning as draw.js: refetch facets when the list SELECTION changes,
+  // not when a filter does.
+  let facetToken = 0;
+  async function refreshFacets() {
+    const token = ++facetToken;
+    try {
+      const facets = await api.facets(poolState.selectedLists());
+      if (token === facetToken) {
+        state.facets = facets;
+        paint();
+      }
+    } catch {
+      // Stale chip counts are survivable.
+    }
+  }
+
   function listPicker() {
     if (state.lists.length === 0) return null;
     return renderListPicker(
       state.lists,
       state.openGroups,
-      () => loadPage({ reset: true }),
+      () => {
+        refreshFacets();
+        loadPage({ reset: true });
+      },
       { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
     );
   }

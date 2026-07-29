@@ -10,14 +10,35 @@ const MIN_DRAW_SIZE = 1;
 const MAX_DRAW_SIZE = 10;
 const MAX_PAGE_SIZE = 120;
 
-/** Filter options, limited to what the active pool actually contains. */
+/**
+ * Filter options, limited to what the SELECTED pool actually contains.
+ *
+ * `?lists=1,4,9` scopes the counts and bounds to that selection; omitting it
+ * falls back to `is_active`, which is what a first paint sends before the
+ * client has a selection of its own. Without the parameter the chips would
+ * describe the default pool while the draw used the selected one — measured at
+ * "Drama 1671" against a 40-film selection.
+ */
 router.get('/pool/facets', (req, res) => {
   const db = getDb();
-  const facets = poolFacets(db);
+  // Three states, matching the filter convention: the parameter ABSENT means
+  // "fall back to is_active", while `?lists=` (present but empty) means the
+  // host has deselected everything and the pool really is empty. Collapsing
+  // those two would make deselecting every list show the default pool's counts.
+  const raw = req.query.lists;
+  const lists =
+    raw === undefined
+      ? null
+      : String(raw)
+          .split(',')
+          .map(Number)
+          .filter(Number.isInteger);
+
+  const facets = poolFacets(db, lists);
   res.json({
     ...facets,
     languages: facets.languages.map((row) => ({ ...row, name: languageName(row.code) })),
-    total: poolCount(db, {}),
+    total: poolCount(db, lists === null ? {} : { lists }),
   });
 });
 

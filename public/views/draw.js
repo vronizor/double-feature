@@ -68,7 +68,7 @@ export async function renderDraw(container) {
   async function refreshData() {
     const [{ lists }, facets, { tags }, { vibes }] = await Promise.all([
       api.lists(),
-      api.facets(),
+      api.facets(poolState.selectedLists()),
       api.tags(),
       api.vibes(),
     ]);
@@ -80,6 +80,25 @@ export async function renderDraw(container) {
     // default. Subsequent mounts keep whatever the host chose for tonight.
     poolState.seedFrom(lists);
     state.poolCount = facets.total;
+  }
+
+  // Re-fetch the facets whenever the list SELECTION changes, so the genre and
+  // language chip counts describe the pool being drawn from. Deliberately not
+  // called for filter changes: those narrow the pool but don't change which
+  // lists are in play, so the facets stay valid and a request per keystroke
+  // would be wasteful.
+  let facetToken = 0;
+  async function refreshFacets() {
+    const token = ++facetToken;
+    try {
+      const facets = await api.facets(poolState.selectedLists());
+      if (token === facetToken) {
+        state.facets = facets;
+        paint();
+      }
+    } catch {
+      // Stale chip counts are survivable; an error banner is not worth it.
+    }
   }
 
   let countToken = 0;
@@ -183,6 +202,7 @@ export async function renderDraw(container) {
               state.openGroups,
               () => {
                 refreshCount();
+                refreshFacets();
                 paint();
               },
               { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
@@ -276,6 +296,7 @@ export async function renderDraw(container) {
           // a one-line summary on faith.
           state.poolSetupOpen = true;
           refreshCount();
+          refreshFacets();
           paint();
         },
         onSave: saveCurrentAsVibe,

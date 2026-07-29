@@ -394,3 +394,35 @@ test('topN combines with ordinary filters instead of replacing them', () => {
   assert.equal(poolCount(db, { lists: [1], topN: 2, search: 'Second' }), 1);
   assert.equal(poolCount(db, { lists: [1], topN: 1, search: 'Second' }), 0, 'cut out by topN');
 });
+
+test('poolFacets describes the SELECTED pool, not whatever is_active says', () => {
+  // The bug this replaces: with only one list selected, the genre chips still
+  // reported counts from every active list — "Drama 1671" against a 40-film
+  // selection.
+  const db = seed();
+  const everything = poolFacets(db);
+  const justInactive = poolFacets(db, [2]);
+
+  assert.ok(everything.genres.length > 0);
+  assert.deepEqual(
+    justInactive.genres.map((g) => g.name),
+    ['drama'],
+    'only the genres present on list 2',
+  );
+  assert.equal(justInactive.min_year, 1970, 'bounds come from the selection too');
+  assert.equal(justInactive.max_year, 1970);
+});
+
+test('poolFacets with an explicitly empty selection reports an empty pool', () => {
+  const db = seed();
+  const facets = poolFacets(db, []);
+  assert.deepEqual(facets.genres, []);
+  assert.deepEqual(facets.languages, []);
+  assert.equal(facets.min_year, null);
+});
+
+test('poolFacets falls back to is_active when no selection is given', () => {
+  // First paint has no client-side selection yet, so absent must keep working.
+  const db = seed();
+  assert.deepEqual(poolFacets(db).genres, poolFacets(db, null).genres);
+});

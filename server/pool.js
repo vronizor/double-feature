@@ -228,12 +228,36 @@ export function queryPool(db, filters, { sort = 'title', limit = 60, offset = 0 
     .map((row) => row.tmdb_id);
 }
 
-/** Only the genres and languages actually present in the active pool. */
-export function poolFacets(db) {
+/**
+ * The genres, languages and year/runtime bounds actually present in the pool.
+ *
+ * Takes the same list selection as `buildPoolQuery` rather than assuming
+ * `is_active`. Getting this wrong was visible: with only the Goya list
+ * selected (40 films), the genre chips reported "Drama 1671 · Comedy 644" and
+ * the total read 2,455 — the counts described the default pool while the draw
+ * used the selected one.
+ *
+ * `lists` follows the same three-state convention as the filter: null/absent
+ * means "fall back to is_active", an empty array means an empty pool.
+ */
+export function poolFacets(db, lists = null) {
+  const selection = lists === null || lists === undefined ? null : asIntList(lists);
+
+  let scope;
+  let scopeParams = [];
+  if (selection !== null && selection.length === 0) {
+    scope = '1 = 0';
+  } else if (selection === null) {
+    scope = 'l.is_active = 1';
+  } else {
+    scope = `l.id IN (${selection.map(() => '?').join(', ')})`;
+    scopeParams = selection;
+  }
+
   const active = `
     SELECT lm.tmdb_id FROM list_movies lm
     JOIN lists l ON l.id = lm.list_id
-    WHERE l.is_active = 1 AND lm.tmdb_id IS NOT NULL`;
+    WHERE ${scope} AND lm.tmdb_id IS NOT NULL`;
 
   const genres = db
     .prepare(
@@ -243,7 +267,7 @@ export function poolFacets(db) {
        WHERE mg.tmdb_id IN (${active})
        GROUP BY g.id ORDER BY g.name`,
     )
-    .all();
+    .all(...scopeParams);
 
   const languages = db
     .prepare(
@@ -251,7 +275,7 @@ export function poolFacets(db) {
        FROM movies WHERE tmdb_id IN (${active}) AND original_language IS NOT NULL
        GROUP BY original_language ORDER BY count DESC`,
     )
-    .all();
+    .all(...scopeParams);
 
   const bounds = db
     .prepare(
@@ -259,7 +283,7 @@ export function poolFacets(db) {
               MIN(runtime) AS min_runtime, MAX(runtime) AS max_runtime
        FROM movies WHERE tmdb_id IN (${active})`,
     )
-    .get();
+    .get(...scopeParams);
 
   return { genres, languages, ...bounds };
 }
