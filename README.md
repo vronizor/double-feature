@@ -74,21 +74,27 @@ Seed lists arrive **active**, so you can draw immediately.
 **Lineup tab** — build up tonight's shortlist through any mix of three ways to
 add a film, then publish it as a vote once you're happy with it:
 
-- **Draw random films** — start from a **"Tonight is…"** preset (Cinephile,
-  Awards, Family — each sets both the lists and the filters that go with it),
-  or tick lists by hand in the collapsible **Pool setup** section. Lists are
-  grouped by category there, so "all the awards lists" is one click. Narrow
-  further by genre, language, year or runtime; ranked lists (TSPDT, Sight &
-  Sound) also get a **Top N** control, so "draw from the TSPDT top 100" is a
+- **Draw random films** — start from a **"Tonight is…"** vibe (Cinephile,
+  Awards, Modern Classics, Family — each sets both the lists and the filters
+  that go with it), or tick lists by hand in the collapsible **Pool setup**
+  section. Lists carry **tags**, so the picker groups them and a tag filter row
+  narrows sixteen lists to four; a list appears under every tag it carries.
+  Vibes are yours to add: set the pool up how you like it and hit
+  **+ Save current…**. Narrow further by genre, language, year or runtime;
+  ranked lists (TSPDT, Sight & Sound) also get a **Top N** control, so "draw from the TSPDT top 100" is a
   single number. Then pick how many to draw (1–10) and hit Draw. A live
   "N films match" count updates as you go, so you see the size of the pool
   before spending a draw on it.
 
-  Presets are a starting point, never a gate — Draw works with nothing
-  selected, and the moment you hand-edit anything the label switches to
-  *Custom* rather than claiming a preset it no longer matches. What you pick
-  here applies to tonight only; the **Lists** tab is where you set which lists
-  are in play *by default*.
+  A vibe is a starting point, never a gate — Draw works with nothing selected,
+  and the moment you hand-edit anything the label switches to *Custom* rather
+  than claiming a vibe it no longer matches. What you pick here applies to
+  tonight only; the **Lists** tab is where you set which lists are in play *by
+  default*.
+
+  Drew something you don't fancy? **Replace N** swaps out only the films that
+  were *drawn*, leaving anything you added deliberately alone, and it remembers
+  what it has already shown you so pressing it again moves forward.
 - **Add a specific film** — search TMDB by title, or paste a TMDB URL/id
   directly for the rare title search won't surface (some films — like Godard's
   *Histoire(s) du cinéma* — are catalogued on TMDB as a TV series rather than a
@@ -184,26 +190,26 @@ Two more were added later, from their own publisher and (by hand, since its site
 blocks scripted access) a curator on SensCritique — then eight award lists from
 Wikidata and the language Wikipedias:
 
-| List | Category | Source | Count |
+| List | Tags | Source | Count |
 |---|---|---|---|
-| The Criterion Collection | collection | Wikidata, spine number `P12279` | 1,251 |
+| The Criterion Collection | collection, canon | Wikidata, spine number `P12279` | 1,251 |
 | Sight & Sound 2022 (critics) | canon | bfi.org.uk — the poll's publisher | 264 |
 | TSPDT 1,000 Greatest Films | canon | theyshootpictures.com — the list's publisher | 1,000 |
-| Disney Animated Canon | collection | Wikidata, "WDAS feature film" series | 65 |
-| Studio Ghibli | collection | Wikidata, "Studio Ghibli Feature Films" series | 23 |
+| Disney Animated Canon | collection, family, animation | Wikidata, "WDAS feature film" series | 65 |
+| Studio Ghibli | collection, family, animation | Wikidata, "Studio Ghibli Feature Films" series | 23 |
 | BFI: Films to See by Age 15 | family | bfi.org.uk (2020 update of a 2005 list) | 64 |
 | Family Films (Ages 6+) | family | A user's curated list on SensCritique | 251 |
 | Oscar — Best Picture | awards | Wikidata, award received `P166` | 97 |
 | Oscar — Best International Feature | awards | Wikidata, award received `P166` | 71 |
-| Palme d'Or (Cannes) | awards | Wikidata, award received `P166` | 82 |
-| Golden Lion (Venice) | awards | Wikidata, award received `P166` | 66 |
-| Golden Bear (Berlin) | awards | Wikidata, award received `P166` | 86 |
+| Palme d'Or (Cannes) | awards, festivals | Wikidata, award received `P166` | 82 |
+| Golden Lion (Venice) | awards, festivals | Wikidata, award received `P166` | 66 |
+| Golden Bear (Berlin) | awards, festivals | Wikidata, award received `P166` | 86 |
 | BAFTA — Best Film | awards | en.wikipedia category → Wikidata → TMDB | 78 |
 | César — Meilleur Film | awards | fr.wikipedia category → Wikidata → TMDB | 51 |
 | Goya — Mejor Película | awards | es.wikipedia category → Wikidata → TMDB | 40 |
-| Crowd-Pleasers (last 10 years) | dynamic | TMDB `/discover` — *see below* | 120 |
+| Modern Classics (last 10 years) | dynamic | TMDB `/discover` — *see below* | 120 |
 
-**On the crowd-pleasers list:** this one is **query-backed**. Its membership
+**On the Modern Classics list:** this one is **query-backed**. Its membership
 isn't a fixed set of titles but a TMDB `/discover` query, re-run daily, so it
 keeps meaning "the last ten years" without anyone re-seeding it each January.
 
@@ -214,6 +220,11 @@ pushed to the top — at a floor of 1,000 it still surfaced a niche romance
 trilogy, while at 5,000 it returns *Top Gun: Maverick*, *Across the
 Spider-Verse* and *The Wild Robot*. The list exists to balance a library that
 is otherwise heavily weighted toward the arthouse canon.
+
+It was called "Crowd-Pleasers" until that name was measured against reality:
+sorting by rating selects for *acclaim*, so its lowest entry rates 8.2 while
+the films people actually put on for a fun evening rate 6.6–7.0. No vote floor
+reaches them — see `BACKLOG.md`.
 
 Query-backed lists are materialised into the same tables as every other list,
 so nothing downstream — filters, Top-N, drawing, publishing — treats them
