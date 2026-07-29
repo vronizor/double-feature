@@ -1,4 +1,4 @@
-# Roadmap — v2
+# Roadmap
 
 v1 shipped a working loop: curated lists → draw → vote → winner. v2 is about
 **occasions** — the observation that the same host has different Friday nights,
@@ -268,173 +268,147 @@ is an obvious Explore action later.
 
 ---
 
-## 4. Work items, in order
+## 4. Finish v2
 
-**Status:** §0, 4.1, 4.2 and 4.3 are done — list selection is view-level, ranks
-and categories are in, the grouped picker and Top-N are built, all four
-occasion chips are live, eight award lists are seeded (five from Wikidata, three
-from Wikipedia categories), award badges show what a film won and when, and the
-crowd-pleasers list is query-backed and refreshes itself daily.
+What remains to make the shipped feature set correct, coherent and documented.
+Everything genuinely new lives in §5 (v3) or `BACKLOG.md`.
 
-Still open: **4.4** (Replace + lineup provenance), **4.5** (streaming badge),
-**4.6** (loop-closers). See `BACKLOG.md` for unscheduled ideas.
+Ordered: verified bugs first, then the cheap completions, then the one
+medium-sized build, then docs.
 
-### 4.1 + 4.2 — build these together
+### F1 — facet counts must respect the list selection
 
-**Sequencing note:** 4.1 is the cheapest item in isolation, but its Top-N
-control lands *inside* the list picker that 4.2 rebuilds with categories.
-Building 4.1 first means building that control twice. Do them as one piece of
-work.
+`poolFacets` (`server/pool.js`) still hardcodes `l.is_active = 1`. The §0
+knock-on list caught `buildPoolQuery` and `sessions.js` and missed this one.
 
-They also both modify the **same** SQL — the list-membership subquery in
-`buildPoolQuery`:
+Consequence, measured: with only the Goya list selected (40 films), the genre
+chips report **Drama 1671 · Comedy 644** and the total reads 2,455. The chip
+counts, the year/runtime placeholder bounds, and the first-paint "N films
+match" all describe the default pool rather than yours.
 
-```sql
-m.tmdb_id IN (
-  SELECT lm.tmdb_id FROM list_movies lm
-  JOIN lists l ON l.id = lm.list_id
-  WHERE l.is_active = 1        -- §0 replaces this with an explicit id set
-    AND lm.tmdb_id IS NOT NULL -- 4.1 adds the rank constraint here
-)
-```
+Fix: `poolFacets` takes the selected list ids, same as `buildPoolQuery` already
+does. `draw.js` seeds `state.poolCount` from `facets.total`, so that call site
+needs updating too.
 
-so §0, 4.1 and 4.2 are one careful change to that subquery plus one set of
-tests, not three.
+### F2 — rename the "Crowd-Pleasers" list
 
-### 4.1 `list_movies.rank` + Top-N  — cost: LOW, risk: LOW
+It sorts by rating, so it returns acclaim, not crowd-pleasing: its lowest entry
+rates 8.2 and it contains Parasite, a film already on the canon lists it was
+meant to counterbalance. Something like "Modern Classics" is honest. The
+genuinely reach-sorted list is a separate thing and is backlogged.
 
-One nullable column and one conditional control. No external dependency, no new
-concepts. Note it is a **per-list** rank (a film can be #3 on one list and
-unranked on another), so it belongs on `list_movies`, not `movies`.
+> **Trap:** `seed.mjs` matches lists by NAME. Renaming in the seed file alone
+> would create a second list rather than rename the existing one. Needs an
+> `UPDATE lists SET name = ...` migration, or a manual rename, before the seed
+> file changes.
 
-> **Trap: re-running `npm run seed` will NOT backfill this column.**
-> `scripts/seed.mjs` builds an `existing` set keyed on `raw_title + raw_year`
-> and filters those entries out of `pending`, precisely so re-runs don't
-> re-spend TMDB calls. Every already-seeded row would therefore keep
-> `rank = NULL` forever. Needs a dedicated backfill script (follow the
-> `scripts/backfill.mjs` precedent) that reads the seed JSON and updates rows
-> in place — no TMDB calls required, since rank comes from the seed file, not
-> the API.
+### F3 — mark the winner watched, from the results screen
 
-### 4.2 Awards lists + `lists.category` + grouped picker — cost: MED, risk: LOW
+The app picks a film and never learns whether it was watched. `watched` is only
+ever set by hand from a card, so the watched-exclusion filter accumulates
+nothing on its own.
 
-The centrepiece. Wikidata fetchers for Best Picture, Palme d'Or, BAFTA, and
-whichever national awards prove additive (**check overlap first** — measured on
-a 30-film sample, Palme d'Or is 80% already in the pool while Oscars are only
-28%, so festival lists mostly re-label films you already have while mainstream
-awards genuinely expand).
+### F4 — reset the lineup after voting closes
 
-`lists.category` — `canon` / `awards` / `family` / `festivals` / `collection` /
-`dynamic`. Single category per list: a list can honestly belong to two (BFI's is
-both *family* and *canon*), but single-category is what keeps the grouped picker
-clean, each list rendering exactly once. Treat it as display grouping, not
-taxonomy. Revisit only if it bites.
-
-> **Trap: this is a data migration, not just a column.** Two gaps the mockup
-> doesn't show:
-> 1. The **7 existing lists** need categories assigned — a one-off update, not
->    something `ensureColumn`'s default can do meaningfully.
-> 2. `POST /api/lists` creates custom lists with no category. Either the create
->    UI gains a category picker, or the grouped picker must render an
->    **"Uncategorised"** bucket. Pick one deliberately; don't let user-created
->    lists silently vanish from a grouped picker.
-
-**Award year is deliberately NOT stored.** For most awards the ceremony is
-release year + 1, so `movies.year` already answers "winners from the 90s" well
-enough. Recency for the Awards occasion comes free from the existing year
-filter.
-
-### 4.3 Dynamic (query-backed) lists — cost: MED, risk: MED
-
-Launch with one: crowd-pleasers at `vote_count.gte=5000`.
-
-**Materialise, don't special-case.** Store the query on the list and have a
-refresh job repopulate its `list_movies` rows. The pool query, filters and the
-whole draw path stay completely unchanged — a dynamic list looks identical to a
-static one downstream. Far cheaper than a second code path through
-`buildPoolQuery`.
-
-**Store the query as a structured object**, e.g.
-`{kind:'discover', params:{...}}`, **not a frozen URL string.** This is the hook
-that lets director/theme night inject a parameter later without a migration.
-It is the one piece of future-proofing worth paying for now.
-
-Risk: the tuning is taste-dependent and TMDB's data drifts, so the vote floor
-will need revisiting. Keep it configurable rather than hard-coded.
-
-### 4.4 "Replace" + lineup provenance — cost: LOW, risk: LOW
-
-Drew 2, don't like them, don't want to remove them by hand: `[Replace 2]`
-redraws them in place.
-
-**Requires provenance per lineup entry.** The lineup mixes films that were
-drawn with films someone specifically asked for (search, paste, manual, Explore).
-Replace must only swap out the **drawn** ones, or it throws away a deliberate
-pick. Since `lineup.js` is an in-memory singleton, this is a property on the
-entry object — **zero schema cost**. `lineup.add(movie, source)` where source is
-`'draw' | 'added'`.
-
-Refinement worth having: keep a session-scoped "already seen" set so repeated
-Replace cycles through fresh options instead of re-offering something just
-rejected. Pass it as `exclude`, which `drawFromPool` already supports.
-
-### 4.5 Streaming badge — cost: LOW, risk: LOW
-
-Free to fetch via `append_to_response`. Needs a providers join table (same shape
-as `movie_genres`), a region setting in `.env` next to `HOST_LAN_IP`, and card
-/ modal display.
-
-One knock-on: provider data goes stale far faster than the rest (films leave
-services monthly), and the refresh job runs a **150-day** TTL at **250
-films/day**. Tightening the whole cycle to ~14 days costs `2042 / 14 ≈ 146`
-films/day — *below* the existing 250/day budget, and providers then ride along
-free. So this is a cadence change, not new infrastructure.
-
-### 4.6 Loop-closers — cost: LOW, risk: LOW
-
-**Mark the winner watched from the results screen.** The app picks a film and
-never learns whether it was watched; `watched` is only ever set by hand from a
-card, so the exclusion filter accumulates nothing on its own.
-
-**Reset the lineup after voting closes.** Once a session closes, the lineup that
-produced it is still staged. Only "← New lineup" clears it.
+Once a session closes, the lineup that produced it is still staged; only
+"← New lineup" clears it.
 
 > **Trap:** `renderSessionPanel` is shared between the host screen and the
-> History tab. Clearing on close must be gated to the host's *own live* session —
-> opening an old session in History must never wipe the lineup being built.
-> `draw.js`'s `showSession()` owns the lineup lifecycle, so pass a callback
-> (`onClosed`) rather than clearing from inside the panel.
+> History tab. Clearing on close must be gated to the host's *own live*
+> session — opening an old session in History must never wipe the lineup being
+> built. `draw.js`'s `showSession()` owns the lineup lifecycle, so pass a
+> callback (`onClosed`) rather than clearing from inside the panel.
 
-Also decide: should closing offer "re-vote with the same films"? If so, clear on
-leaving the results screen rather than on close.
+Also decide: should closing offer "re-vote with the same films"? If so, clear
+on leaving the results screen rather than on close.
 
-### 4.7 Test coverage — not an afterthought
+### F5 — lineup provenance
 
-v1 held **127 tests green** through every refactor, which is the only reason
-those refactors were safe. The new work needs matching coverage:
+`lineup.add(movie, source)` where source is `'draw' | 'added'`. The lineup mixes
+films that were drawn with films someone specifically asked for (search, paste,
+manual, Explore). Zero schema cost — `lineup.js` is an in-memory singleton.
 
-- `buildPoolQuery` with an explicit list-id set (§0) — including the empty-set
-  case, which must return nothing rather than everything
-- rank / Top-N filtering, including the `rank IS NULL` (unranked list) path
-- the rank backfill script — idempotent, and doesn't touch already-correct rows
-- dynamic list materialisation, including a film **dropping out** of the query
-  on re-materialisation
-- lineup provenance: `Replace` must swap only `'draw'` entries and leave
-  `'added'` ones alone
+Prerequisite for F6.
 
-### Before starting: back up the database
+### F6 — "Replace N"
 
-The live DB holds 2,042 films, real watched flags and session history.
-`ensureColumn` is additive and safe, but a re-seed or a dynamic-list
-re-materialisation is not.
+Drew 2, don't like them, don't want to remove them by hand: `[Replace 2]`
+redraws them in place. **Only swaps entries whose provenance is `'draw'`**, or
+it throws away a deliberate pick.
 
-```bash
-cp data/double-feature.db data/double-feature.db.pre-v2
-```
+### F7 — a seen-set so Replace moves forward
 
----
+Replace excludes what is currently in the lineup, but not what has already been
+rejected — so three clicks can hand back the film discarded on the first.
+A session-scoped set of everything rejected, passed as `exclude` (already
+supported by `drawFromPool`), makes repeated Replace cycle through fresh
+options.
 
-## 5. Deferred — but the design must not block them
+### F8 — a shrink guard on the fetchers
+
+`fetch-seed-lists.mjs` writes whatever a source returns. A Wikidata hiccup that
+yields 3 César films instead of 51 currently writes a 3-film seed file and
+reports success; seeding it then shrinks the list.
+
+The Sight & Sound and TSPDT scrapers have count thresholds already; the
+Wikidata and Wikipedia-category fetchers have none. Add a declared minimum per
+source plus a comparison against the `count` field already present in every
+seed JSON, refusing to overwrite on a large shrink. ~15 lines, and it protects
+every future fetcher including box office.
+
+### F9 — streaming badge
+
+Card meta line and modal only — **never a pool filter**. Measured FR flatrate
+coverage is ~30% of this library and 0% pre-1930, so filtering on it would gut
+the arthouse canon. Absent must mean "unknown", not "excluded".
+
+Free to fetch: `append_to_response=watch/providers` rides the detail call the
+refresh job already makes. Needs a providers join table (same shape as
+`movie_genres`), a region setting in `.env` beside `HOST_LAN_IP`, and display.
+
+One knock-on: provider data goes stale far faster than the rest. Tightening the
+refresh cycle from 150 days to ~14 costs `2455 / 14 ≈ 175` films/day, below the
+existing 250/day budget — a cadence change, not new infrastructure.
+
+### F10 — docs sweep
+
+`README.md` still says 13 lists (there are 16) and describes categories rather
+than tags and vibes. `ROADMAP.md`'s own §1–§3 predate the tag/vibe model.
+`BACKLOG.md`'s "short names as data" note is partly stale now that the tag
+vocabulary exists.
+
+## 5. v3
+
+Agreed direction, not yet started.
+
+- **Box-office per country — France and Spain first.** National popularity
+  cannot be derived from TMDB or IMDb: their vote counts measure international
+  reach, so "France loves this" and "the world hasn't seen this" are the same
+  number. Admissions tables on the per-country Wikipedia are the signal. Build
+  it as one parameterised fetcher plus one `box-office` tag, never one fetcher
+  per country. See `BACKLOG.md` for the measurements and open questions.
+  - **Prerequisite:** extract `resolveTitlesToTmdb` (titles → QIDs → TMDB ids)
+    out of `fetchWikipediaCategoryAward`, where it is currently entangled.
+    Box-office reuses exactly that pipeline.
+- **Award years via option C** — scrape each award's own Wikipedia article,
+  which carries year-by-year winner tables, to fill the 28–39% coverage gap for
+  BAFTA, César and Goya. Option B (deriving release year + 1) was considered and
+  rejected: it silently mixes real and guessed data in one column.
+  - Watch for: those tables mix winners with nominees, using different
+    conventions in each language edition.
+- **Award short names as data.** `dom.js` carries a hardcoded map of list name →
+  display name. A `lists.short_name` column would put it with the rest of the
+  list metadata in the seed files.
+- **Award-winner filter** — "only films that won something" as a pool filter,
+  not just a badge. Cheap, since `awards` is already computed.
+- **`seed.mjs` keyed on `tmdb_id`** rather than `raw_title + raw_year`. No
+  current symptom, but if title normalisation ever changes, rows re-resolve as
+  new entries — duplicating, and the backfill script can no longer find its row.
+  Most sources now carry a tmdb_id, which is strictly more stable. Deferred
+  rather than done because changing the skip logic is exactly where a
+  duplicate-everything bug would come from.
+
+## 6. Deferred — but the design must not block them
 
 **Director night.** Parametric occasion. Use `/person/{id}/movie_credits`
 filtered to `job=Director` (not `with_crew`, see §2). Resolves to an ephemeral
@@ -454,7 +428,7 @@ object** (§4.3) and the **`▾` parametric chip shape** (§3).
 
 ---
 
-## 6. Not planned
+## 7. Not planned
 
 - **Kids' night by certification** — killed on evidence, see §2.
 - **TMDB Top Rated 100** — evaluated in v1 and dropped: 46% overlap with the

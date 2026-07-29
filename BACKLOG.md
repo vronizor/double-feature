@@ -164,18 +164,49 @@ awards, family, collections, dynamic — this is how a picker becomes unusable.
 The category grouping built in v2 is what makes it survivable, and any new
 family of lists should arrive with a category rather than as loose entries.
 
-## Other ideas, unranked
+## Unscheduled
 
-- **Short names as data.** `dom.js` carries a hardcoded map of award list name
-  → display name so cards can fit "Oscar Intl." instead of
-  "Oscar — Best International Feature". It falls back to stripping the
-  qualifier for unknown names, which is fine, but a `lists.short_name` column
-  would put it with the rest of the list metadata in the seed files.
-- **Award-winner filter.** The data now supports "only films that won
-  something" as a pool filter, not just a badge. Cheap given `awards` is
-  already computed — but it overlaps heavily with just selecting the awards
-  category in the picker, so it may not earn its place.
+Nothing here is committed to a version. The measurement write-ups above are
+kept because the v3 items in `ROADMAP.md` reference their evidence.
+
+- **Household memory.** The app picks a winner and then learns nothing —
+  `watched` is only ever set by hand, so nothing accumulates between nights.
+  Beyond `ROADMAP.md` F3 (mark the winner watched), the fuller version is a
+  one-tap rating from guests' phones after the film, while the ballot is still
+  open. No accounts needed: the session already knows who ranked. Would give
+  History something worth revisiting and the exclusion filter something to work
+  with.
+
+- **A genuinely reach-sorted "popularity" list.** The third axis, still empty.
+  Distinct from box-office (v3): box-office measures what one country went to
+  the cinema for, reach measures what the world has seen. Box-office France
+  surfaces *Bienvenue chez les Ch'tis*; reach-sorted surfaces *Ace Ventura* and
+  *Austin Powers*. Neither substitutes for the other. Sort by reach with a
+  rating **gate** rather than a rating sort — see the metric write-up above for
+  why rating-sorted can never reach them.
+
 - **Nominees, not just winners.** Wikidata models nominations (`P1411`) and the
   Wikipedia categories have sibling nominee categories. Would multiply the pool
   considerably and dilute "award winner" as a signal; noted rather than
   proposed.
+
+- **Separate "dynamic" as a mechanism from "dynamic" as a tag.** Query-backed
+  lists are identifiable by `query_json IS NOT NULL`, but the Crowd-pleasers
+  vibe resolves on the `dynamic` *tag*. A second query-backed list family would
+  therefore be absorbed by that vibe whether or not it belongs there. Gated on a
+  second query-backed list existing — not on box office, which produces static
+  scraped lists.
+
+- **`materialiseList`: set rank on reconcile, and wrap in a transaction.** The
+  reconcile path keeps existing rows and never updates rank, so a *ranked*
+  dynamic list would freeze its ranks at first materialisation while membership
+  moved on. No such list exists yet. The missing transaction self-heals on the
+  next run.
+
+## Dropped
+
+- **Worker-pooling the refresh job.** `refreshStaleMovies` does `Promise.all`
+  over up to 250 films, which looks alarming but isn't: `request()` in
+  `server/tmdb.js` already gates every call on a semaphore of 8
+  (`MAX_CONCURRENCY`), so those 250 promises queue behind it rather than firing
+  concurrently. The protection already exists.
