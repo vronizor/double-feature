@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createTestDb } from '../server/db.js';
-import { hydrateMovies, createManualMovie } from '../server/movies.js';
+import { hydrateMovies, createManualMovie, recordEntry } from '../server/movies.js';
 
 function seed() {
   const db = createTestDb();
@@ -120,4 +120,54 @@ test('createManualMovie tolerates a missing or non-integer year', () => {
   const id2 = createManualMovie(db, { title: 'Bad Year', year: 'not-a-year' });
   assert.equal(hydrateMovies(db, [id1])[0].year, null);
   assert.equal(hydrateMovies(db, [id2])[0].year, null);
+});
+
+test('recordEntry persists rank and award_year from the seed entry', () => {
+  // These are written on the FIRST insert or never: seed.mjs skips entries
+  // that already landed, so a value missed here can only be repaired by the
+  // separate backfill script. Getting this wrong left fresh installs with
+  // rank = NULL everywhere, which silently removed the Top-N control (it only
+  // renders for lists whose ranked_count > 0).
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (1, 'L', 'seed', 1)`);
+
+  recordEntry(db, {
+    listId: 1,
+    rawTitle: 'Citizen Kane',
+    rawYear: 1941,
+    rank: 1,
+    result: { status: 'resolved', movie: { tmdb_id: 15, title: 'Citizen Kane', year: 1941 } },
+  });
+  recordEntry(db, {
+    listId: 1,
+    rawTitle: 'Parasite',
+    rawYear: 2019,
+    awardYear: 2020,
+    result: { status: 'resolved', movie: { tmdb_id: 496243, title: 'Parasite', year: 2019 } },
+  });
+
+  // Spread into plain objects: node:sqlite returns null-prototype rows, which
+  // deepStrictEqual rejects even when every value matches.
+  const rows = db
+    .prepare('SELECT raw_title, rank, award_year FROM list_movies ORDER BY raw_title')
+    .all()
+    .map((row) => ({ ...row }));
+  assert.deepEqual(rows, [
+    { raw_title: 'Citizen Kane', rank: 1, award_year: null },
+    { raw_title: 'Parasite', rank: null, award_year: 2020 },
+  ]);
+});
+
+test('an unranked entry stores NULL rather than coercing to 0', () => {
+  // rank = 0 would pass a "top N" cut for every N and quietly widen the pool.
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (1, 'L', 'seed', 1)`);
+  recordEntry(db, {
+    listId: 1,
+    rawTitle: 'Unranked',
+    rawYear: 2000,
+    rank: undefined,
+    result: { status: 'resolved', movie: { tmdb_id: 42, title: 'Unranked', year: 2000 } },
+  });
+  assert.equal(db.prepare('SELECT rank FROM list_movies').get().rank, null);
 });
