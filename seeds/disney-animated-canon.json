@@ -1,5 +1,10 @@
 {
   "name": "Disney Animated Canon",
+  "tags": [
+    "collection",
+    "family",
+    "animation"
+  ],
   "category": "collection",
   "source": "Wikidata — \"Walt Disney Animation Studios feature film\" series (Q56070713)",
   "source_url": "https://en.wikipedia.org/wiki/List_of_Walt_Disney_Animation_Studios_films",

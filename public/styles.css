@@ -211,6 +211,16 @@ label { display: block; }
 /* Occasion chips read as presets rather than filter toggles, so they're a
    little larger than the include/exclude chips they sit above. */
 .chip--occasion { font-size: 0.88rem; padding: 6px 14px; }
+.chip--save { border-style: dashed; color: var(--text-dim); }
+
+/* The delete affordance is tucked against its chip and only rendered for the
+   active one, so the row stays a row of choices. */
+.vibe-chip-wrap { display: inline-flex; align-items: center; gap: 2px; }
+.vibe-remove {
+  background: none; border: none; padding: 2px 5px; cursor: pointer; line-height: 1;
+  color: var(--text-faint); font-size: 0.78rem;
+}
+.vibe-remove:hover { color: var(--danger); }
 
 .range { display: flex; align-items: center; gap: 8px; }
 .range input { width: 100%; }

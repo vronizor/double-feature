@@ -9,6 +9,7 @@ import listsRouter from './routes/lists.js';
 import moviesRouter from './routes/movies.js';
 import drawRouter from './routes/draw.js';
 import sessionsRouter from './routes/sessions.js';
+import vibesRouter from './routes/vibes.js';
 import tmdbRouter from './routes/tmdb.js';
 
 export function createApp() {
@@ -33,6 +34,7 @@ export function createApp() {
   app.use('/api/tmdb', tmdbRouter);
   app.use('/api', drawRouter);
   app.use('/api/sessions', sessionsRouter);
+  app.use('/api', vibesRouter);
 
   app.use(express.static(join(ROOT, 'public')));
 

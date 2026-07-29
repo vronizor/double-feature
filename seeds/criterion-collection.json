@@ -1,5 +1,9 @@
 {
   "name": "The Criterion Collection",
+  "tags": [
+    "collection",
+    "canon"
+  ],
   "category": "collection",
   "source": "Wikidata — Criterion Collection spine number (P12279)",
   "source_url": "https://www.criterion.com/shop/browse/list?sort=spine",

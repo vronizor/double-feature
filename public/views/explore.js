@@ -36,6 +36,8 @@ export async function renderExplore(container) {
     // a title here silently shrank the Draw pool with no visible cause.
     search: '',
     openGroups: new Set(),
+    tagFilter: null,
+    vocabulary: [],
     sort: 'title',
     movies: [],
     total: 0,
@@ -44,9 +46,14 @@ export async function renderExplore(container) {
   };
 
   async function refreshData() {
-    const [{ lists }, facets] = await Promise.all([api.lists(), api.facets()]);
+    const [{ lists }, facets, { tags }] = await Promise.all([
+      api.lists(),
+      api.facets(),
+      api.tags(),
+    ]);
     state.lists = lists;
     state.facets = facets;
+    state.vocabulary = tags;
     poolState.seedFrom(lists);
   }
 
@@ -73,7 +80,12 @@ export async function renderExplore(container) {
 
   function listPicker() {
     if (state.lists.length === 0) return null;
-    return renderListPicker(state.lists, state.openGroups, () => loadPage({ reset: true }));
+    return renderListPicker(
+      state.lists,
+      state.openGroups,
+      () => loadPage({ reset: true }),
+      { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
+    );
   }
 
   let searchDebounce = null;

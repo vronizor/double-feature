@@ -1,5 +1,8 @@
 {
   "name": "BFI: Films to See by Age 15",
+  "tags": [
+    "family"
+  ],
   "category": "family",
   "source": "British Film Institute (BFI Education, with Into Film — 2020 update)",
   "source_url": "https://www.bfi.org.uk/lists/50-films-see-age-15",

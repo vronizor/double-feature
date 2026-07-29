@@ -1,5 +1,8 @@
 {
   "name": "BAFTA — Best Film",
+  "tags": [
+    "awards"
+  ],
   "category": "awards",
   "source": "en.wikipedia category \"Best Film BAFTA Award winners\", resolved to TMDB ids via Wikidata",
   "source_url": "https://en.wikipedia.org/wiki/BAFTA_Award_for_Best_Film",

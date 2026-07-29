@@ -5,12 +5,14 @@ import {
   renderFilterPanel,
   renderListPicker,
   renderTopN,
-  renderOccasionChips,
+  renderVibeChips,
+  renderTagFilter,
   renderAwardsToggle,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
 import { poolState } from '../pool-state.js';
+import { currentAsVibe } from '../occasions.js';
 
 const MIN_DRAW_SIZE = 1;
 const MAX_DRAW_SIZE = 10;
@@ -45,6 +47,11 @@ export async function renderDraw(container) {
     // because it's presentation, not pool definition — but it must outlive a
     // repaint, which is why it isn't a local in the render function.
     openGroups: new Set(),
+    // Which tag the picker is narrowed to, and the vocabulary/vibes fetched
+    // from the server. Presentation + server data, so not in poolState.
+    tagFilter: null,
+    vocabulary: [],
+    vibes: [],
     size: 2,
     searchResults: [],
     anonymous: false,
@@ -59,9 +66,16 @@ export async function renderDraw(container) {
   };
 
   async function refreshData() {
-    const [{ lists }, facets] = await Promise.all([api.lists(), api.facets()]);
+    const [{ lists }, facets, { tags }, { vibes }] = await Promise.all([
+      api.lists(),
+      api.facets(),
+      api.tags(),
+      api.vibes(),
+    ]);
     state.lists = lists;
     state.facets = facets;
+    state.vocabulary = tags;
+    state.vibes = vibes;
     // First load only — adopts whatever the Lists tab marked active by
     // default. Subsequent mounts keep whatever the host chose for tonight.
     poolState.seedFrom(lists);
@@ -160,15 +174,67 @@ export async function renderDraw(container) {
             'div',
             { class: 'stack', style: 'margin-top:10px' },
             h('div', { class: 'field-label' }, 'Lists in play'),
-            renderListPicker(state.lists, state.openGroups, () => {
-              refreshCount();
+            renderTagFilter(state.vocabulary, state.tagFilter, (tag) => {
+              state.tagFilter = tag;
               paint();
             }),
+            renderListPicker(
+              state.lists,
+              state.openGroups,
+              () => {
+                refreshCount();
+                paint();
+              },
+              { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
+            ),
             renderTopN(state.lists, () => refreshCount()),
             state.facets ? filterPanel() : null,
           )
         : null,
     );
+  }
+
+  // --- Vibes ----------------------------------------------------------------
+
+  async function saveCurrentAsVibe() {
+    const selected = poolState.selectedLists();
+    if (!selected || selected.length === 0) {
+      toast('Pick at least one list before saving a vibe', 'error');
+      return;
+    }
+    const name = prompt('Name this vibe (e.g. "Sunday with the kids")')?.trim();
+    if (!name) return;
+
+    try {
+      await api.createVibe(currentAsVibe(name));
+      // Re-fetch rather than pushing the response onto the array: the server
+      // computes resolved_lists, and the new vibe needs to slot into the
+      // server's ordering.
+      const { vibes } = await api.vibes();
+      state.vibes = vibes;
+      const created = vibes.find((vibe) => vibe.name === name);
+      if (created) poolState.applyOccasion(created.id, poolState.filters);
+      toast(`Saved "${name}"`, 'ok');
+      paint();
+    } catch (error) {
+      toast(error.message, 'error');
+    }
+  }
+
+  async function removeVibe(vibe) {
+    if (!confirm(`Delete the "${vibe.name}" vibe? The lists themselves are untouched.`)) return;
+    try {
+      await api.deleteVibe(vibe.id);
+      const { vibes } = await api.vibes();
+      state.vibes = vibes;
+      // The pool it produced stays exactly as it is — deleting the shortcut
+      // shouldn't silently change what you're about to draw from.
+      poolState.markCustom();
+      toast(`Deleted "${vibe.name}"`, 'ok');
+      paint();
+    } catch (error) {
+      toast(error.message, 'error');
+    }
   }
 
   function filterPanel() {
@@ -200,16 +266,20 @@ export async function renderDraw(container) {
       'div',
       { class: 'card stack' },
       h('h2', {}, 'Draw random films'),
-      // Occasion chips sit inside this card, immediately above Pool setup,
+      // Vibe chips sit inside this card, immediately above Pool setup,
       // because that is exactly what they configure — "Add a specific film"
       // next door is deliberately untouched by them.
-      renderOccasionChips(state.lists, state.facets, () => {
-        // Applying a preset changes the whole pool, so the setup panel opens
-        // to show what it actually did rather than leaving the host to take
-        // a one-line summary on faith.
-        state.poolSetupOpen = true;
-        refreshCount();
-        paint();
+      renderVibeChips(state.vibes, {
+        onApply: () => {
+          // Applying a vibe changes the whole pool, so the setup panel opens
+          // to show what it actually did rather than leaving the host to take
+          // a one-line summary on faith.
+          state.poolSetupOpen = true;
+          refreshCount();
+          paint();
+        },
+        onSave: saveCurrentAsVibe,
+        onDelete: removeVibe,
       }),
       poolSetup(),
       h(

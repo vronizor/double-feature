@@ -38,10 +38,16 @@ router.get('/', (req, res) => {
               -- which is what the Top-N control keys off to decide whether it
               -- is worth showing at all.
               (SELECT COUNT(lm.rank) FROM list_movies lm
-                WHERE lm.list_id = l.id)                             AS ranked_count
+                WHERE lm.list_id = l.id)                             AS ranked_count,
+              (SELECT group_concat(tag, ',') FROM (
+                 SELECT tag FROM list_tags WHERE list_id = l.id ORDER BY tag
+               ))                                                    AS tag_csv
        FROM lists l ORDER BY l.kind DESC, l.name`,
     )
-    .all();
+    .all()
+    // Tags arrive as a delimited string from group_concat; the client wants an
+    // array, and an untagged list must be [] rather than [''].
+    .map((row) => ({ ...row, tags: row.tag_csv ? row.tag_csv.split(',') : [] }));
 
   // The deduplicated pool is what actually matters for a draw, and it is smaller
   // than the sum of the lists whenever a film sits on more than one of them.

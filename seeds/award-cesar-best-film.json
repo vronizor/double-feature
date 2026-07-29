@@ -1,5 +1,8 @@
 {
   "name": "César — Meilleur Film",
+  "tags": [
+    "awards"
+  ],
   "category": "awards",
   "source": "fr.wikipedia category \"César du meilleur film\", resolved to TMDB ids via Wikidata",
   "source_url": "https://fr.wikipedia.org/wiki/C%C3%A9sar_du_meilleur_film",

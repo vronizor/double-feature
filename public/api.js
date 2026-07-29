@@ -89,6 +89,12 @@ export const api = {
     }),
   closeSession: (slug) => request(`/api/sessions/${slug}/close`, { method: 'POST' }),
   cancelSession: (slug) => request(`/api/sessions/${slug}`, { method: 'DELETE' }),
+
+  tags: () => request('/api/tags'),
+  vibes: () => request('/api/vibes'),
+  createVibe: (vibe) => request('/api/vibes', { method: 'POST', body: vibe }),
+  updateVibe: (id, patch) => request(`/api/vibes/${id}`, { method: 'PATCH', body: patch }),
+  deleteVibe: (id) => request(`/api/vibes/${id}`, { method: 'DELETE' }),
   results: (slug) => request(`/api/sessions/${slug}/results`),
   history: () => request('/api/sessions'),
 };

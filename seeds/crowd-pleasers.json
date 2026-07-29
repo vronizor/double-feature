@@ -1,5 +1,8 @@
 {
   "name": "Crowd-Pleasers (last 10 years)",
+  "tags": [
+    "dynamic"
+  ],
   "category": "dynamic",
   "source": "TMDB /discover/movie — highly rated, with a vote-count floor",
   "source_url": "https://www.themoviedb.org/discover/movie",

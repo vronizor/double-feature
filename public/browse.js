@@ -15,46 +15,45 @@ import {
 import { prefs } from './prefs.js';
 import { api } from './api.js';
 import { poolState } from './pool-state.js';
-import { availableOccasions } from './occasions.js';
+import { applyVibe } from './occasions.js';
 
 // Re-exported so views can keep importing the filter shape from here alongside
 // everything else they use; it lives in pool-state.js because the singleton
 // owns it.
 export { emptyFilters } from './pool-state.js';
 
-// Display order and labels for the list picker's groups. A list's category is
-// free text (no CHECK constraint — this codebase already learned that lesson
-// with media_type), so anything unrecognised, including NULL, falls through to
-// "Uncategorised" rather than vanishing from the picker.
-const CATEGORY_ORDER = ['canon', 'awards', 'festivals', 'family', 'collection', 'dynamic'];
-const CATEGORY_LABELS = {
-  canon: 'The canon',
-  awards: 'Awards',
-  festivals: 'Festivals',
-  family: 'Family',
-  collection: 'Collections',
-  dynamic: 'Auto-updating',
-  __other: 'Uncategorised',
-};
+const UNTAGGED = '__untagged';
 
-const categoryKeyOf = (list) =>
-  CATEGORY_ORDER.includes(list.category) ? list.category : '__other';
-
-export function groupListsByCategory(lists) {
-  const groups = new Map();
-  for (const list of lists) {
-    const key = categoryKeyOf(list);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(list);
+/**
+ * Groups lists for the picker by TAG rather than by a single category.
+ *
+ * A list appears under every tag it carries — Ghibli under both "family" and
+ * "animation" — which is the point of moving off one-category-per-list. The
+ * duplication is the familiar labels pattern, and it's safe here because
+ * selection is keyed on list id, so ticking a list in one group ticks it
+ * everywhere it appears.
+ *
+ * `vocabulary` comes from the server so display order is defined in one place.
+ */
+export function groupListsByTag(lists, vocabulary) {
+  const groups = [];
+  for (const { tag, label } of vocabulary) {
+    const inTag = lists.filter((list) => (list.tags ?? []).includes(tag));
+    if (inTag.length) {
+      groups.push({ key: tag, label, lists: inTag.sort((a, b) => a.name.localeCompare(b.name)) });
+    }
   }
-  const order = [...CATEGORY_ORDER, '__other'];
-  return [...groups.entries()]
-    .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
-    .map(([key, items]) => ({
-      key,
-      label: CATEGORY_LABELS[key] ?? key,
-      lists: items.sort((a, b) => a.name.localeCompare(b.name)),
-    }));
+  // Anything carrying no tag at all still has to be reachable — a custom list
+  // the host just created has none until they file it.
+  const untagged = lists.filter((list) => (list.tags ?? []).length === 0);
+  if (untagged.length) {
+    groups.push({
+      key: UNTAGGED,
+      label: 'Untagged',
+      lists: untagged.sort((a, b) => a.name.localeCompare(b.name)),
+    });
+  }
+  return groups;
 }
 
 /**
@@ -68,7 +67,7 @@ export function groupListsByCategory(lists) {
  * `openGroups` is a Set owned by the calling view, so which groups are expanded
  * survives that view's repaints.
  */
-export function renderListPicker(lists, openGroups, onChange) {
+export function renderListPicker(lists, openGroups, onChange, { vocabulary = [], tagFilter = null } = {}) {
   if (lists.length === 0) {
     return h(
       'div',
@@ -79,8 +78,14 @@ export function renderListPicker(lists, openGroups, onChange) {
     );
   }
 
-  const groups = groupListsByCategory(lists);
-  const allIds = lists.map((list) => list.id);
+  // Narrowing by tag is what keeps this usable as the library grows: at thirty
+  // lists you tap "family" and see four, instead of scrolling past everything.
+  const visible = tagFilter
+    ? lists.filter((list) => (list.tags ?? []).includes(tagFilter))
+    : lists;
+
+  const groups = groupListsByTag(visible, vocabulary);
+  const allIds = visible.map((list) => list.id);
   const selectedCount = lists.filter((list) => poolState.isSelected(list.id)).length;
 
   const bulk = (label, ids, on) =>
@@ -226,10 +231,35 @@ export function renderListPicker(lists, openGroups, onChange) {
  * Renders nothing when no occasion can produce a pool — on a fresh install
  * with no lists, an empty row of dead chips would be worse than no row.
  */
-export function renderOccasionChips(lists, facets, onApply) {
-  const available = availableOccasions({ lists, facets });
-  if (available.length === 0) return null;
+/**
+ * Tag filter chips above the picker. Narrowing to one tag is what stops the
+ * picker becoming a scroll as the library grows — the whole reason lists carry
+ * tags rather than a single category.
+ */
+export function renderTagFilter(vocabulary, active, onChange) {
+  const withLists = vocabulary.filter((entry) => entry.count > 0);
+  if (withLists.length <= 1) return null;
 
+  const chip = (label, tag) =>
+    h(
+      'button',
+      {
+        class: 'chip',
+        dataset: { state: active === tag ? 'include' : 'off' },
+        onClick: () => onChange(active === tag ? null : tag),
+      },
+      label,
+    );
+
+  return h(
+    'div',
+    { class: 'chips' },
+    chip('All', null),
+    ...withLists.map((entry) => chip(`${entry.label} ${entry.count}`, entry.tag)),
+  );
+}
+
+export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
   return h(
     'div',
     {},
@@ -237,20 +267,48 @@ export function renderOccasionChips(lists, facets, onApply) {
     h(
       'div',
       { class: 'chips' },
-      ...available.map(({ occasion, filters }) =>
-        h(
-          'button',
-          {
-            class: 'chip chip--occasion',
-            dataset: { state: poolState.occasion === occasion.id ? 'include' : 'off' },
-            title: occasion.hint,
-            onClick: () => {
-              poolState.applyOccasion(occasion.id, filters);
-              onApply();
+      ...vibes.map((vibe) => {
+        const active = poolState.occasion === vibe.id;
+        return h(
+          'span',
+          { class: 'vibe-chip-wrap' },
+          h(
+            'button',
+            {
+              class: 'chip chip--occasion',
+              dataset: { state: active ? 'include' : 'off' },
+              title: vibe.tags.length
+                ? `Tagged: ${vibe.tags.join(', ')}`
+                : `${vibe.resolved_lists.length} list(s)`,
+              onClick: () => {
+                applyVibe(vibe);
+                onApply();
+              },
             },
-          },
-          occasion.label,
-        ),
+            vibe.name,
+          ),
+          // The remove affordance only appears on the active chip, so the row
+          // stays a row of choices rather than a row of choices-and-buttons.
+          active
+            ? h(
+                'button',
+                {
+                  class: 'vibe-remove',
+                  title: `Delete the "${vibe.name}" vibe`,
+                  onClick: () => onDelete(vibe),
+                },
+                '✕',
+              )
+            : null,
+        );
+      }),
+      // Saving the CURRENT setup is the only creation path: you tune lists and
+      // filters until the pool looks right, then keep it. A blank form would
+      // ask you to imagine the result instead of seeing it.
+      h(
+        'button',
+        { class: 'chip chip--occasion chip--save', title: 'Save the current lists and filters as a new vibe', onClick: onSave },
+        '+ Save current…',
       ),
       poolState.occasion === null
         ? h('span', { class: 'faint', style: 'align-self:center' }, 'Custom')

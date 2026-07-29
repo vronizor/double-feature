@@ -1,90 +1,59 @@
 /**
- * "Tonight is…" — the presets above Pool setup.
+ * "Tonight is…" — applying and creating vibes.
  *
- * The premise of v2: the same host has different Friday nights, and picking
- * between them shouldn't mean hand-toggling six lists and three filters. An
- * occasion bundles a list selection AND the filters that go with it, in one
- * click.
+ * Vibes now live in the database rather than being hardcoded here, because the
+ * set of them is personal and grows: different viewing companions want
+ * different nights, and adding one should be a button rather than a redeploy.
+ * What remains in this file is the client-side half — turning a vibe into pool
+ * state, and turning the current pool state back into a saveable vibe.
  *
- * Occasions are deliberately NOT the same thing as list categories. A category
- * is how the picker groups lists visually; an occasion is a curated starting
- * point that may draw on one category, several, or none. Keeping them separate
- * is what lets "Family" mean *family lists, minus horror* rather than merely
- * "the lists filed under family".
- *
- * An occasion whose `resolve()` yields no lists is hidden rather than shown
- * broken — so "Awards" simply appears once awards lists exist, and
- * "Crowd-pleasers" once the auto-updating list does, with no code change here.
- *
- * ---------------------------------------------------------------------------
- * FUTURE: parametric occasions (director night, theme night)
- *
- * Those need a value before they can resolve — "which director?", "which
- * theme?" — so they will carry an extra field:
- *
- *   {
- *     id: 'director',
- *     label: 'Director',
- *     param: { kind: 'person', placeholder: 'Kurosawa…' },
- *     resolve: ({ value }) => ({ lists: [ephemeralListFor(value)] }),
- *   }
- *
- * The chip renderer shows a `▾` for those and expands an inline input instead
- * of applying immediately. Nothing here defines one yet, and the expansion UI
- * is deliberately not written until there's an occasion to test it against —
- * but the shape above is what the dynamic-list work should target, and it is
- * why a dynamic list's query must be stored as a structured object rather than
- * a frozen URL (see ROADMAP §4.3).
- * ---------------------------------------------------------------------------
+ * A vibe is a STARTING POINT, never a mode. Applying one fills in the pool
+ * setup; editing anything afterwards demotes the chip to "Custom" rather than
+ * letting the UI keep claiming a vibe it no longer matches.
  */
 
-const idsInCategory = (lists, category) =>
-  lists.filter((list) => list.category === category).map((list) => list.id);
+import { poolState, emptyFilters } from './pool-state.js';
 
-const genreIdByName = (facets, name) =>
-  facets?.genres?.find((genre) => genre.name.toLowerCase() === name.toLowerCase())?.id ?? null;
+/**
+ * Applies a vibe: its resolved lists become the selection, and its filters
+ * replace the current ones.
+ *
+ * `resolved_lists` is computed server-side (tag matches ∪ pinned lists) so the
+ * client never has to reimplement that union — and so a tag-driven vibe picks
+ * up a newly added list without the frontend knowing anything changed.
+ */
+export function applyVibe(vibe) {
+  poolState.applyOccasion(vibe.id, {
+    ...emptyFilters(),
+    ...(vibe.filters ?? {}),
+    lists: [...vibe.resolved_lists],
+  });
+}
 
-export const OCCASIONS = [
-  {
-    id: 'cinephile',
-    label: 'Cinephile',
-    hint: 'The canon — the films that made history',
-    resolve: ({ lists }) => ({ lists: idsInCategory(lists, 'canon') }),
-  },
-  {
-    id: 'awards',
-    label: 'Awards',
-    hint: 'Prize winners',
-    resolve: ({ lists }) => ({ lists: idsInCategory(lists, 'awards') }),
-  },
-  {
-    id: 'crowd',
-    label: 'Crowd-pleasers',
-    hint: 'Recent films almost everyone enjoys',
-    resolve: ({ lists }) => ({ lists: idsInCategory(lists, 'dynamic') }),
-  },
-  {
-    id: 'family',
-    label: 'Family',
-    hint: 'Kid-friendly picks, horror excluded',
-    // The one occasion that carries a real filter as well as a selection —
-    // which is the point of it being an occasion rather than just a category.
-    // Note the horror id is looked up by name from the live facets rather than
-    // hardcoded: TMDB's ids are stable, but a filter that silently stops
-    // working is a bad thing to bet on a magic number.
-    resolve: ({ lists, facets }) => {
-      const horror = genreIdByName(facets, 'Horror');
-      return {
-        lists: idsInCategory(lists, 'family'),
-        genres: { include: [], exclude: horror === null ? [] : [horror] },
-      };
-    },
-  },
-];
+/**
+ * The payload for saving the current pool setup as a new vibe.
+ *
+ * Deliberately saves the CONCRETE list selection rather than trying to infer
+ * which tags the user "meant". Guessing would make the saved vibe drift later
+ * in ways they never asked for; if they want tag-driven behaviour they can say
+ * so explicitly. Search is excluded — it's a transient find-a-title action,
+ * not part of a night's shape.
+ */
+export function currentAsVibe(name) {
+  const { search, lists, ...filters } = poolState.filters;
+  return {
+    name,
+    tags: [],
+    lists: lists ?? [],
+    filters,
+  };
+}
 
-/** Only the occasions that can actually produce a pool right now. */
-export function availableOccasions(context) {
-  return OCCASIONS.map((occasion) => ({ occasion, filters: occasion.resolve(context) })).filter(
-    ({ filters }) => (filters.lists ?? []).length > 0,
-  );
+/** Whether a vibe exactly matches the current pool selection. */
+export function vibeMatchesCurrent(vibe) {
+  const selected = poolState.selectedLists();
+  if (selected === null) return false;
+  const a = [...selected].sort((x, y) => x - y).join(',');
+  const b = [...vibe.resolved_lists].sort((x, y) => x - y).join(',');
+  return a === b;
 }

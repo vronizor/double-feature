@@ -167,11 +167,90 @@ CREATE TABLE IF NOT EXISTS ballot_ranks (
   PRIMARY KEY (ballot_id, tmdb_id)
 );
 
+-- Tags replace the single category column. A list genuinely belongs to more
+-- than one bucket — Criterion is both a collection and part of the canon,
+-- Ghibli is a collection AND family AND animation — and forcing a choice made
+-- the "Cinephile" preset silently drop 1,227 Criterion films because it
+-- resolved on category = 'canon' alone.
+--
+-- The vocabulary is fixed (see TAGS below) rather than free text: near
+-- duplicates (comedy / comedies / funny) would degrade the grouped picker,
+-- which is the exact thing tags are here to keep navigable.
+CREATE TABLE IF NOT EXISTS list_tags (
+  list_id INTEGER NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
+  tag     TEXT    NOT NULL,
+  PRIMARY KEY (list_id, tag)
+);
+CREATE INDEX IF NOT EXISTS list_tags_tag ON list_tags(tag);
+
+-- A "vibe" is a saved starting point for a draw: which lists are in play plus
+-- the filters that go with them. Stored as data rather than code so a new one
+-- is a button rather than a redeploy — the whole point is that different
+-- viewing companions want different nights.
+--
+-- Built-ins are seeded with is_builtin = 1 but are otherwise ordinary rows:
+-- editable and deletable like any other, so there is one mechanism rather than
+-- two kinds of vibe to explain.
+CREATE TABLE IF NOT EXISTS vibes (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  name         TEXT    NOT NULL UNIQUE,
+  is_builtin   INTEGER NOT NULL DEFAULT 0,
+  filters_json TEXT,
+  position     INTEGER NOT NULL DEFAULT 0,
+  created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+-- A vibe draws on tags, on specific lists, or both, and resolves to the union.
+-- Both exist because they answer different needs: "Awards night" should be
+-- tag-based so a newly added award list joins it automatically, while
+-- "Sunday with the kids" is three named lists that shouldn't drift when the
+-- library grows.
+CREATE TABLE IF NOT EXISTS vibe_tags (
+  vibe_id INTEGER NOT NULL REFERENCES vibes(id) ON DELETE CASCADE,
+  tag     TEXT    NOT NULL,
+  PRIMARY KEY (vibe_id, tag)
+);
+
+CREATE TABLE IF NOT EXISTS vibe_lists (
+  vibe_id INTEGER NOT NULL REFERENCES vibes(id) ON DELETE CASCADE,
+  list_id INTEGER NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
+  PRIMARY KEY (vibe_id, list_id)
+);
+
 CREATE TABLE IF NOT EXISTS meta (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
 `;
+
+/**
+ * The tag vocabulary. Fixed on purpose — adding one is a deliberate edit here
+ * rather than a side effect of a typo in a text field. Order is display order
+ * in the picker.
+ */
+export const TAGS = [
+  'canon',
+  'awards',
+  'festivals',
+  'family',
+  'animation',
+  'comedy',
+  'collection',
+  'box-office',
+  'dynamic',
+];
+
+export const TAG_LABELS = {
+  canon: 'The canon',
+  awards: 'Awards',
+  festivals: 'Festivals',
+  family: 'Family',
+  animation: 'Animation',
+  comedy: 'Comedy',
+  collection: 'Collections',
+  'box-office': 'Box office',
+  dynamic: 'Auto-updating',
+};
 
 // `CREATE TABLE IF NOT EXISTS` covers fresh installs, but a column added to an
 // existing table needs an explicit ALTER TABLE — this runs it once, only when
@@ -201,6 +280,75 @@ function migrate(target) {
   // landed, so rows seeded before this column existed would stay NULL forever.
   ensureColumn(target, 'list_movies', 'rank', 'INTEGER');
   ensureColumn(target, 'list_movies', 'award_year', 'INTEGER');
+  migrateCategoriesToTags(target);
+}
+
+/**
+ * Bootstraps list_tags from the old single `category` column.
+ *
+ * Only fills in lists that have NO tags at all, so it can run on every boot
+ * without ever undoing a retag. `lists.category` is deliberately left in place
+ * but is no longer read anywhere — dropping it would rewrite the table for no
+ * benefit, and keeping it as a "primary tag" would quietly reintroduce exactly
+ * the single-category problem tags exist to solve.
+ */
+function migrateCategoriesToTags(target) {
+  const untagged = target
+    .prepare(
+      `SELECT id, category FROM lists
+       WHERE category IS NOT NULL
+         AND id NOT IN (SELECT list_id FROM list_tags)`,
+    )
+    .all();
+
+  const insert = target.prepare(
+    'INSERT INTO list_tags (list_id, tag) VALUES (?, ?) ON CONFLICT DO NOTHING',
+  );
+  for (const list of untagged) insert.run(list.id, list.category);
+}
+
+// The presets that used to be hardcoded in the frontend. Seeded as ordinary
+// rows so there is one mechanism for built-in and user-created alike.
+const BUILTIN_VIBES = [
+  { name: 'Cinephile', tags: ['canon'], position: 1 },
+  { name: 'Awards', tags: ['awards'], position: 2 },
+  { name: 'Crowd-pleasers', tags: ['dynamic'], position: 3 },
+  // The one built-in carrying a filter as well as a selection — which is what
+  // makes it a vibe rather than just a tag shortcut.
+  { name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },
+];
+
+/**
+ * Inserts the built-in vibes if they're absent. Idempotent, and never touches
+ * a vibe that already exists — so editing or deleting one sticks.
+ */
+export function ensureBuiltinVibes(target) {
+  const genreId = (name) =>
+    target.prepare('SELECT id FROM genres WHERE name = ? COLLATE NOCASE').get(name)?.id ?? null;
+
+  for (const vibe of BUILTIN_VIBES) {
+    if (target.prepare('SELECT 1 FROM vibes WHERE name = ?').get(vibe.name)) continue;
+
+    // Resolved from the genres table rather than hardcoded, with TMDB's real
+    // id as a fallback for a database seeded before the genre list landed.
+    const excluded = (vibe.excludeGenreNames ?? [])
+      .map((name) => genreId(name) ?? (name === 'Horror' ? 27 : null))
+      .filter((id) => id !== null);
+
+    const filters = excluded.length
+      ? JSON.stringify({ genres: { include: [], exclude: excluded } })
+      : null;
+
+    const { lastInsertRowid } = target
+      .prepare('INSERT INTO vibes (name, is_builtin, filters_json, position) VALUES (?, 1, ?, ?)')
+      .run(vibe.name, filters, vibe.position);
+
+    for (const tag of vibe.tags) {
+      target
+        .prepare('INSERT INTO vibe_tags (vibe_id, tag) VALUES (?, ?)')
+        .run(Number(lastInsertRowid), tag);
+    }
+  }
 }
 
 let db;
@@ -214,6 +362,7 @@ export function getDb() {
   db.exec('PRAGMA foreign_keys = ON');
   db.exec(SCHEMA);
   migrate(db);
+  ensureBuiltinVibes(db);
   db.prepare(
     `INSERT INTO meta (key, value) VALUES ('schema_version', '1')
      ON CONFLICT(key) DO NOTHING`,

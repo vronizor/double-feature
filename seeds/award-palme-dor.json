@@ -1,5 +1,9 @@
 {
   "name": "Palme d’Or (Cannes)",
+  "tags": [
+    "awards",
+    "festivals"
+  ],
   "category": "awards",
   "source": "Wikidata — award received (P166), Palme d’Or (Q179808)",
   "source_url": "https://en.wikipedia.org/wiki/Palme_d%27Or",
