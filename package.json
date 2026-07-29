@@ -14,7 +14,8 @@
     "fetch-seeds": "node scripts/fetch-seed-lists.mjs",
     "seed": "node scripts/seed.mjs",
     "backfill": "node scripts/backfill.mjs",
-    "backfill-lists": "node scripts/backfill-list-fields.mjs"
+    "backfill-lists": "node scripts/backfill-list-fields.mjs",
+    "refresh-dynamic": "node -e \"import('./server/refresh.js').then(async m => { const r = await m.refreshDynamicLists(); console.log(JSON.stringify(r.results ?? r, null, 2)); process.exit(0); })\""
   },
   "dependencies": {
     "express": "^5.1.0",

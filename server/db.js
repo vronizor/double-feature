@@ -19,15 +19,28 @@ const SCHEMA = `
 -- ONLY from the Lists tab. Draw/Explore hold their list selection in view
 -- state instead, so choosing an occasion for tonight never silently rewrites
 -- a stored preference or leaks across tabs.
+-- query_json, when set, makes this a "dynamic" list: its membership comes from
+-- a TMDB /discover query rather than a fixed set of titles, so "crowd-pleasers
+-- of the last five years" stays current without re-seeding. It is stored as a
+-- structured object ({kind, params, limit}) rather than a frozen URL so a
+-- parameter can be injected later — that is what a future "director night"
+-- or "theme night" needs, and retrofitting it onto a URL string would mean a
+-- migration.
+--
+-- Dynamic lists are MATERIALISED into list_movies rather than resolved at draw
+-- time: downstream, a dynamic list is indistinguishable from a hand-curated
+-- one, so the pool query, the filters and the whole draw path stay untouched.
 CREATE TABLE IF NOT EXISTS lists (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  name        TEXT    NOT NULL UNIQUE,
-  kind        TEXT    NOT NULL CHECK (kind IN ('seed', 'custom')),
-  category    TEXT,
-  is_active   INTEGER NOT NULL DEFAULT 0,
-  source      TEXT,
-  source_url  TEXT,
-  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  name            TEXT    NOT NULL UNIQUE,
+  kind            TEXT    NOT NULL CHECK (kind IN ('seed', 'custom')),
+  category        TEXT,
+  is_active       INTEGER NOT NULL DEFAULT 0,
+  source          TEXT,
+  source_url      TEXT,
+  query_json      TEXT,
+  materialised_at TEXT,
+  created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
 -- A movie's canonical identity is its TMDB id, never its title/year string, so
@@ -181,6 +194,8 @@ function migrate(target) {
   ensureColumn(target, 'lists', 'source', 'TEXT');
   ensureColumn(target, 'lists', 'source_url', 'TEXT');
   ensureColumn(target, 'lists', 'category', 'TEXT');
+  ensureColumn(target, 'lists', 'query_json', 'TEXT');
+  ensureColumn(target, 'lists', 'materialised_at', 'TEXT');
   // Populated from the seed files by scripts/backfill-ranks.mjs, NOT by a
   // re-run of the seeder: seed.mjs deliberately skips entries that already
   // landed, so rows seeded before this column existed would stay NULL forever.

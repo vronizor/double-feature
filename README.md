@@ -201,6 +201,23 @@ Wikidata and the language Wikipedias:
 | BAFTA — Best Film | awards | en.wikipedia category → Wikidata → TMDB | 78 |
 | César — Meilleur Film | awards | fr.wikipedia category → Wikidata → TMDB | 51 |
 | Goya — Mejor Película | awards | es.wikipedia category → Wikidata → TMDB | 40 |
+| Crowd-Pleasers (last 10 years) | dynamic | TMDB `/discover` — *see below* | 120 |
+
+**On the crowd-pleasers list:** this one is **query-backed**. Its membership
+isn't a fixed set of titles but a TMDB `/discover` query, re-run daily, so it
+keeps meaning "the last ten years" without anyone re-seeding it each January.
+
+The query sorts by rating with a **vote-count floor of 5,000**, and that floor
+is the entire point. TMDB's own `/movie/top_rated` has none, which is why it
+mixes real classics with obscure titles a handful of enthusiastic fans have
+pushed to the top — at a floor of 1,000 it still surfaced a niche romance
+trilogy, while at 5,000 it returns *Top Gun: Maverick*, *Across the
+Spider-Verse* and *The Wild Robot*. The list exists to balance a library that
+is otherwise heavily weighted toward the arthouse canon.
+
+Query-backed lists are materialised into the same tables as every other list,
+so nothing downstream — filters, Top-N, drawing, publishing — treats them
+specially. Refresh one by hand with `npm run refresh-dynamic`.
 
 **On the awards lists:** TMDB carries no awards data at all — its `oscar`
 keyword tags nine films — so these come from Wikimedia, by two different routes.

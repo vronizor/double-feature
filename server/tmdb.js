@@ -238,6 +238,34 @@ export async function getGenres() {
   return data?.genres ?? [];
 }
 
+/**
+ * /discover/movie with arbitrary caller-supplied filters, paged to `limit`.
+ *
+ * Backs query-backed ("dynamic") lists — a list defined by a query rather than
+ * a fixed set of ids, so it stays current without re-seeding.
+ *
+ * Returns discover's summary records, which are NOT enough to store: they carry
+ * no runtime, director or genre names. Callers upsert via getMovie() per id,
+ * exactly as the seeder does for any other list.
+ */
+export async function discoverMovies(params = {}, { limit = 100 } = {}) {
+  const movies = [];
+  // The page cap is a guard, not a target: discover happily reports hundreds of
+  // pages, and without it a careless query could walk the entire catalogue.
+  for (let page = 1; movies.length < limit && page <= 20; page += 1) {
+    const data = await request('/discover/movie', {
+      language: 'en-US',
+      include_adult: false,
+      ...params,
+      page,
+    });
+    if (!data?.results?.length) break;
+    movies.push(...data.results);
+    if (page >= (data.total_pages ?? 1)) break;
+  }
+  return movies.slice(0, limit);
+}
+
 export async function getTopRated(count = 100) {
   const movies = [];
   for (let page = 1; movies.length < count && page <= 10; page += 1) {

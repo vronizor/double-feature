@@ -2,6 +2,7 @@ import { getDb } from './db.js';
 import { hasTmdbCredentials } from './config.js';
 import { getMovie, getTvShow } from './tmdb.js';
 import { upsertMovie } from './movies.js';
+import { findDynamicLists, materialiseAll } from './dynamic-lists.js';
 
 /** Re-fetches one cached row from the right TMDB endpoint for its media type. */
 export function refetch(row) {
@@ -76,9 +77,34 @@ export async function refreshStaleMovies({ limit = 250, log = console.log } = {}
   return { refreshed, failed };
 }
 
+/**
+ * Re-runs every dynamic list's query, so "crowd-pleasers of the last ten
+ * years" keeps meaning that as films are released and ratings settle.
+ *
+ * Deliberately part of the same daily job rather than its own schedule: these
+ * lists drift slowly (a film needs thousands of votes to qualify), and a Pi
+ * that's rebooted often gets a run at boot either way.
+ */
+export async function refreshDynamicLists({ log = console.log } = {}) {
+  if (!hasTmdbCredentials()) return { skipped: true };
+  const db = getDb();
+  const lists = findDynamicLists(db);
+  if (lists.length === 0) return { lists: 0 };
+
+  const results = await materialiseAll(db, { log });
+  for (const result of results) {
+    if (result.error) continue;
+    if (result.added || result.removed) {
+      log(`[dynamic] ${result.name}: +${result.added} -${result.removed} (${result.total} total)`);
+    }
+  }
+  return { lists: results.length, results };
+}
+
 export function startRefreshJob() {
   const run = () => {
     refreshStaleMovies().catch((error) => console.error('[refresh]', error.message));
+    refreshDynamicLists().catch((error) => console.error('[dynamic]', error.message));
   };
   // A minute after boot, then daily — the Pi is likely to be rebooted more often
   // than it stays up for a month, so boot is the reliable trigger.
