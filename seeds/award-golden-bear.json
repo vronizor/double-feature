@@ -4,437 +4,523 @@
   "source": "Wikidata — award received (P166), Golden Bear (Q154590)",
   "source_url": "https://en.wikipedia.org/wiki/Golden_Bear",
   "note": "Q154590 is the Berlinale prize. Note that a plain search for \"Golden Bear\" returns a US training ship first (Q2512671) — the qid here is the award.",
-  "fetched_at": "2026-07-28",
+  "fetched_at": "2026-07-29",
   "count": 86,
   "entries": [
     {
       "title": "Justice Is Done",
       "year": 1950,
+      "award_year": 1951,
       "tmdb_id": 67731
     },
     {
       "title": "Four in a Jeep",
       "year": 1951,
+      "award_year": 1951,
       "tmdb_id": 162339
     },
     {
       "title": "One Summer of Happiness",
       "year": 1951,
+      "award_year": 1952,
       "tmdb_id": 56719
     },
     {
       "title": "Without Leaving an Address",
       "year": 1951,
+      "award_year": 1951,
       "tmdb_id": 162344
     },
     {
       "title": "The Wages of Fear",
       "year": 1953,
+      "award_year": 1953,
       "tmdb_id": 204
     },
     {
       "title": "Hobson's Choice",
       "year": 1954,
+      "award_year": 1954,
       "tmdb_id": 16410
     },
     {
       "title": "Die Ratten",
       "year": 1955,
+      "award_year": 1955,
       "tmdb_id": 148836
     },
     {
       "title": "Invitation to the Dance",
       "year": 1956,
+      "award_year": 1956,
       "tmdb_id": 47310
     },
     {
       "title": "12 Angry Men",
       "year": 1957,
+      "award_year": 1957,
       "tmdb_id": 389
     },
     {
       "title": "Wild Strawberries",
       "year": 1957,
+      "award_year": 1958,
       "tmdb_id": 614
     },
     {
       "title": "El Lazarillo de Tormes",
       "year": 1959,
+      "award_year": null,
       "tmdb_id": 162368
     },
     {
       "title": "The Cousins",
       "year": 1959,
+      "award_year": 1959,
       "tmdb_id": 2363
     },
     {
       "title": "La Notte",
       "year": 1961,
+      "award_year": 1961,
       "tmdb_id": 41050
     },
     {
       "title": "A Kind of Loving",
       "year": 1962,
+      "award_year": 1962,
       "tmdb_id": 33765
     },
     {
       "title": "Bushido, Samurai Saga",
       "year": 1963,
+      "award_year": 1963,
       "tmdb_id": 90299
     },
     {
       "title": "To Bed or Not to Bed",
       "year": 1963,
+      "award_year": 1963,
       "tmdb_id": 162382
     },
     {
       "title": "Dry Summer",
       "year": 1964,
+      "award_year": 1964,
       "tmdb_id": 58897
     },
     {
       "title": "Alphaville",
       "year": 1965,
+      "award_year": 1965,
       "tmdb_id": 8072
     },
     {
       "title": "Cul-de-sac",
       "year": 1966,
+      "award_year": 1966,
       "tmdb_id": 4772
     },
     {
       "title": "The Departure",
       "year": 1967,
+      "award_year": 1967,
       "tmdb_id": 137726
     },
     {
       "title": "Who Saw Him Die?",
       "year": 1968,
+      "award_year": 1968,
       "tmdb_id": 122671
     },
     {
       "title": "Early Works",
       "year": 1969,
+      "award_year": 1969,
       "tmdb_id": 162421
     },
     {
       "title": "The Garden of the Finzi-Continis",
       "year": 1970,
+      "award_year": 1971,
       "tmdb_id": 4789
     },
     {
       "title": "The Canterbury Tales",
       "year": 1972,
+      "award_year": 1972,
       "tmdb_id": 5691
     },
     {
       "title": "Distant Thunder",
       "year": 1973,
+      "award_year": 1973,
       "tmdb_id": 113012
     },
     {
       "title": "The Apprenticeship of Duddy Kravitz",
       "year": 1974,
+      "award_year": 1974,
       "tmdb_id": 42451
     },
     {
       "title": "Adoption",
       "year": 1975,
+      "award_year": 1975,
       "tmdb_id": 61703
     },
     {
       "title": "Buffalo Bill and the Indians, or Sitting Bull's History Lesson",
       "year": 1976,
+      "award_year": 1976,
       "tmdb_id": 42233
     },
     {
       "title": "The Ascent",
       "year": 1977,
+      "award_year": 1977,
       "tmdb_id": 50183
     },
     {
       "title": "Las truchas",
       "year": 1978,
+      "award_year": 1978,
       "tmdb_id": 162438
     },
     {
       "title": "What Max Said",
       "year": 1978,
+      "award_year": 1978,
       "tmdb_id": 162439
     },
     {
       "title": "David",
       "year": 1979,
+      "award_year": 1979,
       "tmdb_id": 163133
     },
     {
       "title": "Heartland",
       "year": 1979,
+      "award_year": 1980,
       "tmdb_id": 49427
     },
     {
       "title": "The Theme",
       "year": 1979,
+      "award_year": 1987,
       "tmdb_id": 131349
     },
     {
       "title": "Palermo or Wolfsburg",
       "year": 1980,
+      "award_year": 1980,
       "tmdb_id": 130544
     },
     {
       "title": "Deprisa, Deprisa",
       "year": 1981,
+      "award_year": 1981,
       "tmdb_id": 47211
     },
     {
       "title": "La colmena",
       "year": 1982,
+      "award_year": null,
       "tmdb_id": 104435
     },
     {
       "title": "Veronika Voss",
       "year": 1982,
+      "award_year": 1982,
       "tmdb_id": 2262
     },
     {
       "title": "Ascendancy",
       "year": 1983,
+      "award_year": 1983,
       "tmdb_id": 163143
     },
     {
       "title": "Love Streams",
       "year": 1984,
+      "award_year": 1984,
       "tmdb_id": 52109
     },
     {
       "title": "Wetherby",
       "year": 1984,
+      "award_year": 1985,
       "tmdb_id": 147747
     },
     {
       "title": "The Woman and the Stranger",
       "year": 1985,
+      "award_year": 1985,
       "tmdb_id": 163149
     },
     {
       "title": "Stammheim",
       "year": 1986,
+      "award_year": 1986,
       "tmdb_id": 52327
     },
     {
       "title": "Rain Man",
       "year": 1988,
+      "award_year": 1989,
       "tmdb_id": 380
     },
     {
       "title": "Red Sorghum",
       "year": 1988,
+      "award_year": 1988,
       "tmdb_id": 42006
     },
     {
       "title": "Music Box",
       "year": 1989,
+      "award_year": 1990,
       "tmdb_id": 2263
     },
     {
       "title": "Larks on a String",
       "year": 1990,
+      "award_year": 1990,
       "tmdb_id": 12078
     },
     {
       "title": "Grand Canyon",
       "year": 1991,
+      "award_year": 1992,
       "tmdb_id": 13697
     },
     {
       "title": "The House of Smiles",
       "year": 1991,
+      "award_year": 1991,
       "tmdb_id": 148757
     },
     {
       "title": "In the Name of the Father",
       "year": 1993,
+      "award_year": 1994,
       "tmdb_id": 7984
     },
     {
       "title": "The Wedding Banquet",
       "year": 1993,
+      "award_year": 1993,
       "tmdb_id": 9261
     },
     {
       "title": "Woman Sesame Oil Maker",
       "year": 1993,
+      "award_year": 1993,
       "tmdb_id": 162841
     },
     {
       "title": "Sense and Sensibility",
       "year": 1995,
+      "award_year": 1996,
       "tmdb_id": 4584
     },
     {
       "title": "The Bait",
       "year": 1995,
+      "award_year": 1995,
       "tmdb_id": 38414
     },
     {
       "title": "The People vs. Larry Flynt",
       "year": 1996,
+      "award_year": 1997,
       "tmdb_id": 1630
     },
     {
       "title": "Central Station",
       "year": 1998,
+      "award_year": 1998,
       "tmdb_id": 666
     },
     {
       "title": "The Thin Red Line",
       "year": 1998,
+      "award_year": 1999,
       "tmdb_id": 8741
     },
     {
       "title": "Magnolia",
       "year": 1999,
+      "award_year": 2000,
       "tmdb_id": 334
     },
     {
       "title": "Intimacy",
       "year": 2001,
+      "award_year": 2001,
       "tmdb_id": 11845
     },
     {
       "title": "Bloody Sunday",
       "year": 2002,
+      "award_year": 2002,
       "tmdb_id": 4107
     },
     {
       "title": "In This World",
       "year": 2002,
+      "award_year": 2003,
       "tmdb_id": 36791
     },
     {
       "title": "Head-On",
       "year": 2004,
+      "award_year": 2004,
       "tmdb_id": 363
     },
     {
       "title": "In Good Company",
       "year": 2004,
+      "award_year": 2005,
       "tmdb_id": 1901
     },
     {
       "title": "U-Carmen eKhayelitsha",
       "year": 2005,
+      "award_year": 2005,
       "tmdb_id": 79706
     },
     {
       "title": "Grbavica",
       "year": 2006,
+      "award_year": 2006,
       "tmdb_id": 317
     },
     {
       "title": "Tuya's Marriage",
       "year": 2006,
+      "award_year": 2007,
       "tmdb_id": 2694
     },
     {
       "title": "Elite Squad",
       "year": 2007,
+      "award_year": 2008,
       "tmdb_id": 7347
     },
     {
       "title": "A Good Day for a Swim",
       "year": 2008,
+      "award_year": null,
       "tmdb_id": 179599
     },
     {
       "title": "The Milk of Sorrow",
       "year": 2009,
+      "award_year": 2009,
       "tmdb_id": 28644
     },
     {
       "title": "Honey",
       "year": 2010,
+      "award_year": 2010,
       "tmdb_id": 44160
     },
     {
       "title": "A Separation",
       "year": 2011,
+      "award_year": 2011,
       "tmdb_id": 60243
     },
     {
       "title": "Caesar Must Die",
       "year": 2012,
+      "award_year": 2012,
       "tmdb_id": 96821
     },
     {
       "title": "Child's Pose",
       "year": 2013,
+      "award_year": 2013,
       "tmdb_id": 160118
     },
     {
       "title": "Black Coal, Thin Ice",
       "year": 2014,
+      "award_year": 2014,
       "tmdb_id": 255756
     },
     {
       "title": "Taxi",
       "year": 2015,
+      "award_year": 2015,
       "tmdb_id": 320006
     },
     {
       "title": "Fire at Sea",
       "year": 2016,
+      "award_year": 2016,
       "tmdb_id": 377151
     },
     {
       "title": "On Body and Soul",
       "year": 2017,
+      "award_year": null,
       "tmdb_id": 436343
     },
     {
       "title": "Touch Me Not",
       "year": 2018,
+      "award_year": 2018,
       "tmdb_id": 499155
     },
     {
       "title": "Synonyms",
       "year": 2019,
+      "award_year": 2019,
       "tmdb_id": 501590
     },
     {
       "title": "There Is No Evil",
       "year": 2020,
+      "award_year": 2020,
       "tmdb_id": 667935
     },
     {
       "title": "Bad Luck Banging or Loony Porn",
       "year": 2021,
+      "award_year": 2021,
       "tmdb_id": 790496
     },
     {
       "title": "Alcarràs",
       "year": 2022,
+      "award_year": 2022,
       "tmdb_id": 804251
     },
     {
       "title": "The Works and Days",
       "year": 2022,
+      "award_year": null,
       "tmdb_id": 664591
     },
     {
       "title": "On the Adamant",
       "year": 2023,
+      "award_year": 2023,
       "tmdb_id": 1070449
     },
     {
       "title": "Dahomey",
       "year": 2024,
+      "award_year": null,
       "tmdb_id": 1101256
     },
     {
       "title": "Dreams",
       "year": 2024,
+      "award_year": 2025,
       "tmdb_id": 1228682
     }
   ]

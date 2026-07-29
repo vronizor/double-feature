@@ -1,6 +1,12 @@
 import { h, clear, plural, toast } from '../dom.js';
 import { api } from '../api.js';
-import { renderFilterPanel, renderListPicker, renderTopN, movieCard } from '../browse.js';
+import {
+  renderFilterPanel,
+  renderListPicker,
+  renderTopN,
+  renderAwardsToggle,
+  movieCard,
+} from '../browse.js';
 import { lineup } from '../lineup.js';
 import { poolState } from '../pool-state.js';
 
@@ -134,6 +140,7 @@ export async function renderExplore(container) {
           ),
         ),
       ),
+      renderAwardsToggle(paint),
       h('span', { class: 'spacer' }),
       h(
         'span',

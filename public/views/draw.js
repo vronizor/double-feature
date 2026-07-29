@@ -6,6 +6,7 @@ import {
   renderListPicker,
   renderTopN,
   renderOccasionChips,
+  renderAwardsToggle,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -641,7 +642,13 @@ export async function renderDraw(container) {
         'div',
         { class: 'stack' },
         h('div', { class: 'tools-row' }, drawControls(), addFilmPanel()),
-        h('h2', {}, `Your lineup${lineup.movies.length ? ` (${lineup.movies.length})` : ''}`),
+        h(
+          'div',
+          { class: 'row' },
+          h('h2', {}, `Your lineup${lineup.movies.length ? ` (${lineup.movies.length})` : ''}`),
+          h('span', { class: 'spacer' }),
+          renderAwardsToggle(paint),
+        ),
         lineupGrid(),
       ),
     );

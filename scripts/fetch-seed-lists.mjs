@@ -137,20 +137,47 @@ async function fetchCriterion() {
  * returns a mix of films and people — 228 "winners" for an award with 98
  * actual films.
  *
- * These lists are unranked on purpose. An award has no internal ordering, and
- * the ceremony year is release year + 1 for most of them, so `movies.year`
- * already answers "winners from the 90s" without a separate award-year column.
+ * These lists are unranked on purpose — an award has no internal ordering.
+ *
+ * They DO carry an award_year, taken from the point-in-time (P585) qualifier
+ * on the award-received statement. That was originally judged unnecessary on
+ * the grounds that the ceremony year is release year + 1, but that reasoning
+ * only holds for filtering ("winners from the 90s", which movies.year already
+ * answers). It breaks for display: Cannes awards a film in its own release
+ * year while the Oscars and national awards run the following February, so a
+ * derived year would confidently print "Palme d'Or 2020" for a 2019 winner.
  */
 async function fetchWikidataAward(awardQid, meta) {
+  // p:/ps:/pq: rather than the plain wdt: shortcut, because the ceremony year
+  // is a QUALIFIER (point in time, P585) hanging off the award-received
+  // statement — it isn't reachable through the truthy-value shortcut at all.
   const rows = await sparql(`
-    SELECT ?film ?name ?date ?tmdb WHERE {
-      ?film wdt:P166 wd:${awardQid} ; wdt:P31 wd:Q11424 .
+    SELECT ?film ?name ?date ?tmdb ?awarded WHERE {
+      ?film p:P166 ?statement ; wdt:P31 wd:Q11424 .
+      ?statement ps:P166 wd:${awardQid} .
+      OPTIONAL { ?statement pq:P585 ?awarded . }
       ?film rdfs:label ?name . FILTER(LANG(?name) = "en")
       OPTIONAL { ?film wdt:P577 ?date . }
       OPTIONAL { ?film wdt:P4947 ?tmdb . }
     }`);
 
-  const entries = foldWikidataRows(rows)
+  const byFilm = new Map();
+  for (const row of rows) {
+    const key = row.film.value;
+    const entry = byFilm.get(key) ?? { title: row.name.value, year: null, award_year: null, tmdb_id: null };
+    if (row.date?.value) {
+      const year = Number(row.date.value.slice(0, 4));
+      if (Number.isInteger(year) && (entry.year === null || year < entry.year)) entry.year = year;
+    }
+    if (row.awarded?.value && entry.award_year === null) {
+      const awarded = Number(row.awarded.value.slice(0, 4));
+      if (Number.isInteger(awarded)) entry.award_year = awarded;
+    }
+    if (row.tmdb?.value && !entry.tmdb_id) entry.tmdb_id = Number(row.tmdb.value);
+    byFilm.set(key, entry);
+  }
+
+  const entries = [...byFilm.values()]
     .filter((entry) => entry.year === null || entry.year <= THIS_YEAR)
     .sort((a, b) => (a.year ?? 0) - (b.year ?? 0) || a.title.localeCompare(b.title));
 
@@ -197,7 +224,7 @@ async function wikipediaApi(lang, params, attempt = 0) {
  * The category also contains the award's own article ("BAFTA Award for Best
  * Film"), which naturally drops out for having no TMDB id.
  */
-async function fetchWikipediaCategoryAward(lang, category, meta) {
+async function fetchWikipediaCategoryAward(lang, category, awardQid, meta) {
   // 1. Category members, following continuation.
   const titles = [];
   let cont;
@@ -232,27 +259,40 @@ async function fetchWikipediaCategoryAward(lang, category, meta) {
     await sleep(400);
   }
 
-  // 3. QIDs -> TMDB id, English title and release year.
+  // 3. QIDs -> TMDB id, English title, release year, and the ceremony year
+  //    where Wikidata happens to record it. That last one is patchy for these
+  //    three awards (28-39%) — it comes from the same sparse P166 data that
+  //    made the category route necessary in the first place — so a missing
+  //    award_year is expected here and the UI simply omits the year.
   const entries = [];
   for (let i = 0; i < qids.length; i += 120) {
     const values = qids.slice(i, i + 120).map((q) => `wd:${q}`).join(' ');
     const rows = await sparql(`
-      SELECT ?item ?name ?date ?tmdb WHERE {
+      SELECT ?item ?name ?date ?tmdb ?awarded WHERE {
         VALUES ?item { ${values} }
         OPTIONAL { ?item wdt:P4947 ?tmdb . }
         OPTIONAL { ?item wdt:P577 ?date . }
+        OPTIONAL {
+          ?item p:P166 ?statement .
+          ?statement ps:P166 wd:${awardQid} .
+          ?statement pq:P585 ?awarded .
+        }
         OPTIONAL { ?item rdfs:label ?name . FILTER(LANG(?name) = "en") }
       }`);
 
     const byQid = new Map();
     for (const row of rows) {
       const qid = row.item.value.split('/').pop();
-      const entry = byQid.get(qid) ?? { title: null, year: null, tmdb_id: null };
+      const entry = byQid.get(qid) ?? { title: null, year: null, award_year: null, tmdb_id: null };
       if (row.tmdb?.value && !entry.tmdb_id) entry.tmdb_id = Number(row.tmdb.value);
       if (row.name?.value && !entry.title) entry.title = row.name.value;
       if (row.date?.value) {
         const year = Number(row.date.value.slice(0, 4));
         if (Number.isInteger(year) && (entry.year === null || year < entry.year)) entry.year = year;
+      }
+      if (row.awarded?.value && entry.award_year === null) {
+        const awarded = Number(row.awarded.value.slice(0, 4));
+        if (Number.isInteger(awarded)) entry.award_year = awarded;
       }
       byQid.set(qid, entry);
     }
@@ -523,7 +563,7 @@ const SOURCES = [
   {
     label: 'BAFTA Best Film',
     run: () =>
-      fetchWikipediaCategoryAward('en', 'Category:Best Film BAFTA Award winners', {
+      fetchWikipediaCategoryAward('en', 'Category:Best Film BAFTA Award winners', 'Q139184', {
         slug: 'award-bafta-best-film',
         name: 'BAFTA — Best Film',
         source: 'en.wikipedia category "Best Film BAFTA Award winners", resolved to TMDB ids via Wikidata',
@@ -534,7 +574,7 @@ const SOURCES = [
   {
     label: 'César Best Film',
     run: () =>
-      fetchWikipediaCategoryAward('fr', 'Catégorie:César du meilleur film', {
+      fetchWikipediaCategoryAward('fr', 'Catégorie:César du meilleur film', 'Q645595', {
         slug: 'award-cesar-best-film',
         name: 'César — Meilleur Film',
         source: 'fr.wikipedia category "César du meilleur film", resolved to TMDB ids via Wikidata',
@@ -548,6 +588,7 @@ const SOURCES = [
       fetchWikipediaCategoryAward(
         'es',
         'Categoría:Películas ganadoras del Premio Goya a la mejor película',
+        'Q1467554',
         {
           slug: 'award-goya-best-film',
           name: 'Goya — Mejor Película',

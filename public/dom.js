@@ -123,6 +123,34 @@ export function parseTmdbInput(value) {
   return null;
 }
 
+// Full list names ("Oscar — Best International Feature") don't fit a card's
+// meta line, so these are the compact forms used on the card and the poster
+// badge. The modal shows the full name instead, where there's room for it.
+//
+// An explicit map rather than clever parsing because the two Oscar lists would
+// otherwise both shorten to "Oscar", and a film that won both (Parasite) would
+// read "Oscar 2020 · Oscar 2020". Unknown names fall back to stripping the
+// qualifier, so a list added later still degrades sensibly.
+const AWARD_SHORT_NAMES = {
+  'Oscar — Best Picture': 'Oscar',
+  'Oscar — Best International Feature': 'Oscar Intl.',
+  'Palme d’Or (Cannes)': 'Palme d’Or',
+  'Golden Lion (Venice)': 'Golden Lion',
+  'Golden Bear (Berlin)': 'Golden Bear',
+  'BAFTA — Best Film': 'BAFTA',
+  'César — Meilleur Film': 'César',
+  'Goya — Mejor Película': 'Goya',
+};
+
+export const shortAwardName = (name) =>
+  AWARD_SHORT_NAMES[name] ?? name.replace(/\s*\(.*\)$/, '').replace(/\s*—.*$/, '');
+
+/** "Palme d’Or 2019", or just "Palme d’Or" when the year isn't recorded. */
+export const awardLabel = (award, { short = true } = {}) => {
+  const name = short ? shortAwardName(award.name) : award.name;
+  return award.year ? `${name} ${award.year}` : name;
+};
+
 /**
  * The original-language title as a subtitle under the (possibly English)
  * display title — only when it actually differs, so an English-original film
@@ -250,6 +278,18 @@ export function openMovieModal(movie) {
         // tmdb id by then), but is useful context when just browsing —
         // hence kept to the detail overlay rather than the compact card.
         movie.lists ? h('div', { class: 'movie-meta faint' }, `On: ${movie.lists}`) : null,
+        // Full award names here, one per line — the card has to abbreviate to
+        // fit, this is where the whole fact belongs.
+        movie.awards?.length
+          ? h(
+              'div',
+              { class: 'modal-awards' },
+              h('div', { class: 'field-label' }, plural(movie.awards.length, 'Award')),
+              ...movie.awards.map((award) =>
+                h('div', { class: 'modal-award' }, '🏆 ', awardLabel(award, { short: false })),
+              ),
+            )
+          : null,
         h('p', { class: 'modal-overview' }, movie.overview || 'No synopsis available.'),
         h(
           'div',

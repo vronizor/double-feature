@@ -99,6 +99,12 @@ CREATE TABLE IF NOT EXISTS list_movies (
   raw_title       TEXT    NOT NULL,
   raw_year        INTEGER,
   rank            INTEGER,
+  -- The ceremony year, for award lists. Stored rather than derived from the
+  -- release year because the offset differs per award: Cannes awards a film in
+  -- its own release year, while the Oscars and the national awards run in the
+  -- February after. Deriving it would confidently print the wrong year for
+  -- half the lists. NULL where the source doesn't record it.
+  award_year      INTEGER,
   status          TEXT    NOT NULL CHECK (status IN ('resolved', 'needs_review', 'unmatched')),
   candidates_json TEXT,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
@@ -179,6 +185,7 @@ function migrate(target) {
   // re-run of the seeder: seed.mjs deliberately skips entries that already
   // landed, so rows seeded before this column existed would stay NULL forever.
   ensureColumn(target, 'list_movies', 'rank', 'INTEGER');
+  ensureColumn(target, 'list_movies', 'award_year', 'INTEGER');
 }
 
 let db;

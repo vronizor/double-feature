@@ -3,337 +3,403 @@
   "category": "awards",
   "source": "Wikidata — award received (P166), Golden Lion (Q209459)",
   "source_url": "https://en.wikipedia.org/wiki/Golden_Lion",
-  "fetched_at": "2026-07-28",
+  "fetched_at": "2026-07-29",
   "count": 66,
   "entries": [
     {
       "title": "Justice Is Done",
       "year": 1950,
+      "award_year": 1950,
       "tmdb_id": 67731
     },
     {
       "title": "Manon",
       "year": 1950,
+      "award_year": 1949,
       "tmdb_id": 132332
     },
     {
       "title": "Rashomon",
       "year": 1950,
+      "award_year": 1951,
       "tmdb_id": 548
     },
     {
       "title": "Forbidden Games",
       "year": 1952,
+      "award_year": 1952,
       "tmdb_id": 5000
     },
     {
       "title": "Romeo and Juliet",
       "year": 1954,
+      "award_year": 1954,
       "tmdb_id": 92784
     },
     {
       "title": "Ordet",
       "year": 1955,
+      "award_year": 1955,
       "tmdb_id": 48035
     },
     {
       "title": "Aparajito",
       "year": 1956,
+      "award_year": 1957,
       "tmdb_id": 897
     },
     {
       "title": "Rickshaw Man",
       "year": 1958,
+      "award_year": 1958,
       "tmdb_id": 43121
     },
     {
       "title": "The Great War",
       "year": 1959,
+      "award_year": 1959,
       "tmdb_id": 55823
     },
     {
       "title": "Tomorrow Is My Turn",
       "year": 1960,
+      "award_year": 1960,
       "tmdb_id": 154578
     },
     {
       "title": "Last Year at Marienbad",
       "year": 1961,
+      "award_year": 1961,
       "tmdb_id": 4024
     },
     {
       "title": "Family Diary",
       "year": 1962,
+      "award_year": 1962,
       "tmdb_id": 80557
     },
     {
       "title": "Ivan's Childhood",
       "year": 1962,
+      "award_year": 1962,
       "tmdb_id": 31442
     },
     {
       "title": "Hands Over the City",
       "year": 1963,
+      "award_year": 1963,
       "tmdb_id": 58383
     },
     {
       "title": "Red Desert",
       "year": 1964,
+      "award_year": 1964,
       "tmdb_id": 26638
     },
     {
       "title": "Sandra",
       "year": 1965,
+      "award_year": 1965,
       "tmdb_id": 92432
     },
     {
       "title": "The Battle of Algiers",
       "year": 1966,
+      "award_year": 1965,
       "tmdb_id": 17295
     },
     {
       "title": "Belle de Jour",
       "year": 1967,
+      "award_year": 1967,
       "tmdb_id": 649
     },
     {
       "title": "Artists Under the Big Top: Perplexed",
       "year": 1968,
+      "award_year": 1968,
       "tmdb_id": 154582
     },
     {
       "title": "Atlantic City",
       "year": 1980,
+      "award_year": 1980,
       "tmdb_id": 23954
     },
     {
       "title": "Gloria",
       "year": 1980,
+      "award_year": 1980,
       "tmdb_id": 10889
     },
     {
       "title": "Marianne and Juliane",
       "year": 1981,
+      "award_year": 1981,
       "tmdb_id": 42142
     },
     {
       "title": "The State of Things",
       "year": 1982,
+      "award_year": 1982,
       "tmdb_id": 30363
     },
     {
       "title": "First Name: Carmen",
       "year": 1983,
+      "award_year": 1983,
       "tmdb_id": 32689
     },
     {
       "title": "A Year of the Quiet Sun",
       "year": 1984,
+      "award_year": 1984,
       "tmdb_id": 42096
     },
     {
       "title": "Vagabond",
       "year": 1985,
+      "award_year": 1985,
       "tmdb_id": 44018
     },
     {
       "title": "The Green Ray",
       "year": 1986,
+      "award_year": 1986,
       "tmdb_id": 54898
     },
     {
       "title": "Au revoir les enfants",
       "year": 1987,
+      "award_year": 1987,
       "tmdb_id": 1786
     },
     {
       "title": "The Legend of the Holy Drinker",
       "year": 1988,
+      "award_year": 1988,
       "tmdb_id": 54990
     },
     {
       "title": "A City of Sadness",
       "year": 1989,
+      "award_year": 1989,
       "tmdb_id": 49982
     },
     {
       "title": "Rosencrantz & Guildenstern Are Dead",
       "year": 1990,
+      "award_year": 1990,
       "tmdb_id": 18971
     },
     {
       "title": "Close to Eden",
       "year": 1991,
+      "award_year": 1991,
       "tmdb_id": 36346
     },
     {
       "title": "The Story of Qiu Ju",
       "year": 1992,
+      "award_year": null,
       "tmdb_id": 38143
     },
     {
       "title": "Short Cuts",
       "year": 1993,
+      "award_year": 1993,
       "tmdb_id": 695
     },
     {
       "title": "Three Colours: Blue",
       "year": 1993,
+      "award_year": 1993,
       "tmdb_id": 108
     },
     {
       "title": "Before the Rain",
       "year": 1994,
+      "award_year": 1994,
       "tmdb_id": 19155
     },
     {
       "title": "Vive L'Amour",
       "year": 1994,
+      "award_year": 1994,
       "tmdb_id": 11985
     },
     {
       "title": "Cyclo",
       "year": 1995,
+      "award_year": 1995,
       "tmdb_id": 36266
     },
     {
       "title": "Michael Collins",
       "year": 1996,
+      "award_year": 1996,
       "tmdb_id": 1770
     },
     {
       "title": "Hana-bi",
       "year": 1997,
+      "award_year": 1997,
       "tmdb_id": 5910
     },
     {
       "title": "The Way We Laughed",
       "year": 1998,
+      "award_year": 1998,
       "tmdb_id": 58098
     },
     {
       "title": "Not One Less",
       "year": 1999,
+      "award_year": 1999,
       "tmdb_id": 36210
     },
     {
       "title": "The Circle",
       "year": 2000,
+      "award_year": 2000,
       "tmdb_id": 13898
     },
     {
       "title": "Monsoon Wedding",
       "year": 2001,
+      "award_year": 2001,
       "tmdb_id": 480
     },
     {
       "title": "Happening",
       "year": 2002,
+      "award_year": 2021,
       "tmdb_id": 793998
     },
     {
       "title": "The Magdalene Sisters",
       "year": 2002,
+      "award_year": 2002,
       "tmdb_id": 8094
     },
     {
       "title": "The Return",
       "year": 2003,
+      "award_year": 2003,
       "tmdb_id": 11190
     },
     {
       "title": "Vera Drake",
       "year": 2004,
+      "award_year": 2004,
       "tmdb_id": 11109
     },
     {
       "title": "Brokeback Mountain",
       "year": 2005,
+      "award_year": 2005,
       "tmdb_id": 142
     },
     {
       "title": "Still Life",
       "year": 2006,
+      "award_year": 2006,
       "tmdb_id": 2346
     },
     {
       "title": "Lust, Caution",
       "year": 2007,
+      "award_year": 2007,
       "tmdb_id": 4588
     },
     {
       "title": "The Wrestler",
       "year": 2008,
+      "award_year": 2008,
       "tmdb_id": 12163
     },
     {
       "title": "Lebanon",
       "year": 2009,
+      "award_year": 2009,
       "tmdb_id": 32084
     },
     {
       "title": "Somewhere",
       "year": 2010,
+      "award_year": 2010,
       "tmdb_id": 39210
     },
     {
       "title": "Faust (2011 film)",
       "year": 2011,
+      "award_year": 2011,
       "tmdb_id": 77560
     },
     {
       "title": "Pietà",
       "year": 2012,
+      "award_year": 2012,
       "tmdb_id": 123377
     },
     {
       "title": "Sacro GRA",
       "year": 2013,
+      "award_year": 2013,
       "tmdb_id": 216790
     },
     {
       "title": "A Pigeon Sat on a Branch Reflecting on Existence",
       "year": 2014,
+      "award_year": 2014,
       "tmdb_id": 110390
     },
     {
       "title": "From Afar",
       "year": 2015,
+      "award_year": 2015,
       "tmdb_id": 352162
     },
     {
       "title": "The Shape of Water",
       "year": 2017,
+      "award_year": 2017,
       "tmdb_id": 399055
     },
     {
       "title": "Roma",
       "year": 2018,
+      "award_year": 2018,
       "tmdb_id": 426426
     },
     {
       "title": "Nomadland",
       "year": 2020,
+      "award_year": 2020,
       "tmdb_id": 581734
     },
     {
       "title": "All the Beauty and the Bloodshed",
       "year": 2022,
+      "award_year": 2022,
       "tmdb_id": 1004663
     },
     {
       "title": "Poor Things",
       "year": 2023,
+      "award_year": 2023,
       "tmdb_id": 792307
     },
     {
       "title": "The Room Next Door",
       "year": 2024,
+      "award_year": 2024,
       "tmdb_id": 1088514
     },
     {
       "title": "Father Mother Sister Brother",
       "year": 2025,
+      "award_year": 2025,
       "tmdb_id": 1159206
     }
   ]

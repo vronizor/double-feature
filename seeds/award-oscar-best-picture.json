@@ -4,492 +4,589 @@
   "source": "Wikidata — award received (P166), Academy Award for Best Picture (Q102427)",
   "source_url": "https://en.wikipedia.org/wiki/Academy_Award_for_Best_Picture",
   "note": "Constrained to instance-of-film: the producers receive this award too, and without that constraint the query returns them alongside the films.",
-  "fetched_at": "2026-07-28",
+  "fetched_at": "2026-07-29",
   "count": 97,
   "entries": [
     {
       "title": "Wings",
       "year": 1927,
+      "award_year": 1929,
       "tmdb_id": 28966
     },
     {
       "title": "The Broadway Melody",
       "year": 1929,
+      "award_year": 1930,
       "tmdb_id": 65203
     },
     {
       "title": "All Quiet on the Western Front",
       "year": 1930,
+      "award_year": 1930,
       "tmdb_id": 143
     },
     {
       "title": "Cimarron",
       "year": 1931,
+      "award_year": 1931,
       "tmdb_id": 42861
     },
     {
       "title": "Grand Hotel",
       "year": 1932,
+      "award_year": 1932,
       "tmdb_id": 33680
     },
     {
       "title": "Cavalcade",
       "year": 1933,
+      "award_year": 1934,
       "tmdb_id": 56164
     },
     {
       "title": "It Happened One Night",
       "year": 1934,
+      "award_year": 1935,
       "tmdb_id": 3078
     },
     {
       "title": "Mutiny on the Bounty",
       "year": 1935,
+      "award_year": 1936,
       "tmdb_id": 12311
     },
     {
       "title": "The Great Ziegfeld",
       "year": 1936,
+      "award_year": 1937,
       "tmdb_id": 43277
     },
     {
       "title": "The Life of Emile Zola",
       "year": 1937,
+      "award_year": 1938,
       "tmdb_id": 43278
     },
     {
       "title": "You Can't Take It With You",
       "year": 1938,
+      "award_year": 1939,
       "tmdb_id": 34106
     },
     {
       "title": "Gone with the Wind",
       "year": 1939,
+      "award_year": 1940,
       "tmdb_id": 770
     },
     {
       "title": "Rebecca",
       "year": 1940,
+      "award_year": 1941,
       "tmdb_id": 223
     },
     {
       "title": "How Green Was My Valley",
       "year": 1941,
+      "award_year": 1942,
       "tmdb_id": 43266
     },
     {
       "title": "Casablanca",
       "year": 1942,
+      "award_year": 1944,
       "tmdb_id": 289
     },
     {
       "title": "Mrs. Miniver",
       "year": 1942,
+      "award_year": 1943,
       "tmdb_id": 27367
     },
     {
       "title": "Going My Way",
       "year": 1944,
+      "award_year": 1945,
       "tmdb_id": 17661
     },
     {
       "title": "The Lost Weekend",
       "year": 1945,
+      "award_year": 1946,
       "tmdb_id": 28580
     },
     {
       "title": "The Best Years of Our Lives",
       "year": 1946,
+      "award_year": 1947,
       "tmdb_id": 887
     },
     {
       "title": "Gentleman's Agreement",
       "year": 1947,
+      "award_year": 1948,
       "tmdb_id": 33667
     },
     {
       "title": "Hamlet",
       "year": 1948,
+      "award_year": 1949,
       "tmdb_id": 23383
     },
     {
       "title": "All About Eve",
       "year": 1950,
+      "award_year": 1951,
       "tmdb_id": 705
     },
     {
       "title": "All the King's Men",
       "year": 1950,
+      "award_year": 1950,
       "tmdb_id": 25430
     },
     {
       "title": "An American in Paris",
       "year": 1951,
+      "award_year": 1952,
       "tmdb_id": 2769
     },
     {
       "title": "The Greatest Show on Earth",
       "year": 1952,
+      "award_year": 1953,
       "tmdb_id": 27191
     },
     {
       "title": "From Here to Eternity",
       "year": 1953,
+      "award_year": 1954,
       "tmdb_id": 11426
     },
     {
       "title": "On the Waterfront",
       "year": 1954,
+      "award_year": 1955,
       "tmdb_id": 654
     },
     {
       "title": "Marty",
       "year": 1955,
+      "award_year": 1956,
       "tmdb_id": 15919
     },
     {
       "title": "Around the World in 80 Days",
       "year": 1956,
+      "award_year": 1957,
       "tmdb_id": 2897
     },
     {
       "title": "The Bridge on the River Kwai",
       "year": 1957,
+      "award_year": 1958,
       "tmdb_id": 826
     },
     {
       "title": "Gigi",
       "year": 1958,
+      "award_year": 1959,
       "tmdb_id": 17281
     },
     {
       "title": "Ben-Hur",
       "year": 1959,
+      "award_year": 1960,
       "tmdb_id": 665
     },
     {
       "title": "The Apartment",
       "year": 1960,
+      "award_year": 1961,
       "tmdb_id": 284
     },
     {
       "title": "West Side Story",
       "year": 1961,
+      "award_year": 1962,
       "tmdb_id": 1725
     },
     {
       "title": "Lawrence of Arabia",
       "year": 1962,
+      "award_year": 1963,
       "tmdb_id": 947
     },
     {
       "title": "Tom Jones",
       "year": 1963,
+      "award_year": 1964,
       "tmdb_id": 5769
     },
     {
       "title": "My Fair Lady",
       "year": 1964,
+      "award_year": 1965,
       "tmdb_id": 11113
     },
     {
       "title": "The Sound of Music",
       "year": 1965,
+      "award_year": 1966,
       "tmdb_id": 15121
     },
     {
       "title": "A Man for All Seasons",
       "year": 1966,
+      "award_year": 1967,
       "tmdb_id": 874
     },
     {
       "title": "In the Heat of the Night",
       "year": 1967,
+      "award_year": 1968,
       "tmdb_id": 10633
     },
     {
       "title": "Oliver!",
       "year": 1968,
+      "award_year": 1969,
       "tmdb_id": 17917
     },
     {
       "title": "Midnight Cowboy",
       "year": 1969,
+      "award_year": 1970,
       "tmdb_id": 3116
     },
     {
       "title": "Patton",
       "year": 1970,
+      "award_year": 1971,
       "tmdb_id": 11202
     },
     {
       "title": "The French Connection",
       "year": 1971,
+      "award_year": 1972,
       "tmdb_id": 1051
     },
     {
       "title": "The Godfather",
       "year": 1972,
+      "award_year": 1973,
       "tmdb_id": 238
     },
     {
       "title": "The Sting",
       "year": 1973,
+      "award_year": 1974,
       "tmdb_id": 9277
     },
     {
       "title": "The Godfather Part II",
       "year": 1974,
+      "award_year": 1975,
       "tmdb_id": 240
     },
     {
       "title": "One Flew Over the Cuckoo's Nest",
       "year": 1975,
+      "award_year": 1976,
       "tmdb_id": 510
     },
     {
       "title": "Rocky",
       "year": 1976,
+      "award_year": 1977,
       "tmdb_id": 1366
     },
     {
       "title": "Annie Hall",
       "year": 1977,
+      "award_year": 1978,
       "tmdb_id": 703
     },
     {
       "title": "The Deer Hunter",
       "year": 1978,
+      "award_year": 1979,
       "tmdb_id": 11778
     },
     {
       "title": "Kramer vs. Kramer",
       "year": 1979,
+      "award_year": 1980,
       "tmdb_id": 12102
     },
     {
       "title": "Ordinary People",
       "year": 1980,
+      "award_year": 1981,
       "tmdb_id": 16619
     },
     {
       "title": "Chariots of Fire",
       "year": 1981,
+      "award_year": 1982,
       "tmdb_id": 9443
     },
     {
       "title": "Gandhi",
       "year": 1982,
+      "award_year": 1983,
       "tmdb_id": 783
     },
     {
       "title": "Terms of Endearment",
       "year": 1983,
+      "award_year": 1984,
       "tmdb_id": 11050
     },
     {
       "title": "Amadeus",
       "year": 1984,
+      "award_year": 1985,
       "tmdb_id": 279
     },
     {
       "title": "Out of Africa",
       "year": 1985,
+      "award_year": 1986,
       "tmdb_id": 606
     },
     {
       "title": "Platoon",
       "year": 1986,
+      "award_year": 1987,
       "tmdb_id": 792
     },
     {
       "title": "The Last Emperor",
       "year": 1987,
+      "award_year": 1988,
       "tmdb_id": 746
     },
     {
       "title": "Rain Man",
       "year": 1988,
+      "award_year": 1989,
       "tmdb_id": 380
     },
     {
       "title": "Driving Miss Daisy",
       "year": 1989,
+      "award_year": 1990,
       "tmdb_id": 403
     },
     {
       "title": "Dances with Wolves",
       "year": 1990,
+      "award_year": 1991,
       "tmdb_id": 581
     },
     {
       "title": "The Silence of the Lambs",
       "year": 1991,
+      "award_year": 1992,
       "tmdb_id": 274
     },
     {
       "title": "Unforgiven",
       "year": 1992,
+      "award_year": 1993,
       "tmdb_id": 33
     },
     {
       "title": "Schindler's List",
       "year": 1993,
+      "award_year": 1994,
       "tmdb_id": 424
     },
     {
       "title": "Braveheart",
       "year": 1995,
+      "award_year": 1996,
       "tmdb_id": 197
     },
     {
       "title": "The English Patient",
       "year": 1996,
+      "award_year": 1997,
       "tmdb_id": 409
     },
     {
       "title": "Titanic",
       "year": 1997,
+      "award_year": 1998,
       "tmdb_id": 597
     },
     {
       "title": "Shakespeare in Love",
       "year": 1998,
+      "award_year": 1999,
       "tmdb_id": 1934
     },
     {
       "title": "American Beauty",
       "year": 1999,
+      "award_year": 2000,
       "tmdb_id": 14
     },
     {
       "title": "Gladiator",
       "year": 2000,
+      "award_year": 2001,
       "tmdb_id": 98
     },
     {
       "title": "A Beautiful Mind",
       "year": 2001,
+      "award_year": 2002,
       "tmdb_id": 453
     },
     {
       "title": "Chicago",
       "year": 2002,
+      "award_year": 2003,
       "tmdb_id": 1574
     },
     {
       "title": "The Lord of the Rings: The Return of the King",
       "year": 2003,
+      "award_year": 2004,
       "tmdb_id": 122
     },
     {
       "title": "Crash",
       "year": 2004,
+      "award_year": 2006,
       "tmdb_id": 1640
     },
     {
       "title": "Million Dollar Baby",
       "year": 2004,
+      "award_year": 2005,
       "tmdb_id": 70
     },
     {
       "title": "The Departed",
       "year": 2006,
+      "award_year": 2007,
       "tmdb_id": 1422
     },
     {
       "title": "No Country for Old Men",
       "year": 2007,
+      "award_year": 2008,
       "tmdb_id": 6977
     },
     {
       "title": "Slumdog Millionaire",
       "year": 2008,
+      "award_year": 2009,
       "tmdb_id": 12405
     },
     {
       "title": "The Hurt Locker",
       "year": 2008,
+      "award_year": 2010,
       "tmdb_id": 12162
     },
     {
       "title": "The King's Speech",
       "year": 2010,
+      "award_year": 2011,
       "tmdb_id": 45269
     },
     {
       "title": "The Artist",
       "year": 2011,
+      "award_year": 2012,
       "tmdb_id": 74643
     },
     {
       "title": "Argo",
       "year": 2012,
+      "award_year": 2013,
       "tmdb_id": 68734
     },
     {
       "title": "12 Years a Slave",
       "year": 2013,
+      "award_year": 2014,
       "tmdb_id": 76203
     },
     {
       "title": "Birdman",
       "year": 2014,
+      "award_year": 2015,
       "tmdb_id": 194662
     },
     {
       "title": "Spotlight",
       "year": 2015,
+      "award_year": 2016,
       "tmdb_id": 314365
     },
     {
       "title": "Moonlight",
       "year": 2016,
+      "award_year": 2017,
       "tmdb_id": 376867
     },
     {
       "title": "The Shape of Water",
       "year": 2017,
+      "award_year": 2018,
       "tmdb_id": 399055
     },
     {
       "title": "Green Book",
       "year": 2018,
+      "award_year": 2019,
       "tmdb_id": 490132
     },
     {
       "title": "Parasite",
       "year": 2019,
+      "award_year": 2020,
       "tmdb_id": 496243
     },
     {
       "title": "Nomadland",
       "year": 2020,
+      "award_year": 2021,
       "tmdb_id": 581734
     },
     {
       "title": "CODA",
       "year": 2021,
+      "award_year": 2022,
       "tmdb_id": 776503
     },
     {
       "title": "Everything Everywhere All at Once",
       "year": 2022,
+      "award_year": 2023,
       "tmdb_id": 545611
     },
     {
       "title": "Oppenheimer",
       "year": 2023,
+      "award_year": 2024,
       "tmdb_id": 872585
     },
     {
       "title": "Anora",
       "year": 2024,
+      "award_year": 2025,
       "tmdb_id": 1064213
     },
     {
       "title": "One Battle After Another",
       "year": 2025,
+      "award_year": 2026,
       "tmdb_id": 1054867
     }
   ]

@@ -3,7 +3,16 @@
  * vote on) and the Explore tab (just browse the library) — same filters,
  * same card, so a change to either only needs making once.
  */
-import { h, posterUrl, toast, formatRating, openMovieModal, originalTitleLine } from './dom.js';
+import {
+  h,
+  posterUrl,
+  toast,
+  formatRating,
+  openMovieModal,
+  originalTitleLine,
+  awardLabel,
+} from './dom.js';
+import { prefs } from './prefs.js';
 import { api } from './api.js';
 import { poolState } from './pool-state.js';
 import { availableOccasions } from './occasions.js';
@@ -251,6 +260,27 @@ export function renderOccasionChips(lists, facets, onApply) {
 }
 
 /**
+ * The "show awards" switch. A display preference, so it persists in
+ * localStorage and applies to both tabs — unlike anything in poolState, which
+ * is deliberately ephemeral.
+ */
+export function renderAwardsToggle(onChange) {
+  return h(
+    'button',
+    {
+      class: 'chip',
+      dataset: { state: prefs.showAwards ? 'include' : 'off' },
+      title: prefs.showAwards ? 'Hide award badges' : 'Show award badges',
+      onClick: () => {
+        prefs.toggle('showAwards');
+        onChange();
+      },
+    },
+    '🏆 Awards',
+  );
+}
+
+/**
  * "Top N of each ranked list" — rendered only when a selected list actually
  * carries ranks. Showing it against Criterion or Ghibli would be meaningless,
  * since an unranked list is deliberately unaffected by the cut.
@@ -456,10 +486,26 @@ export function renderFilterPanel(filters, facets, { onChipChange, onValueChange
 export function movieCard(movie, { extraAction } = {}) {
   const poster = posterUrl(movie.poster_path);
   const rating = formatRating(movie.vote_average);
+  const awards = prefs.showAwards ? (movie.awards ?? []) : [];
+
   return h(
     'article',
     { class: 'movie' },
     movie.watched ? h('span', { class: 'watched-flag' }, 'watched') : null,
+    // Top-LEFT: the watched flag already owns top-right. The count only
+    // appears when there's more than one, which is 88% of the time it isn't
+    // needed. `title` gives the full detail on desktop hover; the meta line
+    // below is what carries it on a phone, where hover doesn't exist.
+    awards.length
+      ? h(
+          'span',
+          {
+            class: 'award-flag',
+            title: awards.map((award) => awardLabel(award, { short: false })).join('\n'),
+          },
+          awards.length > 1 ? `🏆 ×${awards.length}` : '🏆',
+        )
+      : null,
     poster
       ? h('img', { class: 'movie-poster', src: poster, alt: '', loading: 'lazy' })
       : h('div', { class: 'movie-poster movie-poster--empty' }, 'No poster'),
@@ -484,6 +530,18 @@ export function movieCard(movie, { extraAction } = {}) {
         { class: 'movie-meta faint' },
         [movie.runtime ? `${movie.runtime} min` : null, movie.genres].filter(Boolean).join(' · '),
       ),
+      // Two at most, then "+N" — three award names would take four lines on a
+      // 190px card and crowd out the synopsis. The full set is one tap away in
+      // the overlay.
+      awards.length
+        ? h(
+            'div',
+            { class: 'movie-awards' },
+            '🏆 ',
+            awards.slice(0, 2).map((award) => awardLabel(award)).join(' · '),
+            awards.length > 2 ? ` +${awards.length - 2}` : '',
+          )
+        : null,
       movie.overview ? h('p', { class: 'movie-overview' }, movie.overview) : null,
     ),
     h(

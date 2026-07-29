@@ -4,417 +4,499 @@
   "source": "Wikidata — award received (P166), Palme d’Or (Q179808)",
   "source_url": "https://en.wikipedia.org/wiki/Palme_d%27Or",
   "note": "The most redundant of the award lists against a canon-heavy library (58% already present) — included for the axis rather than the additions.",
-  "fetched_at": "2026-07-28",
+  "fetched_at": "2026-07-29",
   "count": 82,
   "entries": [
     {
       "title": "Neecha Nagar",
       "year": 1946,
+      "award_year": null,
       "tmdb_id": 154879
     },
     {
       "title": "Miss Julie",
       "year": 1951,
+      "award_year": 1951,
       "tmdb_id": 18650
     },
     {
       "title": "Othello",
       "year": 1951,
+      "award_year": 1952,
       "tmdb_id": 47697
     },
     {
       "title": "Two Cents Worth of Hope",
       "year": 1952,
+      "award_year": 1952,
       "tmdb_id": 117478
     },
     {
       "title": "The Wages of Fear",
       "year": 1953,
+      "award_year": 1953,
       "tmdb_id": 204
     },
     {
       "title": "Marty",
       "year": 1955,
+      "award_year": 1955,
       "tmdb_id": 15919
     },
     {
       "title": "Friendly Persuasion",
       "year": 1956,
+      "award_year": 1957,
       "tmdb_id": 43258
     },
     {
       "title": "The Silent World",
       "year": 1956,
+      "award_year": 1956,
       "tmdb_id": 60234
     },
     {
       "title": "The Cranes Are Flying",
       "year": 1957,
+      "award_year": 1958,
       "tmdb_id": 38360
     },
     {
       "title": "Black Orpheus",
       "year": 1959,
+      "award_year": 1959,
       "tmdb_id": 40423
     },
     {
       "title": "La Dolce Vita",
       "year": 1960,
+      "award_year": 1960,
       "tmdb_id": 439
     },
     {
       "title": "The Long Absence",
       "year": 1961,
+      "award_year": 1961,
       "tmdb_id": 131836
     },
     {
       "title": "Viridiana",
       "year": 1961,
+      "award_year": 1961,
       "tmdb_id": 4497
     },
     {
       "title": "O Pagador de Promessas",
       "year": 1962,
+      "award_year": 1962,
       "tmdb_id": 59990
     },
     {
       "title": "The Leopard",
       "year": 1963,
+      "award_year": 1963,
       "tmdb_id": 1040
     },
     {
       "title": "The Umbrellas of Cherbourg",
       "year": 1964,
+      "award_year": 1964,
       "tmdb_id": 5967
     },
     {
       "title": "A Man and a Woman",
       "year": 1966,
+      "award_year": 1966,
       "tmdb_id": 42726
     },
     {
       "title": "Blowup",
       "year": 1966,
+      "award_year": 1967,
       "tmdb_id": 1052
     },
     {
       "title": "The Birds, the Bees and the Italians",
       "year": 1966,
+      "award_year": 1966,
       "tmdb_id": 17974
     },
     {
       "title": "If....",
       "year": 1968,
+      "award_year": 1969,
       "tmdb_id": 14794
     },
     {
       "title": "MASH",
       "year": 1970,
+      "award_year": 1970,
       "tmdb_id": 651
     },
     {
       "title": "The Go-Between",
       "year": 1971,
+      "award_year": 1971,
       "tmdb_id": 36194
     },
     {
       "title": "The Working Class Goes to Heaven",
       "year": 1971,
+      "award_year": 1972,
       "tmdb_id": 56231
     },
     {
       "title": "The Mattei Affair",
       "year": 1972,
+      "award_year": 1972,
       "tmdb_id": 62382
     },
     {
       "title": "Scarecrow",
       "year": 1973,
+      "award_year": null,
       "tmdb_id": 31587
     },
     {
       "title": "The Hireling",
       "year": 1973,
+      "award_year": 1973,
       "tmdb_id": 80382
     },
     {
       "title": "The Conversation",
       "year": 1974,
+      "award_year": 1974,
       "tmdb_id": 592
     },
     {
       "title": "Chronicle of the Years of Fire",
       "year": 1975,
+      "award_year": 1975,
       "tmdb_id": 52555
     },
     {
       "title": "Taxi Driver",
       "year": 1976,
+      "award_year": 1976,
       "tmdb_id": 103
     },
     {
       "title": "Padre Padrone",
       "year": 1977,
+      "award_year": 1977,
       "tmdb_id": 42225
     },
     {
       "title": "The Tree of Wooden Clogs",
       "year": 1978,
+      "award_year": 1978,
       "tmdb_id": 31542
     },
     {
       "title": "All That Jazz",
       "year": 1979,
+      "award_year": 1980,
       "tmdb_id": 16858
     },
     {
       "title": "Apocalypse Now",
       "year": 1979,
+      "award_year": 1979,
       "tmdb_id": 28
     },
     {
       "title": "The Tin Drum",
       "year": 1979,
+      "award_year": 1979,
       "tmdb_id": 659
     },
     {
       "title": "Kagemusha",
       "year": 1980,
+      "award_year": 1980,
       "tmdb_id": 11953
     },
     {
       "title": "Man of Iron",
       "year": 1981,
+      "award_year": 1981,
       "tmdb_id": 225
     },
     {
       "title": "Missing",
       "year": 1982,
+      "award_year": 1982,
       "tmdb_id": 15600
     },
     {
       "title": "Yol",
       "year": 1982,
+      "award_year": 1982,
       "tmdb_id": 52556
     },
     {
       "title": "The Ballad of Narayama",
       "year": 1983,
+      "award_year": 1983,
       "tmdb_id": 42113
     },
     {
       "title": "Paris, Texas",
       "year": 1984,
+      "award_year": 1984,
       "tmdb_id": 655
     },
     {
       "title": "When Father Was Away on Business",
       "year": 1985,
+      "award_year": 1985,
       "tmdb_id": 21042
     },
     {
       "title": "The Mission",
       "year": 1986,
+      "award_year": 1986,
       "tmdb_id": 11416
     },
     {
       "title": "Pelle the Conqueror",
       "year": 1987,
+      "award_year": 1988,
       "tmdb_id": 11174
     },
     {
       "title": "Under the Sun of Satan",
       "year": 1987,
+      "award_year": 1987,
       "tmdb_id": 31300
     },
     {
       "title": "Sex, Lies, and Videotape",
       "year": 1989,
+      "award_year": 1989,
       "tmdb_id": 1412
     },
     {
       "title": "Wild at Heart",
       "year": 1990,
+      "award_year": 1990,
       "tmdb_id": 483
     },
     {
       "title": "Barton Fink",
       "year": 1991,
+      "award_year": 1991,
       "tmdb_id": 290
     },
     {
       "title": "Farewell My Concubine",
       "year": 1993,
+      "award_year": 1993,
       "tmdb_id": 10997
     },
     {
       "title": "The Piano",
       "year": 1993,
+      "award_year": 1993,
       "tmdb_id": 713
     },
     {
       "title": "Pulp Fiction",
       "year": 1994,
+      "award_year": 1994,
       "tmdb_id": 680
     },
     {
       "title": "Underground",
       "year": 1995,
+      "award_year": 1995,
       "tmdb_id": 11902
     },
     {
       "title": "Secrets & Lies",
       "year": 1996,
+      "award_year": 1996,
       "tmdb_id": 11159
     },
     {
       "title": "Taste of Cherry",
       "year": 1997,
+      "award_year": 1997,
       "tmdb_id": 30020
     },
     {
       "title": "The Eel",
       "year": 1997,
+      "award_year": 1997,
       "tmdb_id": 20506
     },
     {
       "title": "Eternity and a Day",
       "year": 1998,
+      "award_year": 1998,
       "tmdb_id": 24858
     },
     {
       "title": "Rosetta",
       "year": 1999,
+      "award_year": 1999,
       "tmdb_id": 11489
     },
     {
       "title": "Dancer in the Dark",
       "year": 2000,
+      "award_year": 2000,
       "tmdb_id": 16
     },
     {
       "title": "The Son's Room",
       "year": 2001,
+      "award_year": 2001,
       "tmdb_id": 11447
     },
     {
       "title": "The Pianist",
       "year": 2002,
+      "award_year": 2002,
       "tmdb_id": 423
     },
     {
       "title": "Elephant",
       "year": 2003,
+      "award_year": 2003,
       "tmdb_id": 1807
     },
     {
       "title": "Fahrenheit 9/11",
       "year": 2004,
+      "award_year": 2004,
       "tmdb_id": 1777
     },
     {
       "title": "The Child",
       "year": 2005,
+      "award_year": 2005,
       "tmdb_id": 11490
     },
     {
       "title": "The Wind That Shakes the Barley",
       "year": 2006,
+      "award_year": 2006,
       "tmdb_id": 1116
     },
     {
       "title": "4 Months, 3 Weeks and 2 Days",
       "year": 2007,
+      "award_year": 2007,
       "tmdb_id": 2009
     },
     {
       "title": "The Class",
       "year": 2008,
+      "award_year": 2008,
       "tmdb_id": 8841
     },
     {
       "title": "The White Ribbon",
       "year": 2009,
+      "award_year": 2009,
       "tmdb_id": 37903
     },
     {
       "title": "Uncle Boonmee Who Can Recall His Past Lives",
       "year": 2010,
+      "award_year": 2010,
       "tmdb_id": 38368
     },
     {
       "title": "The Tree of Life",
       "year": 2011,
+      "award_year": 2011,
       "tmdb_id": 8967
     },
     {
       "title": "Amour",
       "year": 2012,
+      "award_year": 2012,
       "tmdb_id": 86837
     },
     {
       "title": "Blue Is the Warmest Colour",
       "year": 2013,
+      "award_year": 2013,
       "tmdb_id": 152584
     },
     {
       "title": "Winter Sleep",
       "year": 2014,
+      "award_year": 2014,
       "tmdb_id": 265169
     },
     {
       "title": "Dheepan",
       "year": 2015,
+      "award_year": 2015,
       "tmdb_id": 314402
     },
     {
       "title": "I, Daniel Blake",
       "year": 2016,
+      "award_year": 2016,
       "tmdb_id": 374473
     },
     {
       "title": "The Square",
       "year": 2017,
+      "award_year": 2017,
       "tmdb_id": 401246
     },
     {
       "title": "Shoplifters",
       "year": 2018,
+      "award_year": 2018,
       "tmdb_id": 505192
     },
     {
       "title": "Parasite",
       "year": 2019,
+      "award_year": 2019,
       "tmdb_id": 496243
     },
     {
       "title": "Titane",
       "year": 2021,
+      "award_year": 2021,
       "tmdb_id": 630240
     },
     {
       "title": "Triangle of Sadness",
       "year": 2022,
+      "award_year": 2022,
       "tmdb_id": 497828
     },
     {
       "title": "Anatomy of a Fall",
       "year": 2023,
+      "award_year": 2023,
       "tmdb_id": 915935
     },
     {
       "title": "Anora",
       "year": 2024,
+      "award_year": 2024,
       "tmdb_id": 1064213
     },
     {
       "title": "It Was Just an Accident",
       "year": 2025,
+      "award_year": 2025,
       "tmdb_id": 1456349
     },
     {
       "title": "Fjord",
       "year": 2026,
+      "award_year": 2026,
       "tmdb_id": 1401459
     }
   ]

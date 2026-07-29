@@ -102,6 +102,12 @@ is discarded until you remove it (or hit "Clear all"), and nothing is saved
 until you publish. Click any title to see the full synopsis and, when TMDB has
 one, an embedded trailer (or a one-tap YouTube search link when it doesn't).
 
+Award winners carry a 🏆 badge on the poster and a line naming what they won
+and when — *Palme d'Or 2024 · Oscar 2025*. The **🏆 Awards** switch above the
+grid turns that off if you'd rather not be influenced before voting. Where the
+source doesn't record a ceremony year the badge simply names the award; see
+`BACKLOG.md` for why some are missing and what it'd take to fill them in.
+
 **Explore tab** — browse the whole active library outside of building a vote:
 the same filters as the Lineup tab, sortable, paginated, with a search box.
 Useful for settling "wait, do we even have that?" arguments, and every card

@@ -14,7 +14,7 @@
     "fetch-seeds": "node scripts/fetch-seed-lists.mjs",
     "seed": "node scripts/seed.mjs",
     "backfill": "node scripts/backfill.mjs",
-    "backfill-ranks": "node scripts/backfill-ranks.mjs"
+    "backfill-lists": "node scripts/backfill-list-fields.mjs"
   },
   "dependencies": {
     "express": "^5.1.0",

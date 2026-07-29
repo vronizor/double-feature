@@ -131,6 +131,39 @@ export function getMovieRow(db, tmdbId) {
   return db.prepare('SELECT * FROM movies WHERE tmdb_id = ?').get(tmdbId);
 }
 
+/**
+ * Which awards each of these films won, with the ceremony year where the
+ * source recorded one.
+ *
+ * A separate query rather than another correlated subquery because this is the
+ * one piece of list data with real structure — name plus year, several per film
+ * — and flattening it into a delimited string the way `lists` does would just
+ * mean parsing it apart again in the browser.
+ */
+export function awardsByTmdbId(db, tmdbIds) {
+  if (tmdbIds.length === 0) return new Map();
+  const placeholders = tmdbIds.map(() => '?').join(', ');
+  const rows = db
+    .prepare(
+      `SELECT lm.tmdb_id, l.name, lm.award_year
+       FROM list_movies lm JOIN lists l ON l.id = lm.list_id
+       WHERE lm.tmdb_id IN (${placeholders})
+         AND lm.status = 'resolved'
+         AND l.category = 'awards'
+       -- Oldest first, and unknown years last rather than first (SQLite sorts
+       -- NULL lowest), so a film's awards read as a chronology.
+       ORDER BY lm.tmdb_id, lm.award_year IS NULL, lm.award_year, l.name COLLATE NOCASE`,
+    )
+    .all(...tmdbIds);
+
+  const byId = new Map();
+  for (const row of rows) {
+    if (!byId.has(row.tmdb_id)) byId.set(row.tmdb_id, []);
+    byId.get(row.tmdb_id).push({ name: row.name, year: row.award_year ?? null });
+  }
+  return byId;
+}
+
 export function hydrateMovies(db, tmdbIds) {
   if (tmdbIds.length === 0) return [];
   const placeholders = tmdbIds.map(() => '?').join(', ');
@@ -151,6 +184,7 @@ export function hydrateMovies(db, tmdbIds) {
     )
     .all(...tmdbIds);
 
-  const byId = new Map(rows.map((row) => [row.tmdb_id, row]));
+  const awards = awardsByTmdbId(db, tmdbIds);
+  const byId = new Map(rows.map((row) => [row.tmdb_id, { ...row, awards: awards.get(row.tmdb_id) ?? [] }]));
   return tmdbIds.map((id) => byId.get(id)).filter(Boolean);
 }
