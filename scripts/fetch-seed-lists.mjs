@@ -17,7 +17,7 @@
  * never needs to touch these sources.
  */
 
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -600,6 +600,17 @@ const SOURCES = [
   },
 ];
 
+/** How many entries the committed seed file already has, if any. */
+async function readExistingCount(slug) {
+  try {
+    const raw = await readFile(join(SEEDS, `${slug}.json`), 'utf8');
+    const count = JSON.parse(raw).count;
+    return Number.isInteger(count) ? count : null;
+  } catch {
+    return null; // First fetch of this list.
+  }
+}
+
 async function main() {
   await mkdir(SEEDS, { recursive: true });
   const only = process.argv.slice(2);
@@ -615,6 +626,24 @@ async function main() {
       const list = await source.run();
       if (!list) {
         console.log('skipped (no TMDB credentials)');
+        continue;
+      }
+
+      // A source that returns almost nothing is far more likely to be having a
+      // bad day than to have genuinely lost 90% of its films. Without this the
+      // script writes the truncated result, prints it as a success, and the
+      // next seed shrinks the list. The Sight & Sound and TSPDT scrapers have
+      // had their own thresholds from the start; this covers everything else,
+      // including every future fetcher.
+      const existing = await readExistingCount(list.slug);
+      const guardFloor = Math.max(source.minCount ?? 1, Math.ceil((existing ?? 0) * 0.5));
+      if (list.entries.length < guardFloor) {
+        failures += 1;
+        console.log(
+          `REFUSED — ${list.entries.length} films, expected at least ${guardFloor}` +
+            (existing ? ` (previous run had ${existing})` : '') +
+            '. Existing seed file left untouched.',
+        );
         continue;
       }
 

@@ -9,7 +9,7 @@ const POLL_MS = 3500;
  * The host's view of one vote session: QR code, link, live tally, close button,
  * and the results once it's closed. Reused read-only by the history tab.
  */
-export function renderSessionPanel(container, slug, { host = false } = {}) {
+export function renderSessionPanel(container, slug, { host = false, onClosed = null } = {}) {
   let timer = null;
   let stopped = false;
 
@@ -27,7 +27,14 @@ export function renderSessionPanel(container, slug, { host = false } = {}) {
       if (session.status === 'closed') {
         clearInterval(timer);
         const results = await api.results(slug);
-        if (!stopped) renderResults(container, results);
+        if (!stopped) {
+          // Only the caller that owns the lineup passes this, and only for the
+          // session it just published. The History tab renders closed sessions
+          // through this same function and passes nothing — without that gate,
+          // opening last week's result would wipe the lineup being built now.
+          onClosed?.();
+          renderResults(container, results);
+        }
         return;
       }
       renderOpen(session);
@@ -133,6 +140,9 @@ export function renderSessionPanel(container, slug, { host = false } = {}) {
                       try {
                         const results = await api.closeSession(slug);
                         stop();
+                        // Closing by hand skips the poll path above, so the
+                        // hook has to fire here too.
+                        onClosed?.();
                         renderResults(container, results);
                       } catch (error) {
                         toast(error.message, 'error');
@@ -244,6 +254,35 @@ export function renderResults(container, results) {
                 [winner.year, winner.director, winner.runtime ? `${winner.runtime} min` : null]
                   .filter(Boolean)
                   .join(' · '),
+              ),
+              // Closes the loop: the app picks a film and otherwise never
+              // learns whether it was watched, so the watched-exclusion filter
+              // accumulates nothing on its own. One tap here is the only
+              // moment the answer is actually known.
+              h(
+                'button',
+                {
+                  class: 'btn-sm',
+                  style: 'margin-top:8px',
+                  onClick: async (event) => {
+                    const button = event.currentTarget;
+                    const next = !winner.watched;
+                    try {
+                      await api.setWatched(winner.tmdb_id, next);
+                      winner.watched = next;
+                      button.textContent = next ? '✓ Watched' : 'Mark as watched';
+                      toast(
+                        next
+                          ? `${winner.title} marked watched — it won't come up in future draws`
+                          : `${winner.title} is back in the pool`,
+                        'ok',
+                      );
+                    } catch (error) {
+                      toast(error.message, 'error');
+                    }
+                  },
+                },
+                winner.watched ? '✓ Watched' : 'Mark as watched',
               ),
             ),
           )

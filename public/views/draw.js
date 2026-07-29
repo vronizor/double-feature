@@ -339,12 +339,22 @@ export async function renderDraw(container) {
           },
           lineup.movies.length ? `Draw ${state.size} more` : `Draw ${state.size}`,
         ),
+        // Only offered when there is something drawn to replace — with a
+        // hand-picked lineup this button would do nothing.
+        lineup.drawn().length
+          ? h(
+              'button',
+              { disabled: state.busy, onClick: doReplace },
+              `Replace ${lineup.drawn().length}`,
+            )
+          : null,
         lineup.movies.length
           ? h(
               'button',
               {
                 onClick: () => {
                   lineup.clear();
+                  rejected.clear();
                   refreshCount();
                   paint();
                 },
@@ -356,12 +366,57 @@ export async function renderDraw(container) {
     );
   }
 
+  // Everything discarded by Replace this session. Passed as `exclude` so
+  // repeated Replaces cycle through fresh options instead of handing back the
+  // film rejected two clicks ago — the draw otherwise only knows to avoid
+  // what is currently IN the lineup.
+  const rejected = new Set();
+
+  /**
+   * Swap out the drawn films for new ones, leaving deliberate picks alone.
+   *
+   * Only touches entries whose provenance is 'draw': a film someone searched
+   * for, pasted or added from Explore is theirs, not the machine's to discard.
+   */
+  async function doReplace() {
+    const drawn = lineup.drawn();
+    if (drawn.length === 0) return;
+
+    state.busy = true;
+    paint();
+    try {
+      for (const movie of drawn) rejected.add(movie.tmdb_id);
+      // Exclude what stays in the lineup, what we're about to drop, and
+      // everything already rejected — otherwise the replacements can include
+      // the very films being replaced.
+      const exclude = [...new Set([...lineup.ids(), ...rejected])];
+      const result = await api.draw(drawn.length, poolState.filters, exclude);
+
+      if (result.movies.length === 0) {
+        toast('Nothing new left to draw with these filters', 'error');
+        return;
+      }
+      for (const movie of drawn) lineup.remove(movie.tmdb_id);
+      lineup.addAll(result.movies, 'draw');
+
+      if (result.movies.length < drawn.length) {
+        toast(`Only ${plural(result.movies.length, 'new film')} left to swap in`, 'error');
+      }
+      await refreshCount();
+    } catch (error) {
+      toast(error.message, 'error');
+    } finally {
+      state.busy = false;
+      paint();
+    }
+  }
+
   async function doDraw() {
     state.busy = true;
     paint();
     try {
       const result = await api.draw(state.size, poolState.filters, lineup.ids());
-      lineup.addAll(result.movies);
+      lineup.addAll(result.movies, 'draw');
       if (result.shortfall > 0) {
         toast(
           `Only ${plural(result.available, 'new film')} matched — asked for ${result.requested} more`,
@@ -724,7 +779,18 @@ export async function renderDraw(container) {
       ),
       panel,
     );
-    sessionTeardown = renderSessionPanel(panel, slug, { host: true });
+    sessionTeardown = renderSessionPanel(panel, slug, {
+      host: true,
+      // The vote is over, so the lineup that produced it is spent. Clearing it
+      // here means switching back to this tab starts fresh rather than showing
+      // last night's films as though they were still staged. Scoped to THIS
+      // session: the History tab renders closed sessions through the same
+      // panel and passes no callback.
+      onClosed: () => {
+        lineup.clear();
+        refreshCount();
+      },
+    });
   }
 
   function paint() {

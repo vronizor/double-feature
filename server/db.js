@@ -281,6 +281,34 @@ function migrate(target) {
   ensureColumn(target, 'list_movies', 'rank', 'INTEGER');
   ensureColumn(target, 'list_movies', 'award_year', 'INTEGER');
   migrateCategoriesToTags(target);
+  renameCrowdPleasers(target);
+}
+
+/**
+ * The list sorts by rating, so it returns acclaim rather than crowd-pleasing:
+ * its lowest entry rates 8.2 and it contains Parasite, a film already on the
+ * canon lists it was meant to counterbalance. "Modern Classics" is honest, and
+ * it frees the "Crowd-pleasers" name for a genuinely reach-sorted list later.
+ *
+ * Done as a rename rather than by editing the seed file alone: seed.mjs matches
+ * lists by NAME, so changing the JSON on its own would create a second list
+ * beside the old one rather than renaming it. Guarded both ways so it runs
+ * once and never clobbers a list the user has since made themselves.
+ */
+function renameCrowdPleasers(target) {
+  const OLD = 'Crowd-Pleasers (last 10 years)';
+  const NEW = 'Modern Classics (last 10 years)';
+  const hasOld = target.prepare('SELECT id FROM lists WHERE name = ?').get(OLD);
+  const hasNew = target.prepare('SELECT 1 FROM lists WHERE name = ?').get(NEW);
+  if (hasOld && !hasNew) {
+    target.prepare('UPDATE lists SET name = ? WHERE id = ?').run(NEW, hasOld.id);
+  }
+
+  const oldVibe = target.prepare("SELECT id FROM vibes WHERE name = 'Crowd-pleasers'").get();
+  const newVibe = target.prepare("SELECT 1 FROM vibes WHERE name = 'Modern Classics'").get();
+  if (oldVibe && !newVibe) {
+    target.prepare('UPDATE vibes SET name = ? WHERE id = ?').run('Modern Classics', oldVibe.id);
+  }
 }
 
 /**
@@ -312,7 +340,7 @@ function migrateCategoriesToTags(target) {
 const BUILTIN_VIBES = [
   { name: 'Cinephile', tags: ['canon'], position: 1 },
   { name: 'Awards', tags: ['awards'], position: 2 },
-  { name: 'Crowd-pleasers', tags: ['dynamic'], position: 3 },
+  { name: 'Modern Classics', tags: ['dynamic'], position: 3 },
   // The one built-in carrying a filter as well as a selection — which is what
   // makes it a vibe rather than just a tag shortcut.
   { name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },

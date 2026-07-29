@@ -1,0 +1,20 @@
+{
+  "name": "Modern Classics (last 10 years)",
+  "tags": [
+    "dynamic"
+  ],
+  "category": "dynamic",
+  "source": "TMDB /discover/movie — highly rated, with a vote-count floor",
+  "source_url": "https://www.themoviedb.org/discover/movie",
+  "note": "A query-backed list: membership is re-derived from TMDB rather than fixed, so it stays current without re-seeding. NOTE the name: this sorts by rating, so what it actually returns is recent ACCLAIM, not crowd-pleasing — its lowest entry rates 8.2, while the films people put on for a fun evening (Ace Ventura, Wayne's World) rate 6.6-7.0 and no vote floor can reach them. It was called Crowd-Pleasers until that was measured. The vote_count floor of 5000 is still the right call for what this list IS: /movie/top_rated has no floor, which is why it mixes genuine classics with obscure titles a few fans inflated. A genuinely reach-sorted list is a separate thing, and is in BACKLOG.md.",
+  "query": {
+    "kind": "discover",
+    "params": {
+      "sort_by": "vote_average.desc",
+      "vote_count.gte": 5000,
+      "primary_release_date.gte": "2016-01-01"
+    },
+    "limit": 120
+  },
+  "entries": []
+}

@@ -131,7 +131,7 @@ test('built-in vibes are seeded once and never re-added after deletion', () => {
   const db = seed();
   ensureBuiltinVibes(db);
   const first = allVibes(db).map((v) => v.name).sort();
-  assert.deepEqual(first, ['Awards', 'Cinephile', 'Crowd-pleasers', 'Family']);
+  assert.deepEqual(first, ['Awards', 'Cinephile', 'Family', 'Modern Classics']);
 
   // Idempotent.
   ensureBuiltinVibes(db);

@@ -18,14 +18,26 @@ export const lineup = {
   has(tmdbId) {
     return movies.some((movie) => movie.tmdb_id === tmdbId);
   },
-  /** Returns false without adding if the film is already in the lineup. */
-  add(movie) {
+  /**
+   * Returns false without adding if the film is already in the lineup.
+   *
+   * `source` records HOW it got here — 'draw' for a random draw, 'added' for
+   * anything the host chose deliberately (TMDB search, pasted id, manual
+   * entry, or the Explore tab). "Replace" keys off this so it only swaps out
+   * films the machine picked, and never throws away one someone asked for.
+   */
+  add(movie, source = 'added') {
     if (this.has(movie.tmdb_id)) return false;
-    movies.push(movie);
+    movies.push({ ...movie, source });
     return true;
   },
-  addAll(newMovies) {
-    for (const movie of newMovies) this.add(movie);
+  addAll(newMovies, source = 'added') {
+    for (const movie of newMovies) this.add(movie, source);
+  },
+
+  /** The films that came from a random draw, in lineup order. */
+  drawn() {
+    return movies.filter((movie) => movie.source === 'draw');
   },
   remove(tmdbId) {
     const index = movies.findIndex((movie) => movie.tmdb_id === tmdbId);
