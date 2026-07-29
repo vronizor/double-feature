@@ -1,0 +1,211 @@
+{
+  "name": "Goya — Mejor Película",
+  "category": "awards",
+  "source": "es.wikipedia category \"Películas ganadoras del Premio Goya a la mejor película\", resolved to TMDB ids via Wikidata",
+  "source_url": "https://es.wikipedia.org/wiki/Premio_Goya_a_la_mejor_pel%C3%ADcula",
+  "note": "Wikidata's award-received data only covers 12 of these; the Spanish Wikipedia category covers 41.",
+  "fetched_at": "2026-07-29",
+  "count": 40,
+  "entries": [
+    {
+      "title": "Voyage to Nowhere",
+      "year": 1986,
+      "tmdb_id": 156453
+    },
+    {
+      "title": "El bosque animado",
+      "year": 1987,
+      "tmdb_id": 60311
+    },
+    {
+      "title": "Women on the Verge of a Nervous Breakdown",
+      "year": 1988,
+      "tmdb_id": 4203
+    },
+    {
+      "title": "Twisted Obsession",
+      "year": 1989,
+      "tmdb_id": 110928
+    },
+    {
+      "title": "¡Ay, Carmela!",
+      "year": 1990,
+      "tmdb_id": 41806
+    },
+    {
+      "title": "Lovers",
+      "year": 1991,
+      "tmdb_id": 41782
+    },
+    {
+      "title": "Belle Époque",
+      "year": 1992,
+      "tmdb_id": 2470
+    },
+    {
+      "title": "Todos a la cárcel",
+      "year": 1993,
+      "tmdb_id": 99902
+    },
+    {
+      "title": "Running Out of Time",
+      "year": 1994,
+      "tmdb_id": 114218
+    },
+    {
+      "title": "Nobody Will Speak of Us When We're Dead",
+      "year": 1995,
+      "tmdb_id": 74840
+    },
+    {
+      "title": "Tesis",
+      "year": 1996,
+      "tmdb_id": 9299
+    },
+    {
+      "title": "The Lucky Star",
+      "year": 1997,
+      "tmdb_id": 97295
+    },
+    {
+      "title": "The Girl of Your Dreams",
+      "year": 1998,
+      "tmdb_id": 67297
+    },
+    {
+      "title": "All About My Mother",
+      "year": 1999,
+      "tmdb_id": 99
+    },
+    {
+      "title": "El Bola",
+      "year": 2000,
+      "tmdb_id": 33504
+    },
+    {
+      "title": "The Others",
+      "year": 2001,
+      "tmdb_id": 1933
+    },
+    {
+      "title": "Mondays in the Sun",
+      "year": 2002,
+      "tmdb_id": 54580
+    },
+    {
+      "title": "Take My Eyes",
+      "year": 2003,
+      "tmdb_id": 1418
+    },
+    {
+      "title": "The Sea Inside",
+      "year": 2004,
+      "tmdb_id": 1913
+    },
+    {
+      "title": "The Secret Life of Words",
+      "year": 2005,
+      "tmdb_id": 148
+    },
+    {
+      "title": "Volver",
+      "year": 2006,
+      "tmdb_id": 219
+    },
+    {
+      "title": "Solitary Fragments",
+      "year": 2007,
+      "tmdb_id": 39489
+    },
+    {
+      "title": "Camino",
+      "year": 2008,
+      "tmdb_id": 17893
+    },
+    {
+      "title": "Cell 211",
+      "year": 2009,
+      "tmdb_id": 33273
+    },
+    {
+      "title": "Black Bread",
+      "year": 2010,
+      "tmdb_id": 57521
+    },
+    {
+      "title": "No Rest for the Wicked",
+      "year": 2011,
+      "tmdb_id": 76013
+    },
+    {
+      "title": "Blancanieves",
+      "year": 2012,
+      "tmdb_id": 127864
+    },
+    {
+      "title": "Living Is Easy with Eyes Closed",
+      "year": 2013,
+      "tmdb_id": 209415
+    },
+    {
+      "title": "Marshland",
+      "year": 2014,
+      "tmdb_id": 236735
+    },
+    {
+      "title": "Truman",
+      "year": 2015,
+      "tmdb_id": 341744
+    },
+    {
+      "title": "The Fury of a Patient Man",
+      "year": 2016,
+      "tmdb_id": 411638
+    },
+    {
+      "title": "The Bookshop",
+      "year": 2017,
+      "tmdb_id": 444539
+    },
+    {
+      "title": "Champions",
+      "year": 2018,
+      "tmdb_id": 456929
+    },
+    {
+      "title": "Pain and Glory",
+      "year": 2019,
+      "tmdb_id": 519010
+    },
+    {
+      "title": "Schoolgirls",
+      "year": 2020,
+      "tmdb_id": 619443
+    },
+    {
+      "title": "The Good Boss",
+      "year": 2021,
+      "tmdb_id": 820722
+    },
+    {
+      "title": "The Beasts",
+      "year": 2022,
+      "tmdb_id": 848685
+    },
+    {
+      "title": "Society of the Snow",
+      "year": 2023,
+      "tmdb_id": 906126
+    },
+    {
+      "title": "The 47",
+      "year": 2024,
+      "tmdb_id": 1174481
+    },
+    {
+      "title": "Undercover",
+      "year": 2024,
+      "tmdb_id": 1215185
+    }
+  ]
+}

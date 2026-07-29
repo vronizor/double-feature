@@ -65,7 +65,7 @@ docker compose exec double-feature node scripts/seed.mjs
 # or, without Docker:  npm run seed
 ```
 
-This resolves ~3,300 entries against TMDB and takes a few minutes. It's safe to
+This resolves ~3,500 entries against TMDB and takes a few minutes. It's safe to
 re-run — finished entries are skipped, so an interrupted run just continues.
 Seed lists arrive **active**, so you can draw immediately.
 
@@ -175,8 +175,8 @@ rewatches.
 The original spec assumed all six lists could be pulled from Wikipedia. Only two
 of them actually can, so each list is sourced from wherever it genuinely lives.
 Two more were added later, from their own publisher and (by hand, since its site
-blocks scripted access) a curator on SensCritique — then five award lists from
-Wikidata:
+blocks scripted access) a curator on SensCritique — then eight award lists from
+Wikidata and the language Wikipedias:
 
 | List | Category | Source | Count |
 |---|---|---|---|
@@ -192,15 +192,34 @@ Wikidata:
 | Palme d'Or (Cannes) | awards | Wikidata, award received `P166` | 82 |
 | Golden Lion (Venice) | awards | Wikidata, award received `P166` | 66 |
 | Golden Bear (Berlin) | awards | Wikidata, award received `P166` | 86 |
+| BAFTA — Best Film | awards | en.wikipedia category → Wikidata → TMDB | 78 |
+| César — Meilleur Film | awards | fr.wikipedia category → Wikidata → TMDB | 51 |
+| Goya — Mejor Película | awards | es.wikipedia category → Wikidata → TMDB | 40 |
 
 **On the awards lists:** TMDB carries no awards data at all — its `oscar`
-keyword tags nine films — so Wikidata is the only structured source. Each award
-was measured against the existing pool before being included, because the point
-of an awards list is the films it *adds*, not the label: Golden Bear turned out
-the most additive (21% already present), Palme d'Or the least (58%). BAFTA,
-César and Goya were left out — not as redundant, but because Wikidata's coverage
-of them is too incomplete to honestly ship as "the winners" (32, 26 and 12 films
-respectively, against many decades of awards).
+keyword tags nine films — so these come from Wikimedia, by two different routes.
+
+The international awards use Wikidata's *award received* (`P166`) directly.
+The three national awards can't: Wikidata's coverage of them is badly
+incomplete (32 films for BAFTA Best Film, 26 for the César, 12 for the Goya,
+against many decades of ceremonies). Each language Wikipedia curates its own
+national award properly, so those are taken from the relevant **category**
+instead, and each member page is resolved through its Wikidata item to a TMDB
+id — 79/51/41 films at 98–100% id coverage, with no fuzzy title matching
+anywhere. Going via the Wikidata item also sidesteps localisation entirely: the
+French page for a film points at the same item as the English one.
+
+Each award was measured against the existing pool before being included,
+because the point of an awards list is the films it *adds*, not the label:
+
+| Most additive | | Least additive | |
+|---|---|---|---|
+| Golden Bear | 21% already present | BAFTA | 79% already present |
+| Goya | 13% | Palme d'Or | 58% |
+| César | 29% | Oscar Best Picture | 43% |
+
+BAFTA is kept despite the overlap — it adds only 16 films, but "draw me a BAFTA
+winner" is still a thing you might want to ask for.
 
 Why not Wikipedia:
 

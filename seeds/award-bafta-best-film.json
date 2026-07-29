@@ -1,0 +1,401 @@
+{
+  "name": "BAFTA — Best Film",
+  "category": "awards",
+  "source": "en.wikipedia category \"Best Film BAFTA Award winners\", resolved to TMDB ids via Wikidata",
+  "source_url": "https://en.wikipedia.org/wiki/BAFTA_Award_for_Best_Film",
+  "note": "Wikidata's award-received data only covers 32 of these; the category covers 79.",
+  "fetched_at": "2026-07-29",
+  "count": 78,
+  "entries": [
+    {
+      "title": "The Best Years of Our Lives",
+      "year": 1946,
+      "tmdb_id": 887
+    },
+    {
+      "title": "Bicycle Thieves",
+      "year": 1948,
+      "tmdb_id": 5156
+    },
+    {
+      "title": "Hamlet",
+      "year": 1948,
+      "tmdb_id": 23383
+    },
+    {
+      "title": "All About Eve",
+      "year": 1950,
+      "tmdb_id": 705
+    },
+    {
+      "title": "La Ronde",
+      "year": 1950,
+      "tmdb_id": 50030
+    },
+    {
+      "title": "Forbidden Games",
+      "year": 1952,
+      "tmdb_id": 5000
+    },
+    {
+      "title": "The Sound Barrier",
+      "year": 1952,
+      "tmdb_id": 51619
+    },
+    {
+      "title": "The Wages of Fear",
+      "year": 1953,
+      "tmdb_id": 204
+    },
+    {
+      "title": "Richard III",
+      "year": 1955,
+      "tmdb_id": 43323
+    },
+    {
+      "title": "Gervaise",
+      "year": 1956,
+      "tmdb_id": 52726
+    },
+    {
+      "title": "The Bridge on the River Kwai",
+      "year": 1957,
+      "tmdb_id": 826
+    },
+    {
+      "title": "Ballad of a Soldier",
+      "year": 1959,
+      "tmdb_id": 46592
+    },
+    {
+      "title": "Ben-Hur",
+      "year": 1959,
+      "tmdb_id": 665
+    },
+    {
+      "title": "Room at the Top",
+      "year": 1959,
+      "tmdb_id": 43103
+    },
+    {
+      "title": "The Apartment",
+      "year": 1960,
+      "tmdb_id": 284
+    },
+    {
+      "title": "The Hustler",
+      "year": 1961,
+      "tmdb_id": 990
+    },
+    {
+      "title": "Lawrence of Arabia",
+      "year": 1962,
+      "tmdb_id": 947
+    },
+    {
+      "title": "Tom Jones",
+      "year": 1963,
+      "tmdb_id": 5769
+    },
+    {
+      "title": "Dr. Strangelove",
+      "year": 1964,
+      "tmdb_id": 935
+    },
+    {
+      "title": "My Fair Lady",
+      "year": 1964,
+      "tmdb_id": 11113
+    },
+    {
+      "title": "A Man for All Seasons",
+      "year": 1966,
+      "tmdb_id": 874
+    },
+    {
+      "title": "Who's Afraid of Virginia Woolf?",
+      "year": 1966,
+      "tmdb_id": 396
+    },
+    {
+      "title": "The Graduate",
+      "year": 1967,
+      "tmdb_id": 37247
+    },
+    {
+      "title": "Butch Cassidy and the Sundance Kid",
+      "year": 1969,
+      "tmdb_id": 642
+    },
+    {
+      "title": "Midnight Cowboy",
+      "year": 1969,
+      "tmdb_id": 3116
+    },
+    {
+      "title": "Sunday, Bloody Sunday",
+      "year": 1971,
+      "tmdb_id": 45938
+    },
+    {
+      "title": "Cabaret",
+      "year": 1972,
+      "tmdb_id": 10784
+    },
+    {
+      "title": "Day for Night",
+      "year": 1973,
+      "tmdb_id": 1675
+    },
+    {
+      "title": "Alice Doesn't Live Here Anymore",
+      "year": 1974,
+      "tmdb_id": 16153
+    },
+    {
+      "title": "Lacombe, Lucien",
+      "year": 1974,
+      "tmdb_id": 55368
+    },
+    {
+      "title": "One Flew Over the Cuckoo's Nest",
+      "year": 1975,
+      "tmdb_id": 510
+    },
+    {
+      "title": "Annie Hall",
+      "year": 1977,
+      "tmdb_id": 703
+    },
+    {
+      "title": "Julia",
+      "year": 1977,
+      "tmdb_id": 42222
+    },
+    {
+      "title": "Manhattan",
+      "year": 1979,
+      "tmdb_id": 696
+    },
+    {
+      "title": "The Elephant Man",
+      "year": 1980,
+      "tmdb_id": 1955
+    },
+    {
+      "title": "Chariots of Fire",
+      "year": 1981,
+      "tmdb_id": 9443
+    },
+    {
+      "title": "Gandhi",
+      "year": 1982,
+      "tmdb_id": 783
+    },
+    {
+      "title": "Educating Rita",
+      "year": 1983,
+      "tmdb_id": 38291
+    },
+    {
+      "title": "The Killing Fields",
+      "year": 1984,
+      "tmdb_id": 625
+    },
+    {
+      "title": "The Purple Rose of Cairo",
+      "year": 1985,
+      "tmdb_id": 10849
+    },
+    {
+      "title": "A Room with a View",
+      "year": 1986,
+      "tmdb_id": 11257
+    },
+    {
+      "title": "Jean de Florette",
+      "year": 1986,
+      "tmdb_id": 4480
+    },
+    {
+      "title": "The Last Emperor",
+      "year": 1987,
+      "tmdb_id": 746
+    },
+    {
+      "title": "Dead Poets Society",
+      "year": 1989,
+      "tmdb_id": 207
+    },
+    {
+      "title": "Goodfellas",
+      "year": 1990,
+      "tmdb_id": 769
+    },
+    {
+      "title": "The Commitments",
+      "year": 1991,
+      "tmdb_id": 11663
+    },
+    {
+      "title": "Howards End",
+      "year": 1992,
+      "tmdb_id": 8293
+    },
+    {
+      "title": "Schindler's List",
+      "year": 1993,
+      "tmdb_id": 424
+    },
+    {
+      "title": "Four Weddings and a Funeral",
+      "year": 1994,
+      "tmdb_id": 712
+    },
+    {
+      "title": "Sense and Sensibility",
+      "year": 1995,
+      "tmdb_id": 4584
+    },
+    {
+      "title": "The English Patient",
+      "year": 1996,
+      "tmdb_id": 409
+    },
+    {
+      "title": "The Full Monty",
+      "year": 1997,
+      "tmdb_id": 9427
+    },
+    {
+      "title": "Shakespeare in Love",
+      "year": 1998,
+      "tmdb_id": 1934
+    },
+    {
+      "title": "American Beauty",
+      "year": 1999,
+      "tmdb_id": 14
+    },
+    {
+      "title": "Gladiator",
+      "year": 2000,
+      "tmdb_id": 98
+    },
+    {
+      "title": "The Lord of the Rings: The Fellowship of the Ring",
+      "year": 2001,
+      "tmdb_id": 120
+    },
+    {
+      "title": "The Pianist",
+      "year": 2002,
+      "tmdb_id": 423
+    },
+    {
+      "title": "The Lord of the Rings: The Return of the King",
+      "year": 2003,
+      "tmdb_id": 122
+    },
+    {
+      "title": "The Aviator",
+      "year": 2004,
+      "tmdb_id": 2567
+    },
+    {
+      "title": "Brokeback Mountain",
+      "year": 2005,
+      "tmdb_id": 142
+    },
+    {
+      "title": "The Queen",
+      "year": 2006,
+      "tmdb_id": 1165
+    },
+    {
+      "title": "Atonement",
+      "year": 2007,
+      "tmdb_id": 4347
+    },
+    {
+      "title": "Slumdog Millionaire",
+      "year": 2008,
+      "tmdb_id": 12405
+    },
+    {
+      "title": "The Hurt Locker",
+      "year": 2008,
+      "tmdb_id": 12162
+    },
+    {
+      "title": "The King's Speech",
+      "year": 2010,
+      "tmdb_id": 45269
+    },
+    {
+      "title": "The Artist",
+      "year": 2011,
+      "tmdb_id": 74643
+    },
+    {
+      "title": "Argo",
+      "year": 2012,
+      "tmdb_id": 68734
+    },
+    {
+      "title": "12 Years a Slave",
+      "year": 2013,
+      "tmdb_id": 76203
+    },
+    {
+      "title": "Boyhood",
+      "year": 2014,
+      "tmdb_id": 85350
+    },
+    {
+      "title": "The Revenant",
+      "year": 2015,
+      "tmdb_id": 281957
+    },
+    {
+      "title": "Three Billboards Outside Ebbing, Missouri",
+      "year": 2017,
+      "tmdb_id": 359940
+    },
+    {
+      "title": "Roma",
+      "year": 2018,
+      "tmdb_id": 426426
+    },
+    {
+      "title": "1917",
+      "year": 2019,
+      "tmdb_id": 530915
+    },
+    {
+      "title": "Nomadland",
+      "year": 2020,
+      "tmdb_id": 581734
+    },
+    {
+      "title": "The Power of the Dog",
+      "year": 2021,
+      "tmdb_id": 600583
+    },
+    {
+      "title": "All Quiet on the Western Front",
+      "year": 2022,
+      "tmdb_id": 49046
+    },
+    {
+      "title": "Oppenheimer",
+      "year": 2023,
+      "tmdb_id": 872585
+    },
+    {
+      "title": "One Battle After Another",
+      "year": 2025,
+      "tmdb_id": 1054867
+    }
+  ]
+}

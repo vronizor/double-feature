@@ -157,6 +157,120 @@ async function fetchWikidataAward(awardQid, meta) {
   return { category: 'awards', ...meta, entries };
 }
 
+// --- Wikipedia categories -------------------------------------------------
+
+async function wikipediaApi(lang, params, attempt = 0) {
+  const url = new URL(`https://${lang}.wikipedia.org/w/api.php`);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('formatversion', '2');
+  for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+
+  const response = await fetch(url, {
+    headers: { 'user-agent': UA },
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (response.status === 429 || response.status >= 500) {
+    if (attempt >= 4) throw new Error(`${lang}.wikipedia responded ${response.status}`);
+    await sleep(3000 * 2 ** attempt);
+    return wikipediaApi(lang, params, attempt + 1);
+  }
+  if (!response.ok) throw new Error(`${lang}.wikipedia responded ${response.status}`);
+  return response.json();
+}
+
+/**
+ * Award winners taken from a Wikipedia category rather than Wikidata's P166.
+ *
+ * For the national awards, Wikidata's award-received data is badly incomplete —
+ * measured at 32 films for BAFTA Best Film, 26 for the César and 12 for the
+ * Goya, against many decades of ceremonies. The language Wikipedias curate
+ * their own awards properly, and a category is already exactly the list we
+ * want, so this walks:
+ *
+ *     category members  ->  each page's Wikidata QID  ->  that item's TMDB id
+ *
+ * which yields 79 / 51 / 41 films at 98-100% TMDB coverage. Going through the
+ * QID rather than the page title means no fuzzy title matching at all, and it
+ * sidesteps the localisation problem entirely: the French page for a film is
+ * linked to the same Wikidata item as the English one.
+ *
+ * The category also contains the award's own article ("BAFTA Award for Best
+ * Film"), which naturally drops out for having no TMDB id.
+ */
+async function fetchWikipediaCategoryAward(lang, category, meta) {
+  // 1. Category members, following continuation.
+  const titles = [];
+  let cont;
+  do {
+    const data = await wikipediaApi(lang, {
+      action: 'query',
+      list: 'categorymembers',
+      cmtitle: category,
+      cmnamespace: '0',
+      cmlimit: '500',
+      ...(cont ? { cmcontinue: cont } : {}),
+    });
+    titles.push(...(data.query?.categorymembers ?? []).map((m) => m.title));
+    cont = data.continue?.cmcontinue;
+    if (cont) await sleep(400);
+  } while (cont);
+
+  if (titles.length === 0) throw new Error(`category "${category}" is empty or missing`);
+
+  // 2. Page titles -> Wikidata QIDs (50 titles per request is the API limit).
+  const qids = [];
+  for (let i = 0; i < titles.length; i += 50) {
+    const data = await wikipediaApi(lang, {
+      action: 'query',
+      prop: 'pageprops',
+      ppprop: 'wikibase_item',
+      titles: titles.slice(i, i + 50).join('|'),
+    });
+    for (const page of data.query?.pages ?? []) {
+      if (page.pageprops?.wikibase_item) qids.push(page.pageprops.wikibase_item);
+    }
+    await sleep(400);
+  }
+
+  // 3. QIDs -> TMDB id, English title and release year.
+  const entries = [];
+  for (let i = 0; i < qids.length; i += 120) {
+    const values = qids.slice(i, i + 120).map((q) => `wd:${q}`).join(' ');
+    const rows = await sparql(`
+      SELECT ?item ?name ?date ?tmdb WHERE {
+        VALUES ?item { ${values} }
+        OPTIONAL { ?item wdt:P4947 ?tmdb . }
+        OPTIONAL { ?item wdt:P577 ?date . }
+        OPTIONAL { ?item rdfs:label ?name . FILTER(LANG(?name) = "en") }
+      }`);
+
+    const byQid = new Map();
+    for (const row of rows) {
+      const qid = row.item.value.split('/').pop();
+      const entry = byQid.get(qid) ?? { title: null, year: null, tmdb_id: null };
+      if (row.tmdb?.value && !entry.tmdb_id) entry.tmdb_id = Number(row.tmdb.value);
+      if (row.name?.value && !entry.title) entry.title = row.name.value;
+      if (row.date?.value) {
+        const year = Number(row.date.value.slice(0, 4));
+        if (Number.isInteger(year) && (entry.year === null || year < entry.year)) entry.year = year;
+      }
+      byQid.set(qid, entry);
+    }
+    entries.push(...byQid.values());
+    if (i + 120 < qids.length) await sleep(1200);
+  }
+
+  const films = entries
+    // No TMDB id means either the award's own article or a film TMDB doesn't
+    // carry; either way there's nothing to draw, and the id is the whole point
+    // of taking this route.
+    .filter((entry) => entry.tmdb_id && entry.title)
+    .filter((entry) => entry.year === null || entry.year <= THIS_YEAR)
+    .sort((a, b) => (a.year ?? 0) - (b.year ?? 0) || a.title.localeCompare(b.title));
+
+  return { category: 'awards', ...meta, entries: films };
+}
+
 async function fetchWikidataSeries(seriesQid, meta) {
   const rows = await sparql(`
     SELECT ?film ?name ?date ?tmdb WHERE {
@@ -345,10 +459,9 @@ const SOURCES = [
   //     Best International 71 films, 45% overlap → 39 new
   //     Palme d'Or       83 films, 58% overlap  → 35 new
   //
-  // Deliberately NOT included, and not because they're redundant — Wikidata's
-  // coverage of them is simply too incomplete to ship as "the winners":
-  // BAFTA Best Film (32 films for ~75 years of awards), César Best Film (26),
-  // Goya Best Film (12). Worth revisiting if that data fills in.
+  // BAFTA, César and Goya come from Wikipedia categories instead — see
+  // fetchWikipediaCategoryAward for why (Wikidata's P166 has 32/26/12 films
+  // for them; the categories have 79/51/41).
   {
     label: 'Oscar Best Picture',
     run: () =>
@@ -402,6 +515,47 @@ const SOURCES = [
         source_url: 'https://en.wikipedia.org/wiki/Golden_Bear',
         note: 'Q154590 is the Berlinale prize. Note that a plain search for "Golden Bear" returns a US training ship first (Q2512671) — the qid here is the award.',
       }),
+  },
+
+  // These three come from Wikipedia categories rather than Wikidata's P166,
+  // which is badly incomplete for them. Each language Wikipedia curates its
+  // own national award properly.
+  {
+    label: 'BAFTA Best Film',
+    run: () =>
+      fetchWikipediaCategoryAward('en', 'Category:Best Film BAFTA Award winners', {
+        slug: 'award-bafta-best-film',
+        name: 'BAFTA — Best Film',
+        source: 'en.wikipedia category "Best Film BAFTA Award winners", resolved to TMDB ids via Wikidata',
+        source_url: 'https://en.wikipedia.org/wiki/BAFTA_Award_for_Best_Film',
+        note: "Wikidata's award-received data only covers 32 of these; the category covers 79.",
+      }),
+  },
+  {
+    label: 'César Best Film',
+    run: () =>
+      fetchWikipediaCategoryAward('fr', 'Catégorie:César du meilleur film', {
+        slug: 'award-cesar-best-film',
+        name: 'César — Meilleur Film',
+        source: 'fr.wikipedia category "César du meilleur film", resolved to TMDB ids via Wikidata',
+        source_url: 'https://fr.wikipedia.org/wiki/C%C3%A9sar_du_meilleur_film',
+        note: "Wikidata's award-received data only covers 26 of these; the French Wikipedia category covers 51.",
+      }),
+  },
+  {
+    label: 'Goya Best Film',
+    run: () =>
+      fetchWikipediaCategoryAward(
+        'es',
+        'Categoría:Películas ganadoras del Premio Goya a la mejor película',
+        {
+          slug: 'award-goya-best-film',
+          name: 'Goya — Mejor Película',
+          source: 'es.wikipedia category "Películas ganadoras del Premio Goya a la mejor película", resolved to TMDB ids via Wikidata',
+          source_url: 'https://es.wikipedia.org/wiki/Premio_Goya_a_la_mejor_pel%C3%ADcula',
+          note: "Wikidata's award-received data only covers 12 of these; the Spanish Wikipedia category covers 41.",
+        },
+      ),
   },
 ];
 
