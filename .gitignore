@@ -8,4 +8,6 @@ data/*.db-shm
 data/*.db.*
 .env
 .DS_Store
-.claude/
+# Local tool state only — .claude/CLAUDE.md is a shared project convention and
+# is deliberately tracked.
+.claude/settings.local.json

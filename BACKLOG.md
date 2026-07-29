@@ -76,6 +76,94 @@ shows up immediately as a year that doesn't match the film's release year.
 
 ---
 
+## Popularity vs acclaim — the metric problem
+
+**The finding that matters: sorting by rating selects for critical acclaim, not
+for crowd-pleasing.** This is not a tuning issue; it is structural, and it
+applies in every language.
+
+Measured on TMDB:
+
+```
+Ace Ventura            ★6.6      Parasite                ★8.5
+The Mask               ★7.0      Your Name.              ★8.5
+Dumb and Dumber        ★6.7      Into the Spider-Verse   ★8.4
+Austin Powers          ★6.6      Avengers: Infinity War  ★8.2
+Wayne's World          ★6.7      Green Book              ★8.2
+```
+
+The films people put on for a good evening cluster at 6.6–7.0. The current
+"Crowd-Pleasers" list sorts by rating, so its *lowest* entry is 8.2 — it cannot
+reach them. **That list is misnamed**: it is "recent, widely-seen, highly-rated",
+i.e. recent acclaim. It even contains Parasite, which is already on the canon
+lists it was meant to counterbalance.
+
+Two distinct axes, needing two distinct lists:
+
+| Axis | Sort | Gives you |
+|---|---|---|
+| **Acclaim** | rating, with a vote floor | Parasite, Spider-Verse, Portrait de la jeune fille en feu |
+| **Popularity** | reach / admissions, with a rating *gate* | Ace Ventura, Taxi, Les Visiteurs |
+
+Renaming the existing list (to something like "Modern Classics") and adding a
+separate reach-sorted one is probably the honest fix.
+
+## National popularity — box-office admissions
+
+**The gap.** International vote counts cannot distinguish "this country loves
+it" from "the world hasn't seen it". Both look like a low number. Le Père Noël
+est une ordure has 11,588 IMDb votes not because it is obscure but because it
+never left France.
+
+Measured against a list of twelve French comedies everyone in France knows
+(Le Père Noël est une ordure, Taxi, La Tour Montparnasse Infernale, Astérix &
+Obélix : Mission Cléopâtre, Les Visiteurs, La Cité de la peur, Le Dîner de cons,
+Les Bronzés font du ski, OSS 117, Bienvenue chez les Ch'tis, Intouchables,
+La Grande Vadrouille):
+
+| Approach | Hit rate |
+|---|---|
+| Global IMDb floor ≥50k | 3 / 12 survive |
+| French-specific floor, sorted by rating | 4 / 30 of the resulting top 30 |
+| French-specific floor, sorted by reach | 6 / 30 — top is still Léon, Amélie, Le Cinquième Élément |
+
+No normalisation fixes this, because the signal isn't in the data. And
+La Tour Montparnasse Infernale rates **5.8** — beloved-but-badly-rated is a real
+category that no quality metric will ever surface.
+
+**What would work: box-office admissions**, which measure what a country's
+audience actually went to see. Per-country Wikipedia keeps this:
+
+- `fr.wikipedia` — *Liste des plus gros succès du box-office en France*
+  (3 wikitables, 232 rows)
+- equivalents exist for other countries; the pattern generalises, and is the
+  same shape as the award lists already built from language Wikipedias
+
+**Design as a general mechanism, not a French special case.** One fetcher
+parameterised by country → a list per country ("Box-office France",
+"Box-office España", …), all under a `popular` or `box-office` category so the
+picker groups them and one occasion chip can select the lot. That is what keeps
+list proliferation manageable: categories absorb breadth, the picker stays one
+click per group.
+
+**Open questions before building:**
+
+1. Does the table separate domestic productions from Hollywood films released in
+   that country? "Biggest box office in France" includes Titanic and Avatar.
+   Cross-referencing `movies.countries` (already cached) is the likely fix, but
+   it needs checking — and it may be that *both* cuts are wanted:
+   "French films France loved" vs "what France went to see".
+2. Do admissions skew so heavily recent that they need the same per-era
+   treatment as vote counts? Ticket-price inflation affects revenue but
+   admissions counts should be fairer; unverified.
+3. Older films' admissions are often cumulative across re-releases. Whether
+   that's a problem or a feature is a judgement call.
+
+**Risk to watch: list proliferation.** A country list per country, plus canon,
+awards, family, collections, dynamic — this is how a picker becomes unusable.
+The category grouping built in v2 is what makes it survivable, and any new
+family of lists should arrive with a category rather than as loose entries.
+
 ## Other ideas, unranked
 
 - **Short names as data.** `dom.js` carries a hardcoded map of award list name
