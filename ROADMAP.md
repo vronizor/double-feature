@@ -395,7 +395,7 @@ The table only says how far along a thing is.
 | Split `fetchWikipediaCategoryAward` in three | ✅ landed | `fetchCategoryMembers` / `titlesToQids` / `qidsToFilms`; the award year is now an option, not baked in |
 | "draw" (noun) → "vote" in UI strings | ✅ landed | Also fixed History pointing at "the Draw tab", renamed Lineup in v2 |
 | Expand / collapse all lists in the picker | ✅ landed | Open/closed marker rule extracted to `isGroupOpen`/`setGroupOpen` + 5 tests |
-| Box office — France | 👀 review | **1,390 films, 1945–2026, ranks contiguous, seed file written.** Not yet seeded into a database |
+| Box office — France | ✅ landed | 1,390 films seeded, 1390/1390 resolved, Top-N and draws verified against the real DB |
 | Dynamic-list refresh refetches all 120 members daily | ⏳ ready | ~44k needless TMDB calls/year, and it bypasses the concurrency semaphore |
 | `GET /api/sessions` N+1 | ⏳ ready | 3 queries per session, ~120× slower than one join; grows with history |
 | Streaming | ⏳ ready | **Link out, don't cache** — no column, no region config, no refresh change |
@@ -814,9 +814,19 @@ are English.
 > entry carries a `tmdb_id`, so `resolveEntry` takes the id path and the movie
 > row gets TMDB's own title. The seed title is only ever provenance.
 
-**Still to do before this is done:** run `npm run seed -- box-office` against a
-real database and confirm the pool, the picker grouping under the `box-office`
-tag, and a draw. The seed file existing is not the same as the feature working.
+**Seeded and verified** against the real database (2026-07-30), after backing
+it up to `data/double-feature.db.pre-boxoffice`:
+
+```
+1390/1390 resolved, 0 needing review, 0 unmatched
+pool 2,455 -> 3,731 distinct films
+ranks 1..1390, so Top-N has something to cut
+0 films with original_language != 'fr' got through
+picker tag "Box office" appears, vibes unchanged
+top 100 -> 100 films;  top 100 + 1960s -> 12;  comedy -> 767
+draw from the top 60 returned Le Gendarme de Saint-Tropez, Manon des
+Sources, Asterix: Mission Cleopatre
+```
 
 #### Open, to settle during the build
 
