@@ -396,8 +396,8 @@ The table only says how far along a thing is.
 | "draw" (noun) → "vote" in UI strings | ✅ landed | Also fixed History pointing at "the Draw tab", renamed Lineup in v2 |
 | Expand / collapse all lists in the picker | ✅ landed | Open/closed marker rule extracted to `isGroupOpen`/`setGroupOpen` + 5 tests |
 | Box office — France | ✅ landed | 1,390 films seeded, 1390/1390 resolved, Top-N and draws verified against the real DB |
-| Dynamic-list refresh refetches all 120 members daily | ⏳ ready | ~44k needless TMDB calls/year, and it bypasses the concurrency semaphore |
-| `GET /api/sessions` N+1 | ⏳ ready | 3 queries per session, ~120× slower than one join; grows with history |
+| Dynamic-list refresh refetches all 120 members daily | ✅ landed | Cached rows reused; the one test that matters fails against the old code |
+| `GET /api/sessions` N+1 | ✅ landed | One join; verified same films, order and payload shape against the real DB |
 | Streaming | ⏳ ready | **Link out, don't cache** — no column, no region config, no refresh change |
 | Award years | ⏳ ready | Option C, far cheaper than feared — the ceremony wikilink carries the year in all three editions |
 | Box office — Spain | 🗣 next version | No source exists on es.wikipedia; dropped from v3 until one is found |
