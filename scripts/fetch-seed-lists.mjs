@@ -1112,6 +1112,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataAward('Q102427', {
         slug: 'award-oscar-best-picture',
+        short_name: 'Oscar',
         name: 'Oscar — Best Picture',
         source: 'Wikidata — award received (P166), Academy Award for Best Picture (Q102427)',
         source_url: 'https://en.wikipedia.org/wiki/Academy_Award_for_Best_Picture',
@@ -1123,6 +1124,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataAward('Q105304', {
         slug: 'award-oscar-international',
+        short_name: 'Oscar Intl.',
         name: 'Oscar — Best International Feature',
         source: 'Wikidata — award received (P166), Academy Award for Best International Feature Film (Q105304)',
         source_url: 'https://en.wikipedia.org/wiki/Academy_Award_for_Best_International_Feature_Film',
@@ -1134,6 +1136,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataAward('Q179808', {
         slug: 'award-palme-dor',
+        short_name: 'Palme d’Or',
         name: 'Palme d’Or (Cannes)',
         tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Palme d’Or (Q179808)',
@@ -1146,6 +1149,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataAward('Q209459', {
         slug: 'award-golden-lion',
+        short_name: 'Golden Lion',
         name: 'Golden Lion (Venice)',
         tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Golden Lion (Q209459)',
@@ -1157,6 +1161,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataAward('Q154590', {
         slug: 'award-golden-bear',
+        short_name: 'Golden Bear',
         name: 'Golden Bear (Berlin)',
         tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Golden Bear (Q154590)',
@@ -1173,6 +1178,7 @@ const SOURCES = [
     run: () =>
       fetchWikipediaCategoryAward('en', 'Category:Best Film BAFTA Award winners', 'Q139184', {
         slug: 'award-bafta-best-film',
+        short_name: 'BAFTA',
         name: 'BAFTA — Best Film',
         article: 'BAFTA Award for Best Film',
         anchor: 'bafta',
@@ -1186,6 +1192,7 @@ const SOURCES = [
     run: () =>
       fetchWikipediaCategoryAward('fr', 'Catégorie:César du meilleur film', 'Q645595', {
         slug: 'award-cesar-best-film',
+        short_name: 'César',
         name: 'César — Meilleur Film',
         article: 'César du meilleur film',
         anchor: 'cesar',
@@ -1203,6 +1210,7 @@ const SOURCES = [
         'Q1467554',
         {
           slug: 'award-goya-best-film',
+          short_name: 'Goya',
           name: 'Goya — Mejor Película',
           article: 'Premio Goya a la mejor película',
           anchor: 'goya',
@@ -1234,7 +1242,7 @@ async function readExisting(slug) {
 //
 // Same shape of protection as the shrink guard below, one level up: that one
 // watches the entries, this one watches the metadata around them.
-const PRESERVED_KEYS = ['tags', 'category', 'name'];
+const PRESERVED_KEYS = ['tags', 'category', 'name', 'short_name'];
 
 export function droppedKeys(existing, payload) {
   if (!existing) return [];
@@ -1292,6 +1300,7 @@ async function main() {
         // live one — see PRESERVED_KEYS — and `category` is the legacy column
         // it replaced, kept in sync only so an old database still migrates.
         ...(list.tags ? { tags: list.tags } : {}),
+        ...(list.short_name ? { short_name: list.short_name } : {}),
         category: list.category ?? null,
         source: list.source,
         source_url: list.source_url,

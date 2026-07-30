@@ -142,6 +142,25 @@ export const tmdbUrl = (tmdbId, mediaType = 'movie') =>
   `https://www.themoviedb.org/${mediaType === 'tv' ? 'tv' : 'movie'}/${Math.abs(tmdbId)}`;
 
 /**
+ * Where a film is streaming — a LINK, deliberately, not cached data.
+ *
+ * v3 originally specced a providers join table, a region setting in `.env` and
+ * a refresh cycle cut from 150 days to ~14 to keep it current. None of that is
+ * needed: this page is derivable from the id we already store, is the same
+ * JustWatch-backed data TMDB's own API returns, and carries its own country
+ * selector — so the guest picks their region instead of the host baking one in.
+ *
+ * What that avoids: the join table, the region config, and the fact that
+ * provider data goes stale faster than anything else in the API. Storing none
+ * of it means none of it can be wrong.
+ *
+ * What it costs: no "▸ MUBI" on the card. Measured FR flatrate coverage is ~30%
+ * of this library and 0% pre-1930, so roughly seven in ten badges would have
+ * been absent anyway — the card was never going to carry this well.
+ */
+export const watchUrl = (tmdbId, mediaType = 'movie') => `${tmdbUrl(tmdbId, mediaType)}/watch`;
+
+/**
  * The counterpart to tmdbUrl: pulls a media type + id back out of a pasted
  * themoviedb.org/movie/… or /tv/… URL, or accepts a bare numeric id (assumed
  * to be a movie, the overwhelmingly common case). This is the escape hatch
@@ -158,30 +177,28 @@ export function parseTmdbInput(value) {
 }
 
 // Full list names ("Oscar — Best International Feature") don't fit a card's
-// meta line, so these are the compact forms used on the card and the poster
+// meta line, so a list carries a compact form for the card and the poster
 // badge. The modal shows the full name instead, where there's room for it.
 //
-// An explicit map rather than clever parsing because the two Oscar lists would
-// otherwise both shorten to "Oscar", and a film that won both (Parasite) would
-// read "Oscar 2020 · Oscar 2020". Unknown names fall back to stripping the
-// qualifier, so a list added later still degrades sensibly.
-const AWARD_SHORT_NAMES = {
-  'Oscar — Best Picture': 'Oscar',
-  'Oscar — Best International Feature': 'Oscar Intl.',
-  'Palme d’Or (Cannes)': 'Palme d’Or',
-  'Golden Lion (Venice)': 'Golden Lion',
-  'Golden Bear (Berlin)': 'Golden Bear',
-  'BAFTA — Best Film': 'BAFTA',
-  'César — Meilleur Film': 'César',
-  'Goya — Mejor Película': 'Goya',
+// The short name is DATA now, on `lists.short_name`, travelling in the seed
+// files. It used to be a hardcoded map here, which meant adding an award list
+// required editing the frontend — and a list added without that edit silently
+// fell back to string-mangling.
+//
+// The fallback still exists for lists that carry no short name (every custom
+// list, and any seed list yet to be given one): strip a trailing qualifier.
+// It is deliberately not clever — two lists that both shorten to "Oscar" is
+// exactly the collision the explicit value exists to prevent, and Parasite
+// would read "Oscar 2020 · Oscar 2020".
+export const shortAwardName = (award) => {
+  if (typeof award === 'object' && award?.short_name) return award.short_name;
+  const name = typeof award === 'object' ? award?.name : award;
+  return String(name ?? '').replace(/\s*\(.*\)$/, '').replace(/\s*—.*$/, '');
 };
-
-export const shortAwardName = (name) =>
-  AWARD_SHORT_NAMES[name] ?? name.replace(/\s*\(.*\)$/, '').replace(/\s*—.*$/, '');
 
 /** "Palme d’Or 2019", or just "Palme d’Or" when the year isn't recorded. */
 export const awardLabel = (award, { short = true } = {}) => {
-  const name = short ? shortAwardName(award.name) : award.name;
+  const name = short ? shortAwardName(award) : award.name;
   return award.year ? `${name} ${award.year}` : name;
 };
 
@@ -330,11 +347,18 @@ export function openMovieModal(movie) {
           { class: 'modal-links' },
           movie.is_manual
             ? h('span', { class: 'faint' }, 'Manually added — not on TMDB')
-            : h(
-                'a',
-                { href: tmdbUrl(movie.tmdb_id, movie.media_type), target: '_blank', rel: 'noopener noreferrer' },
-                'View on TMDB ↗',
-              ),
+            : [
+                h(
+                  'a',
+                  { href: tmdbUrl(movie.tmdb_id, movie.media_type), target: '_blank', rel: 'noopener noreferrer' },
+                  'View on TMDB ↗',
+                ),
+                h(
+                  'a',
+                  { href: watchUrl(movie.tmdb_id, movie.media_type), target: '_blank', rel: 'noopener noreferrer' },
+                  '▶ Where to watch ↗',
+                ),
+              ],
         ),
       ),
       h('div', { class: 'modal-trailer-row' }, trailerBlock(movie)),

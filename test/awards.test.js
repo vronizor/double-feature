@@ -9,11 +9,11 @@ function seed() {
   const db = createTestDb();
   // Deliberately NO `category` on any of these: category is the legacy column
   // and nothing added after v2 sets it. Awards must resolve on the tag alone.
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
-    (1, 'Palme d’Or (Cannes)', 'seed', 1),
-    (2, 'Oscar — Best Picture', 'seed', 1),
-    (3, 'BAFTA — Best Film', 'seed', 1),
-    (4, 'TSPDT 1,000 Greatest Films', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, kind, is_active, short_name) VALUES
+    (1, 'Palme d’Or (Cannes)', 'seed', 1, 'Palme d’Or'),
+    (2, 'Oscar — Best Picture', 'seed', 1, 'Oscar'),
+    (3, 'BAFTA — Best Film', 'seed', 1, 'BAFTA'),
+    (4, 'TSPDT 1,000 Greatest Films', 'seed', 1, NULL)`);
   db.exec(`INSERT INTO list_tags (list_id, tag) VALUES
     (1, 'awards'), (1, 'festivals'),
     (2, 'awards'),
@@ -118,24 +118,53 @@ test('unresolved memberships never count as awards', () => {
 
 // --- Display helpers (dom.js is DOM-free at module scope) -------------------
 
-test('the two Oscars shorten to distinguishable labels', () => {
-  // Both would collapse to "Oscar" under naive parsing, and a film that won
-  // both would read "Oscar 2020 · Oscar 2020".
-  assert.equal(shortAwardName('Oscar — Best Picture'), 'Oscar');
-  assert.equal(shortAwardName('Oscar — Best International Feature'), 'Oscar Intl.');
+test('the short name comes from the list, not from parsing its full name', () => {
+  // Both Oscars collapse to "Oscar" under any naive parsing, and a film that
+  // won both would read "Oscar 2020 · Oscar 2020". That is the whole reason the
+  // value is stored on the list rather than derived.
+  assert.equal(shortAwardName({ name: 'Oscar — Best Picture', short_name: 'Oscar' }), 'Oscar');
+  assert.equal(
+    shortAwardName({ name: 'Oscar — Best International Feature', short_name: 'Oscar Intl.' }),
+    'Oscar Intl.',
+  );
 });
 
-test('an unknown award name still shortens sensibly', () => {
+test('a list with no short name still shortens sensibly', () => {
+  // Custom lists have none, and a seed list may not have been given one yet.
+  assert.equal(shortAwardName({ name: 'Golden Frog (Camerimage)', short_name: null }), 'Golden Frog');
+  assert.equal(shortAwardName({ name: 'Some Award — Best Thing' }), 'Some Award');
+  assert.equal(shortAwardName({ name: 'Bare Name' }), 'Bare Name');
+});
+
+test('a bare string is still accepted, so the fallback path cannot crash', () => {
   assert.equal(shortAwardName('Golden Frog (Camerimage)'), 'Golden Frog');
-  assert.equal(shortAwardName('Some Award — Best Thing'), 'Some Award');
-  assert.equal(shortAwardName('Bare Name'), 'Bare Name');
+  assert.equal(shortAwardName(null), '');
 });
 
 test('awardLabel omits the year entirely when it is unknown', () => {
-  assert.equal(awardLabel({ name: 'Palme d’Or (Cannes)', year: 2019 }), 'Palme d’Or 2019');
-  assert.equal(awardLabel({ name: 'César — Meilleur Film', year: null }), 'César');
+  assert.equal(awardLabel({ name: 'Palme d’Or (Cannes)', short_name: 'Palme d’Or', year: 2019 }), 'Palme d’Or 2019');
+  assert.equal(awardLabel({ name: 'César — Meilleur Film', short_name: 'César', year: null }), 'César');
   assert.equal(
     awardLabel({ name: 'Oscar — Best Picture', year: 2020 }, { short: false }),
     'Oscar — Best Picture 2020',
   );
+});
+
+test('the short name travels from the list row to the award payload', () => {
+  // The end-to-end point of moving this out of the frontend: a list added to
+  // the database with a short name gets it rendered, with no code change.
+  const db = seed();
+  db.exec(`INSERT INTO lists (id, name, kind, is_active, short_name)
+           VALUES (7, 'Prix Louis-Delluc (France)', 'seed', 1, 'Delluc')`);
+  db.exec(`INSERT INTO list_tags (list_id, tag) VALUES (7, 'awards')`);
+  db.prepare(
+    `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, award_year, status)
+     VALUES (7, 1, 'x', 2019, 2019, 'resolved')`,
+  ).run();
+
+  const award = awardsByTmdbId(db, [1]).get(1).find((a) => a.name.startsWith('Prix Louis'));
+  assert.equal(award.short_name, 'Delluc');
+  assert.equal(awardLabel(award), 'Delluc 2019');
+  // Without the stored value it would have string-mangled to "Prix Louis-Delluc".
+  assert.equal(awardLabel({ ...award, short_name: null }), 'Prix Louis-Delluc 2019');
 });

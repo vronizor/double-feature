@@ -3,6 +3,7 @@
   "tags": [
     "awards"
   ],
+  "short_name": "Goya",
   "category": "awards",
   "source": "es.wikipedia category \"Películas ganadoras del Premio Goya a la mejor película\", resolved to TMDB ids via Wikidata",
   "source_url": "https://es.wikipedia.org/wiki/Premio_Goya_a_la_mejor_pel%C3%ADcula",

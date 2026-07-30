@@ -159,7 +159,7 @@ export function awardsByTmdbId(db, tmdbIds) {
   const placeholders = tmdbIds.map(() => '?').join(', ');
   const rows = db
     .prepare(
-      `SELECT lm.tmdb_id, l.name, lm.award_year
+      `SELECT lm.tmdb_id, l.name, l.short_name, lm.award_year
        FROM list_movies lm JOIN lists l ON l.id = lm.list_id
        WHERE lm.tmdb_id IN (${placeholders})
          AND lm.status = 'resolved'
@@ -173,7 +173,11 @@ export function awardsByTmdbId(db, tmdbIds) {
   const byId = new Map();
   for (const row of rows) {
     if (!byId.has(row.tmdb_id)) byId.set(row.tmdb_id, []);
-    byId.get(row.tmdb_id).push({ name: row.name, year: row.award_year ?? null });
+    byId.get(row.tmdb_id).push({
+      name: row.name,
+      short_name: row.short_name ?? null,
+      year: row.award_year ?? null,
+    });
   }
   return byId;
 }

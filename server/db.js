@@ -40,6 +40,15 @@ CREATE TABLE IF NOT EXISTS lists (
   source_url      TEXT,
   query_json      TEXT,
   materialised_at TEXT,
+  -- The compact form for a card's meta line and poster badge: "Oscar Intl."
+  -- rather than "Oscar - Best International Feature". List metadata, so it
+  -- belongs beside the rest of it and travels in the seed files, rather than
+  -- living in a hardcoded map in the frontend that has to be edited by hand
+  -- every time a list is added.
+  --
+  -- NULL is fine and common: only award lists need one, and the UI falls back
+  -- to stripping the qualifier off the full name.
+  short_name      TEXT,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -275,6 +284,7 @@ function migrate(target) {
   ensureColumn(target, 'lists', 'category', 'TEXT');
   ensureColumn(target, 'lists', 'query_json', 'TEXT');
   ensureColumn(target, 'lists', 'materialised_at', 'TEXT');
+  ensureColumn(target, 'lists', 'short_name', 'TEXT');
   // Populated from the seed files by scripts/backfill-ranks.mjs, NOT by a
   // re-run of the seeder: seed.mjs deliberately skips entries that already
   // landed, so rows seeded before this column existed would stay NULL forever.

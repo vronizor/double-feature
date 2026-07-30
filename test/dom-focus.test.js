@@ -107,3 +107,25 @@ test('a focused element outside the repainted root is left alone', () =>
     preserveFocus(dom.root)();
     assert.notEqual(globalThis.document.activeElement.focused, true);
   }));
+
+// --- watch links -----------------------------------------------------------
+
+const { watchUrl, tmdbUrl } = await import('../public/dom.js');
+
+test('the watch link is derived from the id we already store', () => {
+  assert.equal(watchUrl(346), 'https://www.themoviedb.org/movie/346/watch');
+});
+
+test('a TV-sourced entry links to its /tv/ watch page', () => {
+  // TV entries are keyed by the NEGATION of their real TMDB id (see the schema
+  // comment on `movies`), so both the sign and the path have to be handled.
+  assert.equal(watchUrl(-900, 'tv'), 'https://www.themoviedb.org/tv/900/watch');
+});
+
+test('the watch link is exactly the TMDB page plus /watch', () => {
+  // Keeping it derived from tmdbUrl means the id-negation and media-type rules
+  // live in one place rather than two that can drift apart.
+  for (const [id, type] of [[346, 'movie'], [-900, 'tv'], [550, undefined]]) {
+    assert.equal(watchUrl(id, type), `${tmdbUrl(id, type)}/watch`);
+  }
+});
