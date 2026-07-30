@@ -7,6 +7,12 @@ const POLL_MS = 3500;
 const NAME_KEY = 'double-feature:name';
 const NAME_INPUT_ID = 'vote-name';
 
+// See the same constant in session.js. It matters more here: this poll only
+// watches for the host closing voting, so a failed one costs the guest nothing,
+// while tearing the screen down costs them the ranking they were part-way
+// through building.
+const MAX_POLL_FAILURES = 4;
+
 export async function renderVote(container, slug) {
   const state = {
     session: null,
@@ -23,11 +29,14 @@ export async function renderVote(container, slug) {
     clearInterval(timer);
   };
 
+  let consecutiveFailures = 0;
+
   async function poll() {
     if (stopped) return;
     try {
       const session = await api.session(slug);
       if (stopped) return;
+      consecutiveFailures = 0;
       state.session = session;
 
       // The host closed voting — flip straight to the results.
@@ -39,8 +48,20 @@ export async function renderVote(container, slug) {
       }
       paint();
     } catch (error) {
+      if (stopped) return;
+      consecutiveFailures += 1;
+      // Never throw away a ballot in progress over one dropped request. The
+      // guest's ranking lives in `state.ranked` and is still submittable; only
+      // the "has the host closed voting yet" check is stale.
+      if (consecutiveFailures < MAX_POLL_FAILURES) return;
       clearInterval(timer);
-      clear(container).append(h('div', { class: 'empty error' }, error.message));
+      clear(container).append(
+        h(
+          'div',
+          { class: 'empty error' },
+          `Lost contact with the server — ${error.message}. Reload to try again.`,
+        ),
+      );
     }
   }
 

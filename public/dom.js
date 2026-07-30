@@ -23,6 +23,40 @@ export function clear(node) {
   return node;
 }
 
+// setSelectionRange throws InvalidStateError on input types that have no text
+// selection model — number is the one that matters here, since every filter
+// range input is one.
+const SELECTABLE = new Set(['text', 'search', 'url', 'tel', 'password']);
+
+/**
+ * Capture focus before a repaint, restore it after.
+ *
+ * A view that rebuilds its whole subtree destroys the element the host is
+ * typing into, and the caret goes with it. Explore did this on every keystroke
+ * in any of its five number inputs: one digit landed, the node was replaced,
+ * and the rest went to `<body>`.
+ *
+ * Keyed on the element's id, so anything that wants to survive a repaint needs
+ * a stable one — that is the whole contract. Returns a restore function to call
+ * once the new DOM is in place.
+ */
+export function preserveFocus(root = document) {
+  const active = document.activeElement;
+  const id = active?.id;
+  if (!id || !root.contains?.(active)) return () => {};
+
+  const selection = SELECTABLE.has(active.type)
+    ? { start: active.selectionStart, end: active.selectionEnd }
+    : null;
+
+  return () => {
+    const next = root.querySelector(`#${CSS.escape(id)}`);
+    if (!next) return;
+    next.focus();
+    if (selection) next.setSelectionRange(selection.start, selection.end);
+  };
+}
+
 export const POSTER_BASE = 'https://image.tmdb.org/t/p';
 
 export function posterUrl(path, size = 'w342') {
