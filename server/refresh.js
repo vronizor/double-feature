@@ -19,8 +19,22 @@ const DAILY = 24 * 60 * 60 * 1000;
 // deliberately excluded: plenty of obscure or older films genuinely have no
 // TMDB-catalogued trailer, and treating that as "incomplete" would re-fetch
 // those rows forever instead of just the ones actually missing data.
-const INCOMPLETE =
-  `(vote_average IS NULL OR countries IS NULL OR languages IS NULL OR original_title IS NULL)`;
+//
+// `countries` and `languages` are excluded for exactly the same reason, which
+// took a measurement to notice. They are not always present on TMDB either —
+// verified against the live API, `/movie/1578` (Raging Bull) and `/movie/637`
+// (Life Is Beautiful) both come back with an empty spoken_languages, and
+// `/movie/1204194` is empty for both fields. Five rows in a 2,460-film library
+// could therefore never satisfy this predicate: they were re-fetched every
+// single day, and because the ORDER BY below sorts incomplete rows first they
+// permanently occupied the head of the 250-row daily queue. `npm run backfill`
+// reported "5 updated" on every run without ever converging.
+//
+// The cost of leaving them out is that a NEWLY added column stops self-healing
+// within a day for these two fields; the 150-day cycle still backfills it, just
+// slower. That is the right trade — the alternative is a queue that never
+// drains.
+const INCOMPLETE = `(vote_average IS NULL OR original_title IS NULL)`;
 
 // "Stale" also covers a cached row missing one of those fields — not just one
 // past the six-month cap — so a schema addition self-heals over the following

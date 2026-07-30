@@ -147,6 +147,12 @@ export function getMovieRow(db, tmdbId) {
  * one piece of list data with real structure — name plus year, several per film
  * — and flattening it into a delimited string the way `lists` does would just
  * mean parsing it apart again in the browser.
+ *
+ * "Is this an award list" resolves on the `awards` TAG, not on the legacy
+ * `lists.category` column. Category was superseded by list_tags in v2 and is
+ * no longer written by anything but the seeder; this query was the last reader
+ * of it, so a list tagged awards but never given a category — which is what any
+ * list added from now on looks like — silently rendered no badges at all.
  */
 export function awardsByTmdbId(db, tmdbIds) {
   if (tmdbIds.length === 0) return new Map();
@@ -157,7 +163,7 @@ export function awardsByTmdbId(db, tmdbIds) {
        FROM list_movies lm JOIN lists l ON l.id = lm.list_id
        WHERE lm.tmdb_id IN (${placeholders})
          AND lm.status = 'resolved'
-         AND l.category = 'awards'
+         AND EXISTS (SELECT 1 FROM list_tags lt WHERE lt.list_id = l.id AND lt.tag = 'awards')
        -- Oldest first, and unknown years last rather than first (SQLite sorts
        -- NULL lowest), so a film's awards read as a chronology.
        ORDER BY lm.tmdb_id, lm.award_year IS NULL, lm.award_year, l.name COLLATE NOCASE`,

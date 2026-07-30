@@ -87,6 +87,13 @@ router.patch('/:id', (req, res) => {
   if (req.body?.name !== undefined) {
     const name = String(req.body.name).trim();
     if (!name) throw badRequest('A list name is required');
+    // Same guard POST already has. Without it the UNIQUE index on lists.name
+    // surfaces as a 500 carrying a raw SQLite string. `id != ?` so that
+    // renaming a list to the name it already has stays a no-op rather than
+    // failing against itself.
+    if (db.prepare('SELECT 1 FROM lists WHERE name = ? AND id != ?').get(name, id)) {
+      throw badRequest(`A list named "${name}" already exists`);
+    }
     db.prepare('UPDATE lists SET name = ? WHERE id = ?').run(name, id);
   }
   if (req.body?.is_active !== undefined) {
