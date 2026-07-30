@@ -399,7 +399,7 @@ The table only says how far along a thing is.
 | Dynamic-list refresh refetches all 120 members daily | ✅ landed | Cached rows reused; the one test that matters fails against the old code |
 | `GET /api/sessions` N+1 | ✅ landed | One join; verified same films, order and payload shape against the real DB |
 | Streaming | ⏳ ready | **Link out, don't cache** — no column, no region config, no refresh change |
-| Award years | ⏳ ready | Option C, far cheaper than feared — the ceremony wikilink carries the year in all three editions |
+| Award years | ✅ landed | 104 gaps filled, 13 wrong values corrected. The year comes from the ceremony's Wikidata item, never from the article |
 | Box office — Spain | 🗣 next version | No source exists on es.wikipedia; dropped from v3 until one is found |
 | Award short names as data | ⏳ ready | |
 | Award-winner filter | ⏳ ready | Unblocked by the tag fix above |
@@ -875,51 +875,56 @@ would have been absent anyway, so the card was never going to carry this well.
   - **Prerequisite:** extract `resolveTitlesToTmdb` (titles → QIDs → TMDB ids)
     out of `fetchWikipediaCategoryAward`, where it is currently entangled.
     Box-office reuses exactly that pipeline.
-- **Award years via option C** — scrape each award's own Wikipedia article to
-  fill the 28–39% coverage gap for BAFTA, César and Goya. Option B (deriving
-  release year + 1) stays rejected: it silently mixes real and guessed data in
-  one column.
+- **Award years via option C — ✅ landed 2026-07-30.** Coverage went 20→49/51
+  (César), 29→77/78 (BAFTA), 11→38/40 (Goya): **104 gaps filled and 13 existing
+  values corrected**, with 0 lost and no other field touched.
 
-  Two cheaper structural routes were probed first and **both are dead ends**,
-  recorded so they aren't re-proposed:
+  **The year does NOT come from the article.** An earlier version of this
+  section claimed all three editions "wikilink the ceremony with the year as
+  the display text". That is true only of the César, and acting on it would
+  have written systematically wrong years:
 
-  - *Wikidata ceremony items carry the winner.* They don't. Q115891338 (48th
-    César Awards) has `P585` (the ceremony date) and `P179`/`P361` (its series),
-    but **no `P1346` winner statement** — the winners are simply not modelled
-    on the ceremony item.
-  - *Per-ceremony Wikipedia categories.* Also no. A César winner's fr.wikipedia
-    page carries `Catégorie:César du meilleur film` and per-*category* awards
-    ("Film avec un César de la meilleure réalisation") but nothing per-year. The
-    Goya page carries only the plain winners category.
+  | Edition | Ceremony markup | Printed year means |
+  |---|---|---|
+  | fr César | `[[15e cérémonie des César\|1990]]` | the ceremony ✅ |
+  | en BAFTA | `'''1990'''` beside `[[44th British Academy Film Awards]]` | the **films**; the 44th was held 1991 |
+  | es Goya | `[[Anexo:I edición…\|I edición - 1986]]` | the **films**; the I edición was held 1987 |
 
-  Option C is however **much cheaper than this roadmap assumed**, because all
-  three editions share one invariant: the ceremony is a wikilink whose *display
-  text is the year*.
+  The offset is not even constant — the **1st BAFTAs were held in 1949 and
+  honoured 1947 releases**, a gap of two. Trusting the printed year would have
+  reintroduced exactly the confidently-wrong-year failure that got "release year
+  + 1" rejected.
+
+  **What works: the article gives the winner, Wikidata's ceremony item gives the
+  date.** Both halves were probed separately earlier and *both were written off*
+  — ceremony items carry `P585` but no winner, and there are no per-ceremony
+  categories. Neither is usable alone; together nothing is guessed:
 
   ```
-  fr   * [[15e cérémonie des César|1990]] : '''''[[Trop belle pour toi]]'' …'''
-  es     … [[Anexo:V edición de los Premios Goya|1990]] …
-  en     {{center|'''1990'''<br>{{small|([[44th British Academy Film Awards|44th]])}}}}
+  article  → 47th British Academy Film Awards → Schindler's List
+  Wikidata → P585 on that ceremony            → 1994
   ```
 
-  Only the winner-vs-nominee signal differs per edition, and in each it is
-  unambiguous rather than a judgement call:
+  The one genuine invariant across all three editions: **the winner is a
+  bold-italic wikilink** `'''''[[Film]]'''''` and the nominees around it never
+  are. `CEREMONY_ANCHORS` holds the one per-edition regex, capturing the
+  ceremony's page title — never a year.
 
-  | Edition | Winner marked by |
-  |---|---|
-  | fr (César) | **List depth** — winner at `*`, nominees at `**` |
-  | en (BAFTA) | Table row with `background:#FAEB86` and bold-italic |
-  | es (Goya) | Table, 6 wikitables on `Anexo:Premio Goya a la mejor película` |
+  > **Why 13 existing values were overwritten rather than preserved.** They came
+  > from `P585` on the *film's* award statement, which is inconsistently
+  > populated and sometimes records the film's year: `Schindler's List` was
+  > stored as 1993 against the 47th BAFTAs held in 1994. A ceremony item's own
+  > date is the ceremony by definition, so it wins.
 
-  Note the Goya article title: `Premio Goya a la mejor película` is a redirect,
-  and the API needs `redirects=1` or it returns a 51-character stub.
+  > **The sanity gate is load-bearing.** A ceremony landing outside 0–3 years
+  > after release is rejected, not written — the point of this route over a
+  > derived year is a specific true fact, so a wrong one is worse than the
+  > absent value it replaces. It rejected nothing on the real run, which is what
+  > a good alarm looks like.
 
-  Film identity comes from the wikilink → QID → TMDB id, the pipeline the award
-  fetchers already use, so there is no fuzzy title matching anywhere.
+  Verified end to end: `Parasite` renders `Palme d'Or 2019 · Oscar 2020`, the
+  per-award offset the schema comment exists to protect.
 
-  > **Self-check to build in:** a parsed ceremony year must land within a year or
-  > two of `movies.year`. Anything further out is a mis-parse, and it should
-  > refuse rather than write — the same instinct as the shrink guard.
 - **Award short names as data.** `dom.js` carries a hardcoded map of list name →
   display name. A `lists.short_name` column would put it with the rest of the
   list metadata in the seed files.

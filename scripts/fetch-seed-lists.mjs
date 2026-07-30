@@ -472,10 +472,133 @@ export async function qidsToFilms(qids, { awardQid = null } = {}) {
  * The category also contains the award's own article ("BAFTA Award for Best
  * Film"), which naturally drops out for having no TMDB id.
  */
+// --- Ceremony years -------------------------------------------------------
+//
+// The category route gives us the winners but not when they won: award_year
+// comes from a P585 qualifier on the film's award statement, which is thin for
+// exactly these three awards (28-39%) — the same sparseness that made the
+// category route necessary.
+//
+// The fix is to read the award's own article for WHO won at WHICH ceremony,
+// then take the year from the ceremony's Wikidata item. Neither half is
+// guessed. Two structural routes were tried first and both looked like dead
+// ends on their own: ceremony items carry a date but no winner, and there are
+// no per-ceremony categories. Together they are the answer.
+//
+// What NOT to do — and this took a wrong turn to learn: do not read the year
+// printed in the article. Two of the three editions tabulate by year-of-films
+// rather than year-of-ceremony, and the offset is not constant. The 1st BAFTAs
+// were held in 1949 and honoured 1947 releases, a gap of two. Taking the
+// printed year would write confidently wrong ceremony years, which is exactly
+// why deriving from the release year was rejected in the first place.
+
+const BOLD_ITALIC_FILM = /'''''\[\[(?!Fichier:|File:|Image:|Catégorie:|Category:)([^\]|#]+?)(?:\|([^\]]*))?\]\]/;
+
+/**
+ * How each edition announces a ceremony. Group 1 must capture the ceremony's
+ * article title — never a year off the page.
+ */
+export const CEREMONY_ANCHORS = {
+  // Winners are single-"*" list items; nominees use "**".
+  cesar: /^\*[^*\n].*?\[\[([^\]|\n]*?cérémonie[^\]|\n]*?)\|[^\]\n]*\]\]/gim,
+  // The year cell rowspans the winner and its nominees.
+  bafta: /\{\{center\|'''\d{4}'''.*?\[\[([^\]|\n]*?British Academy Film Awards)(?:\|[^\]\n]*)?\]\]/g,
+  // A full-width header row introduces each ceremony.
+  goya: /!\s*colspan=[^|\n]*\|\s*'''\[\[(Anexo:[^\]|\n]*?edición de los Premios Goya)\|[^\]\n]*\]\]'''/g,
+};
+
+/**
+ * [{ ceremonyPage, winnerPage }] from an award article, in article order.
+ *
+ * A ceremony's block runs from its anchor to the next one, and the winner is
+ * the first BOLD-ITALIC film link inside it. That marker is the one thing all
+ * three editions genuinely share — the nominees around it are never bold-italic.
+ */
+export function parseCeremonyWinners(wikitext, anchor) {
+  const re = new RegExp(anchor.source, anchor.flags);
+  const anchors = [...wikitext.matchAll(re)].map((m) => ({ page: m[1].trim(), at: m.index }));
+
+  const seen = new Set();
+  const pairs = [];
+  for (let i = 0; i < anchors.length; i += 1) {
+    const end = i + 1 < anchors.length ? anchors[i + 1].at : wikitext.length;
+    const winner = BOLD_ITALIC_FILM.exec(wikitext.slice(anchors[i].at, end));
+    if (!winner) continue;
+    const winnerPage = winner[1].trim();
+    // First occurrence wins: a film re-listed in a "most awarded" summary table
+    // must not overwrite the ceremony it actually won at.
+    if (seen.has(winnerPage)) continue;
+    seen.add(winnerPage);
+    pairs.push({ ceremonyPage: anchors[i].page, winnerPage });
+  }
+  return pairs;
+}
+
+/** Ceremony QIDs -> year, from P585. */
+async function ceremonyYearByQid(qids) {
+  const years = new Map();
+  for (let i = 0; i < qids.length; i += 100) {
+    const values = qids.slice(i, i + 100).map((q) => `wd:${q}`).join(' ');
+    const rows = await sparql(`SELECT ?item ?date WHERE { VALUES ?item { ${values} } ?item wdt:P585 ?date }`);
+    for (const row of rows) {
+      const qid = row.item.value.split('/').pop();
+      const year = Number(row.date.value.slice(0, 4));
+      // Earliest wins: a few ceremonies carry more than one point-in-time.
+      if (Number.isInteger(year) && (!years.has(qid) || year < years.get(qid))) years.set(qid, year);
+    }
+    if (i + 100 < qids.length) await sleep(1200);
+  }
+  return years;
+}
+
+/** Map of tmdb_id -> ceremony year, for one award's article. */
+async function fetchCeremonyYears(lang, article, anchorKey) {
+  const wikitext = await fetchWikitext(lang, article);
+  if (!wikitext) {
+    console.log(`\n  ⚠️  ${article}: could not be fetched — award years left as they are`);
+    return new Map();
+  }
+  const pairs = parseCeremonyWinners(wikitext, CEREMONY_ANCHORS[anchorKey]);
+  if (pairs.length === 0) {
+    console.log(`\n  ⚠️  ${article}: no ceremonies parsed — the article layout probably changed`);
+    return new Map();
+  }
+
+  const ceremonyQid = await titlesToQidMap(lang, [...new Set(pairs.map((p) => p.ceremonyPage))]);
+  const years = await ceremonyYearByQid([...new Set(ceremonyQid.values())]);
+  const filmQid = await titlesToQidMap(lang, [...new Set(pairs.map((p) => p.winnerPage))]);
+  const films = await qidsToFilms([...new Set(filmQid.values())]);
+  const byQid = new Map(films.map((film) => [film.qid, film]));
+
+  const byTmdb = new Map();
+  let rejected = 0;
+  for (const { ceremonyPage, winnerPage } of pairs) {
+    const year = years.get(ceremonyQid.get(ceremonyPage));
+    const film = byQid.get(filmQid.get(winnerPage));
+    if (!year || !film?.tmdb_id) continue;
+    // Sanity check, because the whole point of this route over a derived year
+    // is a specific TRUE fact: a ceremony sits 0-3 years after the release.
+    // Anything outside that is a mis-parse and is dropped rather than written.
+    if (film.year && (year - film.year < 0 || year - film.year > 3)) {
+      rejected += 1;
+      console.log(`\n  ⚠️  ${winnerPage}: released ${film.year} but ceremony ${year} — rejected`);
+      continue;
+    }
+    byTmdb.set(film.tmdb_id, year);
+  }
+  console.log(`\n  ${byTmdb.size} ceremony year(s) from ${article}${rejected ? ` (${rejected} rejected)` : ''}`);
+  return byTmdb;
+}
+
 async function fetchWikipediaCategoryAward(lang, category, awardQid, meta) {
   const titles = await fetchCategoryMembers(lang, category);
   const qids = await titlesToQids(lang, titles);
   const entries = await qidsToFilms(qids, { awardQid });
+
+  // Fill in the ceremony years the category route cannot supply on its own.
+  const ceremonyYears = meta.article
+    ? await fetchCeremonyYears(lang, meta.article, meta.anchor)
+    : new Map();
 
   const films = entries
     // No TMDB id means either the award's own article or a film TMDB doesn't
@@ -484,9 +607,18 @@ async function fetchWikipediaCategoryAward(lang, category, awardQid, meta) {
     .filter((entry) => entry.tmdb_id && entry.title)
     .filter((entry) => entry.year === null || entry.year <= THIS_YEAR)
     .sort((a, b) => (a.year ?? 0) - (b.year ?? 0) || a.title.localeCompare(b.title))
-    .map(({ qid, ...entry }) => entry);
+    .map(({ qid, ...entry }) => {
+      const fromCeremony = ceremonyYears.get(entry.tmdb_id);
+      // The ceremony's own date WINS over the film's P585 qualifier where they
+      // differ. The qualifier is inconsistently populated — measured, 13 of the
+      // existing values recorded the film's year rather than the ceremony's
+      // (Schindler's List as 1993 against the 47th BAFTAs held in 1994) —
+      // whereas a ceremony item's date is the ceremony by definition.
+      return fromCeremony ? { ...entry, award_year: fromCeremony } : entry;
+    });
 
-  return { tags: ['awards'], category: 'awards', ...meta, entries: films };
+  const { article, anchor, ...rest } = meta;
+  return { tags: ['awards'], category: 'awards', ...rest, entries: films };
 }
 
 // --- Box office -----------------------------------------------------------
@@ -1042,6 +1174,8 @@ const SOURCES = [
       fetchWikipediaCategoryAward('en', 'Category:Best Film BAFTA Award winners', 'Q139184', {
         slug: 'award-bafta-best-film',
         name: 'BAFTA — Best Film',
+        article: 'BAFTA Award for Best Film',
+        anchor: 'bafta',
         source: 'en.wikipedia category "Best Film BAFTA Award winners", resolved to TMDB ids via Wikidata',
         source_url: 'https://en.wikipedia.org/wiki/BAFTA_Award_for_Best_Film',
         note: "Wikidata's award-received data only covers 32 of these; the category covers 79.",
@@ -1053,6 +1187,8 @@ const SOURCES = [
       fetchWikipediaCategoryAward('fr', 'Catégorie:César du meilleur film', 'Q645595', {
         slug: 'award-cesar-best-film',
         name: 'César — Meilleur Film',
+        article: 'César du meilleur film',
+        anchor: 'cesar',
         source: 'fr.wikipedia category "César du meilleur film", resolved to TMDB ids via Wikidata',
         source_url: 'https://fr.wikipedia.org/wiki/C%C3%A9sar_du_meilleur_film',
         note: "Wikidata's award-received data only covers 26 of these; the French Wikipedia category covers 51.",
@@ -1068,6 +1204,8 @@ const SOURCES = [
         {
           slug: 'award-goya-best-film',
           name: 'Goya — Mejor Película',
+          article: 'Premio Goya a la mejor película',
+          anchor: 'goya',
           source: 'es.wikipedia category "Películas ganadoras del Premio Goya a la mejor película", resolved to TMDB ids via Wikidata',
           source_url: 'https://es.wikipedia.org/wiki/Premio_Goya_a_la_mejor_pel%C3%ADcula',
           note: "Wikidata's award-received data only covers 12 of these; the Spanish Wikipedia category covers 41.",

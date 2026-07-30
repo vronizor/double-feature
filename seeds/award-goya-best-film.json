@@ -7,61 +7,61 @@
   "source": "es.wikipedia category \"Películas ganadoras del Premio Goya a la mejor película\", resolved to TMDB ids via Wikidata",
   "source_url": "https://es.wikipedia.org/wiki/Premio_Goya_a_la_mejor_pel%C3%ADcula",
   "note": "Wikidata's award-received data only covers 12 of these; the Spanish Wikipedia category covers 41.",
-  "fetched_at": "2026-07-29",
+  "fetched_at": "2026-07-30",
   "count": 40,
   "entries": [
     {
       "title": "Voyage to Nowhere",
       "year": 1986,
-      "award_year": null,
+      "award_year": 1987,
       "tmdb_id": 156453
     },
     {
       "title": "El bosque animado",
       "year": 1987,
-      "award_year": null,
+      "award_year": 1988,
       "tmdb_id": 60311
     },
     {
       "title": "Women on the Verge of a Nervous Breakdown",
       "year": 1988,
-      "award_year": null,
+      "award_year": 1989,
       "tmdb_id": 4203
     },
     {
       "title": "Twisted Obsession",
       "year": 1989,
-      "award_year": null,
+      "award_year": 1990,
       "tmdb_id": 110928
     },
     {
       "title": "¡Ay, Carmela!",
       "year": 1990,
-      "award_year": null,
+      "award_year": 1991,
       "tmdb_id": 41806
     },
     {
       "title": "Lovers",
       "year": 1991,
-      "award_year": null,
+      "award_year": 1992,
       "tmdb_id": 41782
     },
     {
       "title": "Belle Époque",
       "year": 1992,
-      "award_year": null,
+      "award_year": 1993,
       "tmdb_id": 2470
     },
     {
       "title": "Todos a la cárcel",
       "year": 1993,
-      "award_year": null,
+      "award_year": 1994,
       "tmdb_id": 99902
     },
     {
       "title": "Running Out of Time",
       "year": 1994,
-      "award_year": null,
+      "award_year": 1995,
       "tmdb_id": 114218
     },
     {
@@ -73,31 +73,31 @@
     {
       "title": "Tesis",
       "year": 1996,
-      "award_year": null,
+      "award_year": 1997,
       "tmdb_id": 9299
     },
     {
       "title": "The Lucky Star",
       "year": 1997,
-      "award_year": 1997,
+      "award_year": 1998,
       "tmdb_id": 97295
     },
     {
       "title": "The Girl of Your Dreams",
       "year": 1998,
-      "award_year": null,
+      "award_year": 1999,
       "tmdb_id": 67297
     },
     {
       "title": "All About My Mother",
       "year": 1999,
-      "award_year": null,
+      "award_year": 2000,
       "tmdb_id": 99
     },
     {
       "title": "El Bola",
       "year": 2000,
-      "award_year": null,
+      "award_year": 2001,
       "tmdb_id": 33504
     },
     {
@@ -109,7 +109,7 @@
     {
       "title": "Mondays in the Sun",
       "year": 2002,
-      "award_year": null,
+      "award_year": 2003,
       "tmdb_id": 54580
     },
     {
@@ -121,31 +121,31 @@
     {
       "title": "The Sea Inside",
       "year": 2004,
-      "award_year": null,
+      "award_year": 2005,
       "tmdb_id": 1913
     },
     {
       "title": "The Secret Life of Words",
       "year": 2005,
-      "award_year": null,
+      "award_year": 2006,
       "tmdb_id": 148
     },
     {
       "title": "Volver",
       "year": 2006,
-      "award_year": null,
+      "award_year": 2007,
       "tmdb_id": 219
     },
     {
       "title": "Solitary Fragments",
       "year": 2007,
-      "award_year": null,
+      "award_year": 2008,
       "tmdb_id": 39489
     },
     {
       "title": "Camino",
       "year": 2008,
-      "award_year": null,
+      "award_year": 2009,
       "tmdb_id": 17893
     },
     {
@@ -163,7 +163,7 @@
     {
       "title": "No Rest for the Wicked",
       "year": 2011,
-      "award_year": null,
+      "award_year": 2012,
       "tmdb_id": 76013
     },
     {
@@ -175,43 +175,43 @@
     {
       "title": "Living Is Easy with Eyes Closed",
       "year": 2013,
-      "award_year": null,
+      "award_year": 2014,
       "tmdb_id": 209415
     },
     {
       "title": "Marshland",
       "year": 2014,
-      "award_year": null,
+      "award_year": 2015,
       "tmdb_id": 236735
     },
     {
       "title": "Truman",
       "year": 2015,
-      "award_year": null,
+      "award_year": 2016,
       "tmdb_id": 341744
     },
     {
       "title": "The Fury of a Patient Man",
       "year": 2016,
-      "award_year": null,
+      "award_year": 2017,
       "tmdb_id": 411638
     },
     {
       "title": "The Bookshop",
       "year": 2017,
-      "award_year": 2017,
+      "award_year": 2018,
       "tmdb_id": 444539
     },
     {
       "title": "Champions",
       "year": 2018,
-      "award_year": null,
+      "award_year": 2019,
       "tmdb_id": 456929
     },
     {
       "title": "Pain and Glory",
       "year": 2019,
-      "award_year": null,
+      "award_year": 2020,
       "tmdb_id": 519010
     },
     {
@@ -229,7 +229,7 @@
     {
       "title": "The Beasts",
       "year": 2022,
-      "award_year": null,
+      "award_year": 2023,
       "tmdb_id": 848685
     },
     {

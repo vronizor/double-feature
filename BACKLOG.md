@@ -69,6 +69,11 @@ fuzzy title matching).
   separate column, and the convention differs between the three language
   Wikipedias.
 
+> **Settled 2026-07-30: option C landed.** Coverage is now 49/51, 77/78 and
+> 38/40. See `ROADMAP.md` §5 — including the part that matters most, which is
+> that the year must NOT be read from the award article: two of the three
+> editions tabulate by year-of-films, and the offset is not constant.
+
 **Recommendation if picked up:** C, not B. The whole point of the badge is a
 specific true fact; a guessed year undermines the feature it's meant to serve.
 C is contained — one parser per award, run once at fetch time, and a bad parse
