@@ -40,7 +40,15 @@ found rather than at the end.
 ✅ <what landed> — <how it was verified>
 ⏭  next: <the next chunk>
 ⚠️  found: <anything unexpected, and what I did with it>
+📦 <uncommitted files, and whether a commit boundary is here>
 ```
+
+The 📦 line is a standing prompt to commit, not a request for permission —
+still only commit when asked. It exists because a finished chunk *is* the
+natural boundary, and once a working tree passes ~10 files the split can no
+longer be made cleanly: changes from different themes land in the same file
+and cannot be separated without hunk-level staging. One session reached 35
+files across six unrelated themes, and `browse.js` alone carried four of them.
 
 **Close a session with four sections, always in this order.**
 
@@ -59,11 +67,12 @@ found rather than at the end.
 - **NEXT** — what happens if the user says nothing, so silence is a
   valid answer.
 
-Two working rules:
+Three working rules:
 
 - **WIP limit of three.** More than three live threads is what makes a
   session sprawl. Everything else waits its turn as ⏳ ready in
   `ROADMAP.md` §5.
+- **Commit at chunk boundaries, when asked.** See the 📦 line above.
 - **Findings are reported, not folded into the diff.** Something noticed
   mid-task goes in the report; it does not quietly join the work the
   user asked for.
