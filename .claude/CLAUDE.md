@@ -71,15 +71,15 @@ Three working rules:
 
 - **WIP limit of three.** More than three live threads is what makes a
   session sprawl. Everything else waits its turn as ⏳ ready in
-  `ROADMAP.md` §5.
+  `ROADMAP.md`'s current-version status table (§6 for v4).
 - **Commit at chunk boundaries, when asked.** See the 📦 line above.
 - **Findings are reported, not folded into the diff.** Something noticed
   mid-task goes in the report; it does not quietly join the work the
   user asked for.
 
 Decisions, once made, still get written where they already belong —
-inline in `ROADMAP.md`, measurements in `BACKLOG.md`, state in the §5
-status table. The report adds no new files and no new bookkeeping.
+inline in `ROADMAP.md`, measurements in `BACKLOG.md`, state in the
+current-version status table. The report adds no new files and no new bookkeeping.
 
 ## Project conventions
 
@@ -128,7 +128,13 @@ re-derive decisions or repeat rejected experiments.
   item are still true of the code: `seed.mjs` matches lists by NAME,
   `renderSessionPanel` is shared with the History tab, and `rank IS NULL`
   must survive a top-N cut.
-- **`ROADMAP.md` §5** — v3, agreed but not started.
+- **`ROADMAP.md` §5** — v3 is shipped. §5.1–§5.3 hold the reasoning and the
+  traps, which stay true: the caption-vs-cell parse bug, the ceremony year that
+  is NOT the year printed in the article, and why streaming is a link.
+- **`ROADMAP.md` §6** — v4, the live status table. Start here.
+- **`ARCHITECTURE.md`** — how the whole app fits together, for someone who
+  directs it without writing it. A dated snapshot, not maintained; `ROADMAP.md`
+  and `BACKLOG.md` win where they disagree.
 - **`BACKLOG.md`** — measurement write-ups (popularity vs acclaim,
   national popularity) that are the evidence behind the v3 items, plus a
   `Dropped` section for things deliberately not done.

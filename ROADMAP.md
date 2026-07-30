@@ -366,45 +366,32 @@ than tags and vibes. `ROADMAP.md`'s own §1–§3 predate the tag/vibe model.
 `BACKLOG.md`'s "short names as data" note is partly stale now that the tag
 vocabulary exists.
 
-## 5. v3
+## 5. v3 — done
 
-### Status
+Shipped 2026-07-30. Kept for the reasoning and the traps, which stay true; the
+detail is in §5.1–§5.3 below.
 
-The in-flight view. **One axis only: distance from shipped.** An earlier version
-of this table mixed that with "when was this decided", which produced two states
-that meant the same thing.
+**Fixes.** Seed-file `tags` no longer stripped by a re-fetch (a live regression
+— Ghibli had already lost its). Award badges resolve on the `awards` tag, not
+the dead `category` column. Six scan findings, each re-verified by execution
+before being touched. Two pieces of repeated work removed: dynamic lists
+re-downloading all 120 members daily, and the History N+1.
 
-| State | Meaning |
-|---|---|
-| 🗣 **discussing** | The approach is not settled. Do not build it yet — a decision is owed first, and it is recorded here when made. |
-| ⏳ **ready** | Approach settled, work not started. Anyone can pick it up from what is written here without asking another question. |
-| 🔨 **building** | In progress. |
-| 👀 **review** | Written, tests green, not yet accepted. |
-| ✅ **landed** | Done and accepted. Stays in the table for one version, then folds into the "done" section like §4. |
+**Features.** Box office France (1,390 films, 1945–2026). Award years from the
+ceremonies themselves — 104 gaps filled, 13 wrong values corrected. Streaming as
+a link rather than cached data. Award short names as `lists.short_name`. An
+award-winner pool filter. Expand/collapse all in the picker.
 
-*Why the reasoning isn't a state:* what was decided and why lives in the
-subsections below and in `BACKLOG.md`, next to the measurement that settled it.
-The table only says how far along a thing is.
+**Vocabulary.** A list selection is not a filter; an occasion is a vibe;
+"draw" as a noun for a published session is a vote.
 
-| Item | State | Where it stands |
-|---|---|---|
-| Seed-file `tags` no longer stripped by a re-fetch | ✅ landed | Was a live regression — Ghibli had already lost its tags |
-| Award badges resolve on the `awards` tag, not `category` | ✅ landed | `category` had one reader left; now none |
-| Six scan findings (§5.1) | ✅ landed | All six re-verified by execution before fixing, all six now covered by tests |
-| Vocabulary divergences (§5.2) | 🗣 discussing | "occasion" vs "vibe" and five more; two need a product decision, not a rename |
-| Split `fetchWikipediaCategoryAward` in three | ✅ landed | `fetchCategoryMembers` / `titlesToQids` / `qidsToFilms`; the award year is now an option, not baked in |
-| "draw" (noun) → "vote" in UI strings | ✅ landed | Also fixed History pointing at "the Draw tab", renamed Lineup in v2 |
-| Expand / collapse all lists in the picker | ✅ landed | Open/closed marker rule extracted to `isGroupOpen`/`setGroupOpen` + 5 tests |
-| Box office — France | ✅ landed | 1,390 films seeded, 1390/1390 resolved, Top-N and draws verified against the real DB |
-| Dynamic-list refresh refetches all 120 members daily | ✅ landed | Cached rows reused; the one test that matters fails against the old code |
-| `GET /api/sessions` N+1 | ✅ landed | One join; verified same films, order and payload shape against the real DB |
-| Streaming | ✅ landed | Link to TMDB's own watch page — no column, no region config, no refresh change |
-| Award years | ✅ landed | 104 gaps filled, 13 wrong values corrected. The year comes from the ceremony's Wikidata item, never from the article |
-| Box office — Spain | 🗣 next version | No source exists on es.wikipedia; dropped from v3 until one is found |
-| Award short names as data | ✅ landed | `lists.short_name`, fed from the seed files; the frontend map is gone |
-| Award-winner filter | ✅ landed | Resolves on the `awards` tag; independent of the list selection |
-| `seed.mjs` keyed on `tmdb_id` | ⏳ ready | Additive key — severity was lower than assumed, see below |
-| `includeWatched` default: README vs UI disagree | 🗣 revisit at F3 | No effect until something is marked watched; F3 starts doing that |
+> **Traps that outlived the work.** `|+` is a table caption, not a cell.
+> `pgrep -f` matches the watcher's own command line. A committed `.gitignore`
+> rule (`data/*.db.*`) is the only thing keeping real ballots out of a public
+> repo. And a note written to prevent a bug can cause it — §5.3's ceremony-year
+> invariant was wrong for two of three editions.
+
+---
 
 ### 5.1 Scan findings — fix before any v3 feature
 
@@ -525,7 +512,7 @@ at all and need a decision about what the thing *is*.
   ~25 sites, no schema, no API, no stored data, no user-visible text.
 
   > One caveat: §1's "occasion" is a **superset** — it includes the parametric
-  > director/theme nights of §6, which the `vibes` schema cannot express. F10
+  > director/theme nights of §7, which the `vibes` schema cannot express. F10
   > declared §1–§3 stale but never rewrote them, so a cold session still reads
   > the wrong noun in the file that exists to stop exactly that.
 
@@ -589,7 +576,7 @@ at all and need a decision about what the thing *is*.
   the axis that actually drives the pool query, and which has no representation
   in the schema at all.
 
-### 5.3 Box office France — spec, awaiting green light
+### 5.3 Box office France — the spec, and what building it changed
 
 **Goal.** A `Box-office France` list of films French audiences actually went to
 see, tagged `box-office`, so a draw can reach *La Cité de la peur* and
@@ -954,7 +941,42 @@ would have been absent anyway, so the card was never going to carry this well.
   skipped, so it cannot introduce a duplicate — and it needs the same change in
   `backfill-list-fields.mjs` or that script silently stops matching.
 
-## 6. Deferred — but the design must not block them
+## 6. v4 — not started
+
+### Status
+
+The in-flight view. **One axis only: distance from shipped.**
+
+| State | Meaning |
+|---|---|
+| 🗣 **discussing** | The approach is not settled. Do not build it yet — a decision is owed first, and it is recorded here when made. |
+| ⏳ **ready** | Approach settled, work not started. Anyone can pick it up from what is written here without asking another question. |
+| 🔨 **building** | In progress. |
+| 👀 **review** | Written, tests green, not yet accepted. |
+| ✅ **landed** | Done and accepted. Stays in the table for one version, then folds into a done section like §4 and §5. |
+
+*Why the reasoning isn't a state:* what was decided and why lives beside the
+measurement that settled it, in the subsections below or in `BACKLOG.md`. The
+table only says how far along a thing is.
+
+| Item | State | Where it stands |
+|---|---|---|
+| `seed.mjs` keyed on `tmdb_id` | ⏳ ready | The one v3 item not done. A tidy-up: `recordEntry` already guards duplicates, so the real exposure is unresolved rows, `backfill-list-fields.mjs`, and wasted TMDB calls. Additive key — see §5 notes |
+| Box office — Spain | 🗣 discussing | Leads and one dead end recorded in `BACKLOG.md`. Blocker is identity: ICAA has no TMDB id or QID, so it needs fuzzy title matching, which this project avoids everywhere |
+| What is a *kind* of list? | 🗣 discussing | `lists.kind` is `seed\|custom` (provenance); §1 means curated \| dynamic \| property-filter — the axis that drives the pool query and has no schema representation. Settle before anything else touches list taxonomy |
+| Two chip rows, same labels | 🗣 revisit after use | A chip "Awards" that *selects* lists sits beside one that *narrows the picker*. Deliberately parked until real use says whether it confuses anyone |
+| `includeWatched` default | 🗣 revisit at F3 | README says exclude, the UI ships include. Inert until something is actually marked watched |
+| Director night / theme night | ⏳ ready | §7. Parametric vibes, both unblocked by the structured query object and the `▾` chip shape. `/person/{id}/movie_credits`, never `with_crew` |
+| LICENSE, and seed-list provenance | 🗣 discussing | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag. Both consciously accepted for now — see `BACKLOG.md` |
+
+Unscheduled candidates, with their evidence, are in `BACKLOG.md`: alternative
+ratings (IMDb's dataset is verified obtainable and joins on `imdb_id`),
+household memory, a reach-sorted popularity list, nominees as well as winners,
+and separating "dynamic" the mechanism from "dynamic" the tag.
+
+---
+
+## 7. Deferred — but the design must not block them
 
 **Director night.** Parametric occasion. Use `/person/{id}/movie_credits`
 filtered to `job=Director` (not `with_crew`, see §2). Resolves to an ephemeral
@@ -970,16 +992,18 @@ first — you cannot query by string.
 > Fine for inspiration, wrong for a strict promise.
 
 Both are unblocked by exactly two decisions above: the **structured query
-object** (§4.3) and the **`▾` parametric chip shape** (§3).
+object** (the `query_json` comment in `server/db.js`) and the
+**`▾` parametric chip shape** (§3).
 
 ---
 
-## 7. Not planned
+## 8. Not planned
 
 - **Kids' night by certification** — killed on evidence, see §2.
 - **TMDB Top Rated 100** — evaluated in v1 and dropped: 46% overlap with the
   existing pool, and the non-overlapping half was largely noise because
-  `/movie/top_rated` has no vote-count floor. Superseded by §4.3.
+  `/movie/top_rated` has no vote-count floor. Superseded by the
+  query-backed Modern Classics list.
 - **Ballot-stuffing prevention** — out of scope by design; trusted-friend model.
 - **Silent Era PSFL as a seed list** — an exhaustive reference database (24,500+
   films), not a curated "best of". Random draws from it would be a worse
