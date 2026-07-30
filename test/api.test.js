@@ -204,25 +204,59 @@ test('activating the list fills the draw pool', async () => {
   assert.equal(body.pool_size, 4);
 });
 
+test('renaming a list onto an existing name is a 400, not a 500', async () => {
+  // POST has guarded this from the start; PATCH did not, so the UNIQUE index on
+  // lists.name surfaced as a 500 carrying a raw SQLite string.
+  const other = await call('/api/lists', { method: 'POST', body: { name: 'Another List' } });
+  assert.equal(other.status, 201);
+
+  const clash = await call(`/api/lists/${other.body.id}`, {
+    method: 'PATCH',
+    body: { name: 'Test List' },
+  });
+  assert.equal(clash.status, 400);
+  assert.match(clash.body.error, /already exists/);
+});
+
+test('renaming a list to the name it already has is a no-op, not a clash', async () => {
+  // The duplicate guard has to exclude the row being renamed, or every
+  // idempotent PATCH fails against itself.
+  const { status } = await call(`/api/lists/${listId}`, {
+    method: 'PATCH',
+    body: { name: 'Test List' },
+  });
+  assert.equal(status, 200);
+});
+
+test('the facets response carries no `total`', async () => {
+  // It used to, computed from the list selection alone — a plausible-looking
+  // number that ignored every other filter. draw.js seeded its "N films match"
+  // from it and reported 954 where the real pool was 97. /pool/count is the
+  // only honest source, so the near-miss alternative is gone rather than fixed.
+  const { body } = await call('/api/pool/facets');
+  assert.equal(body.total, undefined);
+  assert.ok(Array.isArray(body.genres), 'the rest of the facets are unaffected');
+});
+
 test('filters narrow the pool and are reflected in the count', async () => {
-  const all = await call('/api/pool/count', { method: 'POST', body: { filters: {} } });
+  const all = await call('/api/pool/count', { method: 'POST', body: { setup: { filters: {} } } });
   assert.equal(all.body.count, 4);
 
   const japanese = await call('/api/pool/count', {
     method: 'POST',
-    body: { filters: { languages: { include: ['ja'] } } },
+    body: { setup: { filters: { languages: { include: ['ja'] } } } },
   });
   assert.equal(japanese.body.count, 2);
 
   const noJapanese = await call('/api/pool/count', {
     method: 'POST',
-    body: { filters: { languages: { exclude: ['ja'] } } },
+    body: { setup: { filters: { languages: { exclude: ['ja'] } } } },
   });
   assert.equal(noJapanese.body.count, 2);
 
   const noHorror = await call('/api/pool/count', {
     method: 'POST',
-    body: { filters: { genres: { exclude: [27] } } },
+    body: { setup: { filters: { genres: { exclude: [27] } } } },
   });
   assert.equal(noHorror.body.count, 3);
 });
@@ -230,12 +264,12 @@ test('filters narrow the pool and are reflected in the count', async () => {
 test('marking a film watched removes it from the pool, and the toggle brings it back', async () => {
   await call('/api/movies/101/watched', { method: 'POST', body: { watched: true } });
 
-  const excluded = await call('/api/pool/count', { method: 'POST', body: { filters: {} } });
+  const excluded = await call('/api/pool/count', { method: 'POST', body: { setup: { filters: {} } } });
   assert.equal(excluded.body.count, 3);
 
   const included = await call('/api/pool/count', {
     method: 'POST',
-    body: { filters: { includeWatched: true } },
+    body: { setup: { filters: { includeWatched: true } } },
   });
   assert.equal(included.body.count, 4);
 
@@ -245,7 +279,7 @@ test('marking a film watched removes it from the pool, and the toggle brings it 
 test('an over-tight draw reports the shortfall instead of failing', async () => {
   const { status, body } = await call('/api/draw', {
     method: 'POST',
-    body: { size: 5, filters: { languages: { include: ['ja'] } } },
+    body: { size: 5, setup: { filters: { languages: { include: ['ja'] } } } },
   });
 
   assert.equal(status, 200);
@@ -256,14 +290,14 @@ test('an over-tight draw reports the shortfall instead of failing', async () => 
 
 test('a draw persists nothing until it is published', async () => {
   const before = await call('/api/sessions');
-  await call('/api/draw', { method: 'POST', body: { size: 2, filters: {} } });
+  await call('/api/draw', { method: 'POST', body: { size: 2, setup: { filters: {} } } });
   const after = await call('/api/sessions');
 
   assert.equal(after.body.sessions.length, before.body.sessions.length);
 });
 
 test('accepts any whole draw size from 1 to 10, not just 1/2/5', async () => {
-  const { status, body } = await call('/api/draw', { method: 'POST', body: { size: 3, filters: {} } });
+  const { status, body } = await call('/api/draw', { method: 'POST', body: { size: 3, setup: { filters: {} } } });
   assert.equal(status, 200);
   assert.equal(body.requested, 3);
 });
@@ -283,7 +317,7 @@ test('publishing a draw opens a vote session at an unguessable slug', async () =
     body: {
       tmdb_ids: [101, 102, 103],
       anonymous: false,
-      filters: { year: { min: 1950, max: 1960 } },
+      setup: { filters: { year: { min: 1950, max: 1960 } } },
     },
   });
 
@@ -449,7 +483,7 @@ test('the SPA is served for the guest route', async () => {
 
 test('resolution reuses the cache rather than re-querying TMDB', async () => {
   const before = tmdbCalls;
-  await call('/api/pool/count', { method: 'POST', body: { filters: {} } });
+  await call('/api/pool/count', { method: 'POST', body: { setup: { filters: {} } } });
   await call('/api/draw', { method: 'POST', body: { size: 2 } });
   assert.equal(tmdbCalls, before, 'drawing never touches the network');
 });
@@ -590,14 +624,14 @@ test('setup: a small active pool for the staging-basket tests', async () => {
 test('draw with exclude tops up a basket instead of duplicating what is already staged', async () => {
   const first = await call('/api/draw', {
     method: 'POST',
-    body: { size: 1, filters: { search: 'Basket Film' } },
+    body: { size: 1, setup: { filters: { search: 'Basket Film' } } },
   });
   const stagedId = first.body.movies[0].tmdb_id;
 
   // Ask for the other one, excluding what's already staged.
   const second = await call('/api/draw', {
     method: 'POST',
-    body: { size: 1, filters: { search: 'Basket Film' }, exclude: [stagedId] },
+    body: { size: 1, setup: { filters: { search: 'Basket Film' } }, exclude: [stagedId] },
   });
   assert.equal(second.body.movies.length, 1);
   assert.notEqual(second.body.movies[0].tmdb_id, stagedId);
@@ -607,7 +641,7 @@ test('draw with exclude tops up a basket instead of duplicating what is already 
     method: 'POST',
     body: {
       size: 1,
-      filters: { search: 'Basket Film' },
+      setup: { filters: { search: 'Basket Film' } },
       exclude: [stagedId, second.body.movies[0].tmdb_id],
     },
   });
@@ -619,13 +653,13 @@ test('draw with exclude tops up a basket instead of duplicating what is already 
 test('pool/count reflects exclude too, for the live basket count', async () => {
   const withoutExclude = await call('/api/pool/count', {
     method: 'POST',
-    body: { filters: { search: 'Basket Film' } },
+    body: { setup: { filters: { search: 'Basket Film' } } },
   });
   assert.equal(withoutExclude.body.count, 2);
 
   const withExclude = await call('/api/pool/count', {
     method: 'POST',
-    body: { filters: { search: 'Basket Film' }, exclude: [108] },
+    body: { setup: { filters: { search: 'Basket Film' } }, exclude: [108] },
   });
   assert.equal(withExclude.body.count, 1);
 });
@@ -668,7 +702,7 @@ test('a manual entry has no TMDB source and never appears in the pool', async ()
   // draw or an Explore search — it exists only for a specific session's basket.
   const searchForIt = await call('/api/pool/movies', {
     method: 'POST',
-    body: { filters: { search: 'Home Movie' } },
+    body: { setup: { filters: { search: 'Home Movie' } } },
   });
   assert.equal(searchForIt.body.movies.length, 0);
 });
@@ -676,7 +710,7 @@ test('a manual entry has no TMDB source and never appears in the pool', async ()
 test('a basket combining a draw, a search-add, and a manual entry all publish together', async () => {
   const drawn = await call('/api/draw', {
     method: 'POST',
-    body: { size: 1, filters: { languages: { include: ['en'] } } },
+    body: { size: 1, setup: { filters: { languages: { include: ['en'] } } } },
   });
   const drawnId = drawn.body.movies[0].tmdb_id;
 
@@ -697,4 +731,40 @@ test('a basket combining a draw, a search-add, and a manual entry all publish to
   );
   const manualInSession = session.body.movies.find((m) => m.tmdb_id === manual.body.movie.tmdb_id);
   assert.equal(manualInSession.title, 'A Friend’s Proposal');
+});
+
+test('the client publishes its pool setup under the key the route reads', async () => {
+  // A regression the whole suite missed: the selection-is-not-a-filter refactor
+  // renamed the request key on /api/pool/count, /api/draw and /api/pool/movies
+  // but not on publish, so the client kept sending `filters` while the route
+  // read `setup`. filter_summary then described the DEFAULT active lists rather
+  // than what the host actually picked — the exact mislabelling the comment in
+  // sessions.js says it exists to prevent.
+  //
+  // Invisible because every other test posts its own body straight to the
+  // route, never exercising public/api.js. This asserts the two agree.
+  const { readFile } = await import('node:fs/promises');
+  const source = await readFile(new URL('../public/api.js', import.meta.url), 'utf8');
+  const publishBody = /publish:[\s\S]*?body:\s*\{([^}]*)\}/.exec(source)?.[1] ?? '';
+
+  assert.match(publishBody, /\bsetup\b/, 'api.js must send `setup`');
+  assert.ok(!/\bfilters\b/.test(publishBody), 'api.js must not send `filters` on publish');
+});
+
+test('publishing records the lists the host actually chose, not the active ones', async () => {
+  // The behavioural half of the same bug.
+  const other = await call('/api/lists', { method: 'POST', body: { name: 'Not In Play' } });
+  const published = await call('/api/sessions', {
+    method: 'POST',
+    body: {
+      tmdb_ids: [101],
+      anonymous: false,
+      setup: { lists: [other.body.id], filters: { year: { min: 1960, max: 1969 } } },
+    },
+  });
+  assert.equal(published.status, 201);
+
+  const { body } = await call(`/api/sessions/${published.body.slug}`);
+  assert.match(body.filter_summary, /Not In Play/, `got: ${body.filter_summary}`);
+  assert.match(body.filter_summary, /1960–1969/);
 });

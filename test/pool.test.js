@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createTestDb } from '../server/db.js';
 import {
   buildPoolQuery,
+  normalizePoolSetup,
   poolCount,
   drawFromPool,
   queryPool,
@@ -48,7 +49,7 @@ function seed() {
 test('the pool is only active lists, and excludes watched films by default', () => {
   const db = seed();
   assert.equal(poolCount(db, {}), 4);
-  assert.equal(poolCount(db, { includeWatched: true }), 5, 'rewatch toggle adds the watched film');
+  assert.equal(poolCount(db, { filters: { includeWatched: true } }), 5, 'rewatch toggle adds the watched film');
 });
 
 test('explicit null bounds behave exactly like omitted ones', () => {
@@ -58,11 +59,13 @@ test('explicit null bounds behave exactly like omitted ones', () => {
   // regression test for exactly that bug.
   const db = seed();
   const explicitNulls = {
-    genres: { include: [], exclude: [] },
-    languages: { include: [], exclude: [] },
-    year: { min: null, max: null },
-    runtime: { min: null, max: null },
-    includeWatched: false,
+    filters: {
+      genres: { include: [], exclude: [] },
+      languages: { include: [], exclude: [] },
+      year: { min: null, max: null },
+      runtime: { min: null, max: null },
+      includeWatched: false,
+    },
   };
   assert.equal(poolCount(db, explicitNulls), poolCount(db, {}));
   assert.equal(poolCount(db, explicitNulls), 4);
@@ -82,59 +85,55 @@ test('a film on two lists is counted once', () => {
 
 test('genre include matches any of the chosen genres', () => {
   const db = seed();
-  assert.equal(poolCount(db, { genres: { include: [GENRES.horror] } }), 1);
-  assert.equal(poolCount(db, { genres: { include: [GENRES.horror, GENRES.scifi] } }), 2);
+  assert.equal(poolCount(db, { filters: { genres: { include: [GENRES.horror] } } }), 1);
+  assert.equal(poolCount(db, { filters: { genres: { include: [GENRES.horror, GENRES.scifi] } } }), 2);
 });
 
 test('genre exclude drops a film carrying any excluded genre', () => {
   const db = seed();
   // Modern Horror is both horror and drama, so excluding horror must drop it
   // even though it is also a drama.
-  assert.equal(poolCount(db, { genres: { exclude: [GENRES.horror] } }), 3);
-  assert.equal(poolCount(db, { genres: { exclude: [GENRES.drama] } }), 1);
+  assert.equal(poolCount(db, { filters: { genres: { exclude: [GENRES.horror] } } }), 3);
+  assert.equal(poolCount(db, { filters: { genres: { exclude: [GENRES.drama] } } }), 1);
 });
 
 test('include and exclude combine', () => {
   const db = seed();
-  const count = poolCount(db, {
-    genres: { include: [GENRES.drama], exclude: [GENRES.horror] },
-  });
+  const count = poolCount(db, { filters: { genres: { include: [GENRES.drama], exclude: [GENRES.horror] } } });
   assert.equal(count, 2, 'the two pure dramas, not the horror-drama');
 });
 
 test('language include/exclude, year and runtime filters narrow the pool', () => {
   const db = seed();
-  assert.equal(poolCount(db, { languages: { include: ['ja'] } }), 1);
-  assert.equal(poolCount(db, { languages: { include: ['en', 'ja'] } }), 4);
-  assert.equal(poolCount(db, { year: { min: 1960, max: 1970 } }), 2);
-  assert.equal(poolCount(db, { year: { min: 2000 } }), 1);
-  assert.equal(poolCount(db, { runtime: { max: 120 } }), 2);
-  assert.equal(poolCount(db, { runtime: { min: 140 } }), 2);
+  assert.equal(poolCount(db, { filters: { languages: { include: ['ja'] } } }), 1);
+  assert.equal(poolCount(db, { filters: { languages: { include: ['en', 'ja'] } } }), 4);
+  assert.equal(poolCount(db, { filters: { year: { min: 1960, max: 1970 } } }), 2);
+  assert.equal(poolCount(db, { filters: { year: { min: 2000 } } }), 1);
+  assert.equal(poolCount(db, { filters: { runtime: { max: 120 } } }), 2);
+  assert.equal(poolCount(db, { filters: { runtime: { min: 140 } } }), 2);
 });
 
 test('language exclude drops a matching language but keeps an unknown one', () => {
   const db = seed();
   // 4 films total: 3 en, 1 ja. Excluding 'en' should leave just the ja film.
-  assert.equal(poolCount(db, { languages: { exclude: ['en'] } }), 1);
+  assert.equal(poolCount(db, { filters: { languages: { exclude: ['en'] } } }), 1);
 
   db.prepare('UPDATE movies SET original_language = NULL WHERE tmdb_id = 1').run();
   // An unknown language must not be swept up by an exclude filter — SQL's
   // `NULL NOT IN (...)` is NULL (falsy), which would otherwise drop it too.
-  assert.equal(poolCount(db, { languages: { exclude: ['en'] } }), 2);
+  assert.equal(poolCount(db, { filters: { languages: { exclude: ['en'] } } }), 2);
 });
 
 test('language include and exclude combine', () => {
   const db = seed();
-  const count = poolCount(db, {
-    languages: { include: ['en', 'ja'], exclude: ['ja'] },
-  });
+  const count = poolCount(db, { filters: { languages: { include: ['en', 'ja'], exclude: ['ja'] } } });
   assert.equal(count, 3, 'en+ja included, then ja excluded again leaves just en');
 });
 
 test('a film with an unknown year is excluded by a year filter', () => {
   const db = seed();
   db.prepare('UPDATE movies SET year = NULL WHERE tmdb_id = 1').run();
-  assert.equal(poolCount(db, { year: { min: 1900, max: 2100 } }), 3);
+  assert.equal(poolCount(db, { filters: { year: { min: 1900, max: 2100 } } }), 3);
   assert.equal(poolCount(db, {}), 4, 'but it stays in an unfiltered pool');
 });
 
@@ -148,13 +147,13 @@ test('draws never exceed the requested size and return only pool members', () =>
 
 test('an over-tight filter returns fewer than asked rather than throwing', () => {
   const db = seed();
-  const drawn = drawFromPool(db, { languages: { include: ['ja'] } }, 5);
+  const drawn = drawFromPool(db, { filters: { languages: { include: ['ja'] } } }, 5);
   assert.equal(drawn.length, 1);
 });
 
 test('an empty pool draws nothing', () => {
   const db = seed();
-  assert.deepEqual(drawFromPool(db, { languages: { include: ['zz'] } }, 5), []);
+  assert.deepEqual(drawFromPool(db, { filters: { languages: { include: ['zz'] } } }, 5), []);
 });
 
 test('facets only describe the active pool', () => {
@@ -169,13 +168,11 @@ test('facets only describe the active pool', () => {
 
 test('filter values are coerced, so hand-crafted input cannot inject SQL', () => {
   const db = seed();
-  const { params } = buildPoolQuery({
-    genres: { include: ["1); DROP TABLE movies;--", 27] },
-    year: { min: 'nonsense' },
-  });
+  const { params } = buildPoolQuery({ filters: { genres: { include: ["1); DROP TABLE movies;--", 27] },
+    year: { min: 'nonsense' }, } });
 
   assert.deepEqual(params, [27], 'non-numeric ids are dropped, not interpolated');
-  assert.doesNotThrow(() => poolCount(db, { genres: { include: ["1); DROP TABLE movies;--"] } }));
+  assert.doesNotThrow(() => poolCount(db, { filters: { genres: { include: ["1); DROP TABLE movies;--"] } } }));
   assert.equal(poolCount(db, {}), 4, 'the table is still there');
 });
 
@@ -232,7 +229,7 @@ test('queryPool falls back to title order for an unrecognised sort key', () => {
 
 test('queryPool respects filters exactly like poolCount', () => {
   const db = seed();
-  const ja = queryPool(db, { languages: { include: ['ja'] } });
+  const ja = queryPool(db, { filters: { languages: { include: ['ja'] } } });
   assert.deepEqual(ja, [2]);
 });
 
@@ -243,16 +240,16 @@ test('search matches title, original title, or director, case-insensitively', ()
   db.prepare("UPDATE movies SET director = 'Akira Kurosawa' WHERE tmdb_id = 2").run();
   db.prepare("UPDATE movies SET original_title = 'Aru Kagayaku Kioku' WHERE tmdb_id = 3").run();
 
-  assert.equal(poolCount(db, { search: 'drama' }), 2, '"Old Drama" and "Japanese Drama"');
-  assert.equal(poolCount(db, { search: 'KUROSAWA' }), 1, 'matches director, case-insensitively');
-  assert.equal(poolCount(db, { search: 'Kagayaku' }), 1, 'matches original_title');
-  assert.equal(poolCount(db, { search: 'nonexistent' }), 0);
+  assert.equal(poolCount(db, { filters: { search: 'drama' } }), 2, '"Old Drama" and "Japanese Drama"');
+  assert.equal(poolCount(db, { filters: { search: 'KUROSAWA' } }), 1, 'matches director, case-insensitively');
+  assert.equal(poolCount(db, { filters: { search: 'Kagayaku' } }), 1, 'matches original_title');
+  assert.equal(poolCount(db, { filters: { search: 'nonexistent' } }), 0);
 });
 
 test('search ignores surrounding whitespace and blank input', () => {
   const db = seed();
-  assert.equal(poolCount(db, { search: '  Old Drama  ' }), 1);
-  assert.equal(poolCount(db, { search: '   ' }), 4, 'blank search is no filter at all');
+  assert.equal(poolCount(db, { filters: { search: '  Old Drama  ' } }), 1);
+  assert.equal(poolCount(db, { filters: { search: '   ' } }), 4, 'blank search is no filter at all');
 });
 
 test('search escapes LIKE wildcard characters so they match literally', () => {
@@ -260,9 +257,9 @@ test('search escapes LIKE wildcard characters so they match literally', () => {
   db.prepare("UPDATE movies SET title = '100% Real' WHERE tmdb_id = 1").run();
   // Without escaping, the "%" in the search term would itself act as a
   // wildcard and match every row, not just titles containing a literal "%".
-  assert.equal(poolCount(db, { search: '100%' }), 1);
-  assert.equal(poolCount(db, { search: '100% Real' }), 1);
-  assert.equal(poolCount(db, { search: '%' }), 1, 'a bare wildcard char is still just a literal search term');
+  assert.equal(poolCount(db, { filters: { search: '100%' } }), 1);
+  assert.equal(poolCount(db, { filters: { search: '100% Real' } }), 1);
+  assert.equal(poolCount(db, { filters: { search: '%' } }), 1, 'a bare wildcard char is still just a literal search term');
 });
 
 // --- exclude: "don't hand back what's already staged" ---------------------
@@ -286,7 +283,7 @@ test('drawFromPool never returns an excluded id, even when it would otherwise wi
 test('exclude combines with ordinary filters rather than replacing them', () => {
   const db = seed();
   // Pool minus horror (3: films 1,2,4) minus excluded film 2 = films 1,4.
-  assert.equal(poolCount(db, { genres: { exclude: [GENRES.horror] } }, [2]), 2);
+  assert.equal(poolCount(db, { filters: { genres: { exclude: [GENRES.horror] } } }, [2]), 2);
 });
 
 test('exclude tolerates non-numeric junk instead of breaking the query', () => {
@@ -391,8 +388,8 @@ test('list selection and topN survive the round trip through buildPoolQuery para
 
 test('topN combines with ordinary filters instead of replacing them', () => {
   const db = seedRanked();
-  assert.equal(poolCount(db, { lists: [1], topN: 2, search: 'Second' }), 1);
-  assert.equal(poolCount(db, { lists: [1], topN: 1, search: 'Second' }), 0, 'cut out by topN');
+  assert.equal(poolCount(db, { lists: [1], topN: 2, filters: { search: 'Second' } }), 1);
+  assert.equal(poolCount(db, { lists: [1], topN: 1, filters: { search: 'Second' } }), 0, 'cut out by topN');
 });
 
 test('poolFacets describes the SELECTED pool, not whatever is_active says', () => {
@@ -425,4 +422,35 @@ test('poolFacets falls back to is_active when no selection is given', () => {
   // First paint has no client-side selection yet, so absent must keep working.
   const db = seed();
   assert.deepEqual(poolFacets(db).genres, poolFacets(db, null).genres);
+});
+
+// --- selection is not a filter --------------------------------------------
+
+test('the pool setup keeps the selection and the filters as peers', () => {
+  const setup = normalizePoolSetup({
+    lists: [1],
+    topN: 2,
+    filters: { search: 'Second', includeWatched: true },
+  });
+
+  assert.deepEqual(setup.lists, [1]);
+  assert.equal(setup.topN, 2);
+  assert.equal(setup.filters.search, 'Second');
+  assert.equal(setup.filters.lists, undefined, 'the selection must not leak into the filters');
+  assert.equal(setup.filters.topN, undefined);
+});
+
+test('a filter left at the top level is ignored rather than quietly honoured', () => {
+  // The old shape put `genres` and `lists` in one object. Accepting both shapes
+  // is what let /api/pool/facets and /api/pool/count disagree about what a pool
+  // was, so a stray top-level filter must do nothing rather than half-work.
+  const db = seed();
+  assert.equal(poolCount(db, { genres: { include: [GENRES.horror] } }), 4, 'not applied');
+  assert.equal(poolCount(db, { filters: { genres: { include: [GENRES.horror] } } }), 1, 'applied');
+});
+
+test('a selection nested under filters is ignored rather than quietly honoured', () => {
+  const db = seedRanked();
+  assert.equal(poolCount(db, { filters: { lists: [2] } }), 3, 'falls back to is_active');
+  assert.equal(poolCount(db, { lists: [2] }), 2, 'the real selection');
 });

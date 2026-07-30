@@ -5,7 +5,7 @@ import { getDb } from '../db.js';
 import { generateSlug, isValidSlug } from '../slug.js';
 import { hydrateMovies } from '../movies.js';
 import { tallyBallots, describeTiebreak } from '../borda.js';
-import { describeFilters } from '../pool.js';
+import { describePoolSetup } from '../pool.js';
 import { baseUrl } from '../lan.js';
 
 const router = Router();
@@ -53,7 +53,7 @@ router.post('/', (req, res) => {
     .map(Number)
     .filter(Number.isInteger);
 
-  if (tmdbIds.length === 0) throw fail('Publish a draw with at least one movie', 400);
+  if (tmdbIds.length === 0) throw fail('Publish a vote with at least one movie', 400);
 
   const known = db
     .prepare(
@@ -61,15 +61,16 @@ router.post('/', (req, res) => {
     )
     .all(...tmdbIds)
     .map((row) => row.tmdb_id);
-  if (known.length !== tmdbIds.length) throw fail('That draw contains unknown movies', 400);
+  if (known.length !== tmdbIds.length) throw fail('That lineup contains unknown movies', 400);
 
-  // Which lists this draw actually came from. The client sends its own
-  // selection (see the `lists` filter), because `is_active` is only the
-  // opens-by-default preference now — reading it here would mislabel any draw
-  // where the host picked something different for tonight. Falls back to
-  // is_active when the client sends no selection at all.
-  const selectedListIds = Array.isArray(req.body?.filters?.lists)
-    ? req.body.filters.lists.map(Number).filter(Number.isInteger)
+  // Which lists this vote actually came from. The client sends its own
+  // selection, because `is_active` is only the opens-by-default preference now
+  // — reading it here would mislabel any vote where the host picked something
+  // different for tonight. Falls back to is_active when the client sends no
+  // selection at all.
+  const setup = req.body?.setup ?? {};
+  const selectedListIds = Array.isArray(setup.lists)
+    ? setup.lists.map(Number).filter(Number.isInteger)
     : null;
 
   const sourceLists = (
@@ -98,7 +99,7 @@ router.post('/', (req, res) => {
   ).run(
     slug,
     req.body?.anonymous ? 1 : 0,
-    describeFilters(db, req.body?.filters ?? {}, sourceLists),
+    describePoolSetup(db, setup, sourceLists),
   );
 
   const insert = db.prepare(

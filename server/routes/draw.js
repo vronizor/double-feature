@@ -35,18 +35,28 @@ router.get('/pool/facets', (req, res) => {
           .filter(Number.isInteger);
 
   const facets = poolFacets(db, lists);
+  // No `total` here on purpose. It used to be `poolCount` over the list
+  // selection ALONE, which made it a plausible-looking number that ignored
+  // genres, year, runtime, topN and includeWatched — draw.js seeded its
+  // "N films match" from it and reported 954 where the real pool was 97.
+  // /pool/count takes the whole filter set and is the only honest source for
+  // that number; leaving a near-miss alternative in the response is what
+  // caused the bug, so it is gone rather than fixed.
   res.json({
     ...facets,
     languages: facets.languages.map((row) => ({ ...row, name: languageName(row.code) })),
-    total: poolCount(db, lists === null ? {} : { lists }),
   });
 });
 
+// Every endpoint below takes a POOL SETUP — `{ lists, topN, filters }` — not a
+// bare filter object. The list selection used to ride inside `filters`, which
+// is what let this route and /pool/facets disagree about what a pool was.
+const setupFrom = (req) => req.body?.setup ?? {};
+
 /** Live "N films match" count behind the filter panel. */
 router.post('/pool/count', (req, res) => {
-  const filters = req.body?.filters ?? {};
   const exclude = req.body?.exclude ?? [];
-  res.json({ count: poolCount(getDb(), filters, exclude) });
+  res.json({ count: poolCount(getDb(), setupFrom(req), exclude) });
 });
 
 /**
@@ -65,10 +75,10 @@ router.post('/draw', (req, res) => {
     );
   }
 
-  const filters = req.body?.filters ?? {};
+  const setup = setupFrom(req);
   const exclude = req.body?.exclude ?? [];
-  const available = poolCount(db, filters, exclude);
-  const tmdbIds = drawFromPool(db, filters, size, exclude);
+  const available = poolCount(db, setup, exclude);
+  const tmdbIds = drawFromPool(db, setup, size, exclude);
 
   res.json({
     movies: hydrateMovies(db, tmdbIds),
@@ -86,15 +96,15 @@ router.post('/draw', (req, res) => {
  */
 router.post('/pool/movies', (req, res) => {
   const db = getDb();
-  const filters = req.body?.filters ?? {};
+  const setup = setupFrom(req);
   const sort = POOL_SORT_KEYS.includes(req.body?.sort) ? req.body.sort : 'title';
   const limit = Math.min(Math.max(Number(req.body?.limit) || 60, 1), MAX_PAGE_SIZE);
   const offset = Math.max(Number(req.body?.offset) || 0, 0);
 
-  const tmdbIds = queryPool(db, filters, { sort, limit, offset });
+  const tmdbIds = queryPool(db, setup, { sort, limit, offset });
   res.json({
     movies: hydrateMovies(db, tmdbIds),
-    total: poolCount(db, filters),
+    total: poolCount(db, setup),
     limit,
     offset,
   });

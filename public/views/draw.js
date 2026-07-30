@@ -12,7 +12,7 @@ import {
 } from '../browse.js';
 import { lineup } from '../lineup.js';
 import { poolState } from '../pool-state.js';
-import { currentAsVibe } from '../occasions.js';
+import { currentAsVibe } from '../vibes.js';
 
 const MIN_DRAW_SIZE = 1;
 const MAX_DRAW_SIZE = 10;
@@ -79,7 +79,19 @@ export async function renderDraw(container) {
     // First load only — adopts whatever the Lists tab marked active by
     // default. Subsequent mounts keep whatever the host chose for tonight.
     poolState.seedFrom(lists);
-    state.poolCount = facets.total;
+
+    // Deliberately NOT `state.poolCount = facets.total`. The facets route
+    // derives `total` from the list selection alone, so every other filter is
+    // dropped: with Ghibli selected and year <= 1990 it reported 23 against a
+    // real pool of 5, and TSPDT with top-100 reported 954 against 97. Invisible
+    // on a first-ever load, when nothing is filtered — but `poolState` survives
+    // tab switches, so Draw -> Explore -> Draw restored the filters and not the
+    // count, and `disabled: state.poolCount === 0` gates the Draw button on it.
+    //
+    // Leaving it null renders "Counting…" for the one round trip refreshCount()
+    // takes, which is honest, and refreshCount() already sends the full filter
+    // set plus the staged lineup as `exclude`.
+    state.poolCount = null;
   }
 
   // Re-fetch the facets whenever the list SELECTION changes, so the genre and
@@ -105,7 +117,7 @@ export async function renderDraw(container) {
   async function refreshCount() {
     const token = ++countToken;
     try {
-      const { count } = await api.poolCount(poolState.filters, lineup.ids());
+      const { count } = await api.poolCount(poolState.setup, lineup.ids());
       if (token === countToken) {
         state.poolCount = count;
         paintCount();
@@ -145,8 +157,8 @@ export async function renderDraw(container) {
     if (count === 0) return 'No lists selected — tap to choose';
 
     const parts = [`${plural(count, 'list')}`];
-    const f = poolState.filters;
-    if (f.topN) parts.push(`top ${f.topN}`);
+    const { topN, filters: f } = poolState.setup;
+    if (topN) parts.push(`top ${topN}`);
     const genreName = (id) => state.facets?.genres.find((g) => g.id === id)?.name ?? `#${id}`;
     const langName = (code) => state.facets?.languages.find((l) => l.code === code)?.name ?? code;
 
@@ -233,7 +245,7 @@ export async function renderDraw(container) {
       const { vibes } = await api.vibes();
       state.vibes = vibes;
       const created = vibes.find((vibe) => vibe.name === name);
-      if (created) poolState.applyOccasion(created.id, poolState.filters);
+      if (created) poolState.applyVibe(created.id, poolState.setup);
       toast(`Saved "${name}"`, 'ok');
       paint();
     } catch (error) {
@@ -390,7 +402,7 @@ export async function renderDraw(container) {
       // everything already rejected — otherwise the replacements can include
       // the very films being replaced.
       const exclude = [...new Set([...lineup.ids(), ...rejected])];
-      const result = await api.draw(drawn.length, poolState.filters, exclude);
+      const result = await api.draw(drawn.length, poolState.setup, exclude);
 
       if (result.movies.length === 0) {
         toast('Nothing new left to draw with these filters', 'error');
@@ -415,7 +427,7 @@ export async function renderDraw(container) {
     state.busy = true;
     paint();
     try {
-      const result = await api.draw(state.size, poolState.filters, lineup.ids());
+      const result = await api.draw(state.size, poolState.setup, lineup.ids());
       lineup.addAll(result.movies, 'draw');
       if (result.shortfall > 0) {
         toast(
@@ -744,7 +756,7 @@ export async function renderDraw(container) {
     state.busy = true;
     paint();
     try {
-      const session = await api.publish(lineup.ids(), state.anonymous, poolState.filters);
+      const session = await api.publish(lineup.ids(), state.anonymous, poolState.setup);
       showSession(session.slug);
     } catch (error) {
       toast(error.message, 'error');
@@ -813,6 +825,9 @@ export async function renderDraw(container) {
 
   await refreshData();
   paint();
+  // After the first paint, so `countNode` exists for paintCount() to write to.
+  // Not awaited: the panel is usable immediately and the count fills itself in.
+  refreshCount();
 
   return () => {
     countToken += 1;

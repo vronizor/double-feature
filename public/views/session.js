@@ -5,6 +5,16 @@ import { api } from '../api.js';
 // build and run on a Pi than WebSockets would be.
 const POLL_MS = 3500;
 
+// How many polls in a row have to fail before the panel gives up and replaces
+// itself with an error.
+//
+// It used to be one. A single dropped request — a phone waking the Wi-Fi, the
+// Pi busy on a refresh — tore down the QR code, the join link and the live
+// tally mid-movie-night, with no way back but a reload. At 3.5s a poll, four
+// consecutive failures is ~14 seconds, which is long enough to mean the server
+// is genuinely gone rather than briefly busy.
+const MAX_POLL_FAILURES = 4;
+
 /**
  * The host's view of one vote session: QR code, link, live tally, close button,
  * and the results once it's closed. Reused read-only by the history tab.
@@ -18,11 +28,14 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
     clearInterval(timer);
   };
 
+  let consecutiveFailures = 0;
+
   async function tick() {
     if (stopped) return;
     try {
       const session = await api.session(slug, host);
       if (stopped) return;
+      consecutiveFailures = 0;
 
       if (session.status === 'closed') {
         clearInterval(timer);
@@ -39,7 +52,19 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
       }
       renderOpen(session);
     } catch (error) {
-      if (!stopped) clear(container).append(h('div', { class: 'empty error' }, error.message));
+      if (stopped) return;
+      consecutiveFailures += 1;
+      // Keep the panel up and keep polling. Whatever is on screen is a few
+      // seconds stale, which is far better than losing the QR code guests are
+      // still scanning.
+      if (consecutiveFailures < MAX_POLL_FAILURES) return;
+      clear(container).append(
+        h(
+          'div',
+          { class: 'empty error' },
+          `Lost contact with the server — ${error.message}. Reload to try again.`,
+        ),
+      );
       clearInterval(timer);
     }
   }
@@ -107,7 +132,7 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
                     onClick: async () => {
                       if (
                         !confirm(
-                          'Cancel this vote entirely? Unlike "Close voting", this throws the draw away — ' +
+                          'Cancel this vote entirely? Unlike "Close voting", this throws the whole vote away — ' +
                             'any ballots already submitted are discarded, and it won’t appear in history. ' +
                             'This can’t be undone.',
                         )
@@ -118,7 +143,7 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
                         await api.cancelSession(slug);
                         stop();
                         clear(container).append(
-                          h('div', { class: 'empty' }, 'Voting cancelled — this draw was thrown away.'),
+                          h('div', { class: 'empty' }, 'Voting cancelled — this vote was thrown away.'),
                         );
                       } catch (error) {
                         toast(error.message, 'error');
@@ -134,7 +159,7 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
                   {
                     class: 'btn-primary',
                     onClick: async () => {
-                      if (!confirm('Close voting? This computes the final result and is permanent for this draw.')) {
+                      if (!confirm('Close voting? This computes the final result and is permanent for this vote.')) {
                         return;
                       }
                       try {

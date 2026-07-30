@@ -20,7 +20,7 @@ export async function renderHistory(container) {
     const { sessions } = await api.history();
     if (sessions.length === 0) {
       clear(container).append(
-        h('div', { class: 'empty' }, 'No draws yet. Publish one from the Draw tab and it will show up here.'),
+        h('div', { class: 'empty' }, 'No votes yet. Publish one from the Lineup tab and it will show up here.'),
       );
       return;
     }
@@ -29,7 +29,7 @@ export async function renderHistory(container) {
       h(
         'div',
         { class: 'stack' },
-        h('h2', {}, plural(sessions.length, 'past draw')),
+        h('h2', {}, plural(sessions.length, 'past vote')),
         h(
           'div',
           { class: 'stack', style: 'gap:8px' },
@@ -94,7 +94,7 @@ export async function renderHistory(container) {
       h(
         'div',
         { class: 'row', style: 'margin-bottom:16px' },
-        h('button', { class: 'btn-sm', onClick: () => showList() }, '← All draws'),
+        h('button', { class: 'btn-sm', onClick: () => showList() }, '← All votes'),
       ),
       body,
     );

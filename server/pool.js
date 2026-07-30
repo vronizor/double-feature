@@ -1,17 +1,33 @@
 /**
- * The draw pool: every movie on a currently-active list, deduplicated by TMDB id,
+ * The draw pool: every movie on a selected list, deduplicated by TMDB id,
  * narrowed by the host's filters.
  *
- * Filters are plain WHERE clauses over metadata Feature 2 already caches, so they
- * cost no extra TMDB calls. Shape:
+ * **A list selection is not a filter.** The two used to travel together inside
+ * one `filters` object, and everything downstream disagreed about whether that
+ * was true: the UI put the list picker *above* a card labelled "Filters",
+ * `clearFilters()` had to explicitly preserve `lists` with a comment
+ * apologising for the name, and `/api/pool/facets` took `?lists=` as a query
+ * param while its siblings took it inside the body. That last disagreement is
+ * what produced a "N films match" count computed from the selection alone.
+ *
+ * So the request shape is a POOL SETUP, with the selection and the filters as
+ * peers — matching what the UI has always shown:
+ *
  *   {
- *     genres:    { include: [18, 80], exclude: [27] },
- *     languages: { include: ['en'],   exclude: ['ja'] },
- *     year:      { min: 1960, max: 1979 },
- *     runtime:   { min: 60,   max: 180 },
- *     includeWatched: false,
- *     search: 'kurosawa',
+ *     lists: [1, 4],   // which lists are in play; see asListSelection for null vs []
+ *     topN:  100,      // a per-list cut, only meaningful for ranked lists
+ *     filters: {
+ *       genres:    { include: [18, 80], exclude: [27] },
+ *       languages: { include: ['en'],   exclude: ['ja'] },
+ *       year:      { min: 1960, max: 1979 },
+ *       runtime:   { min: 60,   max: 180 },
+ *       includeWatched: false,
+ *       search: 'kurosawa',
+ *     },
  *   }
+ *
+ * Filters are plain WHERE clauses over metadata already cached, so they cost no
+ * extra TMDB calls.
  */
 
 const asIntList = (value) =>
@@ -54,6 +70,7 @@ const asSearch = (value) => {
 const asListSelection = (value) =>
   value === undefined || value === null ? null : asIntList(value);
 
+/** The narrow set: facets over metadata. No list selection here — see the header. */
 export function normalizeFilters(raw = {}) {
   return {
     genres: {
@@ -68,8 +85,23 @@ export function normalizeFilters(raw = {}) {
     runtime: { min: asInt(raw.runtime?.min), max: asInt(raw.runtime?.max) },
     includeWatched: Boolean(raw.includeWatched),
     search: asSearch(raw.search),
+  };
+}
+
+/**
+ * The whole pool definition: which lists, how deep into the ranked ones, and
+ * the filters over the result.
+ *
+ * `topN` sits beside `lists` rather than inside `filters` because it is a cut
+ * *through the selection* — "the top 100 of each ranked list I picked" — and is
+ * meaningless without one. The UI has always grouped it that way too, under
+ * "Ranked lists" rather than in the Filters card.
+ */
+export function normalizePoolSetup(raw = {}) {
+  return {
     lists: asListSelection(raw.lists),
     topN: asInt(raw.topN),
+    filters: normalizeFilters(raw.filters),
   };
 }
 
@@ -81,8 +113,8 @@ export function normalizeFilters(raw = {}) {
  * (OR, the useful default — "a comedy or a thriller"), while `exclude` drops a
  * film carrying ANY of the excluded ones.
  */
-export function buildPoolQuery(filters, exclude = []) {
-  const f = normalizeFilters(filters);
+export function buildPoolQuery(setup, exclude = []) {
+  const { lists, topN, filters: f } = normalizePoolSetup(setup);
   const clauses = [];
   const params = [];
 
@@ -93,27 +125,27 @@ export function buildPoolQuery(filters, exclude = []) {
   // selected" would fall through to no membership constraint at all and match
   // every movie ever cached, including films from lists the host just turned
   // off.
-  if (f.lists !== null && f.lists.length === 0) {
+  if (lists !== null && lists.length === 0) {
     clauses.push('1 = 0');
   } else {
-    const scope = f.lists === null ? 'l.is_active = 1' : `l.id IN (${f.lists.map(() => '?').join(', ')})`;
-    const scopeParams = f.lists === null ? [] : f.lists;
+    const scope = lists === null ? 'l.is_active = 1' : `l.id IN (${lists.map(() => '?').join(', ')})`;
+    const scopeParams = lists === null ? [] : lists;
 
     // A "top N" cut applies per list, and only to lists that actually carry
     // ranks. NULL rank means the list simply isn't ranked (Criterion, Ghibli),
     // and those films must stay in — otherwise asking for "the top 100" would
     // silently delete every unranked list from the pool rather than narrowing
     // the ranked ones.
-    const topN = f.topN !== null && f.topN > 0;
+    const cut = topN !== null && topN > 0;
     clauses.push(
       `m.tmdb_id IN (
        SELECT lm.tmdb_id FROM list_movies lm
        JOIN lists l ON l.id = lm.list_id
-       WHERE ${scope} AND lm.tmdb_id IS NOT NULL${topN ? '\n         AND (lm.rank IS NULL OR lm.rank <= ?)' : ''}
+       WHERE ${scope} AND lm.tmdb_id IS NOT NULL${cut ? '\n         AND (lm.rank IS NULL OR lm.rank <= ?)' : ''}
      )`,
     );
     params.push(...scopeParams);
-    if (topN) params.push(f.topN);
+    if (cut) params.push(topN);
   }
 
   // Not a filter preference (like "no horror") — a per-request "don't hand
@@ -189,14 +221,14 @@ export function buildPoolQuery(filters, exclude = []) {
   return { where: clauses.join('\n  AND '), params };
 }
 
-export function poolCount(db, filters, exclude = []) {
-  const { where, params } = buildPoolQuery(filters, exclude);
+export function poolCount(db, setup, exclude = []) {
+  const { where, params } = buildPoolQuery(setup, exclude);
   return db.prepare(`SELECT COUNT(*) AS n FROM movies m WHERE ${where}`).get(...params).n;
 }
 
 /** Random sample of up to `n` movies. Fewer means the filters were too tight. */
-export function drawFromPool(db, filters, n, exclude = []) {
-  const { where, params } = buildPoolQuery(filters, exclude);
+export function drawFromPool(db, setup, n, exclude = []) {
+  const { where, params } = buildPoolQuery(setup, exclude);
   return db
     .prepare(`SELECT m.tmdb_id FROM movies m WHERE ${where} ORDER BY RANDOM() LIMIT ?`)
     .all(...params, n)
@@ -219,8 +251,8 @@ const POOL_SORTS = {
 export const POOL_SORT_KEYS = Object.keys(POOL_SORTS);
 
 /** A page of the filtered pool, sorted — for browsing rather than a random draw. */
-export function queryPool(db, filters, { sort = 'title', limit = 60, offset = 0 } = {}) {
-  const { where, params } = buildPoolQuery(filters);
+export function queryPool(db, setup, { sort = 'title', limit = 60, offset = 0 } = {}) {
+  const { where, params } = buildPoolQuery(setup);
   const orderBy = POOL_SORTS[sort] ?? POOL_SORTS.title;
   return db
     .prepare(`SELECT m.tmdb_id FROM movies m WHERE ${where} ORDER BY ${orderBy} LIMIT ? OFFSET ?`)
@@ -304,11 +336,22 @@ export function languageName(code) {
   }
 }
 
-/** Short human-readable summary stored on the session for the results screen. */
-export function describeFilters(db, filters, activeListNames) {
-  const f = normalizeFilters(filters);
+/**
+ * Short human-readable summary stored on the session for the results screen.
+ *
+ * Takes the whole pool setup, and the names for the ids in it. It used to take
+ * the filters plus a *separate* list-names argument — which was the same
+ * "selection isn't really a filter" instinct, worked around at the call site
+ * instead of in the shape.
+ *
+ * The column it lands in is still `sessions.filter_summary`. Renaming a
+ * populated column means a table rebuild for tidiness alone, and the value it
+ * holds is honestly described by the name, so it stays.
+ */
+export function describePoolSetup(db, setup, selectedListNames) {
+  const { topN, filters: f } = normalizePoolSetup(setup);
   const parts = [];
-  if (activeListNames?.length) parts.push(activeListNames.join(' + '));
+  if (selectedListNames?.length) parts.push(selectedListNames.join(' + '));
 
   const nameFor = (id) =>
     db.prepare('SELECT name FROM genres WHERE id = ?').get(id)?.name ?? `#${id}`;
@@ -323,7 +366,7 @@ export function describeFilters(db, filters, activeListNames) {
   if (f.languages.exclude.length) parts.push(`no ${f.languages.exclude.map(languageName).join('/')}`);
   if (f.genres.include.length) parts.push(f.genres.include.map(nameFor).join('/'));
   if (f.genres.exclude.length) parts.push(`no ${f.genres.exclude.map(nameFor).join('/')}`);
-  if (f.topN !== null && f.topN > 0) parts.push(`top ${f.topN}`);
+  if (topN !== null && topN > 0) parts.push(`top ${topN}`);
   if (f.includeWatched) parts.push('incl. watched');
   if (f.search) parts.push(`"${f.search}"`);
 

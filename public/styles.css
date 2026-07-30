@@ -208,9 +208,9 @@ label { display: block; }
   background: color-mix(in srgb, var(--danger) 22%, transparent);
   color: var(--danger); border-color: var(--danger); text-decoration: line-through;
 }
-/* Occasion chips read as presets rather than filter toggles, so they're a
+/* Vibe chips read as presets rather than filter toggles, so they're a
    little larger than the include/exclude chips they sit above. */
-.chip--occasion { font-size: 0.88rem; padding: 6px 14px; }
+.chip--vibe { font-size: 0.88rem; padding: 6px 14px; }
 .chip--save { border-style: dashed; color: var(--text-dim); }
 
 /* The delete affordance is tucked against its chip and only rendered for the

@@ -1,4 +1,4 @@
-import { h, clear, plural, toast } from '../dom.js';
+import { h, clear, plural, toast, preserveFocus } from '../dom.js';
 import { api } from '../api.js';
 import {
   renderFilterPanel,
@@ -64,7 +64,7 @@ export async function renderExplore(container) {
     paint();
 
     try {
-      const { movies, total } = await api.poolMovies(poolState.filtersFor({ search: state.search }), {
+      const { movies, total } = await api.poolMovies(poolState.setupFor({ search: state.search }), {
         sort: state.sort,
         limit: PAGE_SIZE,
         offset: state.offset,
@@ -230,14 +230,13 @@ export async function renderExplore(container) {
   }
 
   function paint() {
-    // The search box is the one control here a host might pause mid-typing on
-    // and then continue — a full repaint (needed either way, since the grid
-    // has to update) would otherwise silently kick focus out of it.
-    const active = document.activeElement;
-    const focusedSearch =
-      active?.id === SEARCH_INPUT_ID
-        ? { selectionStart: active.selectionStart, selectionEnd: active.selectionEnd }
-        : null;
+    // Every control the host might be mid-edit on has to survive this, not just
+    // the search box. `browse.js` documents that range inputs must never be
+    // repainted; Explore cannot honour that literally, because a filter change
+    // has to redraw the results grid, so it repaints and puts the caret back
+    // instead. Before this, typing "1960" into the year field landed the 1 and
+    // sent "960" to `<body>`.
+    const restoreFocus = preserveFocus(container);
 
     clear(container).append(
       h(
@@ -258,11 +257,7 @@ export async function renderExplore(container) {
       ),
     );
 
-    if (focusedSearch) {
-      const input = container.querySelector(`#${SEARCH_INPUT_ID}`);
-      input?.focus();
-      input?.setSelectionRange(focusedSearch.selectionStart, focusedSearch.selectionEnd);
-    }
+    restoreFocus();
   }
 
   await refreshData();

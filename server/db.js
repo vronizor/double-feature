@@ -17,7 +17,7 @@ const SCHEMA = `
 --
 -- is_active means "in play by default when the app opens", and is written
 -- ONLY from the Lists tab. Draw/Explore hold their list selection in view
--- state instead, so choosing an occasion for tonight never silently rewrites
+-- state instead, so choosing a vibe for tonight never silently rewrites
 -- a stored preference or leaks across tabs.
 -- query_json, when set, makes this a "dynamic" list: its membership comes from
 -- a TMDB /discover query rather than a fixed set of titles, so "crowd-pleasers

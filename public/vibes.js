@@ -1,15 +1,20 @@
 /**
  * "Tonight is…" — applying and creating vibes.
  *
- * Vibes now live in the database rather than being hardcoded here, because the
- * set of them is personal and grows: different viewing companions want
- * different nights, and adding one should be a button rather than a redeploy.
- * What remains in this file is the client-side half — turning a vibe into pool
+ * Vibes live in the database rather than being hardcoded here, because the set
+ * of them is personal and grows: different viewing companions want different
+ * nights, and adding one should be a button rather than a redeploy. What
+ * remains in this file is the client-side half — turning a vibe into pool
  * state, and turning the current pool state back into a saveable vibe.
  *
  * A vibe is a STARTING POINT, never a mode. Applying one fills in the pool
  * setup; editing anything afterwards demotes the chip to "Custom" rather than
  * letting the UI keep claiming a vibe it no longer matches.
+ *
+ * (This file was `occasions.js`. "Occasion" and "vibe" were the same concept
+ * under two names — one function call apart, since `applyVibe` called
+ * `applyOccasion` — and "vibe" won: it owns the schema, the API path and every
+ * user-visible string. "Occasion" appeared in none of them.)
  */
 
 import { poolState, emptyFilters } from './pool-state.js';
@@ -23,10 +28,10 @@ import { poolState, emptyFilters } from './pool-state.js';
  * up a newly added list without the frontend knowing anything changed.
  */
 export function applyVibe(vibe) {
-  poolState.applyOccasion(vibe.id, {
-    ...emptyFilters(),
-    ...(vibe.filters ?? {}),
+  poolState.applyVibe(vibe.id, {
     lists: [...vibe.resolved_lists],
+    topN: vibe.filters?.topN ?? null,
+    filters: { ...emptyFilters(), ...(vibe.filters ?? {}) },
   });
 }
 
@@ -40,12 +45,15 @@ export function applyVibe(vibe) {
  * not part of a night's shape.
  */
 export function currentAsVibe(name) {
-  const { search, lists, ...filters } = poolState.filters;
+  const { lists, topN, filters } = poolState.setup;
+  const { search, ...rest } = filters;
   return {
     name,
     tags: [],
     lists: lists ?? [],
-    filters,
+    // topN rides inside the stored filters blob: `vibes.filters_json` is a free
+    // shape, and splitting it would mean a schema migration for no gain.
+    filters: { ...rest, ...(topN === null ? {} : { topN }) },
   };
 }
 

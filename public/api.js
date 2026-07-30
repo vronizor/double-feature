@@ -71,17 +71,19 @@ export const api = {
   // very first paint wants — the client has no selection of its own yet.
   facets: (lists = null) =>
     request(`/api/pool/facets${lists ? `?lists=${lists.join(',')}` : ''}`),
-  poolCount: (filters, exclude) =>
-    request('/api/pool/count', { method: 'POST', body: { filters, exclude } }),
-  draw: (size, filters, exclude) =>
-    request('/api/draw', { method: 'POST', body: { size, filters, exclude } }),
-  poolMovies: (filters, { sort, limit, offset } = {}) =>
-    request('/api/pool/movies', { method: 'POST', body: { filters, sort, limit, offset } }),
+  // Every one of these takes a POOL SETUP — { lists, topN, filters } — because
+  // a list selection is not a filter. See the header of server/pool.js.
+  poolCount: (setup, exclude) =>
+    request('/api/pool/count', { method: 'POST', body: { setup, exclude } }),
+  draw: (size, setup, exclude) =>
+    request('/api/draw', { method: 'POST', body: { size, setup, exclude } }),
+  poolMovies: (setup, { sort, limit, offset } = {}) =>
+    request('/api/pool/movies', { method: 'POST', body: { setup, sort, limit, offset } }),
 
-  publish: (tmdbIds, anonymous, filters) =>
+  publish: (tmdbIds, anonymous, setup) =>
     request('/api/sessions', {
       method: 'POST',
-      body: { tmdb_ids: tmdbIds, anonymous, filters },
+      body: { tmdb_ids: tmdbIds, anonymous, setup },
     }),
   session: (slug, includeTally = false) =>
     request(`/api/sessions/${slug}${includeTally ? '?include=tally' : ''}`),

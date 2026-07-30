@@ -15,7 +15,7 @@ import {
 import { prefs } from './prefs.js';
 import { api } from './api.js';
 import { poolState } from './pool-state.js';
-import { applyVibe } from './occasions.js';
+import { applyVibe } from './vibes.js';
 
 // Re-exported so views can keep importing the filter shape from here alongside
 // everything else they use; it lives in pool-state.js because the singleton
@@ -54,6 +54,29 @@ export function groupListsByTag(lists, vocabulary) {
     });
   }
   return groups;
+}
+
+/**
+ * Whether a picker group renders expanded.
+ *
+ * `openGroups` holds TWO kinds of marker, not one: `key` forces a group open,
+ * `!key` forces it closed. Both are needed because a group containing a
+ * selection defaults to open — without an explicit closed marker, collapsing
+ * such a group would spring straight back open on the next repaint.
+ *
+ * Extracted because that rule is used in three places now (the per-group
+ * toggle, expand/collapse-all, and this test) and is easy to get subtly wrong.
+ */
+export function isGroupOpen(openGroups, key, hasSelection) {
+  if (openGroups.has(key)) return true;
+  if (openGroups.has(`!${key}`)) return false;
+  return hasSelection;
+}
+
+/** Sets a group's state, clearing the opposite marker so the two can't disagree. */
+export function setGroupOpen(openGroups, key, open) {
+  openGroups.delete(open ? `!${key}` : key);
+  openGroups.add(open ? key : `!${key}`);
 }
 
 /**
@@ -101,6 +124,34 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
       label,
     );
 
+  // Expand/collapse is deliberately separate from select/deselect: one changes
+  // what you can SEE, the other changes what you're drawing FROM. Conflating
+  // them would mean opening a group to look at it silently altered the pool.
+  //
+  // Both markers have to be written, not just the one being set — `key` forces
+  // open and `!key` forces closed, and a group with a selection defaults to
+  // open, so "collapse all" has to say so explicitly or those spring back.
+  const expandAll = (open) =>
+    h(
+      'button',
+      {
+        class: 'btn-sm',
+        onClick: () => {
+          for (const group of groups) setGroupOpen(openGroups, group.key, open);
+          onChange();
+        },
+      },
+      open ? '▾ Expand all' : '▸ Collapse all',
+    );
+
+  const allOpen = groups.every((group) =>
+    isGroupOpen(
+      openGroups,
+      group.key,
+      group.lists.some((list) => poolState.isSelected(list.id)),
+    ),
+  );
+
   return h(
     'div',
     { class: 'stack', style: 'gap:10px' },
@@ -109,6 +160,9 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
       { class: 'row' },
       h('span', { class: 'faint' }, `${selectedCount} of ${lists.length} lists selected`),
       h('span', { class: 'spacer' }),
+      // One toggle rather than two buttons: with every group already open,
+      // "Expand all" is a no-op that looks like it should do something.
+      groups.length > 1 ? expandAll(!allOpen) : null,
       bulk('Select all', allIds, true),
       bulk('Deselect all', allIds, false),
     ),
@@ -119,16 +173,13 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
       // A group the host is actually using stays open across repaints; the
       // rest stay out of the way. With ~20 lists this is what keeps the panel
       // readable at all.
-      const isOpen = openGroups.has(group.key) || (selected > 0 && !openGroups.has(`!${group.key}`));
+      const isOpen = isGroupOpen(openGroups, group.key, selected > 0);
 
       // Interacting with a group pins it open. Without this, unchecking the
       // last selected list in a group would drop `selected` to 0 and collapse
       // the group instantly — yanking the very checkbox being clicked out from
       // under the cursor.
-      const pinOpen = () => {
-        openGroups.delete(`!${group.key}`);
-        openGroups.add(group.key);
-      };
+      const pinOpen = () => setGroupOpen(openGroups, group.key, true);
 
       const groupBulk = (label, on) =>
         h(
@@ -155,17 +206,7 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
             {
               class: 'expand-link',
               onClick: () => {
-                // Two markers, not one: `key` forces open, `!key` forces
-                // closed. Without the explicit closed marker, collapsing a
-                // group that has selections would spring straight back open
-                // on the next repaint.
-                if (isOpen) {
-                  openGroups.delete(group.key);
-                  openGroups.add(`!${group.key}`);
-                } else {
-                  openGroups.delete(`!${group.key}`);
-                  openGroups.add(group.key);
-                }
+                setGroupOpen(openGroups, group.key, !isOpen);
                 onChange();
               },
             },
@@ -226,9 +267,9 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
  * The "Tonight is…" chip row. Applying a preset replaces the pool setup
  * wholesale; the summary line underneath then shows what that produced, and
  * any hand-edit afterwards demotes the label back to "Custom" (poolState
- * handles that) so the UI never claims an occasion it is no longer showing.
+ * handles that) so the UI never claims a vibe it is no longer showing.
  *
- * Renders nothing when no occasion can produce a pool — on a fresh install
+ * Renders nothing when no vibe can produce a pool — on a fresh install
  * with no lists, an empty row of dead chips would be worse than no row.
  */
 /**
@@ -268,14 +309,14 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
       'div',
       { class: 'chips' },
       ...vibes.map((vibe) => {
-        const active = poolState.occasion === vibe.id;
+        const active = poolState.vibe === vibe.id;
         return h(
           'span',
           { class: 'vibe-chip-wrap' },
           h(
             'button',
             {
-              class: 'chip chip--occasion',
+              class: 'chip chip--vibe',
               dataset: { state: active ? 'include' : 'off' },
               title: vibe.tags.length
                 ? `Tagged: ${vibe.tags.join(', ')}`
@@ -307,10 +348,10 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
       // ask you to imagine the result instead of seeing it.
       h(
         'button',
-        { class: 'chip chip--occasion chip--save', title: 'Save the current lists and filters as a new vibe', onClick: onSave },
+        { class: 'chip chip--vibe chip--save', title: 'Save the current lists and filters as a new vibe', onClick: onSave },
         '+ Save current…',
       ),
-      poolState.occasion === null
+      poolState.vibe === null
         ? h('span', { class: 'faint', style: 'align-self:center' }, 'Custom')
         : null,
     ),
@@ -358,10 +399,11 @@ export function renderTopN(lists, onChange) {
       { class: 'row' },
       h('span', { class: 'muted' }, 'Top'),
       h('input', {
+        id: 'filter-topn',
         type: 'number',
         min: '1',
         placeholder: 'all',
-        value: poolState.filters.topN ?? '',
+        value: poolState.setup.topN ?? '',
         style: 'width:88px',
         onInput: (event) => {
           const raw = event.target.value.trim();
@@ -421,6 +463,10 @@ function chipToggleGroup(items, group, getKey, getLabel, onChange) {
 function rangeInputs(filters, key, unit, bounds, onChange) {
   const make = (edge) =>
     h('input', {
+      // Stable id so `preserveFocus` can put the caret back after a repaint —
+      // Explore rebuilds its whole subtree on every keystroke. Safe as a plain
+      // id because only one view is mounted at a time.
+      id: `filter-${key}-${edge}`,
       type: 'number',
       value: filters[key][edge] ?? '',
       placeholder: edge === 'min' ? String(bounds.min ?? '') : String(bounds.max ?? ''),
@@ -521,6 +567,7 @@ export function renderFilterPanel(filters, facets, { onChipChange, onValueChange
       'label',
       { class: 'check' },
       h('input', {
+        id: 'filter-watched',
         type: 'checkbox',
         checked: filters.includeWatched,
         onChange: (event) => {

@@ -8,7 +8,7 @@
  *
  * The membership is MATERIALISED into `list_movies` rather than resolved when
  * a draw happens. That means everything downstream — buildPoolQuery, the
- * filters, Top-N, the occasion presets, the picker — treats a dynamic list
+ * filters, Top-N, the vibe presets, the picker — treats a dynamic list
  * exactly like any other, with no second code path. The alternative (teaching
  * the pool query to union in a live API call) would have touched every one of
  * those and made a draw depend on the network.
@@ -22,7 +22,7 @@ import { upsertMovie } from './movies.js';
  *
  * Structured, not a URL string: `{ kind, params, limit }`. The extra shape
  * looks like ceremony now, when `kind` is always 'discover', but it is the
- * hook that lets a parametric occasion (director night, theme night) inject a
+ * hook that lets a parametric vibe (director night, theme night) inject a
  * value later without a schema migration — see ROADMAP §5.
  */
 export function parseListQuery(raw) {
