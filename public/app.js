@@ -1,3 +1,4 @@
+import { api } from './api.js';
 import { h, clear } from './dom.js';
 import { renderDraw } from './views/draw.js';
 import { renderExplore } from './views/explore.js';
@@ -74,3 +75,16 @@ window.addEventListener('hashchange', route);
 route().catch((error) => {
   clear(root).append(h('div', { class: 'empty error' }, error.message));
 });
+
+// Cosmetic, so it is deliberately fire-and-forget and never blocks the first
+// paint: if /api/config is slow or fails, the footer keeps the credit line and
+// simply shows no version. Patch is dropped from the display — 4.1.0 reads
+// "v4.1", because the minor is the part that carries meaning here.
+api
+  .config()
+  .then(({ version }) => {
+    if (!version) return;
+    const node = document.getElementById('app-version');
+    if (node) node.textContent = `v${String(version).split('.').slice(0, 2).join('.')}`;
+  })
+  .catch(() => {});

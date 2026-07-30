@@ -462,6 +462,11 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   border-top: 1px solid var(--border);
 }
 
+/* Sits on its own line on a phone, inline beside the credit anywhere wider —
+   the footer is one flow of small print, not two competing lines. */
+.credit-version { display: inline-block; margin-left: 8px; opacity: 0.75; }
+.credit-version:empty { display: none; }
+
 .empty {
   text-align: center; padding: 44px 20px; color: var(--text-dim);
   border: 1px dashed var(--border-strong); border-radius: var(--radius);

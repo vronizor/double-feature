@@ -1,4 +1,5 @@
 import express from 'express';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { config, ROOT, hasTmdbCredentials } from './config.js';
@@ -10,6 +11,29 @@ import moviesRouter from './routes/movies.js';
 import drawRouter from './routes/draw.js';
 import sessionsRouter from './routes/sessions.js';
 import vibesRouter from './routes/vibes.js';
+
+/**
+ * The displayed version, read from package.json so there is exactly one place
+ * to bump it.
+ *
+ * MAJOR is the roadmap version (4 = v4, in flight). MINOR is a decision round:
+ * it goes up once per session in which decisions were actually settled, which
+ * is the unit this project already works in — see the reporting conventions in
+ * CLAUDE.md. PATCH is unused for now.
+ *
+ * Read once at boot rather than imported, because a JSON import assertion is
+ * still awkward across Node versions and this is a single synchronous read of
+ * a file that is already on disk.
+ */
+const VERSION = (() => {
+  try {
+    return JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version ?? null;
+  } catch {
+    // A missing or unreadable package.json must not stop the app booting —
+    // the footer simply shows nothing.
+    return null;
+  }
+})();
 import tmdbRouter from './routes/tmdb.js';
 
 export function createApp() {
@@ -26,6 +50,7 @@ export function createApp() {
       lan_ip: detectLanIp(),
       port: config.port,
       tmdb_configured: hasTmdbCredentials(),
+      version: VERSION,
     });
   });
 
