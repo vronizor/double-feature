@@ -961,18 +961,203 @@ table only says how far along a thing is.
 
 | Item | State | Where it stands |
 |---|---|---|
+| Box office — Spain (ICAA) | ⏳ ready | **Decided: fuzzy matching is accepted here.** ICAA is official and 70 years deep but carries no TMDB id or QID — see §6.1 |
+| Box office — United States | ⏳ ready | Extends the axis. **Replaces the "reach-sorted list" idea**, which measured something worse — see §6.2 |
+| Alternative ratings — IMDb | ⏳ ready | `title.ratings.tsv.gz`, joins on `imdb_id`. Needs a column, a backfill, and a licence rule: never commit the dataset — see §6.3 |
+| Alternative ratings — Letterboxd | 🔍 research only | **Research, do not build.** Terms are the deciding factor. Any build is v5 |
+| National cinema night | ⏳ ready | Query-backed list per country, `with_origin_country`. First real test of the two dynamic-list gaps below |
+| Director night | ⏳ ready | Parametric vibe. `/person/{id}/movie_credits` filtered to `job=Director`, never `with_crew` (§2). Base for actor's night in v5 |
+| `dynamic`: mechanism vs tag | ⏳ ready | **No longer hypothetical** — v4 adds query-backed lists. See §6.4 |
+| `materialiseList`: rank on reconcile, and a transaction | ⏳ ready | **Becomes live the moment a ranked dynamic list exists**, which national cinema night is. See §6.4 |
 | `seed.mjs` keyed on `tmdb_id` | ⏳ ready | The one v3 item not done. A tidy-up: `recordEntry` already guards duplicates, so the real exposure is unresolved rows, `backfill-list-fields.mjs`, and wasted TMDB calls. Additive key — see §5 notes |
-| Box office — Spain | 🗣 discussing | Leads and one dead end recorded in `BACKLOG.md`. Blocker is identity: ICAA has no TMDB id or QID, so it needs fuzzy title matching, which this project avoids everywhere |
-| What is a *kind* of list? | 🗣 discussing | `lists.kind` is `seed\|custom` (provenance); §1 means curated \| dynamic \| property-filter — the axis that drives the pool query and has no schema representation. Settle before anything else touches list taxonomy |
-| Two chip rows, same labels | 🗣 revisit after use | A chip "Awards" that *selects* lists sits beside one that *narrows the picker*. Deliberately parked until real use says whether it confuses anyone |
+| What is a *kind* of list? | 🗣 discussing | `lists.kind` is `seed\|custom` (provenance); §1 means curated \| dynamic \| property-filter — the axis that drives the pool query and has no schema representation. **Settle before national cinema night**, which adds a third kind |
+| Two chip rows, same labels | 🗣 revisit after use | A chip "Awards" that *selects* lists sits beside one that *narrows the picker*. Parked until real use says whether it confuses anyone |
 | `includeWatched` default | 🗣 revisit at F3 | README says exclude, the UI ships include. Inert until something is actually marked watched |
-| Director night / theme night | ⏳ ready | §7. Parametric vibes, both unblocked by the structured query object and the `▾` chip shape. `/person/{id}/movie_credits`, never `with_crew` |
 | LICENSE, and seed-list provenance | 🗣 discussing | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag. Both consciously accepted for now — see `BACKLOG.md` |
 
-Unscheduled candidates, with their evidence, are in `BACKLOG.md`: alternative
-ratings (IMDb's dataset is verified obtainable and joins on `imdb_id`),
-household memory, a reach-sorted popularity list, nominees as well as winners,
-and separating "dynamic" the mechanism from "dynamic" the tag.
+Deferred to **v5**, recorded so they are not re-proposed early: cultness (§6.2),
+actor's night (director night generalised), a Letterboxd build, household
+memory, and nominees as well as winners.
+
+---
+
+### 6.1 Box office — Spain, via the ICAA catalogue
+
+**Source: the ICAA *Catálogo de Películas*** (`sede.mcu.gob.es/CatalogoICAA`),
+the Spanish film institute's own register. Verified live: an unauthenticated
+JSON endpoint, `/Buscador/GetPeliculasPreview?T_general=<title>`, and a detail
+page carrying *espectadores*, *recaudación* and co-production percentages.
+
+```
+1952  BIENVENIDO MISTER MARSHALL      26.204 espectadores
+1961  VIRIDIANA                    1.039.120
+1984  SANTOS INOCENTES, LOS        2.033.935
+2000  OTROS, LOS                   6.411.003
+2022  AS BESTAS                    1.112.098
+```
+
+Seventy years deep, official, and admissions rather than revenue — better data
+than Wikipedia would have given. Rejected alternatives are in `BACKLOG.md`:
+es.wikipedia has no per-year series, the ministry's other per-year files are
+Rentrak-sourced PDFs covering only 2016–2025, and Wikidata has 26 films total.
+
+**Decided: fuzzy title matching is accepted for this list, and only this list.**
+That is a real departure — every other list resolves through a TMDB id or a
+Wikidata QID precisely to avoid title matching. ICAA has neither, and stores
+titles article-last and upper-cased (`VERDUGO, EL`, `OTROS, LOS`). So this needs
+a normaliser that undoes that convention before matching, and it will be the
+first place in the codebase where identity is a guess.
+
+Given that, the guard rails matter more than usual:
+
+- **Match on title + year, never title alone.** `normalizeTitle` in
+  `server/tmdb.js` already folds accents, punctuation and leading articles, and
+  `scoreCandidate` already encodes "confident" as an exact title match within a
+  year. Reuse them rather than writing a second matcher.
+- **Anything not confidently matched goes to `needs_review`**, exactly as an
+  imported custom list does. The reconciliation screen already exists. Do not
+  silently drop and do not silently guess.
+- **Report the match rate.** If it comes in materially below the 98–100% the
+  QID route achieves, that is a finding worth acting on, not a number to bury.
+
+**Open: enumeration.** The search endpoint needs a query string, and no
+browse-by-year or bulk export was found. Without one there is no way to ask for
+"every Spanish film of 1994", which is what a list needs. **Settle this before
+building** — if no enumeration exists, the fallback is to drive it from a
+Wikipedia list of Spanish films and use ICAA only for the admissions figure,
+which changes the shape of the work.
+
+### 6.2 Box office — United States, and why "reach" is not the axis
+
+**The reach-sorted list is dropped as a separate item.** It was described as a
+third axis — "box office surfaces *Ch'tis*, reach surfaces *Ace Ventura*" — and
+that framing does not survive contact with the numbers.
+
+*Ace Ventura* **was** a US box-office hit: roughly $72M domestic in 1994, around
+thirteenth for the year. It sits comfortably in any per-year US box-office list.
+So the film used to justify a separate reach axis is reached by ordinary box
+office, and the axis is not needed to get it.
+
+What the three measures actually are:
+
+| Measure | What it counts | Reaches |
+|---|---|---|
+| **Acclaim** | rating, with a vote floor | Parasite, Portrait de la jeune fille en feu |
+| **Box office** | tickets sold, one country, one year | Ch'tis, Ace Ventura, Le Corniaud |
+| **"Reach"** (vote counts) | how many people *rated* it, ever | mostly anglophone films |
+
+The third is the weak one, and `BACKLOG.md` already measured why: *Le Père Noël
+est une ordure* has 11,588 IMDb votes **not because it is obscure but because it
+never left France**. Vote-count reach measures *anglophone* familiarity, so as a
+"popularity" axis it is a worse-sourced restatement of "was this film big in
+America" — which US box office answers directly and honestly.
+
+**So: extend box office to the US.** Same fetcher shape, a new source, one more
+`box-office` list.
+
+> **One genuine difference from France, and it needs a decision during the
+> build.** French per-year pages give **admissions**, which are immune to ticket
+> price inflation. US sources give **gross in dollars**, which are not. Within a
+> single year that does not matter, so a per-year list is safe; a *global* rank
+> across decades would put 2019 above 1975 for reasons that have nothing to do
+> with how many people went. Either rank per-year, or find an admissions-adjusted
+> source, or state plainly on the list that it ranks dollars.
+
+**What is genuinely left over** once box office covers France, Spain and the US
+is the thing box office structurally cannot see: films whose fame arrived
+*after* the cinema, through television and home video. *Le Père Noël est une
+ordure* is the canonical case — a modest theatrical run and total cultural
+saturation. That is **cultness**, it is a real axis, and it is **v5**. It is not
+the same thing as reach, and it will need its own evidence before it gets built.
+
+### 6.3 Alternative ratings — IMDb now, Letterboxd only researched
+
+**IMDb, build it.** `title.ratings.tsv.gz` is ~8 MB, covers every title, is
+refreshed daily, and joins **exactly** on `imdb_id` — which TMDB already returns
+in the detail response, so there is no matching problem at all. Needs an
+`imdb_id` column on `movies`, a backfill, and display beside the TMDB score.
+
+> **Licence rule, non-negotiable:** the dataset is licensed for personal and
+> non-commercial use, which fits this app — but it **must not be committed to
+> the repo**. Fetch it at setup or refresh time and store only the derived
+> numbers. This is the same distinction the `.gitignore` already enforces for
+> `data/*.db`.
+
+**Letterboxd: research only, do not build.** Historically no public API, believed
+invite-only. **Their terms are the deciding factor and must be read before any
+design** — do not assume scraping is acceptable. Any build is v5. Recording the
+outcome of the research, either way, is the deliverable here.
+
+SensCritique stays **closed**: verified 403 to scripted requests, same as
+criterion.com.
+
+### 6.4 The two dynamic-list gaps — what they mean, and why they stop being theoretical
+
+Both were logged as "no such list exists yet". v4 creates such lists, so both
+become live. Plain-language versions, since neither is obvious from its title:
+
+**"`dynamic` the mechanism vs `dynamic` the tag."** A list is *query-backed*
+when `lists.query_json` is set — that is the mechanism, and it is what makes
+"Modern Classics" re-derive itself instead of needing a re-seed. Separately,
+lists carry **tags**, and one of those tags is also called `dynamic`; the
+"Modern Classics" vibe resolves on it.
+
+Today there is exactly one query-backed list and it is the only list tagged
+`dynamic`, so the two coincide and nothing misbehaves. The moment national
+cinema night adds a second query-backed list, tagging it `dynamic` would sweep
+it into the **Modern Classics vibe** — a vibe about recent acclaim would
+silently start including Japanese cinema. The tag is doing two jobs: "this
+updates itself" and "this belongs to the modern-classics family".
+
+Fix: the vibe pins its list explicitly, and `dynamic` as a tag becomes purely
+descriptive (or goes away, since `query_json IS NOT NULL` already answers the
+mechanism question).
+
+**"`materialiseList`: set rank on reconcile, and wrap in a transaction."**
+Re-running a query-backed list *reconciles* rather than rebuilds: rows already
+present are kept, new ones inserted, departed ones deleted. It never **updates**
+a row that stayed. Rank is therefore written once, at first materialisation, and
+never again — so a *ranked* dynamic list would freeze its ranks on day one while
+its membership moved on underneath. A film ranked #5 last year would still read
+#5 after dropping to #40.
+
+That is fine today because no dynamic list is ranked. **National cinema night
+ranked by popularity is exactly such a list**, so this has to be fixed first or
+the ranks are wrong from the first refresh.
+
+The transaction half is smaller: the insert/delete loop is not atomic, so a
+crash mid-run leaves the list half-updated. It self-heals on the next run, but a
+draw in between would be made from a list that never existed.
+
+### 6.5 National cinema night, and director night
+
+Both are query-backed, and together they are the reason §6.4 has to land first.
+
+**National cinema night.** `§2` already established this is nearly free:
+`movies.countries` is cached, and TMDB's `with_origin_country` works for a
+dynamic list. The open design question is whether it is **one list per country**
+(fixed, tagged, groupable in the picker) or **one parametric vibe** taking a
+country at selection time. One list per country is simpler and reuses the
+picker; it also reintroduces the list-proliferation risk `BACKLOG.md` flags. A
+parametric vibe avoids proliferation but needs the `▾` chip shape.
+
+> Settle **"what is a *kind* of list?"** (still 🗣 in the table above) before
+> this. A per-country dynamic list is precisely the third kind the schema has no
+> word for, and naming it after building it is how the `category`/`tag`
+> confusion happened the first time.
+
+**Director night.** Already specified in §7 and unchanged: resolve the person,
+then `/person/{id}/movie_credits` filtered to `job=Director`. **Never
+`with_crew`** — measured in §2, it returns 112 films for Kurosawa including 1936
+comedies where he was an assistant director, because it matches any crew role.
+
+Parametric, so it needs the `▾` chip: a value chosen at selection time rather
+than a list sitting in the picker. That interaction is the part worth getting
+right, because **actor's night in v5 is the same shape with `job` swapped** — if
+director night is built as a one-off rather than as "a credit-filtered person
+list", v5 rewrites it.
+
+---
 
 ---
 
