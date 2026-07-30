@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createTestDb } from '../server/db.js';
 import {
   buildPoolQuery,
+  describePoolSetup,
   normalizePoolSetup,
   poolCount,
   drawFromPool,
@@ -453,4 +454,68 @@ test('a selection nested under filters is ignored rather than quietly honoured',
   const db = seedRanked();
   assert.equal(poolCount(db, { filters: { lists: [2] } }), 3, 'falls back to is_active');
   assert.equal(poolCount(db, { lists: [2] }), 2, 'the real selection');
+});
+
+// --- award-winner filter ---------------------------------------------------
+
+function seedWithAwards() {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+    (1, 'Canon', 'seed', 1),
+    (2, 'Palme d’Or (Cannes)', 'seed', 1),
+    (3, 'Stale Category Award', 'seed', 1)`);
+  // List 2 is tagged; list 3 carries only the dead `category` column.
+  db.exec(`INSERT INTO list_tags (list_id, tag) VALUES (1, 'canon'), (2, 'awards')`);
+  db.exec(`UPDATE lists SET category = 'awards' WHERE id = 3`);
+
+  const add = (tmdbId, title, listId, status = 'resolved') => {
+    db.prepare('INSERT OR IGNORE INTO movies (tmdb_id, title, year) VALUES (?, ?, 1990)').run(tmdbId, title);
+    db.prepare(
+      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status) VALUES (?, ?, ?, 1990, ?)`,
+    ).run(listId, tmdbId, title, status);
+  };
+  add(1, 'Winner', 1);
+  add(1, 'Winner', 2);          // also on the awards list
+  add(2, 'Plain Film', 1);
+  add(3, 'Category Only', 1);
+  add(3, 'Category Only', 3);   // on a list with category but no tag
+  add(4, 'Unresolved Award', 2, 'needs_review');
+  return db;
+}
+
+test('the award filter keeps only films on an award-tagged list', () => {
+  const db = seedWithAwards();
+  assert.equal(poolCount(db, {}), 4, 'all four films without the filter');
+  assert.equal(poolCount(db, { filters: { awardWinners: true } }), 1);
+});
+
+test('the award filter resolves on the tag, not the dead category column', () => {
+  // Same move as the award badges: `lists.category` has no readers left, and a
+  // list added today has it NULL.
+  const db = seedWithAwards();
+  const ids = drawFromPool(db, { filters: { awardWinners: true } }, 10);
+  assert.deepEqual(ids, [1], 'Category Only must not count as a winner');
+});
+
+test('an unresolved membership is not a win', () => {
+  // A needs_review row has no confirmed film behind it.
+  const db = seedWithAwards();
+  const ids = drawFromPool(db, { filters: { awardWinners: true } }, 10);
+  assert.ok(!ids.includes(4));
+});
+
+test('the award filter is independent of which lists are selected', () => {
+  // Drawing from the canon list while asking only for winners is a real
+  // question, and different from selecting the award lists.
+  const db = seedWithAwards();
+  // The canon list holds Winner, Plain Film and Category Only. The
+  // needs_review row is on the awards list only.
+  assert.equal(poolCount(db, { lists: [1] }), 3);
+  assert.equal(poolCount(db, { lists: [1], filters: { awardWinners: true } }), 1);
+});
+
+test('the award filter shows up in the session summary', () => {
+  const db = seedWithAwards();
+  const summary = describePoolSetup(db, { filters: { awardWinners: true } }, ['Canon']);
+  assert.match(summary, /award winners/);
 });

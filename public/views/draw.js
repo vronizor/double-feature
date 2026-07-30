@@ -170,6 +170,7 @@ export async function renderDraw(container) {
     if (f.runtime.min !== null || f.runtime.max !== null) {
       parts.push(`${f.runtime.min ?? 0}–${f.runtime.max ?? '…'} min`);
     }
+    if (f.awardWinners) parts.push('award winners');
     if (!f.includeWatched) parts.push('unwatched only');
 
     return parts.join(' · ');

@@ -398,11 +398,11 @@ The table only says how far along a thing is.
 | Box office — France | ✅ landed | 1,390 films seeded, 1390/1390 resolved, Top-N and draws verified against the real DB |
 | Dynamic-list refresh refetches all 120 members daily | ✅ landed | Cached rows reused; the one test that matters fails against the old code |
 | `GET /api/sessions` N+1 | ✅ landed | One join; verified same films, order and payload shape against the real DB |
-| Streaming | ⏳ ready | **Link out, don't cache** — no column, no region config, no refresh change |
+| Streaming | ✅ landed | Link to TMDB's own watch page — no column, no region config, no refresh change |
 | Award years | ✅ landed | 104 gaps filled, 13 wrong values corrected. The year comes from the ceremony's Wikidata item, never from the article |
 | Box office — Spain | 🗣 next version | No source exists on es.wikipedia; dropped from v3 until one is found |
-| Award short names as data | ⏳ ready | |
-| Award-winner filter | ⏳ ready | Unblocked by the tag fix above |
+| Award short names as data | ✅ landed | `lists.short_name`, fed from the seed files; the frontend map is gone |
+| Award-winner filter | ✅ landed | Resolves on the `awards` tag; independent of the list selection |
 | `seed.mjs` keyed on `tmdb_id` | ⏳ ready | Additive key — severity was lower than assumed, see below |
 | `includeWatched` default: README vs UI disagree | 🗣 revisit at F3 | No effect until something is marked watched; F3 starts doing that |
 

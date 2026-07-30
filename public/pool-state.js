@@ -27,6 +27,7 @@ export const emptyFilters = () => ({
   year: { min: null, max: null },
   runtime: { min: null, max: null },
   includeWatched: true,
+  awardWinners: false,
   // Only surfaced in the UI on the Explore tab. Deliberately NOT shared
   // between views via this singleton — see `poolState.setupFor()`.
   search: '',

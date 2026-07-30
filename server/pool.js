@@ -84,6 +84,7 @@ export function normalizeFilters(raw = {}) {
     year: { min: asInt(raw.year?.min), max: asInt(raw.year?.max) },
     runtime: { min: asInt(raw.runtime?.min), max: asInt(raw.runtime?.max) },
     includeWatched: Boolean(raw.includeWatched),
+    awardWinners: Boolean(raw.awardWinners),
     search: asSearch(raw.search),
   };
 }
@@ -160,6 +161,25 @@ export function buildPoolQuery(setup, exclude = []) {
   }
 
   if (!f.includeWatched) clauses.push('m.watched = 0');
+
+  // "Only films that won something." Cheap, because the award badge already
+  // needs this join — a film is a winner if it sits on any list tagged
+  // `awards`, resolved.
+  //
+  // Deliberately independent of the list SELECTION: you can be drawing from
+  // the canon lists and still ask only for winners among them. Making it a
+  // selection of the award lists instead would change which films are in play,
+  // which is a different question.
+  //
+  // Resolves on the tag, never on lists.category — that column has no readers
+  // left, and an award list added today has it NULL.
+  if (f.awardWinners) {
+    clauses.push(
+      `EXISTS (SELECT 1 FROM list_movies lm2
+               JOIN list_tags lt2 ON lt2.list_id = lm2.list_id AND lt2.tag = 'awards'
+               WHERE lm2.tmdb_id = m.tmdb_id AND lm2.status = 'resolved')`,
+    );
+  }
 
   if (f.year.min !== null) {
     clauses.push('m.year IS NOT NULL AND m.year >= ?');
@@ -367,6 +387,7 @@ export function describePoolSetup(db, setup, selectedListNames) {
   if (f.genres.include.length) parts.push(f.genres.include.map(nameFor).join('/'));
   if (f.genres.exclude.length) parts.push(`no ${f.genres.exclude.map(nameFor).join('/')}`);
   if (topN !== null && topN > 0) parts.push(`top ${topN}`);
+  if (f.awardWinners) parts.push('award winners');
   if (f.includeWatched) parts.push('incl. watched');
   if (f.search) parts.push(`"${f.search}"`);
 

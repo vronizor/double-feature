@@ -577,6 +577,20 @@ export function renderFilterPanel(filters, facets, { onChipChange, onValueChange
       }),
       h('span', {}, 'Include films already marked watched (allow rewatches)'),
     ),
+    h(
+      'label',
+      { class: 'check' },
+      h('input', {
+        id: 'filter-awards-only',
+        type: 'checkbox',
+        checked: filters.awardWinners,
+        onChange: (event) => {
+          filters.awardWinners = event.target.checked;
+          onValueChange();
+        },
+      }),
+      h('span', {}, '🏆 Only films that won an award'),
+    ),
   );
 }
 
