@@ -73,20 +73,53 @@ export async function materialiseList(db, list, { log = () => {} } = {}) {
     return { added: 0, removed: 0, kept: 0, emptyResult: true };
   }
 
-  // Fetch full records: discover's summaries carry no runtime, director or
-  // genres, and those drive the filters.
-  const detailed = [];
-  for (const summary of found) {
-    try {
-      const movie = await getMovie(summary.id);
-      if (movie) detailed.push(movie);
-    } catch (error) {
-      log(`[dynamic] ${list.name}: ${summary.id} failed — ${error.message}`);
-    }
+  // Full records are needed because discover's summaries carry no runtime,
+  // director or genres, and those drive the filters. But most of them are
+  // already in `movies` — this job ran yesterday, and the films in a
+  // "last ten years, highly rated" list barely move.
+  //
+  // Before this check the loop fetched EVERY member EVERY run: ~120 TMDB
+  // detail calls a day, ~44k a year, for rows the app already held and its own
+  // policy considers good for 150 days. It also awaited them one at a time,
+  // which bypassed the 8-way semaphore in tmdb.js entirely — 120 sequential
+  // round trips rather than 15 concurrent batches.
+  //
+  // Freshness is not lost, it is handed back to `refreshStaleMovies`, which
+  // already owns it for every other film in the library on the same cycle.
+  // One visible consequence, and it is the correct one: these rows stop having
+  // `refreshed_at` bumped daily, so they start appearing in the normal
+  // 250-row refresh queue like everything else.
+  const cached = new Map();
+  const ids = found.map((summary) => summary.id);
+  if (ids.length) {
+    const rows = db
+      .prepare(`SELECT tmdb_id FROM movies WHERE tmdb_id IN (${ids.map(() => '?').join(', ')})`)
+      .all(...ids);
+    for (const row of rows) cached.set(row.tmdb_id, true);
   }
-  if (detailed.length === 0) return { added: 0, removed: 0, kept: 0, emptyResult: true };
 
-  const wanted = new Map(detailed.map((movie) => [movie.tmdb_id, movie]));
+  const toFetch = found.filter((summary) => !cached.has(summary.id));
+  const fetched = await Promise.all(
+    toFetch.map(async (summary) => {
+      try {
+        // Through getMovie, so the semaphore caps concurrency at 8.
+        return await getMovie(summary.id);
+      } catch (error) {
+        log(`[dynamic] ${list.name}: ${summary.id} failed — ${error.message}`);
+        return null;
+      }
+    }),
+  );
+
+  const wanted = new Map();
+  for (const movie of fetched) if (movie) wanted.set(movie.tmdb_id, movie);
+  // A cached row is always a complete toMovie() record — nothing writes a
+  // discover summary into `movies` — so reusing it loses no fields. Held as
+  // null to mean "already correct in the database, do not upsert".
+  for (const summary of found) if (cached.has(summary.id)) wanted.set(summary.id, null);
+
+  if (wanted.size === 0) return { added: 0, removed: 0, kept: 0, emptyResult: true };
+  if (toFetch.length) log(`[dynamic] ${list.name}: ${cached.size} cached, ${toFetch.length} fetched`);
 
   const existing = db
     .prepare('SELECT id, tmdb_id FROM list_movies WHERE list_id = ?')
@@ -102,10 +135,12 @@ export async function materialiseList(db, list, { log = () => {} } = {}) {
   );
   const drop = db.prepare('DELETE FROM list_movies WHERE id = ?');
 
-  for (const movie of wanted.values()) {
-    upsertMovie(db, movie);
-    if (existingIds.has(movie.tmdb_id)) continue;
-    insert.run(list.id, movie.tmdb_id, movie.title, movie.year ?? null);
+  for (const [tmdbId, movie] of wanted) {
+    // null means the row was already cached and complete — see above.
+    if (movie) upsertMovie(db, movie);
+    if (existingIds.has(tmdbId)) continue;
+    const row = movie ?? db.prepare('SELECT title, year FROM movies WHERE tmdb_id = ?').get(tmdbId);
+    insert.run(list.id, tmdbId, row?.title ?? String(tmdbId), row?.year ?? null);
     added += 1;
   }
 

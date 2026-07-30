@@ -174,3 +174,63 @@ test('a list with no query materialises to nothing rather than throwing', async 
   const list = db.prepare('SELECT * FROM lists WHERE id = 1').get();
   assert.deepEqual(await materialiseList(db, list), { skipped: true });
 });
+
+test('re-materialising does not re-download films already cached', async () => {
+  // The waste this guards: materialiseList called getMovie() for every film the
+  // discover query returned, with no database check — ~120 TMDB detail calls a
+  // day, ~44k a year, for rows the app already held and its own refresh policy
+  // considers good for 150 days. It also awaited them one at a time, bypassing
+  // the 8-way semaphore in tmdb.js.
+  const db = createTestDb();
+  const list = seedDynamicList(db);
+
+  let detailCalls = 0;
+  const countingStub = (ids) => {
+    stubTmdb(ids);
+    const stubbed = globalThis.fetch;
+    globalThis.fetch = async (input, init) => {
+      const href = input instanceof URL ? input.href : String(input?.url ?? input);
+      if (/\/3\/movie\/\d+$/.test(new URL(href).pathname)) detailCalls += 1;
+      return stubbed(input, init);
+    };
+  };
+
+  try {
+    countingStub([1, 2, 3]);
+    await materialiseList(db, list);
+    assert.equal(detailCalls, 3, 'first run has nothing cached, so it fetches all three');
+
+    detailCalls = 0;
+    await materialiseList(db, list);
+    assert.equal(detailCalls, 0, 'second run reuses every cached row');
+
+    // A film entering the list is still fetched — only the known ones are skipped.
+    detailCalls = 0;
+    countingStub([1, 2, 3, 4]);
+    const result = await materialiseList(db, list);
+    assert.equal(detailCalls, 1, 'only the newcomer is fetched');
+    assert.equal(result.added, 1);
+    assert.equal(result.total, 4);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('a film reused from cache still joins the list with its real title', async () => {
+  // The cached branch passes `null` instead of a movie object, so the insert
+  // has to read title/year back from `movies` rather than writing a placeholder.
+  const db = createTestDb();
+  const list = seedDynamicList(db);
+  try {
+    stubTmdb([7]);
+    await materialiseList(db, list);
+    db.prepare('DELETE FROM list_movies WHERE list_id = 1').run();
+
+    await materialiseList(db, list); // movie 7 is cached now, list row is not
+    const row = db.prepare('SELECT raw_title, raw_year FROM list_movies WHERE list_id = 1').get();
+    assert.equal(row.raw_title, 'Film 7', 'not the bare id');
+    assert.equal(row.raw_year, 2020);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});

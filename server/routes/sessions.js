@@ -137,16 +137,40 @@ router.get('/', (req, res) => {
     )
     .all(Number(req.query.limit) || 50, Number(req.query.offset) || 0);
 
+  // One query for every session's posters, not `sessionMovies` per row.
+  //
+  // That ran three queries per session — the id fetch, a `SELECT m.*` carrying
+  // two correlated group_concat subqueries for genres and list names, and the
+  // awards lookup — and then threw all of it away to keep four columns.
+  // Measured at 8.2ms against 0.07ms for this single join, and it grew linearly
+  // with history while the Pi is several times slower than the machine that was
+  // measured on.
+  //
+  // Deliberately NOT hydrateMovies: History shows a poster strip, so genres,
+  // list names and awards are work with no reader here.
+  const slugs = rows.map((row) => row.slug);
+  const byslug = new Map(slugs.map((slug) => [slug, []]));
+  if (slugs.length) {
+    const posters = db
+      .prepare(
+        `SELECT sm.slug, m.tmdb_id, m.title, m.year, m.poster_path
+         FROM session_movies sm
+         JOIN movies m ON m.tmdb_id = sm.tmdb_id
+         WHERE sm.slug IN (${slugs.map(() => '?').join(', ')})
+         ORDER BY sm.slug, sm.position`,
+      )
+      .all(...slugs);
+    for (const poster of posters) {
+      const { slug, ...movie } = poster;
+      byslug.get(slug)?.push(movie);
+    }
+  }
+
   res.json({
     sessions: rows.map((row) => ({
       ...row,
       anonymous: Boolean(row.anonymous),
-      movies: sessionMovies(db, row.slug).map((movie) => ({
-        tmdb_id: movie.tmdb_id,
-        title: movie.title,
-        year: movie.year,
-        poster_path: movie.poster_path,
-      })),
+      movies: byslug.get(row.slug) ?? [],
     })),
   });
 });
