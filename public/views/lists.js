@@ -63,7 +63,7 @@ export async function renderLists(container) {
   function importPanel() {
     if (state.lists.length === 0) return null;
 
-    let selectedId = state.lists.find((l) => l.kind === 'custom')?.id ?? state.lists[0].id;
+    let selectedId = state.lists.find((l) => l.origin === 'custom')?.id ?? state.lists[0].id;
     let text = '';
     let format = null;
 
@@ -524,7 +524,7 @@ export async function renderLists(container) {
           }),
           h('span', { class: 'list-name' }, list.name),
         ),
-        h('span', { class: 'badge badge-kind' }, list.kind),
+        h('span', { class: 'badge badge-origin' }, list.origin),
         h('span', { class: 'spacer' }),
         h('span', { class: 'badge' }, `${list.resolved_count} films`),
         list.review_count > 0
@@ -536,7 +536,7 @@ export async function renderLists(container) {
           {
             class: 'btn-sm btn-danger',
             onClick: async () => {
-              const force = list.kind === 'seed';
+              const force = list.origin === 'seed';
               if (!confirm(`Delete "${list.name}"? Its films stay cached but the list goes.`)) return;
               try {
                 await api.deleteList(list.id, force);

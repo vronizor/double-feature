@@ -33,7 +33,12 @@ const SCHEMA = `
 CREATE TABLE IF NOT EXISTS lists (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   name            TEXT    NOT NULL UNIQUE,
-  kind            TEXT    NOT NULL CHECK (kind IN ('seed', 'custom')),
+  -- Where the list came from, and nothing else. It was called "kind" until
+  -- v4, which was a word doing too much: the roadmap used it for a second,
+  -- unrelated axis (curated / self-updating / a filter over metadata) that
+  -- turned out to need no column at all. Self-updating is query_json IS NOT
+  -- NULL, subject matter is list_tags, and a metadata filter was never a list.
+  origin          TEXT    NOT NULL CHECK (origin IN ('seed', 'custom')),
   category        TEXT,
   is_active       INTEGER NOT NULL DEFAULT 0,
   source          TEXT,
@@ -282,7 +287,27 @@ function ensureColumn(target, table, column, definition) {
   }
 }
 
+/**
+ * Renames lists.kind to lists.origin.
+ *
+ * CREATE TABLE IF NOT EXISTS never alters a table that already exists, so a
+ * database that has booted even once keeps the old column name and every query
+ * against origin fails. Guarded both ways so it runs exactly once and does
+ * nothing on a fresh install, where SCHEMA already created the column.
+ *
+ * Renaming rather than adding a column: the values are unchanged and the CHECK
+ * constraint moves with it, which ALTER TABLE RENAME COLUMN handles.
+ */
+function renameKindToOrigin(target) {
+  const columns = target.prepare('PRAGMA table_info(lists)').all().map((row) => row.name);
+  if (columns.includes('kind') && !columns.includes('origin')) {
+    target.exec('ALTER TABLE lists RENAME COLUMN kind TO origin');
+  }
+}
+
 function migrate(target) {
+  // First, because everything below queries the table it renames.
+  renameKindToOrigin(target);
   ensureColumn(target, 'movies', 'vote_average', 'REAL');
   ensureColumn(target, 'movies', 'countries', 'TEXT');
   ensureColumn(target, 'movies', 'languages', 'TEXT');

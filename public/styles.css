@@ -117,11 +117,11 @@ label { display: block; }
    own ellipsis rule (below) can actually take effect. */
 /* A fixed basis (rather than flex-grow, which competed with .spacer for
    leftover space) keeps the name column the same width on every row, so the
-   kind badge right after it starts at the same X position instead of drifting
+   origin badge right after it starts at the same X position instead of drifting
    with each list's name length. Overridden for the Draw tab's stacked compact
    picker below, which wants the name on its own full-width line instead. */
 .list-row .check { flex: 0 1 320px; min-width: 0; }
-.badge-kind { display: inline-block; min-width: 56px; text-align: center; }
+.badge-origin { display: inline-block; min-width: 56px; text-align: center; }
 .list-name {
   font-weight: 560; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
 }

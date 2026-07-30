@@ -17,7 +17,7 @@ const GENRES = { drama: 18, horror: 27, scifi: 878, comedy: 35 };
 
 function seed() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Active', 'seed', 1),
     (2, 'Inactive', 'seed', 0)`);
   for (const [id, name] of Object.entries(GENRES)) {
@@ -74,7 +74,7 @@ test('explicit null bounds behave exactly like omitted ones', () => {
 
 test('a film on two lists is counted once', () => {
   const db = seed();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (3, 'Overlap', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (3, 'Overlap', 'seed', 1)`);
   db.prepare(
     `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)
      VALUES (3, 1, 'Old Drama', 1955, 'resolved')`,
@@ -304,7 +304,7 @@ test('exclude tolerates non-numeric junk instead of breaking the query', () => {
  */
 function seedRanked() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Ranked', 'seed', 1),
     (2, 'Unranked', 'seed', 0)`);
 
@@ -460,7 +460,7 @@ test('a selection nested under filters is ignored rather than quietly honoured',
 
 function seedWithAwards() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Canon', 'seed', 1),
     (2, 'Palme d’Or (Cannes)', 'seed', 1),
     (3, 'Stale Category Award', 'seed', 1)`);

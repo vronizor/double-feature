@@ -42,7 +42,7 @@ router.get('/', (req, res) => {
               (SELECT group_concat(tag, ',') FROM (
                  SELECT tag FROM list_tags WHERE list_id = l.id ORDER BY tag
                ))                                                    AS tag_csv
-       FROM lists l ORDER BY l.kind DESC, l.name`,
+       FROM lists l ORDER BY l.origin DESC, l.name`,
     )
     .all()
     // Tags arrive as a delimited string from group_concat; the client wants an
@@ -72,7 +72,7 @@ router.post('/', (req, res) => {
   }
 
   const { lastInsertRowid } = db
-    .prepare(`INSERT INTO lists (name, kind, is_active) VALUES (?, 'custom', 0)`)
+    .prepare(`INSERT INTO lists (name, origin, is_active) VALUES (?, 'custom', 0)`)
     .run(name);
 
   res.status(201).json(listWithCounts(db, Number(lastInsertRowid)));
@@ -114,7 +114,7 @@ router.delete('/:id', (req, res) => {
 
   // Seed lists are cheap to re-seed but expensive to re-resolve; make removing
   // one deliberate rather than a stray click.
-  if (list.kind === 'seed' && req.query.force !== 'true') {
+  if (list.origin === 'seed' && req.query.force !== 'true') {
     throw badRequest('Refusing to delete a seed list without ?force=true');
   }
 

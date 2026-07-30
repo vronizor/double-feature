@@ -984,7 +984,7 @@ table only says how far along a thing is.
 | `materialiseList`: write rank, and a transaction | ⏳ ready | **Bigger than logged** — rank is not written *at all*, not merely stale on reconcile (verified: 120 rows, 0 ranked). Decided: write it from discover order. See §6.4 |
 | Guest vote route 404s under a dotted path | ⏳ ready | **A one-line fix, found by running the app 2026-07-30.** `res.sendFile` with no `root` rejects any absolute path containing a dot-directory, so `/vote/:slug` 404s while `/` is fine. See §6.7 |
 | `seed.mjs` keyed on `tmdb_id` | ⏳ ready | The one v3 item not done. A tidy-up: `recordEntry` already guards duplicates, so the real exposure is unresolved rows, `backfill-list-fields.mjs`, and wasted TMDB calls. Additive key — see §5 notes |
-| Retire "kind": `lists.kind` → `origin` | ⏳ ready | **Decided 2026-07-30 — there is no missing third kind.** All three things §1 called "kind" already have a home: provenance is the column, mechanism is `query_json IS NOT NULL`, family is tags. The word goes, the column is renamed. See §6.6 |
+| Retire "kind": `lists.kind` → `origin` | ✅ landed | **Decided 2026-07-30 — there is no missing third kind.** All three things §1 called "kind" already have a home: provenance is the column, mechanism is `query_json IS NOT NULL`, family is tags. The word goes, the column is renamed. See §6.6 |
 | Two chip rows, same labels | 🗣 revisit after use | A chip "Awards" that *selects* lists sits beside one that *narrows the picker*. Parked until real use says whether it confuses anyone |
 | `includeWatched` default | 🗣 revisit at F3 | README says exclude, the UI ships include. Inert until something is actually marked watched |
 | LICENSE, and seed-list provenance | 🗣 discussing | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag. Both consciously accepted for now — see `BACKLOG.md` |
@@ -1303,18 +1303,35 @@ which is what §6.4 is about. Defining "kind" would have created a fourth
 overlapping vocabulary next to `category` — the column §5.2 records as dead
 precisely because it duplicated tags.
 
-**The work:** rename the column `kind` → `origin`, so the surviving concept says
-what it is. Verified against the code before deciding — four readers, and one of
-them is user-visible:
+**The work — ✅ landed 2026-07-30.** The column is renamed `kind` → `origin`, so
+the surviving concept says what it is. Seven call sites, one of them
+user-visible:
 
 ```
-server/routes/lists.js:45    ORDER BY l.kind DESC, l.name
-server/routes/lists.js:75    INSERT INTO lists (name, kind, is_active) VALUES (?, 'custom', 0)
-server/routes/lists.js:117   list.kind === 'seed'  -> deletion needs ?force=true
+server/routes/lists.js:45    ORDER BY l.origin DESC, l.name
+server/routes/lists.js:75    INSERT INTO lists (name, origin, is_active) VALUES (?, 'custom', 0)
+server/routes/lists.js:117   list.origin === 'seed'  -> deletion needs ?force=true
 public/views/lists.js:66     first 'custom' list is the default selection
-public/views/lists.js:527    renders the raw value in a badge-kind chip
+public/views/lists.js:527    renders the raw value in a badge-origin chip
 public/views/lists.js:539    force-delete gate, mirrors routes/lists.js:117
+scripts/seed.mjs:46          INSERT INTO lists (name, origin, category, ...)
 ```
+
+> **The seventh site nearly got missed, and the reason is worth keeping.**
+> This section originally said *six*. `grep -rn kind scripts/` returned
+> **nothing** for `scripts/seed.mjs` — not because the string was absent but
+> because the file draws a progress bar with box-drawing and symbol characters,
+> so grep classifies it as binary and reports matches only as
+> *"binary file matches"*, or in a pipeline, silently drops them. **Use
+> `grep -a` when sweeping this repo**, or the seeder is invisible. A missed
+> rename there would not have failed a single test — no test exercises
+> `seed.mjs` — and would have surfaced as a broken `npm run seed` much later.
+>
+> Migration: `ALTER TABLE lists RENAME COLUMN kind TO origin`, guarded both
+> ways. `CREATE TABLE IF NOT EXISTS` never alters an existing table, so without
+> it every database that had booted once would keep `kind` and every query
+> against `origin` would fail. Verified on a copy of the real database: the
+> column renames, all 17 rows keep `seed`, and `/api/lists` returns `origin`.
 
 > **Traps for whoever does it.** The badge at `views/lists.js:527` prints the
 > *value*, so `seed`/`custom` stay on screen unchanged and the rename is

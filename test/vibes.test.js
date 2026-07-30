@@ -13,7 +13,7 @@ import {
 
 function seed() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Criterion', 'seed', 1),
     (2, 'TSPDT', 'seed', 1),
     (3, 'Ghibli', 'seed', 1),
@@ -55,7 +55,7 @@ test('a tag-driven vibe picks up a newly tagged list without being edited', () =
   const vibe = createVibe(db, { name: 'Awards', tags: ['awards'] });
   assert.deepEqual(vibe.resolved_lists, [4]);
 
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (6, 'BAFTA', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (6, 'BAFTA', 'seed', 1)`);
   db.prepare('INSERT INTO list_tags (list_id, tag) VALUES (6, ?)').run('awards');
   assert.deepEqual(resolveVibe(db, vibe.id), [4, 6]);
 });
@@ -63,7 +63,7 @@ test('a tag-driven vibe picks up a newly tagged list without being edited', () =
 test('a pinned list does NOT drift when the library grows', () => {
   const db = seed();
   const vibe = createVibe(db, { name: 'Kids', lists: [3] });
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (7, 'Disney', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (7, 'Disney', 'seed', 1)`);
   db.prepare('INSERT INTO list_tags (list_id, tag) VALUES (7, ?)').run('family');
   assert.deepEqual(resolveVibe(db, vibe.id), [3], 'still exactly what was pinned');
 });

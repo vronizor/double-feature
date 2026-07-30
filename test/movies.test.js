@@ -6,7 +6,7 @@ import { hydrateMovies, createManualMovie, recordEntry } from '../server/movies.
 
 function seed() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Criterion', 'seed', 1),
     (2, 'Sight and Sound', 'seed', 1)`);
   db.prepare(
@@ -49,7 +49,7 @@ test('list ordering is case-insensitive, not SQLite\'s default byte-wise order',
   // Collection" (uppercase 'S' < lowercase 'h'), which isn't alphabetical in
   // any human sense — COLLATE NOCASE fixes that.
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'TSPDT 1,000 Greatest Films', 'seed', 1),
     (2, 'The Criterion Collection', 'seed', 1)`);
   db.prepare(`INSERT INTO movies (tmdb_id, title, year) VALUES (1, 'A Film', 1960)`).run();
@@ -129,7 +129,7 @@ test('recordEntry persists rank and award_year from the seed entry', () => {
   // rank = NULL everywhere, which silently removed the Top-N control (it only
   // renders for lists whose ranked_count > 0).
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (1, 'L', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'L', 'seed', 1)`);
 
   recordEntry(db, {
     listId: 1,
@@ -161,7 +161,7 @@ test('recordEntry persists rank and award_year from the seed entry', () => {
 test('an unranked entry stores NULL rather than coercing to 0', () => {
   // rank = 0 would pass a "top N" cut for every N and quietly widen the pool.
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (1, 'L', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'L', 'seed', 1)`);
   recordEntry(db, {
     listId: 1,
     rawTitle: 'Unranked',
