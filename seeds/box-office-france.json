@@ -1,0 +1,8354 @@
+{
+  "name": "Box-office France",
+  "tags": [
+    "box-office"
+  ],
+  "category": "box-office",
+  "source": "fr.wikipedia \"Box-office France <year>\", 1945-2026, resolved to TMDB ids via Wikidata",
+  "source_url": "https://fr.wikipedia.org/wiki/Liste_des_plus_gros_succ%C3%A8s_du_box-office_en_France",
+  "note": "Admissions, not revenue, so ticket-price inflation never enters. Francophone films only, decided by TMDB original_language rather than the page's country column — a country rule admitted Hollywood blockbusters carrying Canadian co-production credits. Ranked by admissions.",
+  "fetched_at": "2026-07-30",
+  "count": 1390,
+  "entries": [
+    {
+      "title": "Bienvenue chez les Ch'tis",
+      "year": 2008,
+      "tmdb_id": 8265,
+      "rank": 1
+    },
+    {
+      "title": "The Intouchables",
+      "year": 2011,
+      "tmdb_id": 77338,
+      "rank": 2
+    },
+    {
+      "title": "La Grande Vadrouille",
+      "year": 1966,
+      "tmdb_id": 8290,
+      "rank": 3
+    },
+    {
+      "title": "Asterix & Obelix: Mission Cleopatra",
+      "year": 2002,
+      "tmdb_id": 2899,
+      "rank": 4
+    },
+    {
+      "title": "Les Visiteurs",
+      "year": 1993,
+      "tmdb_id": 11687,
+      "rank": 5
+    },
+    {
+      "title": "Qu'est-ce qu'on a fait au Bon Dieu?",
+      "year": 2014,
+      "tmdb_id": 262391,
+      "rank": 6
+    },
+    {
+      "title": "The Sucker",
+      "year": 1965,
+      "tmdb_id": 25866,
+      "rank": 7
+    },
+    {
+      "title": "Un p'tit truc en plus",
+      "year": 2024,
+      "tmdb_id": 1152014,
+      "rank": 8
+    },
+    {
+      "title": "Friends Forever",
+      "year": 2006,
+      "tmdb_id": 21435,
+      "rank": 9
+    },
+    {
+      "title": "Taxi 2",
+      "year": 2000,
+      "tmdb_id": 2332,
+      "rank": 10
+    },
+    {
+      "title": "Three Men and a Cradle",
+      "year": 1985,
+      "tmdb_id": 4180,
+      "rank": 11
+    },
+    {
+      "title": "Les Misérables",
+      "year": 1958,
+      "tmdb_id": 4412,
+      "rank": 12
+    },
+    {
+      "title": "War of the Buttons",
+      "year": 1962,
+      "tmdb_id": 10421,
+      "rank": 13
+    },
+    {
+      "title": "The Count of Monte Cristo",
+      "year": 2024,
+      "tmdb_id": 1084736,
+      "rank": 14
+    },
+    {
+      "title": "Le Dîner de Cons",
+      "year": 1998,
+      "tmdb_id": 9421,
+      "rank": 15
+    },
+    {
+      "title": "The Big Blue",
+      "year": 1988,
+      "tmdb_id": 175,
+      "rank": 16
+    },
+    {
+      "title": "The Bear",
+      "year": 1988,
+      "tmdb_id": 2383,
+      "rank": 17
+    },
+    {
+      "title": "Asterix & Obelix Take On Caesar",
+      "year": 1999,
+      "tmdb_id": 9564,
+      "rank": 18
+    },
+    {
+      "title": "Emmanuelle",
+      "year": 1974,
+      "tmdb_id": 24402,
+      "rank": 19
+    },
+    {
+      "title": "La Vache et le Prisonnier",
+      "year": 1959,
+      "tmdb_id": 58736,
+      "rank": 20
+    },
+    {
+      "title": "Le Bataillon du ciel",
+      "year": 1947,
+      "tmdb_id": 243499,
+      "rank": 21
+    },
+    {
+      "title": "Amélie",
+      "year": 2001,
+      "tmdb_id": 194,
+      "rank": 22
+    },
+    {
+      "title": "The Chorus",
+      "year": 2004,
+      "tmdb_id": 5528,
+      "rank": 23
+    },
+    {
+      "title": "Nothing to Declare",
+      "year": 2010,
+      "tmdb_id": 52077,
+      "rank": 24
+    },
+    {
+      "title": "The Visitors II: The Corridors of Time",
+      "year": 1998,
+      "tmdb_id": 10353,
+      "rank": 25
+    },
+    {
+      "title": "Little Indian, Big City",
+      "year": 1994,
+      "tmdb_id": 11479,
+      "rank": 26
+    },
+    {
+      "title": "La Vérité si je mens ! 2",
+      "year": 2001,
+      "tmdb_id": 31359,
+      "rank": 27
+    },
+    {
+      "title": "The Gendarme of Saint-Tropez",
+      "year": 1964,
+      "tmdb_id": 4727,
+      "rank": 28
+    },
+    {
+      "title": "The Count of Monte Cristo",
+      "year": 1954,
+      "tmdb_id": 82046,
+      "rank": 29
+    },
+    {
+      "title": "The Fifth Element",
+      "year": 1997,
+      "tmdb_id": 18,
+      "rank": 30
+    },
+    {
+      "title": "Les Bidasses en folie",
+      "year": 1971,
+      "tmdb_id": 72259,
+      "rank": 31
+    },
+    {
+      "title": "The Return of Don Camillo",
+      "year": 1953,
+      "tmdb_id": 11578,
+      "rank": 32
+    },
+    {
+      "title": "The Mad Adventures of Rabbi Jacob",
+      "year": 1973,
+      "tmdb_id": 760,
+      "rank": 33
+    },
+    {
+      "title": "Jean de Florette",
+      "year": 1986,
+      "tmdb_id": 4480,
+      "rank": 34
+    },
+    {
+      "title": "La Chèvre",
+      "year": 1981,
+      "tmdb_id": 19123,
+      "rank": 35
+    },
+    {
+      "title": "Monsieur Vincent",
+      "year": 1947,
+      "tmdb_id": 43460,
+      "rank": 36
+    },
+    {
+      "title": "Les grandes vacances",
+      "year": 1967,
+      "tmdb_id": 11696,
+      "rank": 37
+    },
+    {
+      "title": "Royal Affairs in Versailles",
+      "year": 1954,
+      "tmdb_id": 67540,
+      "rank": 38
+    },
+    {
+      "title": "The Wages of Fear",
+      "year": 1953,
+      "tmdb_id": 204,
+      "rank": 39
+    },
+    {
+      "title": "The Three Brothers",
+      "year": 1995,
+      "tmdb_id": 37653,
+      "rank": 40
+    },
+    {
+      "title": "Michel Strogoff",
+      "year": 1956,
+      "tmdb_id": 77418,
+      "rank": 41
+    },
+    {
+      "title": "Le gendarme se marie",
+      "year": 1968,
+      "tmdb_id": 4729,
+      "rank": 42
+    },
+    {
+      "title": "Asterix at the Olympic Games",
+      "year": 2008,
+      "tmdb_id": 2395,
+      "rank": 43
+    },
+    {
+      "title": "Jour de Fête",
+      "year": 1949,
+      "tmdb_id": 4595,
+      "rank": 44
+    },
+    {
+      "title": "Special Mission",
+      "year": 1946,
+      "tmdb_id": 471276,
+      "rank": 45
+    },
+    {
+      "title": "Fanfan la Tulipe",
+      "year": 1952,
+      "tmdb_id": 62547,
+      "rank": 46
+    },
+    {
+      "title": "Serial (Bad) Weddings 2",
+      "year": 2019,
+      "tmdb_id": 505436,
+      "rank": 47
+    },
+    {
+      "title": "We Will All Go to Paris",
+      "year": 1950,
+      "tmdb_id": 193224,
+      "rank": 48
+    },
+    {
+      "title": "Manon des Sources",
+      "year": 1986,
+      "tmdb_id": 4481,
+      "rank": 49
+    },
+    {
+      "title": "Taxi",
+      "year": 1998,
+      "tmdb_id": 2330,
+      "rank": 50
+    },
+    {
+      "title": "Arthur and the Minimoys",
+      "year": 2006,
+      "tmdb_id": 9992,
+      "rank": 51
+    },
+    {
+      "title": "My Wife’s Husband",
+      "year": 1963,
+      "tmdb_id": 70449,
+      "rank": 52
+    },
+    {
+      "title": "My Father's Glory",
+      "year": 1990,
+      "tmdb_id": 12716,
+      "rank": 53
+    },
+    {
+      "title": "The Gendarme and the Extra-Terrestrials",
+      "year": 1979,
+      "tmdb_id": 10516,
+      "rank": 54
+    },
+    {
+      "title": "Marche à l'ombre",
+      "year": 1984,
+      "tmdb_id": 55976,
+      "rank": 55
+    },
+    {
+      "title": "Germinal",
+      "year": 1993,
+      "tmdb_id": 51980,
+      "rank": 56
+    },
+    {
+      "title": "Taxi 3",
+      "year": 2003,
+      "tmdb_id": 2334,
+      "rank": 57
+    },
+    {
+      "title": "The Charterhouse of Parma",
+      "year": 1948,
+      "tmdb_id": 65657,
+      "rank": 58
+    },
+    {
+      "title": "Marsupilami",
+      "year": 2026,
+      "tmdb_id": 1145899,
+      "rank": 59
+    },
+    {
+      "title": "Oscar",
+      "year": 1967,
+      "tmdb_id": 2798,
+      "rank": 60
+    },
+    {
+      "title": "To Die of Love",
+      "year": 1971,
+      "tmdb_id": 78372,
+      "rank": 61
+    },
+    {
+      "title": "My New Partner",
+      "year": 1984,
+      "tmdb_id": 10260,
+      "rank": 62
+    },
+    {
+      "title": "The Wing or the Thigh",
+      "year": 1976,
+      "tmdb_id": 761,
+      "rank": 63
+    },
+    {
+      "title": "Le Bossu",
+      "year": 1959,
+      "tmdb_id": 54880,
+      "rank": 64
+    },
+    {
+      "title": "Les Anges gardiens",
+      "year": 1995,
+      "tmdb_id": 51191,
+      "rank": 65
+    },
+    {
+      "title": "Stadium Nuts",
+      "year": 1972,
+      "tmdb_id": 62660,
+      "rank": 66
+    },
+    {
+      "title": "Andalusia",
+      "year": 1951,
+      "tmdb_id": 113487,
+      "rank": 67
+    },
+    {
+      "title": "The Battle of the Rails",
+      "year": 1946,
+      "tmdb_id": 39142,
+      "rank": 68
+    },
+    {
+      "title": "Going Places",
+      "year": 1974,
+      "tmdb_id": 4031,
+      "rank": 69
+    },
+    {
+      "title": "Let's Get Those English Girls",
+      "year": 1976,
+      "tmdb_id": 52216,
+      "rank": 70
+    },
+    {
+      "title": "The Hunchback of Notre Dame",
+      "year": 1956,
+      "tmdb_id": 11594,
+      "rank": 71
+    },
+    {
+      "title": "Les Tuche 3",
+      "year": 2018,
+      "tmdb_id": 424619,
+      "rank": 72
+    },
+    {
+      "title": "Delusions of Grandeur",
+      "year": 1971,
+      "tmdb_id": 14257,
+      "rank": 73
+    },
+    {
+      "title": "The Brain",
+      "year": 1969,
+      "tmdb_id": 33436,
+      "rank": 74
+    },
+    {
+      "title": "The Little Bather",
+      "year": 1968,
+      "tmdb_id": 46655,
+      "rank": 75
+    },
+    {
+      "title": "Le Petit Nicolas",
+      "year": 2009,
+      "tmdb_id": 31203,
+      "rank": 76
+    },
+    {
+      "title": "Gendarme in New York",
+      "year": 1965,
+      "tmdb_id": 4728,
+      "rank": 77
+    },
+    {
+      "title": "Little White Lies",
+      "year": 2010,
+      "tmdb_id": 48034,
+      "rank": 78
+    },
+    {
+      "title": "Ace of Aces",
+      "year": 1982,
+      "tmdb_id": 71524,
+      "rank": 79
+    },
+    {
+      "title": "La Cage aux Folles",
+      "year": 1978,
+      "tmdb_id": 4484,
+      "rank": 80
+    },
+    {
+      "title": "Papa, maman, la bonne et moi",
+      "year": 1954,
+      "tmdb_id": 81049,
+      "rank": 81
+    },
+    {
+      "title": "The Three Musketeers",
+      "year": 1953,
+      "tmdb_id": 67446,
+      "rank": 82
+    },
+    {
+      "title": "Les Spécialistes",
+      "year": 1985,
+      "tmdb_id": 12111,
+      "rank": 83
+    },
+    {
+      "title": "The Closet",
+      "year": 2001,
+      "tmdb_id": 11444,
+      "rank": 84
+    },
+    {
+      "title": "Sur la piste du Marsupilami",
+      "year": 2012,
+      "tmdb_id": 102207,
+      "rank": 85
+    },
+    {
+      "title": "The Grand Maneuver",
+      "year": 1955,
+      "tmdb_id": 66436,
+      "rank": 86
+    },
+    {
+      "title": "The Green Mare",
+      "year": 1959,
+      "tmdb_id": 80571,
+      "rank": 87
+    },
+    {
+      "title": "Supercondriaque",
+      "year": 2014,
+      "tmdb_id": 248507,
+      "rank": 88
+    },
+    {
+      "title": "The Professional",
+      "year": 1981,
+      "tmdb_id": 1672,
+      "rank": 89
+    },
+    {
+      "title": "La Vie en Rose",
+      "year": 2007,
+      "tmdb_id": 1407,
+      "rank": 90
+    },
+    {
+      "title": "Brotherhood of the Wolf",
+      "year": 2001,
+      "tmdb_id": 6312,
+      "rank": 91
+    },
+    {
+      "title": "One Deadly Summer",
+      "year": 1983,
+      "tmdb_id": 9041,
+      "rank": 92
+    },
+    {
+      "title": "The Captain",
+      "year": 1945,
+      "tmdb_id": 505333,
+      "rank": 93
+    },
+    {
+      "title": "A Cage of Nightingales",
+      "year": 1945,
+      "tmdb_id": 143065,
+      "rank": 94
+    },
+    {
+      "title": "Les Vacances de Monsieur Hulot",
+      "year": 1953,
+      "tmdb_id": 778,
+      "rank": 95
+    },
+    {
+      "title": "Clochemerle (film)",
+      "year": 1948,
+      "tmdb_id": 397068,
+      "rank": 96
+    },
+    {
+      "title": "Le Marginal",
+      "year": 1983,
+      "tmdb_id": 12504,
+      "rank": 97
+    },
+    {
+      "title": "Young Sinners",
+      "year": 1958,
+      "tmdb_id": 63681,
+      "rank": 98
+    },
+    {
+      "title": "Quest for Fire",
+      "year": 1981,
+      "tmdb_id": 62204,
+      "rank": 99
+    },
+    {
+      "title": "Is Paris Burning?",
+      "year": 1966,
+      "tmdb_id": 4708,
+      "rank": 100
+    },
+    {
+      "title": "Beating Hearts",
+      "year": 2024,
+      "tmdb_id": 959604,
+      "rank": 101
+    },
+    {
+      "title": "Happiness Is in the Field",
+      "year": 1995,
+      "tmdb_id": 43612,
+      "rank": 102
+    },
+    {
+      "title": "Taxi for Tobruk",
+      "year": 1960,
+      "tmdb_id": 33336,
+      "rank": 103
+    },
+    {
+      "title": "La Vérité si je mens !",
+      "year": 1997,
+      "tmdb_id": 39385,
+      "rank": 104
+    },
+    {
+      "title": "Forbidden Games",
+      "year": 1952,
+      "tmdb_id": 5000,
+      "rank": 105
+    },
+    {
+      "title": "Le Gendarme en balade",
+      "year": 1970,
+      "tmdb_id": 11913,
+      "rank": 106
+    },
+    {
+      "title": "Le Triporteur",
+      "year": 1957,
+      "tmdb_id": 169958,
+      "rank": 107
+    },
+    {
+      "title": "Les Compères",
+      "year": 1983,
+      "tmdb_id": 10484,
+      "rank": 108
+    },
+    {
+      "title": "Le clan des siciliens",
+      "year": 1969,
+      "tmdb_id": 4235,
+      "rank": 109
+    },
+    {
+      "title": "That Man from Rio",
+      "year": 1964,
+      "tmdb_id": 4034,
+      "rank": 110
+    },
+    {
+      "title": "Le Chanteur de Mexico",
+      "year": 1957,
+      "tmdb_id": 66898,
+      "rank": 111
+    },
+    {
+      "title": "Atlantic Wall",
+      "year": 1970,
+      "tmdb_id": 61231,
+      "rank": 112
+    },
+    {
+      "title": "Rider on the Rain",
+      "year": 1970,
+      "tmdb_id": 27889,
+      "rank": 113
+    },
+    {
+      "title": "Devil in the Flesh",
+      "year": 1947,
+      "tmdb_id": 63764,
+      "rank": 114
+    },
+    {
+      "title": "Cyrano de Bergerac",
+      "year": 1990,
+      "tmdb_id": 11673,
+      "rank": 115
+    },
+    {
+      "title": "Grisbi",
+      "year": 1954,
+      "tmdb_id": 27430,
+      "rank": 116
+    },
+    {
+      "title": "Borsalino",
+      "year": 1970,
+      "tmdb_id": 25251,
+      "rank": 117
+    },
+    {
+      "title": "Destins",
+      "year": 1946,
+      "tmdb_id": 430283,
+      "rank": 118
+    },
+    {
+      "title": "Tomorrow Is My Turn",
+      "year": 1960,
+      "tmdb_id": 154578,
+      "rank": 119
+    },
+    {
+      "title": "Babette Goes to War",
+      "year": 1959,
+      "tmdb_id": 56499,
+      "rank": 120
+    },
+    {
+      "title": "The Silent World",
+      "year": 1956,
+      "tmdb_id": 60234,
+      "rank": 121
+    },
+    {
+      "title": "Les Tuche 2",
+      "year": 2016,
+      "tmdb_id": 369776,
+      "rank": 122
+    },
+    {
+      "title": "La Vérité si je mens ! 3",
+      "year": 2011,
+      "tmdb_id": 86868,
+      "rank": 123
+    },
+    {
+      "title": "Deux heures moins le quart avant Jésus-Christ",
+      "year": 1982,
+      "tmdb_id": 49398,
+      "rank": 124
+    },
+    {
+      "title": "Asterix & Obelix: The Middle Kingdom",
+      "year": 2023,
+      "tmdb_id": 643215,
+      "rank": 125
+    },
+    {
+      "title": "Mon Oncle",
+      "year": 1958,
+      "tmdb_id": 427,
+      "rank": 126
+    },
+    {
+      "title": "Raid dingue",
+      "year": 2017,
+      "tmdb_id": 382597,
+      "rank": 127
+    },
+    {
+      "title": "Taxi 4",
+      "year": 2007,
+      "tmdb_id": 2335,
+      "rank": 128
+    },
+    {
+      "title": "The Fugitives",
+      "year": 1986,
+      "tmdb_id": 30163,
+      "rank": 129
+    },
+    {
+      "title": "The Count of Monte Cristo",
+      "year": 1961,
+      "tmdb_id": 4528,
+      "rank": 130
+    },
+    {
+      "title": "A Very Long Engagement",
+      "year": 2004,
+      "tmdb_id": 2841,
+      "rank": 131
+    },
+    {
+      "title": "The New Adventures of Aladdin",
+      "year": 2015,
+      "tmdb_id": 344268,
+      "rank": 132
+    },
+    {
+      "title": "Brice de Nice",
+      "year": 2005,
+      "tmdb_id": 17350,
+      "rank": 133
+    },
+    {
+      "title": "Les Aventures de Casanova",
+      "year": 1947,
+      "tmdb_id": 514347,
+      "rank": 134
+    },
+    {
+      "title": "The Burglars",
+      "year": 1971,
+      "tmdb_id": 34184,
+      "rank": 135
+    },
+    {
+      "title": "La Boum",
+      "year": 1980,
+      "tmdb_id": 166,
+      "rank": 136
+    },
+    {
+      "title": "Le Cercle rouge",
+      "year": 1970,
+      "tmdb_id": 11657,
+      "rank": 137
+    },
+    {
+      "title": "Justice Is Done",
+      "year": 1950,
+      "tmdb_id": 67731,
+      "rank": 138
+    },
+    {
+      "title": "Les femmes s'en balancent",
+      "year": 1954,
+      "tmdb_id": 66964,
+      "rank": 139
+    },
+    {
+      "title": "Tanguy",
+      "year": 2001,
+      "tmdb_id": 2029,
+      "rank": 140
+    },
+    {
+      "title": "Sink or Swim",
+      "year": 2018,
+      "tmdb_id": 484482,
+      "rank": 141
+    },
+    {
+      "title": "Manon des sources",
+      "year": 1952,
+      "tmdb_id": 65703,
+      "rank": 142
+    },
+    {
+      "title": "Alibi.com 2",
+      "year": 2023,
+      "tmdb_id": 967585,
+      "rank": 143
+    },
+    {
+      "title": "Carmen",
+      "year": 1945,
+      "tmdb_id": 67549,
+      "rank": 144
+    },
+    {
+      "title": "My Mother's Castle",
+      "year": 1990,
+      "tmdb_id": 12717,
+      "rank": 145
+    },
+    {
+      "title": "A Man and a Woman",
+      "year": 1966,
+      "tmdb_id": 42726,
+      "rank": 146
+    },
+    {
+      "title": "Fantômas se déchaîne",
+      "year": 1965,
+      "tmdb_id": 1870,
+      "rank": 147
+    },
+    {
+      "title": "The Gendarme and the Gendarmettes",
+      "year": 1982,
+      "tmdb_id": 11915,
+      "rank": 148
+    },
+    {
+      "title": "Yours Truly, Blake",
+      "year": 1954,
+      "tmdb_id": 294239,
+      "rank": 149
+    },
+    {
+      "title": "Beauty and the Beast",
+      "year": 1946,
+      "tmdb_id": 648,
+      "rank": 150
+    },
+    {
+      "title": "La Balance",
+      "year": 1982,
+      "tmdb_id": 86404,
+      "rank": 151
+    },
+    {
+      "title": "Man About Town",
+      "year": 1947,
+      "tmdb_id": 146828,
+      "rank": 152
+    },
+    {
+      "title": "Crazy Boys in Spain",
+      "year": 1972,
+      "tmdb_id": 79391,
+      "rank": 153
+    },
+    {
+      "title": "Pédale douce",
+      "year": 1996,
+      "tmdb_id": 31789,
+      "rank": 154
+    },
+    {
+      "title": "Sadsacks Go to War",
+      "year": 1974,
+      "tmdb_id": 62662,
+      "rank": 155
+    },
+    {
+      "title": "The American Beauty",
+      "year": 1961,
+      "tmdb_id": 59969,
+      "rank": 156
+    },
+    {
+      "title": "Gervaise",
+      "year": 1956,
+      "tmdb_id": 52726,
+      "rank": 157
+    },
+    {
+      "title": "Papy fait de la résistance",
+      "year": 1983,
+      "tmdb_id": 48769,
+      "rank": 158
+    },
+    {
+      "title": "The Bet",
+      "year": 1997,
+      "tmdb_id": 44706,
+      "rank": 159
+    },
+    {
+      "title": "God's Thunder",
+      "year": 1965,
+      "tmdb_id": 76744,
+      "rank": 160
+    },
+    {
+      "title": "The 400 Blows",
+      "year": 1959,
+      "tmdb_id": 147,
+      "rank": 161
+    },
+    {
+      "title": "Life Is a Long Quiet River",
+      "year": 1988,
+      "tmdb_id": 4271,
+      "rank": 162
+    },
+    {
+      "title": "Barry",
+      "year": 1949,
+      "tmdb_id": 147356,
+      "rank": 163
+    },
+    {
+      "title": "Tout le monde il est beau, tout le monde il est gentil",
+      "year": 1972,
+      "tmdb_id": 27020,
+      "rank": 164
+    },
+    {
+      "title": "Archimède le clochard",
+      "year": 1959,
+      "tmdb_id": 33017,
+      "rank": 165
+    },
+    {
+      "title": "La Boum 2",
+      "year": 1982,
+      "tmdb_id": 171,
+      "rank": 166
+    },
+    {
+      "title": "The King of Camelots",
+      "year": 1951,
+      "tmdb_id": 514621,
+      "rank": 167
+    },
+    {
+      "title": "Fernandel the Dressmaker",
+      "year": 1956,
+      "tmdb_id": 79442,
+      "rank": 168
+    },
+    {
+      "title": "French Twist",
+      "year": 1995,
+      "tmdb_id": 4482,
+      "rank": 169
+    },
+    {
+      "title": "The Under-Gifted",
+      "year": 1980,
+      "tmdb_id": 60175,
+      "rank": 170
+    },
+    {
+      "title": "Camping 2",
+      "year": 2010,
+      "tmdb_id": 38277,
+      "rank": 171
+    },
+    {
+      "title": "French Cancan",
+      "year": 1955,
+      "tmdb_id": 45213,
+      "rank": 172
+    },
+    {
+      "title": "Serial Teachers",
+      "year": 2013,
+      "tmdb_id": 182219,
+      "rank": 173
+    },
+    {
+      "title": "Z",
+      "year": 1969,
+      "tmdb_id": 2721,
+      "rank": 174
+    },
+    {
+      "title": "Cop or Hood",
+      "year": 1979,
+      "tmdb_id": 40420,
+      "rank": 175
+    },
+    {
+      "title": "Fear Over the City",
+      "year": 1975,
+      "tmdb_id": 40180,
+      "rank": 176
+    },
+    {
+      "title": "Now Where Did the 7th Company Get to?",
+      "year": 1973,
+      "tmdb_id": 93289,
+      "rank": 177
+    },
+    {
+      "title": "Torrents",
+      "year": 1947,
+      "tmdb_id": 514353,
+      "rank": 178
+    },
+    {
+      "title": "Jéricho",
+      "year": 1946,
+      "tmdb_id": 202618,
+      "rank": 179
+    },
+    {
+      "title": "Asterix: The Secret of the Magic Potion",
+      "year": 2018,
+      "tmdb_id": 527729,
+      "rank": 180
+    },
+    {
+      "title": "The Big Store",
+      "year": 1973,
+      "tmdb_id": 61852,
+      "rank": 181
+    },
+    {
+      "title": "Arthur and the Revenge of Maltazard",
+      "year": 2009,
+      "tmdb_id": 26505,
+      "rank": 182
+    },
+    {
+      "title": "The Big Restaurant",
+      "year": 1966,
+      "tmdb_id": 19548,
+      "rank": 183
+    },
+    {
+      "title": "Chouchou",
+      "year": 2003,
+      "tmdb_id": 17684,
+      "rank": 184
+    },
+    {
+      "title": "The Taste of Others",
+      "year": 2000,
+      "tmdb_id": 10697,
+      "rank": 185
+    },
+    {
+      "title": "Poison Ivy",
+      "year": 1953,
+      "tmdb_id": 144146,
+      "rank": 186
+    },
+    {
+      "title": "Les évadés",
+      "year": 1955,
+      "tmdb_id": 202695,
+      "rank": 187
+    },
+    {
+      "title": "Mam'zelle Nitouche",
+      "year": 1954,
+      "tmdb_id": 95162,
+      "rank": 188
+    },
+    {
+      "title": "So Long",
+      "year": 1983,
+      "tmdb_id": 58833,
+      "rank": 189
+    },
+    {
+      "title": "Les Misérables",
+      "year": 1982,
+      "tmdb_id": 4416,
+      "rank": 190
+    },
+    {
+      "title": "Asterix and Obelix: God Save Britannia",
+      "year": 2012,
+      "tmdb_id": 99770,
+      "rank": 191
+    },
+    {
+      "title": "L'aventure, c'est l'aventure",
+      "year": 1972,
+      "tmdb_id": 34280,
+      "rank": 192
+    },
+    {
+      "title": "Chacun son tour",
+      "year": 1951,
+      "tmdb_id": 514630,
+      "rank": 193
+    },
+    {
+      "title": "Heartbreaker",
+      "year": 2010,
+      "tmdb_id": 41211,
+      "rank": 194
+    },
+    {
+      "title": "Nikita",
+      "year": 1990,
+      "tmdb_id": 9322,
+      "rank": 195
+    },
+    {
+      "title": "Le Miracle des loups",
+      "year": 1961,
+      "tmdb_id": 95363,
+      "rank": 196
+    },
+    {
+      "title": "Banzaï",
+      "year": 1983,
+      "tmdb_id": 52557,
+      "rank": 197
+    },
+    {
+      "title": "Honoré de Marseille",
+      "year": 1956,
+      "tmdb_id": 74766,
+      "rank": 198
+    },
+    {
+      "title": "La Fayette",
+      "year": 1961,
+      "tmdb_id": 65912,
+      "rank": 199
+    },
+    {
+      "title": "The Seventh Company Has Been Found",
+      "year": 1975,
+      "tmdb_id": 401306,
+      "rank": 200
+    },
+    {
+      "title": "I Do",
+      "year": 2006,
+      "tmdb_id": 19955,
+      "rank": 201
+    },
+    {
+      "title": "The Valorgue Baker",
+      "year": 1952,
+      "tmdb_id": 67757,
+      "rank": 202
+    },
+    {
+      "title": "8 Women",
+      "year": 2002,
+      "tmdb_id": 1958,
+      "rank": 203
+    },
+    {
+      "title": "Lucky Pierre",
+      "year": 1974,
+      "tmdb_id": 51212,
+      "rank": 204
+    },
+    {
+      "title": "Inspector Blunder",
+      "year": 1980,
+      "tmdb_id": 24260,
+      "rank": 205
+    },
+    {
+      "title": "Le Roi des resquilleurs",
+      "year": 1945,
+      "tmdb_id": 514260,
+      "rank": 206
+    },
+    {
+      "title": "Blanc comme neige",
+      "year": 1948,
+      "tmdb_id": 180325,
+      "rank": 207
+    },
+    {
+      "title": "Le Cœur sur la main",
+      "year": 1949,
+      "tmdb_id": 200840,
+      "rank": 208
+    },
+    {
+      "title": "Taxi 5",
+      "year": 2018,
+      "tmdb_id": 434355,
+      "rank": 209
+    },
+    {
+      "title": "Cet homme est dangereux",
+      "year": 1953,
+      "tmdb_id": 114879,
+      "rank": 210
+    },
+    {
+      "title": "Tintin and the Golden Fleece",
+      "year": 1961,
+      "tmdb_id": 46521,
+      "rank": 211
+    },
+    {
+      "title": "Betty Blue",
+      "year": 1986,
+      "tmdb_id": 11986,
+      "rank": 212
+    },
+    {
+      "title": "Lucrèce Borgia",
+      "year": 1953,
+      "tmdb_id": 67554,
+      "rank": 213
+    },
+    {
+      "title": "Les Morfalous",
+      "year": 1984,
+      "tmdb_id": 72664,
+      "rank": 214
+    },
+    {
+      "title": "The Eighth Day",
+      "year": 1996,
+      "tmdb_id": 36998,
+      "rank": 215
+    },
+    {
+      "title": "Cartouche",
+      "year": 1962,
+      "tmdb_id": 26866,
+      "rank": 216
+    },
+    {
+      "title": "Children of Love",
+      "year": 1953,
+      "tmdb_id": 288327,
+      "rank": 217
+    },
+    {
+      "title": "The Wise Guys",
+      "year": 1965,
+      "tmdb_id": 74767,
+      "rank": 218
+    },
+    {
+      "title": "Podium",
+      "year": 2004,
+      "tmdb_id": 14648,
+      "rank": 219
+    },
+    {
+      "title": "Alibi.com",
+      "year": 2017,
+      "tmdb_id": 398929,
+      "rank": 220
+    },
+    {
+      "title": "Les Sous-doués en vacances",
+      "year": 1982,
+      "tmdb_id": 51925,
+      "rank": 221
+    },
+    {
+      "title": "Man to Men",
+      "year": 1948,
+      "tmdb_id": 331465,
+      "rank": 222
+    },
+    {
+      "title": "Fantômas contre Scotland Yard",
+      "year": 1967,
+      "tmdb_id": 1875,
+      "rank": 223
+    },
+    {
+      "title": "Le défroque",
+      "year": 1954,
+      "tmdb_id": 269316,
+      "rank": 224
+    },
+    {
+      "title": "Léon: The Professional",
+      "year": 1994,
+      "tmdb_id": 101,
+      "rank": 225
+    },
+    {
+      "title": "Dialogue with the Carmelites",
+      "year": 1960,
+      "tmdb_id": 104923,
+      "rank": 226
+    },
+    {
+      "title": "Les risques du métier",
+      "year": 1967,
+      "tmdb_id": 4410,
+      "rank": 227
+    },
+    {
+      "title": "Any Number Can Win",
+      "year": 1963,
+      "tmdb_id": 22650,
+      "rank": 228
+    },
+    {
+      "title": "Folies-Bergère",
+      "year": 1957,
+      "tmdb_id": 68755,
+      "rank": 229
+    },
+    {
+      "title": "Story of O",
+      "year": 1975,
+      "tmdb_id": 4561,
+      "rank": 230
+    },
+    {
+      "title": "Beauties of the Night",
+      "year": 1952,
+      "tmdb_id": 65656,
+      "rank": 231
+    },
+    {
+      "title": "Bethsabee",
+      "year": 1947,
+      "tmdb_id": 317068,
+      "rank": 232
+    },
+    {
+      "title": "Serial Teachers 2",
+      "year": 2015,
+      "tmdb_id": 325844,
+      "rank": 233
+    },
+    {
+      "title": "Au revoir les enfants",
+      "year": 1987,
+      "tmdb_id": 1786,
+      "rank": 234
+    },
+    {
+      "title": "I Spit on Your Grave",
+      "year": 1959,
+      "tmdb_id": 51862,
+      "rank": 235
+    },
+    {
+      "title": "Normandie - Niémen",
+      "year": 1960,
+      "tmdb_id": 278284,
+      "rank": 236
+    },
+    {
+      "title": "The Old Guard",
+      "year": 1960,
+      "tmdb_id": 33362,
+      "rank": 237
+    },
+    {
+      "title": "The Tall Blond Man with One Black Shoe",
+      "year": 1972,
+      "tmdb_id": 12089,
+      "rank": 238
+    },
+    {
+      "title": "Austerlitz",
+      "year": 1960,
+      "tmdb_id": 50791,
+      "rank": 239
+    },
+    {
+      "title": "Don Juan",
+      "year": 1956,
+      "tmdb_id": 191712,
+      "rank": 240
+    },
+    {
+      "title": "Greed in the Sun",
+      "year": 1964,
+      "tmdb_id": 34059,
+      "rank": 241
+    },
+    {
+      "title": "Happy Easter",
+      "year": 1984,
+      "tmdb_id": 40061,
+      "rank": 242
+    },
+    {
+      "title": "La Princesse de Clèves",
+      "year": 1961,
+      "tmdb_id": 104305,
+      "rank": 243
+    },
+    {
+      "title": "Ça va barder",
+      "year": 1954,
+      "tmdb_id": 263010,
+      "rank": 244
+    },
+    {
+      "title": "Rue des prairies",
+      "year": 1959,
+      "tmdb_id": 74708,
+      "rank": 245
+    },
+    {
+      "title": "The Last Metro",
+      "year": 1980,
+      "tmdb_id": 1716,
+      "rank": 246
+    },
+    {
+      "title": "The Law Is the Law",
+      "year": 1958,
+      "tmdb_id": 56544,
+      "rank": 247
+    },
+    {
+      "title": "Le Ruffian",
+      "year": 1983,
+      "tmdb_id": 71630,
+      "rank": 248
+    },
+    {
+      "title": "La grande java",
+      "year": 1970,
+      "tmdb_id": 72280,
+      "rank": 249
+    },
+    {
+      "title": "The Slap",
+      "year": 1974,
+      "tmdb_id": 76198,
+      "rank": 250
+    },
+    {
+      "title": "Microcosmos",
+      "year": 1996,
+      "tmdb_id": 9305,
+      "rank": 251
+    },
+    {
+      "title": "Hibernatus",
+      "year": 1969,
+      "tmdb_id": 2462,
+      "rank": 252
+    },
+    {
+      "title": "Le vieux fusil",
+      "year": 1975,
+      "tmdb_id": 3480,
+      "rank": 253
+    },
+    {
+      "title": "Et la tendresse?... Bordel!",
+      "year": 1979,
+      "tmdb_id": 115387,
+      "rank": 254
+    },
+    {
+      "title": "L'emmerdeur",
+      "year": 1973,
+      "tmdb_id": 11670,
+      "rank": 255
+    },
+    {
+      "title": "Baby Beats the Band",
+      "year": 1951,
+      "tmdb_id": 66560,
+      "rank": 256
+    },
+    {
+      "title": "Monsieur Gangster",
+      "year": 1963,
+      "tmdb_id": 25253,
+      "rank": 257
+    },
+    {
+      "title": "What's in a Name?",
+      "year": 2012,
+      "tmdb_id": 112198,
+      "rank": 258
+    },
+    {
+      "title": "Fortunat",
+      "year": 1960,
+      "tmdb_id": 66837,
+      "rank": 259
+    },
+    {
+      "title": "The Three Musketeers: D'Artagnan",
+      "year": 2023,
+      "tmdb_id": 796185,
+      "rank": 260
+    },
+    {
+      "title": "Les motards",
+      "year": 1959,
+      "tmdb_id": 357060,
+      "rank": 261
+    },
+    {
+      "title": "Les Compagnes de la nuit",
+      "year": 1953,
+      "tmdb_id": 376673,
+      "rank": 262
+    },
+    {
+      "title": "Red Sun",
+      "year": 1971,
+      "tmdb_id": 11842,
+      "rank": 263
+    },
+    {
+      "title": "Plucking the Daisy",
+      "year": 1956,
+      "tmdb_id": 66968,
+      "rank": 264
+    },
+    {
+      "title": "Rififi",
+      "year": 1955,
+      "tmdb_id": 934,
+      "rank": 265
+    },
+    {
+      "title": "Plus beau que moi, tu meurs",
+      "year": 1982,
+      "tmdb_id": 45134,
+      "rank": 266
+    },
+    {
+      "title": "The Crimson Rivers",
+      "year": 2000,
+      "tmdb_id": 60670,
+      "rank": 267
+    },
+    {
+      "title": "Itinerary of a Spoiled Child",
+      "year": 1988,
+      "tmdb_id": 38198,
+      "rank": 268
+    },
+    {
+      "title": "Demain tout commence",
+      "year": 2016,
+      "tmdb_id": 382591,
+      "rank": 269
+    },
+    {
+      "title": "Les Uns et les Autres",
+      "year": 1981,
+      "tmdb_id": 37335,
+      "rank": 270
+    },
+    {
+      "title": "Days of Glory",
+      "year": 2006,
+      "tmdb_id": 2016,
+      "rank": 271
+    },
+    {
+      "title": "A Lover's Return",
+      "year": 1946,
+      "tmdb_id": 64406,
+      "rank": 272
+    },
+    {
+      "title": "Par la fenêtre",
+      "year": 1948,
+      "tmdb_id": 112180,
+      "rank": 273
+    },
+    {
+      "title": "The Tattoo",
+      "year": 1968,
+      "tmdb_id": 11912,
+      "rank": 274
+    },
+    {
+      "title": "Of Gods and Men",
+      "year": 2010,
+      "tmdb_id": 46332,
+      "rank": 275
+    },
+    {
+      "title": "Indochine",
+      "year": 1992,
+      "tmdb_id": 2731,
+      "rank": 276
+    },
+    {
+      "title": "Come Dance with Me",
+      "year": 1959,
+      "tmdb_id": 66965,
+      "rank": 277
+    },
+    {
+      "title": "Grand Highway",
+      "year": 1987,
+      "tmdb_id": 60797,
+      "rank": 278
+    },
+    {
+      "title": "Le Boulet",
+      "year": 2002,
+      "tmdb_id": 18457,
+      "rank": 279
+    },
+    {
+      "title": "Animal",
+      "year": 1977,
+      "tmdb_id": 8767,
+      "rank": 280
+    },
+    {
+      "title": "The Lover",
+      "year": 1992,
+      "tmdb_id": 10995,
+      "rank": 281
+    },
+    {
+      "title": "Weekend at Dunkirk",
+      "year": 1964,
+      "tmdb_id": 75525,
+      "rank": 282
+    },
+    {
+      "title": "In Case of Adversity",
+      "year": 1958,
+      "tmdb_id": 66966,
+      "rank": 283
+    },
+    {
+      "title": "Les Mystères de Paris",
+      "year": 1962,
+      "tmdb_id": 86197,
+      "rank": 284
+    },
+    {
+      "title": "Tenue de soirée",
+      "year": 1986,
+      "tmdb_id": 3934,
+      "rank": 285
+    },
+    {
+      "title": "Paris Still Sings",
+      "year": 1952,
+      "tmdb_id": 213056,
+      "rank": 286
+    },
+    {
+      "title": "Ruby & Quentin",
+      "year": 2003,
+      "tmdb_id": 7229,
+      "rank": 287
+    },
+    {
+      "title": "The Last Adventure",
+      "year": 1967,
+      "tmdb_id": 11396,
+      "rank": 288
+    },
+    {
+      "title": "La Minute de vérité",
+      "year": 1952,
+      "tmdb_id": 82170,
+      "rank": 289
+    },
+    {
+      "title": "Tell No One",
+      "year": 2006,
+      "tmdb_id": 10795,
+      "rank": 290
+    },
+    {
+      "title": "Samba",
+      "year": 2014,
+      "tmdb_id": 269148,
+      "rank": 291
+    },
+    {
+      "title": "La Tulipe noire",
+      "year": 1964,
+      "tmdb_id": 12539,
+      "rank": 292
+    },
+    {
+      "title": "Le Maître d'école",
+      "year": 1981,
+      "tmdb_id": 53179,
+      "rank": 293
+    },
+    {
+      "title": "La Soupe aux choux",
+      "year": 1981,
+      "tmdb_id": 9317,
+      "rank": 294
+    },
+    {
+      "title": "The Valet",
+      "year": 2006,
+      "tmdb_id": 21427,
+      "rank": 295
+    },
+    {
+      "title": "Cage of Girls",
+      "year": 1949,
+      "tmdb_id": 514543,
+      "rank": 296
+    },
+    {
+      "title": "Je suis un sentimental",
+      "year": 1955,
+      "tmdb_id": 210343,
+      "rank": 297
+    },
+    {
+      "title": "Peau d'Âne",
+      "year": 1970,
+      "tmdb_id": 5590,
+      "rank": 298
+    },
+    {
+      "title": "L'homme et l'enfant",
+      "year": 1956,
+      "tmdb_id": 270175,
+      "rank": 299
+    },
+    {
+      "title": "The Artist",
+      "year": 2011,
+      "tmdb_id": 74643,
+      "rank": 300
+    },
+    {
+      "title": "We Are All Murderers",
+      "year": 1952,
+      "tmdb_id": 199503,
+      "rank": 301
+    },
+    {
+      "title": "Vous pigez?",
+      "year": 1956,
+      "tmdb_id": 261308,
+      "rank": 302
+    },
+    {
+      "title": "Love and the Frenchwoman",
+      "year": 1960,
+      "tmdb_id": 98302,
+      "rank": 303
+    },
+    {
+      "title": "Le Grand Cirque",
+      "year": 1950,
+      "tmdb_id": 445102,
+      "rank": 304
+    },
+    {
+      "title": "The Three Cousins",
+      "year": 1947,
+      "tmdb_id": 514366,
+      "rank": 305
+    },
+    {
+      "title": "C'est la vie!",
+      "year": 2017,
+      "tmdb_id": 432068,
+      "rank": 306
+    },
+    {
+      "title": "The Revenge of Roger",
+      "year": 1946,
+      "tmdb_id": 417385,
+      "rank": 307
+    },
+    {
+      "title": "La Cage aux Folles II",
+      "year": 1980,
+      "tmdb_id": 11684,
+      "rank": 308
+    },
+    {
+      "title": "Peppermint Soda",
+      "year": 1977,
+      "tmdb_id": 80220,
+      "rank": 309
+    },
+    {
+      "title": "Sur le banc",
+      "year": 1954,
+      "tmdb_id": 69452,
+      "rank": 310
+    },
+    {
+      "title": "Coco",
+      "year": 2009,
+      "tmdb_id": 18955,
+      "rank": 311
+    },
+    {
+      "title": "God Save the Tuche",
+      "year": 2025,
+      "tmdb_id": 1137759,
+      "rank": 312
+    },
+    {
+      "title": "Boule de suif",
+      "year": 1945,
+      "tmdb_id": 61712,
+      "rank": 313
+    },
+    {
+      "title": "Les Lavandières du Portugal",
+      "year": 1957,
+      "tmdb_id": 132979,
+      "rank": 314
+    },
+    {
+      "title": "Typhon sur Nagasaki",
+      "year": 1957,
+      "tmdb_id": 311040,
+      "rank": 315
+    },
+    {
+      "title": "L'Auberge espagnole",
+      "year": 2002,
+      "tmdb_id": 1555,
+      "rank": 316
+    },
+    {
+      "title": "The Adventures of Arsène Lupin",
+      "year": 1957,
+      "tmdb_id": 91380,
+      "rank": 317
+    },
+    {
+      "title": "Les 11 commandements",
+      "year": 2004,
+      "tmdb_id": 17825,
+      "rank": 318
+    },
+    {
+      "title": "Belle and Sebastian",
+      "year": 2013,
+      "tmdb_id": 204668,
+      "rank": 319
+    },
+    {
+      "title": "The Things of Life",
+      "year": 1970,
+      "tmdb_id": 3423,
+      "rank": 320
+    },
+    {
+      "title": "Angélique, Marquise des Anges",
+      "year": 1964,
+      "tmdb_id": 44450,
+      "rank": 321
+    },
+    {
+      "title": "La Course à l'échalote",
+      "year": 1975,
+      "tmdb_id": 38090,
+      "rank": 322
+    },
+    {
+      "title": "Alarm in Morocco",
+      "year": 1953,
+      "tmdb_id": 514807,
+      "rank": 323
+    },
+    {
+      "title": "Allô... je t'aime",
+      "year": 1952,
+      "tmdb_id": 514737,
+      "rank": 324
+    },
+    {
+      "title": "Rocambole",
+      "year": 1948,
+      "tmdb_id": 296929,
+      "rank": 325
+    },
+    {
+      "title": "The Hotshots",
+      "year": 1968,
+      "tmdb_id": 56546,
+      "rank": 326
+    },
+    {
+      "title": "Live for Life",
+      "year": 1967,
+      "tmdb_id": 76295,
+      "rank": 327
+    },
+    {
+      "title": "Shadow of Evil",
+      "year": 1964,
+      "tmdb_id": 115082,
+      "rank": 328
+    },
+    {
+      "title": "Pardon Mon Affaire",
+      "year": 1976,
+      "tmdb_id": 2459,
+      "rank": 329
+    },
+    {
+      "title": "La Carapate",
+      "year": 1978,
+      "tmdb_id": 61864,
+      "rank": 330
+    },
+    {
+      "title": "The Cat",
+      "year": 1958,
+      "tmdb_id": 66141,
+      "rank": 331
+    },
+    {
+      "title": "Subway",
+      "year": 1985,
+      "tmdb_id": 10656,
+      "rank": 332
+    },
+    {
+      "title": "Radin!",
+      "year": 2016,
+      "tmdb_id": 382511,
+      "rank": 333
+    },
+    {
+      "title": "My New Partner II",
+      "year": 1990,
+      "tmdb_id": 22240,
+      "rank": 334
+    },
+    {
+      "title": "Les aristocrates",
+      "year": 1955,
+      "tmdb_id": 122334,
+      "rank": 335
+    },
+    {
+      "title": "Didier",
+      "year": 1997,
+      "tmdb_id": 37652,
+      "rank": 336
+    },
+    {
+      "title": "Russian Dolls",
+      "year": 2005,
+      "tmdb_id": 1826,
+      "rank": 337
+    },
+    {
+      "title": "Daddy or Mommy",
+      "year": 2015,
+      "tmdb_id": 319341,
+      "rank": 338
+    },
+    {
+      "title": "La route du bagne",
+      "year": 1945,
+      "tmdb_id": 382482,
+      "rank": 339
+    },
+    {
+      "title": "Le Guignolo",
+      "year": 1980,
+      "tmdb_id": 12541,
+      "rank": 340
+    },
+    {
+      "title": "Love on a Pillow",
+      "year": 1962,
+      "tmdb_id": 66916,
+      "rank": 341
+    },
+    {
+      "title": "Maigret et l'Affaire Saint-Fiacre",
+      "year": 1959,
+      "tmdb_id": 434966,
+      "rank": 342
+    },
+    {
+      "title": "Si ça peut vous faire plaisir",
+      "year": 1948,
+      "tmdb_id": 332911,
+      "rank": 343
+    },
+    {
+      "title": "Le Miroir à deux faces",
+      "year": 1958,
+      "tmdb_id": 86260,
+      "rank": 344
+    },
+    {
+      "title": "L'Âge ingrat",
+      "year": 1964,
+      "tmdb_id": 76648,
+      "rank": 345
+    },
+    {
+      "title": "Bons Baisers de Hong Kong",
+      "year": 1975,
+      "tmdb_id": 56501,
+      "rank": 346
+    },
+    {
+      "title": "Himalaya",
+      "year": 1999,
+      "tmdb_id": 26813,
+      "rank": 347
+    },
+    {
+      "title": "The Round Up",
+      "year": 2010,
+      "tmdb_id": 41411,
+      "rank": 348
+    },
+    {
+      "title": "P.R.O.F.S.",
+      "year": 1985,
+      "tmdb_id": 57308,
+      "rank": 349
+    },
+    {
+      "title": "Madame",
+      "year": 1961,
+      "tmdb_id": 198570,
+      "rank": 350
+    },
+    {
+      "title": "Caroline Cherie",
+      "year": 1952,
+      "tmdb_id": 210127,
+      "rank": 351
+    },
+    {
+      "title": "The Two Girls",
+      "year": 1951,
+      "tmdb_id": 443860,
+      "rank": 352
+    },
+    {
+      "title": "La Belle que voilà",
+      "year": 1950,
+      "tmdb_id": 345794,
+      "rank": 353
+    },
+    {
+      "title": "The Married Couple of the Year Two",
+      "year": 1971,
+      "tmdb_id": 4279,
+      "rank": 354
+    },
+    {
+      "title": "Viens chez moi",
+      "year": 1981,
+      "tmdb_id": 69044,
+      "rank": 355
+    },
+    {
+      "title": "Me, Myself and Mum",
+      "year": 2013,
+      "tmdb_id": 190880,
+      "rank": 356
+    },
+    {
+      "title": "Savage Nights",
+      "year": 1992,
+      "tmdb_id": 41878,
+      "rank": 357
+    },
+    {
+      "title": "The Mask of the Gorilla",
+      "year": 1958,
+      "tmdb_id": 95456,
+      "rank": 358
+    },
+    {
+      "title": "Vincent, François, Paul and the Others",
+      "year": 1974,
+      "tmdb_id": 42454,
+      "rank": 359
+    },
+    {
+      "title": "Le Magnifique",
+      "year": 1973,
+      "tmdb_id": 19562,
+      "rank": 360
+    },
+    {
+      "title": "La Grande Bouffe",
+      "year": 1973,
+      "tmdb_id": 10102,
+      "rank": 361
+    },
+    {
+      "title": "Little White Lies 2",
+      "year": 2019,
+      "tmdb_id": 542830,
+      "rank": 362
+    },
+    {
+      "title": "La Zizanie",
+      "year": 1978,
+      "tmdb_id": 11530,
+      "rank": 363
+    },
+    {
+      "title": "Trois de la Canebière",
+      "year": 1955,
+      "tmdb_id": 443858,
+      "rank": 364
+    },
+    {
+      "title": "L'Homme aux clés d'or",
+      "year": 1956,
+      "tmdb_id": 235940,
+      "rank": 365
+    },
+    {
+      "title": "The Man in the Raincoat",
+      "year": 1957,
+      "tmdb_id": 95455,
+      "rank": 366
+    },
+    {
+      "title": "Au grand balcon",
+      "year": 1949,
+      "tmdb_id": 64896,
+      "rank": 367
+    },
+    {
+      "title": "Strange Fate",
+      "year": 1946,
+      "tmdb_id": 514291,
+      "rank": 368
+    },
+    {
+      "title": "Holiday Hotel",
+      "year": 1978,
+      "tmdb_id": 82175,
+      "rank": 369
+    },
+    {
+      "title": "Memoirs of a French Whore",
+      "year": 1979,
+      "tmdb_id": 85363,
+      "rank": 370
+    },
+    {
+      "title": "Palais royal !",
+      "year": 2005,
+      "tmdb_id": 32390,
+      "rank": 371
+    },
+    {
+      "title": "An Impudent Girl",
+      "year": 1985,
+      "tmdb_id": 61991,
+      "rank": 372
+    },
+    {
+      "title": "Daisy Town",
+      "year": 1971,
+      "tmdb_id": 52761,
+      "rank": 373
+    },
+    {
+      "title": "Dieu a besoin des hommes",
+      "year": 1950,
+      "tmdb_id": 154380,
+      "rank": 374
+    },
+    {
+      "title": "Winged Migration",
+      "year": 2001,
+      "tmdb_id": 11516,
+      "rank": 375
+    },
+    {
+      "title": "The Royalists",
+      "year": 1947,
+      "tmdb_id": 92128,
+      "rank": 376
+    },
+    {
+      "title": "The Case of Dr. Laurent",
+      "year": 1957,
+      "tmdb_id": 78183,
+      "rank": 377
+    },
+    {
+      "title": "Mon oncle Benjamin",
+      "year": 1969,
+      "tmdb_id": 2373,
+      "rank": 378
+    },
+    {
+      "title": "Camille Claudel",
+      "year": 1988,
+      "tmdb_id": 11709,
+      "rank": 379
+    },
+    {
+      "title": "The Dream Team",
+      "year": 2012,
+      "tmdb_id": 133469,
+      "rank": 380
+    },
+    {
+      "title": "Adorables créatures",
+      "year": 1952,
+      "tmdb_id": 277414,
+      "rank": 381
+    },
+    {
+      "title": "After Love",
+      "year": 1948,
+      "tmdb_id": 514404,
+      "rank": 382
+    },
+    {
+      "title": "The King and the Mockingbird",
+      "year": 1980,
+      "tmdb_id": 22504,
+      "rank": 383
+    },
+    {
+      "title": "Spring, Autumn and Love",
+      "year": 1955,
+      "tmdb_id": 76642,
+      "rank": 384
+    },
+    {
+      "title": "The Corsican File",
+      "year": 2004,
+      "tmdb_id": 39386,
+      "rank": 385
+    },
+    {
+      "title": "La vengeance du serpent à plumes",
+      "year": 1984,
+      "tmdb_id": 77673,
+      "rank": 386
+    },
+    {
+      "title": "Kaamelott: The First Chapter",
+      "year": 2021,
+      "tmdb_id": 577242,
+      "rank": 387
+    },
+    {
+      "title": "Marius and Jeannette",
+      "year": 1997,
+      "tmdb_id": 64968,
+      "rank": 388
+    },
+    {
+      "title": "Copie conforme",
+      "year": 1947,
+      "tmdb_id": 64242,
+      "rank": 389
+    },
+    {
+      "title": "Murmur of the Heart",
+      "year": 1971,
+      "tmdb_id": 42501,
+      "rank": 390
+    },
+    {
+      "title": "Same Old Song",
+      "year": 1997,
+      "tmdb_id": 2817,
+      "rank": 391
+    },
+    {
+      "title": "Before the Deluge",
+      "year": 1954,
+      "tmdb_id": 199431,
+      "rank": 392
+    },
+    {
+      "title": "Adieu l'ami",
+      "year": 1968,
+      "tmdb_id": 4857,
+      "rank": 393
+    },
+    {
+      "title": "Docteur Françoise Gailland",
+      "year": 1976,
+      "tmdb_id": 68971,
+      "rank": 394
+    },
+    {
+      "title": "Ah! The Beautiful Priestesses of Bacchus",
+      "year": 1954,
+      "tmdb_id": 74580,
+      "rank": 395
+    },
+    {
+      "title": "The Marching Band",
+      "year": 2024,
+      "tmdb_id": 1000866,
+      "rank": 396
+    },
+    {
+      "title": "The Counterfeit Constable",
+      "year": 1964,
+      "tmdb_id": 27325,
+      "rank": 397
+    },
+    {
+      "title": "The Lady of the Camellias",
+      "year": 1953,
+      "tmdb_id": 348592,
+      "rank": 398
+    },
+    {
+      "title": "The Foxiest Girl in Paris",
+      "year": 1957,
+      "tmdb_id": 193282,
+      "rank": 399
+    },
+    {
+      "title": "Pétrus",
+      "year": 1946,
+      "tmdb_id": 139257,
+      "rank": 400
+    },
+    {
+      "title": "Marie-Octobre",
+      "year": 1959,
+      "tmdb_id": 76777,
+      "rank": 401
+    },
+    {
+      "title": "L'impossible Monsieur Pipelet",
+      "year": 1955,
+      "tmdb_id": 123715,
+      "rank": 402
+    },
+    {
+      "title": "Beauty and the Devil",
+      "year": 1950,
+      "tmdb_id": 58513,
+      "rank": 403
+    },
+    {
+      "title": "César and Rosalie",
+      "year": 1972,
+      "tmdb_id": 3426,
+      "rank": 404
+    },
+    {
+      "title": "The Three Musketeers: Milady",
+      "year": 2023,
+      "tmdb_id": 845111,
+      "rank": 405
+    },
+    {
+      "title": "Incorrigible",
+      "year": 1975,
+      "tmdb_id": 61226,
+      "rank": 406
+    },
+    {
+      "title": "The Game Is Over",
+      "year": 1966,
+      "tmdb_id": 92180,
+      "rank": 407
+    },
+    {
+      "title": "The Horseman on the Roof",
+      "year": 1995,
+      "tmdb_id": 11876,
+      "rank": 408
+    },
+    {
+      "title": "The Bellman",
+      "year": 1945,
+      "tmdb_id": 279859,
+      "rank": 409
+    },
+    {
+      "title": "Benjamin",
+      "year": 1968,
+      "tmdb_id": 111965,
+      "rank": 410
+    },
+    {
+      "title": "Dortoir des grandes",
+      "year": 1953,
+      "tmdb_id": 315940,
+      "rank": 411
+    },
+    {
+      "title": "I Married a Shadow",
+      "year": 1983,
+      "tmdb_id": 4227,
+      "rank": 412
+    },
+    {
+      "title": "Je suis timide mais je me soigne",
+      "year": 1978,
+      "tmdb_id": 40054,
+      "rank": 413
+    },
+    {
+      "title": "The Damned",
+      "year": 1947,
+      "tmdb_id": 87245,
+      "rank": 414
+    },
+    {
+      "title": "Beware of Blondes",
+      "year": 1950,
+      "tmdb_id": 263365,
+      "rank": 415
+    },
+    {
+      "title": "OSS 117: Lost in Rio",
+      "year": 2009,
+      "tmdb_id": 15588,
+      "rank": 416
+    },
+    {
+      "title": "L'Ami de la famille",
+      "year": 1957,
+      "tmdb_id": 323907,
+      "rank": 417
+    },
+    {
+      "title": "Parole de flic",
+      "year": 1985,
+      "tmdb_id": 170033,
+      "rank": 418
+    },
+    {
+      "title": "La Putain respectueuse",
+      "year": 1952,
+      "tmdb_id": 254348,
+      "rank": 419
+    },
+    {
+      "title": "Simone Veil, A Woman of the Century",
+      "year": 2022,
+      "tmdb_id": 740937,
+      "rank": 420
+    },
+    {
+      "title": "Me, I Want to Have Dough",
+      "year": 1973,
+      "tmdb_id": 104499,
+      "rank": 421
+    },
+    {
+      "title": "Bluebeard",
+      "year": 1951,
+      "tmdb_id": 317338,
+      "rank": 422
+    },
+    {
+      "title": "The Fox and the Child",
+      "year": 2007,
+      "tmdb_id": 5139,
+      "rank": 423
+    },
+    {
+      "title": "The Wanderer",
+      "year": 1967,
+      "tmdb_id": 5035,
+      "rank": 424
+    },
+    {
+      "title": "Panique",
+      "year": 1946,
+      "tmdb_id": 43462,
+      "rank": 425
+    },
+    {
+      "title": "Music in the Head",
+      "year": 1951,
+      "tmdb_id": 533346,
+      "rank": 426
+    },
+    {
+      "title": "Martin Roumagnac",
+      "year": 1946,
+      "tmdb_id": 95549,
+      "rank": 427
+    },
+    {
+      "title": "À tout casser",
+      "year": 1968,
+      "tmdb_id": 145993,
+      "rank": 428
+    },
+    {
+      "title": "Crésus",
+      "year": 1960,
+      "tmdb_id": 70440,
+      "rank": 429
+    },
+    {
+      "title": "Élisa",
+      "year": 1995,
+      "tmdb_id": 58058,
+      "rank": 430
+    },
+    {
+      "title": "Mariage blanc pour tous",
+      "year": 2017,
+      "tmdb_id": 432613,
+      "rank": 431
+    },
+    {
+      "title": "Yamakasi",
+      "year": 2001,
+      "tmdb_id": 6935,
+      "rank": 432
+    },
+    {
+      "title": "Jo",
+      "year": 1971,
+      "tmdb_id": 12598,
+      "rank": 433
+    },
+    {
+      "title": "La Maternelle",
+      "year": 1949,
+      "tmdb_id": 444769,
+      "rank": 434
+    },
+    {
+      "title": "The Lebanese Mission",
+      "year": 1956,
+      "tmdb_id": 452939,
+      "rank": 435
+    },
+    {
+      "title": "La Femme et le Pantin",
+      "year": 1959,
+      "tmdb_id": 57669,
+      "rank": 436
+    },
+    {
+      "title": "Dynamite Jack",
+      "year": 1961,
+      "tmdb_id": 95234,
+      "rank": 437
+    },
+    {
+      "title": "Nicholas on Holiday",
+      "year": 2014,
+      "tmdb_id": 277368,
+      "rank": 438
+    },
+    {
+      "title": "Two Men in Town",
+      "year": 1973,
+      "tmdb_id": 4680,
+      "rank": 439
+    },
+    {
+      "title": "The Umbrella Coup",
+      "year": 1980,
+      "tmdb_id": 60194,
+      "rank": 440
+    },
+    {
+      "title": "Family Resemblances",
+      "year": 1996,
+      "tmdb_id": 14646,
+      "rank": 441
+    },
+    {
+      "title": "The Queen's Necklace",
+      "year": 1946,
+      "tmdb_id": 446482,
+      "rank": 442
+    },
+    {
+      "title": "Purple Noon",
+      "year": 1960,
+      "tmdb_id": 10363,
+      "rank": 443
+    },
+    {
+      "title": "The Bread Peddler",
+      "year": 1963,
+      "tmdb_id": 272864,
+      "rank": 444
+    },
+    {
+      "title": "Disco",
+      "year": 2008,
+      "tmdb_id": 13727,
+      "rank": 445
+    },
+    {
+      "title": "L'avare",
+      "year": 1980,
+      "tmdb_id": 11680,
+      "rank": 446
+    },
+    {
+      "title": "Le Voyou",
+      "year": 1970,
+      "tmdb_id": 120100,
+      "rank": 447
+    },
+    {
+      "title": "Le Masque de fer",
+      "year": 1962,
+      "tmdb_id": 85746,
+      "rank": 448
+    },
+    {
+      "title": "Le Secret de Mayerling",
+      "year": 1949,
+      "tmdb_id": 528252,
+      "rank": 449
+    },
+    {
+      "title": "The Great Spy Chase",
+      "year": 1964,
+      "tmdb_id": 31270,
+      "rank": 450
+    },
+    {
+      "title": "Pinot simple flic",
+      "year": 1984,
+      "tmdb_id": 42394,
+      "rank": 451
+    },
+    {
+      "title": "Un singe en hiver",
+      "year": 1962,
+      "tmdb_id": 33998,
+      "rank": 452
+    },
+    {
+      "title": "Rolling to You",
+      "year": 2018,
+      "tmdb_id": 458534,
+      "rank": 453
+    },
+    {
+      "title": "Asterix the Gaul",
+      "year": 1967,
+      "tmdb_id": 11047,
+      "rank": 454
+    },
+    {
+      "title": "Polisse",
+      "year": 2011,
+      "tmdb_id": 71157,
+      "rank": 455
+    },
+    {
+      "title": "Animal Kingdom: Let's Go Ape",
+      "year": 2015,
+      "tmdb_id": 280391,
+      "rank": 456
+    },
+    {
+      "title": "The Eagle with Two Heads",
+      "year": 1948,
+      "tmdb_id": 185591,
+      "rank": 457
+    },
+    {
+      "title": "Le Jaguar",
+      "year": 1996,
+      "tmdb_id": 54471,
+      "rank": 458
+    },
+    {
+      "title": "We're Moving the Colonel",
+      "year": 1955,
+      "tmdb_id": 446491,
+      "rank": 459
+    },
+    {
+      "title": "The Count of Bragelonne",
+      "year": 1954,
+      "tmdb_id": 533380,
+      "rank": 460
+    },
+    {
+      "title": "Letters from My Windmill",
+      "year": 1954,
+      "tmdb_id": 82039,
+      "rank": 461
+    },
+    {
+      "title": "St. Val's Mystery",
+      "year": 1945,
+      "tmdb_id": 95364,
+      "rank": 462
+    },
+    {
+      "title": "The Lady Banker",
+      "year": 1980,
+      "tmdb_id": 4370,
+      "rank": 463
+    },
+    {
+      "title": "People of No Importance",
+      "year": 1956,
+      "tmdb_id": 59496,
+      "rank": 464
+    },
+    {
+      "title": "Les livreurs",
+      "year": 1961,
+      "tmdb_id": 515950,
+      "rank": 465
+    },
+    {
+      "title": "La marraine de Charley",
+      "year": 1959,
+      "tmdb_id": 442938,
+      "rank": 466
+    },
+    {
+      "title": "Lost Souvenirs",
+      "year": 1950,
+      "tmdb_id": 77507,
+      "rank": 467
+    },
+    {
+      "title": "His Greatest Role",
+      "year": 1957,
+      "tmdb_id": 95653,
+      "rank": 468
+    },
+    {
+      "title": "The Law",
+      "year": 1958,
+      "tmdb_id": 80677,
+      "rank": 469
+    },
+    {
+      "title": "Fantômas",
+      "year": 1947,
+      "tmdb_id": 202584,
+      "rank": 470
+    },
+    {
+      "title": "Madame du Barry",
+      "year": 1954,
+      "tmdb_id": 66435,
+      "rank": 471
+    },
+    {
+      "title": "To Kill a Cop",
+      "year": 1981,
+      "tmdb_id": 118732,
+      "rank": 472
+    },
+    {
+      "title": "Lovers Like Us",
+      "year": 1975,
+      "tmdb_id": 76829,
+      "rank": 473
+    },
+    {
+      "title": "Heaven Sent",
+      "year": 1963,
+      "tmdb_id": 62848,
+      "rank": 474
+    },
+    {
+      "title": "Hold-Up",
+      "year": 1985,
+      "tmdb_id": 40411,
+      "rank": 475
+    },
+    {
+      "title": "Thérèse Raquin",
+      "year": 1953,
+      "tmdb_id": 67736,
+      "rank": 476
+    },
+    {
+      "title": "Babysitting",
+      "year": 2014,
+      "tmdb_id": 262551,
+      "rank": 477
+    },
+    {
+      "title": "La Crise",
+      "year": 1992,
+      "tmdb_id": 56947,
+      "rank": 478
+    },
+    {
+      "title": "Escalier de service",
+      "year": 1954,
+      "tmdb_id": 62788,
+      "rank": 479
+    },
+    {
+      "title": "Hollywoo",
+      "year": 2011,
+      "tmdb_id": 80015,
+      "rank": 480
+    },
+    {
+      "title": "The Drunkard",
+      "year": 1953,
+      "tmdb_id": 533375,
+      "rank": 481
+    },
+    {
+      "title": "Marvelous Angelique",
+      "year": 1965,
+      "tmdb_id": 44453,
+      "rank": 482
+    },
+    {
+      "title": "Le Journal d'une femme en blanc",
+      "year": 1965,
+      "tmdb_id": 325799,
+      "rank": 483
+    },
+    {
+      "title": "The Brand New Adventures of Aladdin",
+      "year": 2018,
+      "tmdb_id": 459616,
+      "rank": 484
+    },
+    {
+      "title": "One Swallow Brought Spring",
+      "year": 2001,
+      "tmdb_id": 33302,
+      "rank": 485
+    },
+    {
+      "title": "Tempest in the Flesh",
+      "year": 1954,
+      "tmdb_id": 533382,
+      "rank": 486
+    },
+    {
+      "title": "OSS 117 Is Unleashed",
+      "year": 1963,
+      "tmdb_id": 163879,
+      "rank": 487
+    },
+    {
+      "title": "On Guard",
+      "year": 1997,
+      "tmdb_id": 40815,
+      "rank": 488
+    },
+    {
+      "title": "The Sharks of Gibraltar",
+      "year": 1947,
+      "tmdb_id": 559267,
+      "rank": 489
+    },
+    {
+      "title": "Potiche",
+      "year": 2010,
+      "tmdb_id": 51447,
+      "rank": 490
+    },
+    {
+      "title": "Fernand clochard",
+      "year": 1957,
+      "tmdb_id": 342626,
+      "rank": 491
+    },
+    {
+      "title": "One Life",
+      "year": 1958,
+      "tmdb_id": 169780,
+      "rank": 492
+    },
+    {
+      "title": "Hunting and Gathering",
+      "year": 2007,
+      "tmdb_id": 2882,
+      "rank": 493
+    },
+    {
+      "title": "La Tour, prends garde !",
+      "year": 1958,
+      "tmdb_id": 62712,
+      "rank": 494
+    },
+    {
+      "title": "Le permis de conduire",
+      "year": 1973,
+      "tmdb_id": 243101,
+      "rank": 495
+    },
+    {
+      "title": "French Fried Vacation",
+      "year": 1978,
+      "tmdb_id": 11183,
+      "rank": 496
+    },
+    {
+      "title": "De Gaulle: Tilting Iron",
+      "year": 2026,
+      "tmdb_id": 1165366,
+      "rank": 497
+    },
+    {
+      "title": "OSS 117: Cairo, Nest of Spies",
+      "year": 2006,
+      "tmdb_id": 15152,
+      "rank": 498
+    },
+    {
+      "title": "Les Aventures de Till L'Espiègle",
+      "year": 1956,
+      "tmdb_id": 257184,
+      "rank": 499
+    },
+    {
+      "title": "Les Rois mages",
+      "year": 2001,
+      "tmdb_id": 18298,
+      "rank": 500
+    },
+    {
+      "title": "The Players",
+      "year": 2012,
+      "tmdb_id": 89899,
+      "rank": 501
+    },
+    {
+      "title": "Frou-Frou",
+      "year": 1955,
+      "tmdb_id": 82162,
+      "rank": 502
+    },
+    {
+      "title": "Gangster Boss",
+      "year": 1959,
+      "tmdb_id": 74765,
+      "rank": 503
+    },
+    {
+      "title": "A Simple Story",
+      "year": 1978,
+      "tmdb_id": 3425,
+      "rank": 504
+    },
+    {
+      "title": "Les Trois Frères: Le retour",
+      "year": 2014,
+      "tmdb_id": 246320,
+      "rank": 505
+    },
+    {
+      "title": "Joyeux Noël",
+      "year": 2005,
+      "tmdb_id": 11661,
+      "rank": 506
+    },
+    {
+      "title": "Diva",
+      "year": 1981,
+      "tmdb_id": 4485,
+      "rank": 507
+    },
+    {
+      "title": "Marie Antoinette Queen of France",
+      "year": 1955,
+      "tmdb_id": 149662,
+      "rank": 508
+    },
+    {
+      "title": "All Fired Up",
+      "year": 1982,
+      "tmdb_id": 80587,
+      "rank": 509
+    },
+    {
+      "title": "Mission in Tangier",
+      "year": 1949,
+      "tmdb_id": 215505,
+      "rank": 510
+    },
+    {
+      "title": "Cinq Millions comptant",
+      "year": 1956,
+      "tmdb_id": 323902,
+      "rank": 511
+    },
+    {
+      "title": "The Best Job in the World",
+      "year": 1996,
+      "tmdb_id": 40089,
+      "rank": 512
+    },
+    {
+      "title": "Casimir",
+      "year": 1950,
+      "tmdb_id": 95224,
+      "rank": 513
+    },
+    {
+      "title": "The Elusive Corporal",
+      "year": 1962,
+      "tmdb_id": 43000,
+      "rank": 514
+    },
+    {
+      "title": "Les Parents terribles",
+      "year": 1948,
+      "tmdb_id": 63151,
+      "rank": 515
+    },
+    {
+      "title": "Patrie",
+      "year": 1946,
+      "tmdb_id": 189189,
+      "rank": 516
+    },
+    {
+      "title": "Emmanuelle 2",
+      "year": 1975,
+      "tmdb_id": 28209,
+      "rank": 517
+    },
+    {
+      "title": "Hiroshima mon amour",
+      "year": 1959,
+      "tmdb_id": 5544,
+      "rank": 518
+    },
+    {
+      "title": "Last Known Address",
+      "year": 1970,
+      "tmdb_id": 70967,
+      "rank": 519
+    },
+    {
+      "title": "Monelle",
+      "year": 1948,
+      "tmdb_id": 108000,
+      "rank": 520
+    },
+    {
+      "title": "Le Tampon du capiston",
+      "year": 1950,
+      "tmdb_id": 514610,
+      "rank": 521
+    },
+    {
+      "title": "Virgile",
+      "year": 1953,
+      "tmdb_id": 331964,
+      "rank": 522
+    },
+    {
+      "title": "The Legend of Frenchie King",
+      "year": 1971,
+      "tmdb_id": 64345,
+      "rank": 523
+    },
+    {
+      "title": "A Dog, a Mouse, and a Sputnik",
+      "year": 1958,
+      "tmdb_id": 116339,
+      "rank": 524
+    },
+    {
+      "title": "Alexandre le bienheureux",
+      "year": 1968,
+      "tmdb_id": 18628,
+      "rank": 525
+    },
+    {
+      "title": "Dernier Métro",
+      "year": 1945,
+      "tmdb_id": 514269,
+      "rank": 526
+    },
+    {
+      "title": "Rasputin",
+      "year": 1954,
+      "tmdb_id": 561447,
+      "rank": 527
+    },
+    {
+      "title": "La Cité de la peur",
+      "year": 1994,
+      "tmdb_id": 15097,
+      "rank": 528
+    },
+    {
+      "title": "The Women on the 6th Floor",
+      "year": 2010,
+      "tmdb_id": 57243,
+      "rank": 529
+    },
+    {
+      "title": "The Merry Widow",
+      "year": 2007,
+      "tmdb_id": 13710,
+      "rank": 530
+    },
+    {
+      "title": "Breathless",
+      "year": 1960,
+      "tmdb_id": 269,
+      "rank": 531
+    },
+    {
+      "title": "The Twelve Tasks of Asterix",
+      "year": 1976,
+      "tmdb_id": 9385,
+      "rank": 532
+    },
+    {
+      "title": "Carmen",
+      "year": 1984,
+      "tmdb_id": 21193,
+      "rank": 533
+    },
+    {
+      "title": "The Visitors: Bastille Day",
+      "year": 2016,
+      "tmdb_id": 248705,
+      "rank": 534
+    },
+    {
+      "title": "Coup de Torchon",
+      "year": 1981,
+      "tmdb_id": 35797,
+      "rank": 535
+    },
+    {
+      "title": "The Return of the Tall Blond Man with One Black Shoe",
+      "year": 1974,
+      "tmdb_id": 10939,
+      "rank": 536
+    },
+    {
+      "title": "Trois hommes à abattre",
+      "year": 1980,
+      "tmdb_id": 56497,
+      "rank": 537
+    },
+    {
+      "title": "Tower of Lust",
+      "year": 1955,
+      "tmdb_id": 79892,
+      "rank": 538
+    },
+    {
+      "title": "Le Viager",
+      "year": 1972,
+      "tmdb_id": 62363,
+      "rank": 539
+    },
+    {
+      "title": "The Four Charlots Musketeers",
+      "year": 1974,
+      "tmdb_id": 47157,
+      "rank": 540
+    },
+    {
+      "title": "Diary of a Country Priest",
+      "year": 1951,
+      "tmdb_id": 43376,
+      "rank": 541
+    },
+    {
+      "title": "Counter Investigation",
+      "year": 1947,
+      "tmdb_id": 559158,
+      "rank": 542
+    },
+    {
+      "title": "Une ravissante idiote",
+      "year": 1963,
+      "tmdb_id": 200502,
+      "rank": 543
+    },
+    {
+      "title": "Angelica and the King",
+      "year": 1965,
+      "tmdb_id": 22183,
+      "rank": 544
+    },
+    {
+      "title": "The Big Pardon",
+      "year": 1982,
+      "tmdb_id": 40055,
+      "rank": 545
+    },
+    {
+      "title": "It's Not Me, It's Him",
+      "year": 1980,
+      "tmdb_id": 52877,
+      "rank": 546
+    },
+    {
+      "title": "Les Frères Pétard",
+      "year": 1986,
+      "tmdb_id": 51257,
+      "rank": 547
+    },
+    {
+      "title": "The French, They Are a Funny Race",
+      "year": 1955,
+      "tmdb_id": 162624,
+      "rank": 548
+    },
+    {
+      "title": "Les Misérables",
+      "year": 2019,
+      "tmdb_id": 586863,
+      "rank": 549
+    },
+    {
+      "title": "Pouic-Pouic",
+      "year": 1963,
+      "tmdb_id": 36324,
+      "rank": 550
+    },
+    {
+      "title": "Les Arnaud",
+      "year": 1967,
+      "tmdb_id": 163752,
+      "rank": 551
+    },
+    {
+      "title": "Lévy and Goliath",
+      "year": 1987,
+      "tmdb_id": 77729,
+      "rank": 552
+    },
+    {
+      "title": "Miquette",
+      "year": 1950,
+      "tmdb_id": 66140,
+      "rank": 553
+    },
+    {
+      "title": "Fort Saganne",
+      "year": 1984,
+      "tmdb_id": 4274,
+      "rank": 554
+    },
+    {
+      "title": "Secret Cargo",
+      "year": 1947,
+      "tmdb_id": 496207,
+      "rank": 555
+    },
+    {
+      "title": "Priceless",
+      "year": 2006,
+      "tmdb_id": 6691,
+      "rank": 556
+    },
+    {
+      "title": "Tous les Matins du Monde",
+      "year": 1991,
+      "tmdb_id": 41804,
+      "rank": 557
+    },
+    {
+      "title": "Tatie Danielle",
+      "year": 1990,
+      "tmdb_id": 6444,
+      "rank": 558
+    },
+    {
+      "title": "Elle boit pas, elle fume pas, elle drague pas, mais... elle cause !",
+      "year": 1970,
+      "tmdb_id": 68827,
+      "rank": 559
+    },
+    {
+      "title": "Two Are Guilty",
+      "year": 1963,
+      "tmdb_id": 245787,
+      "rank": 560
+    },
+    {
+      "title": "The Woman's Confidant",
+      "year": 1959,
+      "tmdb_id": 79389,
+      "rank": 561
+    },
+    {
+      "title": "L'homme orchestre",
+      "year": 1970,
+      "tmdb_id": 36179,
+      "rank": 562
+    },
+    {
+      "title": "The Confession",
+      "year": 1970,
+      "tmdb_id": 60859,
+      "rank": 563
+    },
+    {
+      "title": "A Crime in Paradise",
+      "year": 2001,
+      "tmdb_id": 54544,
+      "rank": 564
+    },
+    {
+      "title": "The Last Days of Pompeii",
+      "year": 1950,
+      "tmdb_id": 444136,
+      "rank": 565
+    },
+    {
+      "title": "The Children of the Marshland",
+      "year": 1999,
+      "tmdb_id": 36719,
+      "rank": 566
+    },
+    {
+      "title": "Mademoiselle from Paris",
+      "year": 1955,
+      "tmdb_id": 561728,
+      "rank": 567
+    },
+    {
+      "title": "Carnaval",
+      "year": 1953,
+      "tmdb_id": 86270,
+      "rank": 568
+    },
+    {
+      "title": "Atout coeur à Tokyo pour OSS 117",
+      "year": 1966,
+      "tmdb_id": 111475,
+      "rank": 569
+    },
+    {
+      "title": "Marlene",
+      "year": 1949,
+      "tmdb_id": 559320,
+      "rank": 570
+    },
+    {
+      "title": "Elena and Her Men",
+      "year": 1956,
+      "tmdb_id": 53156,
+      "rank": 571
+    },
+    {
+      "title": "La Horse",
+      "year": 1970,
+      "tmdb_id": 65887,
+      "rank": 572
+    },
+    {
+      "title": "Tintin and the Temple of the Sun",
+      "year": 1969,
+      "tmdb_id": 241001,
+      "rank": 573
+    },
+    {
+      "title": "The Big Bluff",
+      "year": 1957,
+      "tmdb_id": 294400,
+      "rank": 574
+    },
+    {
+      "title": "The Last Trapper",
+      "year": 2004,
+      "tmdb_id": 13678,
+      "rank": 575
+    },
+    {
+      "title": "The Sleepwalker",
+      "year": 1951,
+      "tmdb_id": 35822,
+      "rank": 576
+    },
+    {
+      "title": "Les Pique-assiette",
+      "year": 1960,
+      "tmdb_id": 515373,
+      "rank": 577
+    },
+    {
+      "title": "Erotissimo",
+      "year": 1969,
+      "tmdb_id": 66137,
+      "rank": 578
+    },
+    {
+      "title": "Clash of Steel",
+      "year": 1962,
+      "tmdb_id": 115333,
+      "rank": 579
+    },
+    {
+      "title": "The Inquisitor",
+      "year": 1981,
+      "tmdb_id": 5062,
+      "rank": 580
+    },
+    {
+      "title": "Les Fourberies de Scapin",
+      "year": 1981,
+      "tmdb_id": 516823,
+      "rank": 581
+    },
+    {
+      "title": "Crimson Rivers II: Angels of the Apocalypse",
+      "year": 2004,
+      "tmdb_id": 60672,
+      "rank": 582
+    },
+    {
+      "title": "36 Quai des Orfèvres",
+      "year": 2004,
+      "tmdb_id": 7291,
+      "rank": 583
+    },
+    {
+      "title": "Le Costaud des Batignolles",
+      "year": 1952,
+      "tmdb_id": 458283,
+      "rank": 584
+    },
+    {
+      "title": "Retour de manivelle",
+      "year": 1957,
+      "tmdb_id": 260854,
+      "rank": 585
+    },
+    {
+      "title": "La Tour Montparnasse Infernale",
+      "year": 2001,
+      "tmdb_id": 15449,
+      "rank": 586
+    },
+    {
+      "title": "The Light Across the Street",
+      "year": 1955,
+      "tmdb_id": 116713,
+      "rank": 587
+    },
+    {
+      "title": "Pardon Mon Affaire, Too!",
+      "year": 1977,
+      "tmdb_id": 40585,
+      "rank": 588
+    },
+    {
+      "title": "Les culottes rouges",
+      "year": 1962,
+      "tmdb_id": 112168,
+      "rank": 589
+    },
+    {
+      "title": "Air of Paris",
+      "year": 1954,
+      "tmdb_id": 60620,
+      "rank": 590
+    },
+    {
+      "title": "Black Dossier",
+      "year": 1955,
+      "tmdb_id": 199252,
+      "rank": 591
+    },
+    {
+      "title": "Neuf mois ferme",
+      "year": 2013,
+      "tmdb_id": 200713,
+      "rank": 592
+    },
+    {
+      "title": "Passeurs d'or",
+      "year": 1948,
+      "tmdb_id": 317077,
+      "rank": 593
+    },
+    {
+      "title": "Ma pomme",
+      "year": 1950,
+      "tmdb_id": 388097,
+      "rank": 594
+    },
+    {
+      "title": "Quelques messieurs trop tranquilles",
+      "year": 1973,
+      "tmdb_id": 78415,
+      "rank": 595
+    },
+    {
+      "title": "Vive les femmes!",
+      "year": 1984,
+      "tmdb_id": 191938,
+      "rank": 596
+    },
+    {
+      "title": "Ridicule",
+      "year": 1996,
+      "tmdb_id": 12709,
+      "rank": 597
+    },
+    {
+      "title": "Dr. Popaul",
+      "year": 1972,
+      "tmdb_id": 68972,
+      "rank": 598
+    },
+    {
+      "title": "See You Up There",
+      "year": 2017,
+      "tmdb_id": 430424,
+      "rank": 599
+    },
+    {
+      "title": "Les Lions sont lâchés",
+      "year": 1961,
+      "tmdb_id": 76748,
+      "rank": 600
+    },
+    {
+      "title": "Monsieur Aznavour",
+      "year": 2024,
+      "tmdb_id": 1002155,
+      "rank": 601
+    },
+    {
+      "title": "Kirikou and the Wild Beasts",
+      "year": 2005,
+      "tmdb_id": 13679,
+      "rank": 602
+    },
+    {
+      "title": "Hotbed of Sin",
+      "year": 1951,
+      "tmdb_id": 559677,
+      "rank": 603
+    },
+    {
+      "title": "Street of the Damned",
+      "year": 1984,
+      "tmdb_id": 76217,
+      "rank": 604
+    },
+    {
+      "title": "Le Pacha",
+      "year": 1968,
+      "tmdb_id": 55316,
+      "rank": 605
+    },
+    {
+      "title": "Retirement Home",
+      "year": 2022,
+      "tmdb_id": 736500,
+      "rank": 606
+    },
+    {
+      "title": "Cops Is Cops",
+      "year": 1972,
+      "tmdb_id": 70718,
+      "rank": 607
+    },
+    {
+      "title": "A Merry Life",
+      "year": 1948,
+      "tmdb_id": 381688,
+      "rank": 608
+    },
+    {
+      "title": "La Haine",
+      "year": 1995,
+      "tmdb_id": 406,
+      "rank": 609
+    },
+    {
+      "title": "Guru",
+      "year": 2025,
+      "tmdb_id": 1259983,
+      "rank": 610
+    },
+    {
+      "title": "Le Mouton",
+      "year": 1960,
+      "tmdb_id": 342581,
+      "rank": 611
+    },
+    {
+      "title": "La Vengeance d'une blonde",
+      "year": 1994,
+      "tmdb_id": 51196,
+      "rank": 612
+    },
+    {
+      "title": "Belphegor, Phantom of the Louvre",
+      "year": 2001,
+      "tmdb_id": 35831,
+      "rank": 613
+    },
+    {
+      "title": "Too Beautiful for You",
+      "year": 1989,
+      "tmdb_id": 48524,
+      "rank": 614
+    },
+    {
+      "title": "Napoléon II l'Aiglon",
+      "year": 1961,
+      "tmdb_id": 515952,
+      "rank": 615
+    },
+    {
+      "title": "The Inheritor",
+      "year": 1973,
+      "tmdb_id": 57194,
+      "rank": 616
+    },
+    {
+      "title": "Tales of Paris",
+      "year": 1962,
+      "tmdb_id": 138104,
+      "rank": 617
+    },
+    {
+      "title": "Grosse Fatigue",
+      "year": 1994,
+      "tmdb_id": 64567,
+      "rank": 618
+    },
+    {
+      "title": "Green Harvest",
+      "year": 1959,
+      "tmdb_id": 277199,
+      "rank": 619
+    },
+    {
+      "title": "Oasis",
+      "year": 1955,
+      "tmdb_id": 490950,
+      "rank": 620
+    },
+    {
+      "title": "Inspector Sergil",
+      "year": 1947,
+      "tmdb_id": 559170,
+      "rank": 621
+    },
+    {
+      "title": "Shut up when you speak",
+      "year": 1981,
+      "tmdb_id": 41470,
+      "rank": 622
+    },
+    {
+      "title": "Mariages!",
+      "year": 2004,
+      "tmdb_id": 52538,
+      "rank": 623
+    },
+    {
+      "title": "The Widow Couderc",
+      "year": 1971,
+      "tmdb_id": 76871,
+      "rank": 624
+    },
+    {
+      "title": "Backfire",
+      "year": 1964,
+      "tmdb_id": 133827,
+      "rank": 625
+    },
+    {
+      "title": "Don't Take God's Children for Wild Geese",
+      "year": 1968,
+      "tmdb_id": 55317,
+      "rank": 626
+    },
+    {
+      "title": "Knave of Hearts",
+      "year": 1954,
+      "tmdb_id": 163333,
+      "rank": 627
+    },
+    {
+      "title": "La Reine Margot",
+      "year": 1994,
+      "tmdb_id": 10452,
+      "rank": 628
+    },
+    {
+      "title": "Bye Bye Morons",
+      "year": 2020,
+      "tmdb_id": 651881,
+      "rank": 629
+    },
+    {
+      "title": "The Passage",
+      "year": 1986,
+      "tmdb_id": 59059,
+      "rank": 630
+    },
+    {
+      "title": "Love Is at Stake",
+      "year": 1957,
+      "tmdb_id": 335935,
+      "rank": 631
+    },
+    {
+      "title": "The Day of Glory",
+      "year": 1976,
+      "tmdb_id": 84515,
+      "rank": 632
+    },
+    {
+      "title": "Nous irons à Deauville",
+      "year": 1962,
+      "tmdb_id": 95546,
+      "rank": 633
+    },
+    {
+      "title": "Cocorico",
+      "year": 2024,
+      "tmdb_id": 973912,
+      "rank": 634
+    },
+    {
+      "title": "The Upper Hand",
+      "year": 1966,
+      "tmdb_id": 76745,
+      "rank": 635
+    },
+    {
+      "title": "The Dope",
+      "year": 2003,
+      "tmdb_id": 49878,
+      "rank": 636
+    },
+    {
+      "title": "Blood to the Head",
+      "year": 1956,
+      "tmdb_id": 74672,
+      "rank": 637
+    },
+    {
+      "title": "Madame Rosa",
+      "year": 1977,
+      "tmdb_id": 42223,
+      "rank": 638
+    },
+    {
+      "title": "La Scoumoune",
+      "year": 1972,
+      "tmdb_id": 57539,
+      "rank": 639
+    },
+    {
+      "title": "In the Name of the Land",
+      "year": 2019,
+      "tmdb_id": 612368,
+      "rank": 640
+    },
+    {
+      "title": "Avenue Montaigne",
+      "year": 2006,
+      "tmdb_id": 10051,
+      "rank": 641
+    },
+    {
+      "title": "Flic Story",
+      "year": 1975,
+      "tmdb_id": 32653,
+      "rank": 642
+    },
+    {
+      "title": "Tender Scoundrel",
+      "year": 1966,
+      "tmdb_id": 79877,
+      "rank": 643
+    },
+    {
+      "title": "Harry, He's Here to Help",
+      "year": 2000,
+      "tmdb_id": 47943,
+      "rank": 644
+    },
+    {
+      "title": "Safari",
+      "year": 2009,
+      "tmdb_id": 15587,
+      "rank": 645
+    },
+    {
+      "title": "Comment se faire réformer",
+      "year": 1978,
+      "tmdb_id": 238638,
+      "rank": 646
+    },
+    {
+      "title": "The Passerby",
+      "year": 1982,
+      "tmdb_id": 5063,
+      "rank": 647
+    },
+    {
+      "title": "He Who Must Die",
+      "year": 1957,
+      "tmdb_id": 119637,
+      "rank": 648
+    },
+    {
+      "title": "Les Dalton",
+      "year": 2004,
+      "tmdb_id": 10870,
+      "rank": 649
+    },
+    {
+      "title": "Ça va être ta fête",
+      "year": 1961,
+      "tmdb_id": 533445,
+      "rank": 650
+    },
+    {
+      "title": "Asterix and Cleopatra",
+      "year": 1968,
+      "tmdb_id": 9929,
+      "rank": 651
+    },
+    {
+      "title": "Pattaya",
+      "year": 2016,
+      "tmdb_id": 277839,
+      "rank": 652
+    },
+    {
+      "title": "Comment réussir en amour",
+      "year": 1962,
+      "tmdb_id": 301523,
+      "rank": 653
+    },
+    {
+      "title": "The French Detective",
+      "year": 1975,
+      "tmdb_id": 58694,
+      "rank": 654
+    },
+    {
+      "title": "Juste une illusion",
+      "year": 2026,
+      "tmdb_id": 1404684,
+      "rank": 655
+    },
+    {
+      "title": "Wasteland",
+      "year": 1960,
+      "tmdb_id": 147415,
+      "rank": 656
+    },
+    {
+      "title": "Beaumarchais",
+      "year": 1996,
+      "tmdb_id": 68023,
+      "rank": 657
+    },
+    {
+      "title": "Le Battant",
+      "year": 1983,
+      "tmdb_id": 146877,
+      "rank": 658
+    },
+    {
+      "title": "Le Samouraï",
+      "year": 1967,
+      "tmdb_id": 5511,
+      "rank": 659
+    },
+    {
+      "title": "Les hommes préfèrent les grosses",
+      "year": 1981,
+      "tmdb_id": 81024,
+      "rank": 660
+    },
+    {
+      "title": "Rust and Bone",
+      "year": 2012,
+      "tmdb_id": 97365,
+      "rank": 661
+    },
+    {
+      "title": "Open Season",
+      "year": 2023,
+      "tmdb_id": 1001026,
+      "rank": 662
+    },
+    {
+      "title": "Fiston",
+      "year": 2014,
+      "tmdb_id": 252607,
+      "rank": 663
+    },
+    {
+      "title": "Let's Rob the Bank",
+      "year": 1964,
+      "tmdb_id": 57144,
+      "rank": 664
+    },
+    {
+      "title": "Le pistonné",
+      "year": 1970,
+      "tmdb_id": 138573,
+      "rank": 665
+    },
+    {
+      "title": "March of the Penguins",
+      "year": 2005,
+      "tmdb_id": 1667,
+      "rank": 666
+    },
+    {
+      "title": "Jet Set",
+      "year": 2000,
+      "tmdb_id": 51861,
+      "rank": 667
+    },
+    {
+      "title": "Le deuxième souffle",
+      "year": 1966,
+      "tmdb_id": 25047,
+      "rank": 668
+    },
+    {
+      "title": "Un cheval pour deux",
+      "year": 1961,
+      "tmdb_id": 516005,
+      "rank": 669
+    },
+    {
+      "title": "Untamable Angelique",
+      "year": 1967,
+      "tmdb_id": 44448,
+      "rank": 670
+    },
+    {
+      "title": "Arrête ton char... bidasse!",
+      "year": 1977,
+      "tmdb_id": 84519,
+      "rank": 671
+    },
+    {
+      "title": "Elevator to the Gallows",
+      "year": 1958,
+      "tmdb_id": 1093,
+      "rank": 672
+    },
+    {
+      "title": "Banana Peel",
+      "year": 1963,
+      "tmdb_id": 83663,
+      "rank": 673
+    },
+    {
+      "title": "Max et les Ferrailleurs",
+      "year": 1971,
+      "tmdb_id": 3427,
+      "rank": 674
+    },
+    {
+      "title": "The Key Is in the Door",
+      "year": 1978,
+      "tmdb_id": 80329,
+      "rank": 675
+    },
+    {
+      "title": "The Old Maid",
+      "year": 1972,
+      "tmdb_id": 105576,
+      "rank": 676
+    },
+    {
+      "title": "Tout ça... pour ça !",
+      "year": 1993,
+      "tmdb_id": 33489,
+      "rank": 677
+    },
+    {
+      "title": "Le Concert",
+      "year": 2009,
+      "tmdb_id": 25205,
+      "rank": 678
+    },
+    {
+      "title": "Vidocq",
+      "year": 2001,
+      "tmdb_id": 9597,
+      "rank": 679
+    },
+    {
+      "title": "A Very Private Affair",
+      "year": 1961,
+      "tmdb_id": 48196,
+      "rank": 680
+    },
+    {
+      "title": "Camping",
+      "year": 2006,
+      "tmdb_id": 13043,
+      "rank": 681
+    },
+    {
+      "title": "Astragal",
+      "year": 1969,
+      "tmdb_id": 1868,
+      "rank": 682
+    },
+    {
+      "title": "Tête à claques",
+      "year": 1982,
+      "tmdb_id": 178297,
+      "rank": 683
+    },
+    {
+      "title": "Le roi des cons",
+      "year": 1981,
+      "tmdb_id": 123829,
+      "rank": 684
+    },
+    {
+      "title": "Le zèbre",
+      "year": 1992,
+      "tmdb_id": 164126,
+      "rank": 685
+    },
+    {
+      "title": "Stars 80",
+      "year": 2012,
+      "tmdb_id": 139156,
+      "rank": 686
+    },
+    {
+      "title": "Lucky Luke",
+      "year": 2009,
+      "tmdb_id": 35026,
+      "rank": 687
+    },
+    {
+      "title": "Bang-Bang",
+      "year": 1967,
+      "tmdb_id": 301779,
+      "rank": 688
+    },
+    {
+      "title": "Rape of Love",
+      "year": 1978,
+      "tmdb_id": 186745,
+      "rank": 689
+    },
+    {
+      "title": "The Gendarme of Champignol",
+      "year": 1959,
+      "tmdb_id": 442412,
+      "rank": 690
+    },
+    {
+      "title": "Shock Treatment",
+      "year": 1973,
+      "tmdb_id": 5601,
+      "rank": 691
+    },
+    {
+      "title": "Death of a Corrupt Man",
+      "year": 1977,
+      "tmdb_id": 69517,
+      "rank": 692
+    },
+    {
+      "title": "Les Truands",
+      "year": 1956,
+      "tmdb_id": 280517,
+      "rank": 693
+    },
+    {
+      "title": "Double Zero",
+      "year": 2004,
+      "tmdb_id": 33624,
+      "rank": 694
+    },
+    {
+      "title": "Charmants Garçons",
+      "year": 1957,
+      "tmdb_id": 311051,
+      "rank": 695
+    },
+    {
+      "title": "Le Tracassin",
+      "year": 1961,
+      "tmdb_id": 332903,
+      "rank": 696
+    },
+    {
+      "title": "Les louves",
+      "year": 1957,
+      "tmdb_id": 198337,
+      "rank": 697
+    },
+    {
+      "title": "Les Espions",
+      "year": 1957,
+      "tmdb_id": 80176,
+      "rank": 698
+    },
+    {
+      "title": "La grosse caisse",
+      "year": 1965,
+      "tmdb_id": 90247,
+      "rank": 699
+    },
+    {
+      "title": "The Little Thief",
+      "year": 1988,
+      "tmdb_id": 8768,
+      "rank": 700
+    },
+    {
+      "title": "Cocagne",
+      "year": 1961,
+      "tmdb_id": 202579,
+      "rank": 701
+    },
+    {
+      "title": "Police",
+      "year": 1985,
+      "tmdb_id": 6320,
+      "rank": 702
+    },
+    {
+      "title": "Monsieur",
+      "year": 1964,
+      "tmdb_id": 33361,
+      "rank": 703
+    },
+    {
+      "title": "Cover Up",
+      "year": 1983,
+      "tmdb_id": 249786,
+      "rank": 704
+    },
+    {
+      "title": "Comme un cheveu sur la soupe",
+      "year": 1957,
+      "tmdb_id": 63960,
+      "rank": 705
+    },
+    {
+      "title": "I as in Icarus",
+      "year": 1979,
+      "tmdb_id": 25264,
+      "rank": 706
+    },
+    {
+      "title": "Happiness Never Comes Alone",
+      "year": 2012,
+      "tmdb_id": 121936,
+      "rank": 707
+    },
+    {
+      "title": "Beauty and the Beast",
+      "year": 2014,
+      "tmdb_id": 197796,
+      "rank": 708
+    },
+    {
+      "title": "Impossible on Saturday",
+      "year": 1965,
+      "tmdb_id": 277242,
+      "rank": 709
+    },
+    {
+      "title": "Courte tête",
+      "year": 1956,
+      "tmdb_id": 186885,
+      "rank": 710
+    },
+    {
+      "title": "Le Cœur des hommes 2",
+      "year": 2007,
+      "tmdb_id": 13734,
+      "rank": 711
+    },
+    {
+      "title": "Jappeloup",
+      "year": 2013,
+      "tmdb_id": 172106,
+      "rank": 712
+    },
+    {
+      "title": "Noce Blanche",
+      "year": 1989,
+      "tmdb_id": 37533,
+      "rank": 713
+    },
+    {
+      "title": "Les Novices",
+      "year": 1970,
+      "tmdb_id": 82976,
+      "rank": 714
+    },
+    {
+      "title": "Le Diable et les Dix Commandements",
+      "year": 1962,
+      "tmdb_id": 53386,
+      "rank": 715
+    },
+    {
+      "title": "School Life",
+      "year": 2019,
+      "tmdb_id": 587301,
+      "rank": 716
+    },
+    {
+      "title": "No Problem!",
+      "year": 1975,
+      "tmdb_id": 76590,
+      "rank": 717
+    },
+    {
+      "title": "Small Change",
+      "year": 1976,
+      "tmdb_id": 1660,
+      "rank": 718
+    },
+    {
+      "title": "The Woman Cop",
+      "year": 1980,
+      "tmdb_id": 136914,
+      "rank": 719
+    },
+    {
+      "title": "L'honorable Stanislas, agent secret",
+      "year": 1963,
+      "tmdb_id": 202588,
+      "rank": 720
+    },
+    {
+      "title": "Case départ",
+      "year": 2011,
+      "tmdb_id": 66118,
+      "rank": 721
+    },
+    {
+      "title": "The Police War",
+      "year": 1979,
+      "tmdb_id": 136922,
+      "rank": 722
+    },
+    {
+      "title": "Mandrin, bandit gentilhomme",
+      "year": 1962,
+      "tmdb_id": 283383,
+      "rank": 723
+    },
+    {
+      "title": "De l'autre côté du lit",
+      "year": 2008,
+      "tmdb_id": 15709,
+      "rank": 724
+    },
+    {
+      "title": "The Seventh Company Outdoors",
+      "year": 1977,
+      "tmdb_id": 56589,
+      "rank": 725
+    },
+    {
+      "title": "My Way",
+      "year": 2012,
+      "tmdb_id": 85870,
+      "rank": 726
+    },
+    {
+      "title": "Dear Detective",
+      "year": 1977,
+      "tmdb_id": 33337,
+      "rank": 727
+    },
+    {
+      "title": "Exhibition",
+      "year": 1975,
+      "tmdb_id": 218696,
+      "rank": 728
+    },
+    {
+      "title": "The Gypsy",
+      "year": 1975,
+      "tmdb_id": 77570,
+      "rank": 729
+    },
+    {
+      "title": "Choice of Arms",
+      "year": 1981,
+      "tmdb_id": 42145,
+      "rank": 730
+    },
+    {
+      "title": "L'africain",
+      "year": 1983,
+      "tmdb_id": 71055,
+      "rank": 731
+    },
+    {
+      "title": "Crime and Punishment",
+      "year": 1956,
+      "tmdb_id": 60967,
+      "rank": 732
+    },
+    {
+      "title": "Il suffit d'aimer",
+      "year": 1960,
+      "tmdb_id": 170069,
+      "rank": 733
+    },
+    {
+      "title": "Angelique and the Sultan",
+      "year": 1968,
+      "tmdb_id": 44446,
+      "rank": 734
+    },
+    {
+      "title": "Ho!",
+      "year": 1968,
+      "tmdb_id": 85392,
+      "rank": 735
+    },
+    {
+      "title": "Monsieur Batignole",
+      "year": 2002,
+      "tmdb_id": 2594,
+      "rank": 736
+    },
+    {
+      "title": "Azur & Asmar: The Princes' Quest",
+      "year": 2006,
+      "tmdb_id": 19026,
+      "rank": 737
+    },
+    {
+      "title": "Le Corps de mon ennemi",
+      "year": 1976,
+      "tmdb_id": 51213,
+      "rank": 738
+    },
+    {
+      "title": "Largo Winch",
+      "year": 2008,
+      "tmdb_id": 14400,
+      "rank": 739
+    },
+    {
+      "title": "Womanlight",
+      "year": 1979,
+      "tmdb_id": 4948,
+      "rank": 740
+    },
+    {
+      "title": "A Matter of Resistance",
+      "year": 1965,
+      "tmdb_id": 4194,
+      "rank": 741
+    },
+    {
+      "title": "Le Juge Fayard dit Le Shériff",
+      "year": 1977,
+      "tmdb_id": 74822,
+      "rank": 742
+    },
+    {
+      "title": "Cours après moi... que je t'attrape",
+      "year": 1976,
+      "tmdb_id": 84403,
+      "rank": 743
+    },
+    {
+      "title": "Scout toujours...",
+      "year": 1985,
+      "tmdb_id": 50211,
+      "rank": 744
+    },
+    {
+      "title": "The Indestructible",
+      "year": 1959,
+      "tmdb_id": 533413,
+      "rank": 745
+    },
+    {
+      "title": "Les Héritiers",
+      "year": 1960,
+      "tmdb_id": 533423,
+      "rank": 746
+    },
+    {
+      "title": "La Brigade en folie",
+      "year": 1973,
+      "tmdb_id": 216054,
+      "rank": 747
+    },
+    {
+      "title": "De Gaulle: The Sovereign Edge",
+      "year": 2026,
+      "tmdb_id": 1165369,
+      "rank": 748
+    },
+    {
+      "title": "Lacombe, Lucien",
+      "year": 1974,
+      "tmdb_id": 55368,
+      "rank": 749
+    },
+    {
+      "title": "The Twin",
+      "year": 1984,
+      "tmdb_id": 39978,
+      "rank": 750
+    },
+    {
+      "title": "Sergeant X",
+      "year": 1960,
+      "tmdb_id": 533425,
+      "rank": 751
+    },
+    {
+      "title": "We Won't Grow Old Together",
+      "year": 1972,
+      "tmdb_id": 63230,
+      "rank": 752
+    },
+    {
+      "title": "The Gentleman from Epsom",
+      "year": 1962,
+      "tmdb_id": 44522,
+      "rank": 753
+    },
+    {
+      "title": "Classe tous risques",
+      "year": 1960,
+      "tmdb_id": 34145,
+      "rank": 754
+    },
+    {
+      "title": "Asterix in Britain",
+      "year": 1986,
+      "tmdb_id": 9318,
+      "rank": 755
+    },
+    {
+      "title": "Certains l'aiment froide",
+      "year": 1960,
+      "tmdb_id": 76280,
+      "rank": 756
+    },
+    {
+      "title": "A Monster in Paris",
+      "year": 2011,
+      "tmdb_id": 77459,
+      "rank": 757
+    },
+    {
+      "title": "Paris",
+      "year": 2008,
+      "tmdb_id": 8279,
+      "rank": 758
+    },
+    {
+      "title": "The Wild Child",
+      "year": 1970,
+      "tmdb_id": 1627,
+      "rank": 759
+    },
+    {
+      "title": "Don't Tempt the Devil",
+      "year": 1963,
+      "tmdb_id": 82950,
+      "rank": 760
+    },
+    {
+      "title": "Le rapace",
+      "year": 1968,
+      "tmdb_id": 163017,
+      "rank": 761
+    },
+    {
+      "title": "The Medic",
+      "year": 1979,
+      "tmdb_id": 52546,
+      "rank": 762
+    },
+    {
+      "title": "Lucie Aubrac",
+      "year": 1997,
+      "tmdb_id": 52366,
+      "rank": 763
+    },
+    {
+      "title": "Quasimodo d'El Paris",
+      "year": 1999,
+      "tmdb_id": 61405,
+      "rank": 764
+    },
+    {
+      "title": "Asterix Versus Caesar",
+      "year": 1985,
+      "tmdb_id": 8868,
+      "rank": 765
+    },
+    {
+      "title": "RRRrrrr!!!",
+      "year": 2004,
+      "tmdb_id": 21778,
+      "rank": 766
+    },
+    {
+      "title": "Léon Morin, Priest",
+      "year": 1961,
+      "tmdb_id": 63892,
+      "rank": 767
+    },
+    {
+      "title": "125",
+      "year": 1959,
+      "tmdb_id": 71323,
+      "rank": 768
+    },
+    {
+      "title": "Borsalino & Co.",
+      "year": 1974,
+      "tmdb_id": 60181,
+      "rank": 769
+    },
+    {
+      "title": "Colonel Chabert",
+      "year": 1994,
+      "tmdb_id": 41580,
+      "rank": 770
+    },
+    {
+      "title": "La Cage aux Folles 3: The Wedding",
+      "year": 1985,
+      "tmdb_id": 78159,
+      "rank": 771
+    },
+    {
+      "title": "A Secret",
+      "year": 2007,
+      "tmdb_id": 13726,
+      "rank": 772
+    },
+    {
+      "title": "Auguste",
+      "year": 1961,
+      "tmdb_id": 343292,
+      "rank": 773
+    },
+    {
+      "title": "Sundays and Cybele",
+      "year": 1962,
+      "tmdb_id": 43001,
+      "rank": 774
+    },
+    {
+      "title": "Le Joli Cœur",
+      "year": 1984,
+      "tmdb_id": 178281,
+      "rank": 775
+    },
+    {
+      "title": "The Crucible",
+      "year": 1957,
+      "tmdb_id": 4300,
+      "rank": 776
+    },
+    {
+      "title": "Belle and Sebastian, Friends for Life",
+      "year": 2017,
+      "tmdb_id": 434358,
+      "rank": 777
+    },
+    {
+      "title": "Tintin and the Blue Oranges",
+      "year": 1964,
+      "tmdb_id": 46690,
+      "rank": 778
+    },
+    {
+      "title": "Nicky Larson and Cupid's Perfume",
+      "year": 2018,
+      "tmdb_id": 469274,
+      "rank": 779
+    },
+    {
+      "title": "Signé Arsène Lupin",
+      "year": 1959,
+      "tmdb_id": 146581,
+      "rank": 780
+    },
+    {
+      "title": "Arsene Lupin vs. Arsene Lupin",
+      "year": 1962,
+      "tmdb_id": 4719,
+      "rank": 781
+    },
+    {
+      "title": "Goubbiah, mon amour",
+      "year": 1956,
+      "tmdb_id": 533400,
+      "rank": 782
+    },
+    {
+      "title": "Une époque formidable...",
+      "year": 1991,
+      "tmdb_id": 50213,
+      "rank": 783
+    },
+    {
+      "title": "Male Hunt",
+      "year": 1964,
+      "tmdb_id": 4835,
+      "rank": 784
+    },
+    {
+      "title": "Mathias Sandorf",
+      "year": 1963,
+      "tmdb_id": 341880,
+      "rank": 785
+    },
+    {
+      "title": "Lemmy pour les dames",
+      "year": 1962,
+      "tmdb_id": 210644,
+      "rank": 786
+    },
+    {
+      "title": "Love Songs",
+      "year": 1984,
+      "tmdb_id": 63111,
+      "rank": 787
+    },
+    {
+      "title": "Love at the Top",
+      "year": 1974,
+      "tmdb_id": 60430,
+      "rank": 788
+    },
+    {
+      "title": "The 317th Platoon",
+      "year": 1964,
+      "tmdb_id": 31344,
+      "rank": 789
+    },
+    {
+      "title": "Le bourreau des cœurs",
+      "year": 1983,
+      "tmdb_id": 114654,
+      "rank": 790
+    },
+    {
+      "title": "Chinese in Paris",
+      "year": 1974,
+      "tmdb_id": 70802,
+      "rank": 791
+    },
+    {
+      "title": "Death in a French Garden",
+      "year": 1985,
+      "tmdb_id": 24583,
+      "rank": 792
+    },
+    {
+      "title": "Les gamins",
+      "year": 2013,
+      "tmdb_id": 183836,
+      "rank": 793
+    },
+    {
+      "title": "Marco the Magnificent",
+      "year": 1965,
+      "tmdb_id": 131384,
+      "rank": 794
+    },
+    {
+      "title": "Ladybug & Cat Noir: The Movie",
+      "year": 2023,
+      "tmdb_id": 496450,
+      "rank": 795
+    },
+    {
+      "title": "7 Years of Marriage",
+      "year": 2003,
+      "tmdb_id": 19565,
+      "rank": 796
+    },
+    {
+      "title": "Hiver 54, l'abbé Pierre",
+      "year": 1989,
+      "tmdb_id": 179956,
+      "rank": 797
+    },
+    {
+      "title": "Chéri, fais-moi peur",
+      "year": 1958,
+      "tmdb_id": 225367,
+      "rank": 798
+    },
+    {
+      "title": "The Bodin's in the Land of Smile",
+      "year": 2021,
+      "tmdb_id": 874294,
+      "rank": 799
+    },
+    {
+      "title": "Women and War",
+      "year": 1961,
+      "tmdb_id": 76549,
+      "rank": 800
+    },
+    {
+      "title": "The Blockhead Fair",
+      "year": 1963,
+      "tmdb_id": 420050,
+      "rank": 801
+    },
+    {
+      "title": "Look at Me",
+      "year": 2004,
+      "tmdb_id": 11399,
+      "rank": 802
+    },
+    {
+      "title": "La Totale!",
+      "year": 1991,
+      "tmdb_id": 75944,
+      "rank": 803
+    },
+    {
+      "title": "Yves Saint Laurent",
+      "year": 2014,
+      "tmdb_id": 245775,
+      "rank": 804
+    },
+    {
+      "title": "To Be and to Have",
+      "year": 2002,
+      "tmdb_id": 5168,
+      "rank": 805
+    },
+    {
+      "title": "Your Turn, Darling",
+      "year": 1963,
+      "tmdb_id": 120502,
+      "rank": 806
+    },
+    {
+      "title": "The Pleasure Pit",
+      "year": 1969,
+      "tmdb_id": 68968,
+      "rank": 807
+    },
+    {
+      "title": "Chouans!",
+      "year": 1988,
+      "tmdb_id": 50796,
+      "rank": 808
+    },
+    {
+      "title": "Assassin in the Phonebook",
+      "year": 1962,
+      "tmdb_id": 95183,
+      "rank": 809
+    },
+    {
+      "title": "Entre Nous",
+      "year": 1983,
+      "tmdb_id": 42108,
+      "rank": 810
+    },
+    {
+      "title": "The Extraordinary Adventures of Adèle Blanc-Sec",
+      "year": 2010,
+      "tmdb_id": 35552,
+      "rank": 811
+    },
+    {
+      "title": "Tabarin",
+      "year": 1958,
+      "tmdb_id": 562141,
+      "rank": 812
+    },
+    {
+      "title": "Ces messieurs de la famille",
+      "year": 1968,
+      "tmdb_id": 85395,
+      "rank": 813
+    },
+    {
+      "title": "Change of Plans",
+      "year": 2009,
+      "tmdb_id": 14688,
+      "rank": 814
+    },
+    {
+      "title": "OSS 117: From Africa with Love",
+      "year": 2021,
+      "tmdb_id": 604563,
+      "rank": 815
+    },
+    {
+      "title": "Perched on a Tree",
+      "year": 1971,
+      "tmdb_id": 11914,
+      "rank": 816
+    },
+    {
+      "title": "There's No Smoke Without Fire",
+      "year": 1973,
+      "tmdb_id": 134177,
+      "rank": 817
+    },
+    {
+      "title": "The Bear and the Doll",
+      "year": 1970,
+      "tmdb_id": 63882,
+      "rank": 818
+    },
+    {
+      "title": "Season's Beatings",
+      "year": 1999,
+      "tmdb_id": 48216,
+      "rank": 819
+    },
+    {
+      "title": "The Class",
+      "year": 2008,
+      "tmdb_id": 8841,
+      "rank": 820
+    },
+    {
+      "title": "The 25th Hour",
+      "year": 1967,
+      "tmdb_id": 66568,
+      "rank": 821
+    },
+    {
+      "title": "The Train",
+      "year": 1973,
+      "tmdb_id": 3475,
+      "rank": 822
+    },
+    {
+      "title": "Les affreux",
+      "year": 1959,
+      "tmdb_id": 425343,
+      "rank": 823
+    },
+    {
+      "title": "The Deadly Decoy",
+      "year": 1962,
+      "tmdb_id": 202670,
+      "rank": 824
+    },
+    {
+      "title": "Jupiter's Thigh",
+      "year": 1980,
+      "tmdb_id": 61243,
+      "rank": 825
+    },
+    {
+      "title": "La Fièvre Monte à El Pao",
+      "year": 1959,
+      "tmdb_id": 48863,
+      "rank": 826
+    },
+    {
+      "title": "Rive droite, rive gauche",
+      "year": 1984,
+      "tmdb_id": 211923,
+      "rank": 827
+    },
+    {
+      "title": "Le Cœur des hommes",
+      "year": 2003,
+      "tmdb_id": 19099,
+      "rank": 828
+    },
+    {
+      "title": "L'Étudiante",
+      "year": 1988,
+      "tmdb_id": 52286,
+      "rank": 829
+    },
+    {
+      "title": "Santa Claus Is a Stinker",
+      "year": 1982,
+      "tmdb_id": 14645,
+      "rank": 830
+    },
+    {
+      "title": "Agent Secret FX 18",
+      "year": 1964,
+      "tmdb_id": 317910,
+      "rank": 831
+    },
+    {
+      "title": "Keep Talking, Baby",
+      "year": 1961,
+      "tmdb_id": 533446,
+      "rank": 832
+    },
+    {
+      "title": "Sunday Encounter",
+      "year": 1958,
+      "tmdb_id": 84725,
+      "rank": 833
+    },
+    {
+      "title": "An Officer and a Spy",
+      "year": 2019,
+      "tmdb_id": 399121,
+      "rank": 834
+    },
+    {
+      "title": "Jules and Jim",
+      "year": 1962,
+      "tmdb_id": 1628,
+      "rank": 835
+    },
+    {
+      "title": "Kirikou and the Sorceress",
+      "year": 1998,
+      "tmdb_id": 21348,
+      "rank": 836
+    },
+    {
+      "title": "La Loi des rues",
+      "year": 1956,
+      "tmdb_id": 245666,
+      "rank": 837
+    },
+    {
+      "title": "Retirement Home 2",
+      "year": 2024,
+      "tmdb_id": 1083300,
+      "rank": 838
+    },
+    {
+      "title": "Vice and Virtue",
+      "year": 1963,
+      "tmdb_id": 277296,
+      "rank": 839
+    },
+    {
+      "title": "Year of the Jellyfish",
+      "year": 1984,
+      "tmdb_id": 25290,
+      "rank": 840
+    },
+    {
+      "title": "18 Years Later",
+      "year": 2003,
+      "tmdb_id": 38210,
+      "rank": 841
+    },
+    {
+      "title": "Elle court, elle court la banlieue",
+      "year": 1973,
+      "tmdb_id": 184187,
+      "rank": 842
+    },
+    {
+      "title": "Tintin and the Lake of Sharks",
+      "year": 1972,
+      "tmdb_id": 241004,
+      "rank": 843
+    },
+    {
+      "title": "Molière",
+      "year": 1978,
+      "tmdb_id": 66949,
+      "rank": 844
+    },
+    {
+      "title": "That Most Important Thing: Love",
+      "year": 1975,
+      "tmdb_id": 3476,
+      "rank": 845
+    },
+    {
+      "title": "War of the Buttons",
+      "year": 2011,
+      "tmdb_id": 74945,
+      "rank": 846
+    },
+    {
+      "title": "Verdict",
+      "year": 1974,
+      "tmdb_id": 4681,
+      "rank": 847
+    },
+    {
+      "title": "Death in the Garden",
+      "year": 1956,
+      "tmdb_id": 35206,
+      "rank": 848
+    },
+    {
+      "title": "Les Bronzés font du ski",
+      "year": 1979,
+      "tmdb_id": 33701,
+      "rank": 849
+    },
+    {
+      "title": "Les Tuche",
+      "year": 2011,
+      "tmdb_id": 66129,
+      "rank": 850
+    },
+    {
+      "title": "L'Alpagueur",
+      "year": 1976,
+      "tmdb_id": 11512,
+      "rank": 851
+    },
+    {
+      "title": "Les Bricoleurs",
+      "year": 1963,
+      "tmdb_id": 182341,
+      "rank": 852
+    },
+    {
+      "title": "Emile's Boat",
+      "year": 1962,
+      "tmdb_id": 41507,
+      "rank": 853
+    },
+    {
+      "title": "The Connection",
+      "year": 2014,
+      "tmdb_id": 197950,
+      "rank": 854
+    },
+    {
+      "title": "Pleure pas la bouche pleine",
+      "year": 1973,
+      "tmdb_id": 314149,
+      "rank": 855
+    },
+    {
+      "title": "Summer Things",
+      "year": 2002,
+      "tmdb_id": 8434,
+      "rank": 856
+    },
+    {
+      "title": "Public Enemy No. 1 – Todestrieb",
+      "year": 2008,
+      "tmdb_id": 15362,
+      "rank": 857
+    },
+    {
+      "title": "Nelly and Mr. Arnaud",
+      "year": 1995,
+      "tmdb_id": 12652,
+      "rank": 858
+    },
+    {
+      "title": "La Soif de l'or",
+      "year": 1993,
+      "tmdb_id": 51195,
+      "rank": 859
+    },
+    {
+      "title": "Salad by the Roots",
+      "year": 1964,
+      "tmdb_id": 59237,
+      "rank": 860
+    },
+    {
+      "title": "Chinese Puzzle",
+      "year": 2013,
+      "tmdb_id": 206408,
+      "rank": 861
+    },
+    {
+      "title": "Monsieur Robinson Crusoe",
+      "year": 1960,
+      "tmdb_id": 206950,
+      "rank": 862
+    },
+    {
+      "title": "Once Upon My Mother",
+      "year": 2025,
+      "tmdb_id": 1107215,
+      "rank": 863
+    },
+    {
+      "title": "Bis",
+      "year": 2015,
+      "tmdb_id": 323020,
+      "rank": 864
+    },
+    {
+      "title": "Irreplaceable",
+      "year": 2016,
+      "tmdb_id": 375950,
+      "rank": 865
+    },
+    {
+      "title": "Les Rois du gag",
+      "year": 1985,
+      "tmdb_id": 64675,
+      "rank": 866
+    },
+    {
+      "title": "Le Choc",
+      "year": 1982,
+      "tmdb_id": 124352,
+      "rank": 867
+    },
+    {
+      "title": "Life and Nothing But",
+      "year": 1989,
+      "tmdb_id": 41936,
+      "rank": 868
+    },
+    {
+      "title": "Crime on a Summer Morning",
+      "year": 1965,
+      "tmdb_id": 83788,
+      "rank": 869
+    },
+    {
+      "title": "Action immédiate",
+      "year": 1957,
+      "tmdb_id": 81027,
+      "rank": 870
+    },
+    {
+      "title": "Ducobu 3",
+      "year": 2020,
+      "tmdb_id": 605733,
+      "rank": 871
+    },
+    {
+      "title": "Revenge of the Musketeers",
+      "year": 1994,
+      "tmdb_id": 10732,
+      "rank": 872
+    },
+    {
+      "title": "Eiffel",
+      "year": 2021,
+      "tmdb_id": 655082,
+      "rank": 873
+    },
+    {
+      "title": "Marriage of the Century",
+      "year": 1985,
+      "tmdb_id": 80336,
+      "rank": 874
+    },
+    {
+      "title": "L'Élève Ducobu",
+      "year": 2011,
+      "tmdb_id": 68637,
+      "rank": 875
+    },
+    {
+      "title": "Hearth Fires",
+      "year": 1972,
+      "tmdb_id": 2382,
+      "rank": 876
+    },
+    {
+      "title": "The Discreet Charm of the Bourgeoisie",
+      "year": 1972,
+      "tmdb_id": 4593,
+      "rank": 877
+    },
+    {
+      "title": "How to Make a Killing",
+      "year": 2024,
+      "tmdb_id": 1210732,
+      "rank": 878
+    },
+    {
+      "title": "Violins at the Ball",
+      "year": 1974,
+      "tmdb_id": 198537,
+      "rank": 879
+    },
+    {
+      "title": "My Best Friend's Girl",
+      "year": 1983,
+      "tmdb_id": 64504,
+      "rank": 880
+    },
+    {
+      "title": "I Don't Know Much",
+      "year": 1973,
+      "tmdb_id": 62867,
+      "rank": 881
+    },
+    {
+      "title": "Magnet of Doom",
+      "year": 1963,
+      "tmdb_id": 69729,
+      "rank": 882
+    },
+    {
+      "title": "The Hot Rabbit",
+      "year": 1974,
+      "tmdb_id": 240750,
+      "rank": 883
+    },
+    {
+      "title": "There Were Days... and Moons",
+      "year": 1990,
+      "tmdb_id": 51329,
+      "rank": 884
+    },
+    {
+      "title": "Le Mac",
+      "year": 2010,
+      "tmdb_id": 35025,
+      "rank": 885
+    },
+    {
+      "title": "Les Scélérats",
+      "year": 1960,
+      "tmdb_id": 295156,
+      "rank": 886
+    },
+    {
+      "title": "War of the Buttons",
+      "year": 2011,
+      "tmdb_id": 74944,
+      "rank": 887
+    },
+    {
+      "title": "Operation Corned Beef",
+      "year": 1991,
+      "tmdb_id": 40223,
+      "rank": 888
+    },
+    {
+      "title": "Thérèse",
+      "year": 1986,
+      "tmdb_id": 42029,
+      "rank": 889
+    },
+    {
+      "title": "Those Happy Days",
+      "year": 2006,
+      "tmdb_id": 19100,
+      "rank": 890
+    },
+    {
+      "title": "Malabar Princess",
+      "year": 2004,
+      "tmdb_id": 60030,
+      "rank": 891
+    },
+    {
+      "title": "Minuscule: Valley of the Lost Ants",
+      "year": 2013,
+      "tmdb_id": 140870,
+      "rank": 892
+    },
+    {
+      "title": "Sex-Shop",
+      "year": 1972,
+      "tmdb_id": 72563,
+      "rank": 893
+    },
+    {
+      "title": "Police Python 357",
+      "year": 1976,
+      "tmdb_id": 37455,
+      "rank": 894
+    },
+    {
+      "title": "The Purple Taxi",
+      "year": 1977,
+      "tmdb_id": 88309,
+      "rank": 895
+    },
+    {
+      "title": "Un flic",
+      "year": 1972,
+      "tmdb_id": 42741,
+      "rank": 896
+    },
+    {
+      "title": "Icy Breasts",
+      "year": 1974,
+      "tmdb_id": 79393,
+      "rank": 897
+    },
+    {
+      "title": "Les Assassins du dimanche",
+      "year": 1956,
+      "tmdb_id": 173944,
+      "rank": 898
+    },
+    {
+      "title": "The Dreamlife of Angels",
+      "year": 1998,
+      "tmdb_id": 9840,
+      "rank": 899
+    },
+    {
+      "title": "The Race",
+      "year": 2002,
+      "tmdb_id": 46728,
+      "rank": 900
+    },
+    {
+      "title": "Le désert de Pigalle",
+      "year": 1958,
+      "tmdb_id": 527707,
+      "rank": 901
+    },
+    {
+      "title": "The Common Man",
+      "year": 1975,
+      "tmdb_id": 5602,
+      "rank": 902
+    },
+    {
+      "title": "Viva la vie",
+      "year": 1984,
+      "tmdb_id": 127994,
+      "rank": 903
+    },
+    {
+      "title": "Le Pion",
+      "year": 1978,
+      "tmdb_id": 2376,
+      "rank": 904
+    },
+    {
+      "title": "Le Temps des Vacances",
+      "year": 1979,
+      "tmdb_id": 533794,
+      "rank": 905
+    },
+    {
+      "title": "Les Longs Manteaux",
+      "year": 1986,
+      "tmdb_id": 250634,
+      "rank": 906
+    },
+    {
+      "title": "Les Sœurs fâchées",
+      "year": 2004,
+      "tmdb_id": 1935,
+      "rank": 907
+    },
+    {
+      "title": "Zarafa",
+      "year": 2012,
+      "tmdb_id": 94196,
+      "rank": 908
+    },
+    {
+      "title": "Mince alors!",
+      "year": 2012,
+      "tmdb_id": 121730,
+      "rank": 909
+    },
+    {
+      "title": "Thirty-Five Something",
+      "year": 2005,
+      "tmdb_id": 13746,
+      "rank": 910
+    },
+    {
+      "title": "The Ballad of the Daltons",
+      "year": 1978,
+      "tmdb_id": 50166,
+      "rank": 911
+    },
+    {
+      "title": "Un témoin dans la ville",
+      "year": 1959,
+      "tmdb_id": 77980,
+      "rank": 912
+    },
+    {
+      "title": "Asterix and the Big Fight",
+      "year": 1989,
+      "tmdb_id": 11625,
+      "rank": 913
+    },
+    {
+      "title": "Guinguette",
+      "year": 1959,
+      "tmdb_id": 425341,
+      "rank": 914
+    },
+    {
+      "title": "Spread Your Wings",
+      "year": 2019,
+      "tmdb_id": 589982,
+      "rank": 915
+    },
+    {
+      "title": "Bilitis",
+      "year": 1977,
+      "tmdb_id": 50435,
+      "rank": 916
+    },
+    {
+      "title": "Mia and the White Lion",
+      "year": 2018,
+      "tmdb_id": 498248,
+      "rank": 917
+    },
+    {
+      "title": "Waiter!",
+      "year": 1983,
+      "tmdb_id": 75996,
+      "rank": 918
+    },
+    {
+      "title": "Malevil",
+      "year": 1981,
+      "tmdb_id": 47416,
+      "rank": 919
+    },
+    {
+      "title": "The War Is Over",
+      "year": 1989,
+      "tmdb_id": 59349,
+      "rank": 920
+    },
+    {
+      "title": "Cousins in Love",
+      "year": 1980,
+      "tmdb_id": 73134,
+      "rank": 921
+    },
+    {
+      "title": "My Father the Hero",
+      "year": 1991,
+      "tmdb_id": 20978,
+      "rank": 922
+    },
+    {
+      "title": "Le Distrait",
+      "year": 1970,
+      "tmdb_id": 62675,
+      "rank": 923
+    },
+    {
+      "title": "Plot",
+      "year": 1972,
+      "tmdb_id": 152635,
+      "rank": 924
+    },
+    {
+      "title": "Welcome aboard",
+      "year": 2011,
+      "tmdb_id": 75198,
+      "rank": 925
+    },
+    {
+      "title": "Hikers",
+      "year": 1997,
+      "tmdb_id": 40413,
+      "rank": 926
+    },
+    {
+      "title": "All That Glitters",
+      "year": 2010,
+      "tmdb_id": 44269,
+      "rank": 927
+    },
+    {
+      "title": "Joy House",
+      "year": 1964,
+      "tmdb_id": 38421,
+      "rank": 928
+    },
+    {
+      "title": "Moi vouloir toi",
+      "year": 1985,
+      "tmdb_id": 76288,
+      "rank": 929
+    },
+    {
+      "title": "Sugar Cane Alley",
+      "year": 1983,
+      "tmdb_id": 42115,
+      "rank": 930
+    },
+    {
+      "title": "Fantasia Among the Squares",
+      "year": 1971,
+      "tmdb_id": 18097,
+      "rank": 931
+    },
+    {
+      "title": "Le pull-over rouge",
+      "year": 1979,
+      "tmdb_id": 66955,
+      "rank": 932
+    },
+    {
+      "title": "Delicatessen",
+      "year": 1991,
+      "tmdb_id": 892,
+      "rank": 933
+    },
+    {
+      "title": "Aldo et Junior",
+      "year": 1984,
+      "tmdb_id": 114640,
+      "rank": 934
+    },
+    {
+      "title": "La Discrète",
+      "year": 1990,
+      "tmdb_id": 66538,
+      "rank": 935
+    },
+    {
+      "title": "Franciscan of Bourges",
+      "year": 1968,
+      "tmdb_id": 65902,
+      "rank": 936
+    },
+    {
+      "title": "Blague dans le coin",
+      "year": 1963,
+      "tmdb_id": 95196,
+      "rank": 937
+    },
+    {
+      "title": "Army of Shadows",
+      "year": 1969,
+      "tmdb_id": 15383,
+      "rank": 938
+    },
+    {
+      "title": "The Well-Digger's Daughter",
+      "year": 2011,
+      "tmdb_id": 62580,
+      "rank": 939
+    },
+    {
+      "title": "Rise",
+      "year": 2022,
+      "tmdb_id": 771077,
+      "rank": 940
+    },
+    {
+      "title": "It Boy",
+      "year": 2013,
+      "tmdb_id": 173185,
+      "rank": 941
+    },
+    {
+      "title": "Il a déjà tes yeux",
+      "year": 2016,
+      "tmdb_id": 398920,
+      "rank": 942
+    },
+    {
+      "title": "Danton",
+      "year": 1983,
+      "tmdb_id": 4202,
+      "rank": 943
+    },
+    {
+      "title": "Patate",
+      "year": 1964,
+      "tmdb_id": 287566,
+      "rank": 944
+    },
+    {
+      "title": "Love Is a Funny Thing",
+      "year": 1969,
+      "tmdb_id": 73824,
+      "rank": 945
+    },
+    {
+      "title": "How to Keep the Red Lamp Burning",
+      "year": 1965,
+      "tmdb_id": 78534,
+      "rank": 946
+    },
+    {
+      "title": "Sous les jupes des filles",
+      "year": 2014,
+      "tmdb_id": 273169,
+      "rank": 947
+    },
+    {
+      "title": "Le Prix du Danger",
+      "year": 1983,
+      "tmdb_id": 51259,
+      "rank": 948
+    },
+    {
+      "title": "Le Coup de sirocco",
+      "year": 1979,
+      "tmdb_id": 114862,
+      "rank": 949
+    },
+    {
+      "title": "Troubleshooters",
+      "year": 1971,
+      "tmdb_id": 71056,
+      "rank": 950
+    },
+    {
+      "title": "The Four Charlots Musketeers 2",
+      "year": 1974,
+      "tmdb_id": 62659,
+      "rank": 951
+    },
+    {
+      "title": "Dog 51",
+      "year": 2025,
+      "tmdb_id": 1266798,
+      "rank": 952
+    },
+    {
+      "title": "Schools Falling Apart",
+      "year": 1981,
+      "tmdb_id": 2437,
+      "rank": 953
+    },
+    {
+      "title": "The Hole",
+      "year": 1960,
+      "tmdb_id": 29259,
+      "rank": 954
+    },
+    {
+      "title": "The Gorillas",
+      "year": 1964,
+      "tmdb_id": 178288,
+      "rank": 955
+    },
+    {
+      "title": "Nuit d'ivresse",
+      "year": 1986,
+      "tmdb_id": 40224,
+      "rank": 956
+    },
+    {
+      "title": "For Those I Loved",
+      "year": 1983,
+      "tmdb_id": 74400,
+      "rank": 957
+    },
+    {
+      "title": "My American Uncle",
+      "year": 1980,
+      "tmdb_id": 39543,
+      "rank": 958
+    },
+    {
+      "title": "Shéhérazade",
+      "year": 1963,
+      "tmdb_id": 170173,
+      "rank": 959
+    },
+    {
+      "title": "The Fenouillard Family",
+      "year": 1961,
+      "tmdb_id": 170032,
+      "rank": 960
+    },
+    {
+      "title": "Asterix and the Vikings",
+      "year": 2006,
+      "tmdb_id": 9642,
+      "rank": 961
+    },
+    {
+      "title": "La bonne année",
+      "year": 1973,
+      "tmdb_id": 76329,
+      "rank": 962
+    },
+    {
+      "title": "Absolument fabuleux",
+      "year": 2001,
+      "tmdb_id": 75118,
+      "rank": 963
+    },
+    {
+      "title": "Line of Demarcation",
+      "year": 1966,
+      "tmdb_id": 70293,
+      "rank": 964
+    },
+    {
+      "title": "Les SEGPA au ski",
+      "year": 2023,
+      "tmdb_id": 1098987,
+      "rank": 965
+    },
+    {
+      "title": "The Price to Pay",
+      "year": 2007,
+      "tmdb_id": 13045,
+      "rank": 966
+    },
+    {
+      "title": "Conversations with My Gardener",
+      "year": 2007,
+      "tmdb_id": 4519,
+      "rank": 967
+    },
+    {
+      "title": "Divorce French Style",
+      "year": 2016,
+      "tmdb_id": 382593,
+      "rank": 968
+    },
+    {
+      "title": "Mata Hari, agent H 21",
+      "year": 1964,
+      "tmdb_id": 186783,
+      "rank": 969
+    },
+    {
+      "title": "Twist Again in Moskau",
+      "year": 1986,
+      "tmdb_id": 81122,
+      "rank": 970
+    },
+    {
+      "title": "Idiot in Paris",
+      "year": 1967,
+      "tmdb_id": 78377,
+      "rank": 971
+    },
+    {
+      "title": "L'Affaire Dominici",
+      "year": 1973,
+      "tmdb_id": 74817,
+      "rank": 972
+    },
+    {
+      "title": "Night Flight from Moscow",
+      "year": 1973,
+      "tmdb_id": 44607,
+      "rank": 973
+    },
+    {
+      "title": "Les copains",
+      "year": 1965,
+      "tmdb_id": 76792,
+      "rank": 974
+    },
+    {
+      "title": "15 August",
+      "year": 2001,
+      "tmdb_id": 18296,
+      "rank": 975
+    },
+    {
+      "title": "Une souris chez les hommes",
+      "year": 1964,
+      "tmdb_id": 51957,
+      "rank": 976
+    },
+    {
+      "title": "The Twilight Girls",
+      "year": 1957,
+      "tmdb_id": 155589,
+      "rank": 977
+    },
+    {
+      "title": "Largo Winch II",
+      "year": 2011,
+      "tmdb_id": 57331,
+      "rank": 978
+    },
+    {
+      "title": "I Love You All",
+      "year": 1980,
+      "tmdb_id": 41814,
+      "rank": 979
+    },
+    {
+      "title": "A Heart in Winter",
+      "year": 1992,
+      "tmdb_id": 48150,
+      "rank": 980
+    },
+    {
+      "title": "La Menace",
+      "year": 1977,
+      "tmdb_id": 76519,
+      "rank": 981
+    },
+    {
+      "title": "Operation Double Cross",
+      "year": 1965,
+      "tmdb_id": 3691,
+      "rank": 982
+    },
+    {
+      "title": "The Monocle Laughs",
+      "year": 1964,
+      "tmdb_id": 74876,
+      "rank": 983
+    },
+    {
+      "title": "Invisibles",
+      "year": 2018,
+      "tmdb_id": 501633,
+      "rank": 984
+    },
+    {
+      "title": "Tir groupé",
+      "year": 1982,
+      "tmdb_id": 11668,
+      "rank": 985
+    },
+    {
+      "title": "R.A.S.",
+      "year": 1973,
+      "tmdb_id": 138587,
+      "rank": 986
+    },
+    {
+      "title": "Le vent se lève",
+      "year": 1959,
+      "tmdb_id": 235872,
+      "rank": 987
+    },
+    {
+      "title": "The Private Lesson",
+      "year": 1968,
+      "tmdb_id": 134191,
+      "rank": 988
+    },
+    {
+      "title": "Les cavaliers de l'orage",
+      "year": 1984,
+      "tmdb_id": 267066,
+      "rank": 989
+    },
+    {
+      "title": "Le quart d'heure américain",
+      "year": 1982,
+      "tmdb_id": 50212,
+      "rank": 990
+    },
+    {
+      "title": "Houla-Houla",
+      "year": 1959,
+      "tmdb_id": 562153,
+      "rank": 991
+    },
+    {
+      "title": "Tarzoon: Shame of the Jungle",
+      "year": 1975,
+      "tmdb_id": 50237,
+      "rank": 992
+    },
+    {
+      "title": "Touch and Go",
+      "year": 1971,
+      "tmdb_id": 359684,
+      "rank": 993
+    },
+    {
+      "title": "The Children of the Resistance",
+      "year": 2026,
+      "tmdb_id": 1309400,
+      "rank": 994
+    },
+    {
+      "title": "Monnaie de singe",
+      "year": 1966,
+      "tmdb_id": 197877,
+      "rank": 995
+    },
+    {
+      "title": "Le Bal des casse-pieds",
+      "year": 1992,
+      "tmdb_id": 76793,
+      "rank": 996
+    },
+    {
+      "title": "Woman in Chains",
+      "year": 1968,
+      "tmdb_id": 70496,
+      "rank": 997
+    },
+    {
+      "title": "Bluebeard",
+      "year": 1963,
+      "tmdb_id": 4195,
+      "rank": 998
+    },
+    {
+      "title": "Paris 36",
+      "year": 2008,
+      "tmdb_id": 15457,
+      "rank": 999
+    },
+    {
+      "title": "The Cop",
+      "year": 1970,
+      "tmdb_id": 94376,
+      "rank": 1000
+    },
+    {
+      "title": "Venus Beauty Institute",
+      "year": 1999,
+      "tmdb_id": 33491,
+      "rank": 1001
+    },
+    {
+      "title": "Crime Does Not Pay",
+      "year": 1962,
+      "tmdb_id": 256653,
+      "rank": 1002
+    },
+    {
+      "title": "Whispers in the Woods",
+      "year": 2026,
+      "tmdb_id": 1309373,
+      "rank": 1003
+    },
+    {
+      "title": "Escape to Nowhere",
+      "year": 1973,
+      "tmdb_id": 70928,
+      "rank": 1004
+    },
+    {
+      "title": "Promotion canapé",
+      "year": 1990,
+      "tmdb_id": 79753,
+      "rank": 1005
+    },
+    {
+      "title": "The Gift",
+      "year": 1982,
+      "tmdb_id": 68963,
+      "rank": 1006
+    },
+    {
+      "title": "La Ch'tite famille",
+      "year": 2018,
+      "tmdb_id": 456165,
+      "rank": 1007
+    },
+    {
+      "title": "Get Out Your Handkerchiefs",
+      "year": 1978,
+      "tmdb_id": 4267,
+      "rank": 1008
+    },
+    {
+      "title": "Farinelli",
+      "year": 1994,
+      "tmdb_id": 10954,
+      "rank": 1009
+    },
+    {
+      "title": "Amen.",
+      "year": 2002,
+      "tmdb_id": 9045,
+      "rank": 1010
+    },
+    {
+      "title": "The Young Girls of Rochefort",
+      "year": 1967,
+      "tmdb_id": 2433,
+      "rank": 1011
+    },
+    {
+      "title": "Aline",
+      "year": 2020,
+      "tmdb_id": 498402,
+      "rank": 1012
+    },
+    {
+      "title": "A Bag of Marbles",
+      "year": 2017,
+      "tmdb_id": 398924,
+      "rank": 1013
+    },
+    {
+      "title": "A Golden Widow",
+      "year": 1969,
+      "tmdb_id": 355096,
+      "rank": 1014
+    },
+    {
+      "title": "Life Love Death",
+      "year": 1969,
+      "tmdb_id": 11666,
+      "rank": 1015
+    },
+    {
+      "title": "Second Chance",
+      "year": 1976,
+      "tmdb_id": 263230,
+      "rank": 1016
+    },
+    {
+      "title": "The Barbarian Invasions",
+      "year": 2003,
+      "tmdb_id": 11042,
+      "rank": 1017
+    },
+    {
+      "title": "One Is Always Too Good to Women",
+      "year": 1971,
+      "tmdb_id": 533671,
+      "rank": 1018
+    },
+    {
+      "title": "Pierrot le Fou",
+      "year": 1965,
+      "tmdb_id": 2786,
+      "rank": 1019
+    },
+    {
+      "title": "A Prophet",
+      "year": 2009,
+      "tmdb_id": 21575,
+      "rank": 1020
+    },
+    {
+      "title": "Van Gogh",
+      "year": 1991,
+      "tmdb_id": 4734,
+      "rank": 1021
+    },
+    {
+      "title": "The City of Lost Children",
+      "year": 1995,
+      "tmdb_id": 902,
+      "rank": 1022
+    },
+    {
+      "title": "Les malheurs d'Alfred",
+      "year": 1972,
+      "tmdb_id": 67420,
+      "rank": 1023
+    },
+    {
+      "title": "Wasabi",
+      "year": 2001,
+      "tmdb_id": 2110,
+      "rank": 1024
+    },
+    {
+      "title": "Pour cent briques",
+      "year": 1982,
+      "tmdb_id": 59455,
+      "rank": 1025
+    },
+    {
+      "title": "Espion, lève-toi",
+      "year": 1982,
+      "tmdb_id": 15468,
+      "rank": 1026
+    },
+    {
+      "title": "The Public Woman",
+      "year": 1984,
+      "tmdb_id": 70410,
+      "rank": 1027
+    },
+    {
+      "title": "The Lovers of Montparnasse",
+      "year": 1958,
+      "tmdb_id": 80470,
+      "rank": 1028
+    },
+    {
+      "title": "May Fools",
+      "year": 1990,
+      "tmdb_id": 1785,
+      "rank": 1029
+    },
+    {
+      "title": "Sky Fighters",
+      "year": 2005,
+      "tmdb_id": 10798,
+      "rank": 1030
+    },
+    {
+      "title": "Madame Bovary",
+      "year": 1991,
+      "tmdb_id": 2528,
+      "rank": 1031
+    },
+    {
+      "title": "Without Apparent Motive",
+      "year": 1971,
+      "tmdb_id": 150587,
+      "rank": 1032
+    },
+    {
+      "title": "On aura tout vu",
+      "year": 1976,
+      "tmdb_id": 70720,
+      "rank": 1033
+    },
+    {
+      "title": "Jean-Philippe",
+      "year": 2006,
+      "tmdb_id": 13713,
+      "rank": 1034
+    },
+    {
+      "title": "Bernadette",
+      "year": 1988,
+      "tmdb_id": 66970,
+      "rank": 1035
+    },
+    {
+      "title": "Un sac de billes",
+      "year": 1975,
+      "tmdb_id": 108703,
+      "rank": 1036
+    },
+    {
+      "title": "The Magic of the Kite",
+      "year": 1958,
+      "tmdb_id": 430735,
+      "rank": 1037
+    },
+    {
+      "title": "Patients",
+      "year": 2017,
+      "tmdb_id": 434616,
+      "rank": 1038
+    },
+    {
+      "title": "L'étalon",
+      "year": 1970,
+      "tmdb_id": 85722,
+      "rank": 1039
+    },
+    {
+      "title": "Boulevard du Rhum",
+      "year": 1971,
+      "tmdb_id": 74811,
+      "rank": 1040
+    },
+    {
+      "title": "And Long Live Liberty",
+      "year": 1978,
+      "tmdb_id": 79370,
+      "rank": 1041
+    },
+    {
+      "title": "Emmanuelle 4",
+      "year": 1984,
+      "tmdb_id": 40978,
+      "rank": 1042
+    },
+    {
+      "title": "The Umbrellas of Cherbourg",
+      "year": 1964,
+      "tmdb_id": 5967,
+      "rank": 1043
+    },
+    {
+      "title": "The Bride Wore Black",
+      "year": 1968,
+      "tmdb_id": 4191,
+      "rank": 1044
+    },
+    {
+      "title": "Mon petit doigt m'a dit...",
+      "year": 2005,
+      "tmdb_id": 31329,
+      "rank": 1045
+    },
+    {
+      "title": "My Afternoons with Margueritte",
+      "year": 2010,
+      "tmdb_id": 39413,
+      "rank": 1046
+    },
+    {
+      "title": "Le Grand Carnaval",
+      "year": 1983,
+      "tmdb_id": 114863,
+      "rank": 1047
+    },
+    {
+      "title": "Shooting Stars",
+      "year": 2002,
+      "tmdb_id": 18419,
+      "rank": 1048
+    },
+    {
+      "title": "The Mystery of the Yellow Room",
+      "year": 2003,
+      "tmdb_id": 37351,
+      "rank": 1049
+    },
+    {
+      "title": "Titeuf",
+      "year": 2011,
+      "tmdb_id": 61672,
+      "rank": 1050
+    },
+    {
+      "title": "La Mandarine",
+      "year": 1972,
+      "tmdb_id": 65974,
+      "rank": 1051
+    },
+    {
+      "title": "Men, Women: A User's Manual",
+      "year": 1996,
+      "tmdb_id": 76390,
+      "rank": 1052
+    },
+    {
+      "title": "The Return of Martin Guerre",
+      "year": 1983,
+      "tmdb_id": 4483,
+      "rank": 1053
+    },
+    {
+      "title": "Joyeuse retraite!",
+      "year": 2019,
+      "tmdb_id": 589976,
+      "rank": 1054
+    },
+    {
+      "title": "Mont-Dragon",
+      "year": 1970,
+      "tmdb_id": 67552,
+      "rank": 1055
+    },
+    {
+      "title": "Micmacs",
+      "year": 2009,
+      "tmdb_id": 27936,
+      "rank": 1056
+    },
+    {
+      "title": "Belle maman",
+      "year": 1999,
+      "tmdb_id": 55705,
+      "rank": 1057
+    },
+    {
+      "title": "Bonjour sourire",
+      "year": 1956,
+      "tmdb_id": 95197,
+      "rank": 1058
+    },
+    {
+      "title": "Sirga",
+      "year": 1993,
+      "tmdb_id": 47480,
+      "rank": 1059
+    },
+    {
+      "title": "Agathe Cléry",
+      "year": 2008,
+      "tmdb_id": 20072,
+      "rank": 1060
+    },
+    {
+      "title": "The Odyssey",
+      "year": 2016,
+      "tmdb_id": 332794,
+      "rank": 1061
+    },
+    {
+      "title": "The Toy",
+      "year": 1976,
+      "tmdb_id": 56648,
+      "rank": 1062
+    },
+    {
+      "title": "The Seventh Target",
+      "year": 1984,
+      "tmdb_id": 70929,
+      "rank": 1063
+    },
+    {
+      "title": "Fanfan la Tulipe",
+      "year": 2003,
+      "tmdb_id": 37559,
+      "rank": 1064
+    },
+    {
+      "title": "The Gypsy",
+      "year": 1986,
+      "tmdb_id": 86006,
+      "rank": 1065
+    },
+    {
+      "title": "Emilia Pérez",
+      "year": 2024,
+      "tmdb_id": 974950,
+      "rank": 1066
+    },
+    {
+      "title": "The Decline of the American Empire",
+      "year": 1986,
+      "tmdb_id": 18499,
+      "rank": 1067
+    },
+    {
+      "title": "Code Name: Tiger",
+      "year": 1964,
+      "tmdb_id": 114785,
+      "rank": 1068
+    },
+    {
+      "title": "Molière",
+      "year": 2007,
+      "tmdb_id": 21494,
+      "rank": 1069
+    },
+    {
+      "title": "Le rendez-vous",
+      "year": 1961,
+      "tmdb_id": 486309,
+      "rank": 1070
+    },
+    {
+      "title": "Feelings",
+      "year": 2003,
+      "tmdb_id": 18461,
+      "rank": 1071
+    },
+    {
+      "title": "Slow Local Trains",
+      "year": 1960,
+      "tmdb_id": 79878,
+      "rank": 1072
+    },
+    {
+      "title": "Le Fils à Jo",
+      "year": 2011,
+      "tmdb_id": 52043,
+      "rank": 1073
+    },
+    {
+      "title": "Three Colours: Blue",
+      "year": 1993,
+      "tmdb_id": 108,
+      "rank": 1074
+    },
+    {
+      "title": "99 Francs",
+      "year": 2007,
+      "tmdb_id": 8827,
+      "rank": 1075
+    },
+    {
+      "title": "Les zozos",
+      "year": 1973,
+      "tmdb_id": 69978,
+      "rank": 1076
+    },
+    {
+      "title": "The Gilded Cage",
+      "year": 2013,
+      "tmdb_id": 186161,
+      "rank": 1077
+    },
+    {
+      "title": "The Beat That My Heart Skipped",
+      "year": 2005,
+      "tmdb_id": 1553,
+      "rank": 1078
+    },
+    {
+      "title": "Black Mic-Mac",
+      "year": 1986,
+      "tmdb_id": 63657,
+      "rank": 1079
+    },
+    {
+      "title": "Act of Aggression",
+      "year": 1975,
+      "tmdb_id": 68864,
+      "rank": 1080
+    },
+    {
+      "title": "Le crocodile du Botswanga",
+      "year": 2014,
+      "tmdb_id": 248390,
+      "rank": 1081
+    },
+    {
+      "title": "Impossible Is Not French",
+      "year": 1974,
+      "tmdb_id": 173907,
+      "rank": 1082
+    },
+    {
+      "title": "The Thief of Paris",
+      "year": 1967,
+      "tmdb_id": 55370,
+      "rank": 1083
+    },
+    {
+      "title": "Boyz On the Beach",
+      "year": 1999,
+      "tmdb_id": 57141,
+      "rank": 1084
+    },
+    {
+      "title": "Galia",
+      "year": 1966,
+      "tmdb_id": 121208,
+      "rank": 1085
+    },
+    {
+      "title": "Mississippi Mermaid",
+      "year": 1969,
+      "tmdb_id": 1651,
+      "rank": 1086
+    },
+    {
+      "title": "Le Bon Plaisir",
+      "year": 1984,
+      "tmdb_id": 104349,
+      "rank": 1087
+    },
+    {
+      "title": "Compostelle",
+      "year": 2026,
+      "tmdb_id": 1404604,
+      "rank": 1088
+    },
+    {
+      "title": "L'union sacrée",
+      "year": 1989,
+      "tmdb_id": 66635,
+      "rank": 1089
+    },
+    {
+      "title": "Le crime est notre affaire",
+      "year": 2008,
+      "tmdb_id": 15437,
+      "rank": 1090
+    },
+    {
+      "title": "Germinal",
+      "year": 1963,
+      "tmdb_id": 84721,
+      "rank": 1091
+    },
+    {
+      "title": "L'Addition",
+      "year": 1984,
+      "tmdb_id": 225977,
+      "rank": 1092
+    },
+    {
+      "title": "Échec au porteur",
+      "year": 1958,
+      "tmdb_id": 245875,
+      "rank": 1093
+    },
+    {
+      "title": "Take It from the Top",
+      "year": 1978,
+      "tmdb_id": 80042,
+      "rank": 1094
+    },
+    {
+      "title": "Le Crabe-tambour",
+      "year": 1977,
+      "tmdb_id": 86727,
+      "rank": 1095
+    },
+    {
+      "title": "Man in the Trunk",
+      "year": 1973,
+      "tmdb_id": 70781,
+      "rank": 1096
+    },
+    {
+      "title": "Persepolis",
+      "year": 2007,
+      "tmdb_id": 2011,
+      "rank": 1097
+    },
+    {
+      "title": "Fatal",
+      "year": 2010,
+      "tmdb_id": 45535,
+      "rank": 1098
+    },
+    {
+      "title": "A Gang Story",
+      "year": 2011,
+      "tmdb_id": 56415,
+      "rank": 1099
+    },
+    {
+      "title": "A Woman at Her Window",
+      "year": 1976,
+      "tmdb_id": 4947,
+      "rank": 1100
+    },
+    {
+      "title": "Welcome",
+      "year": 2009,
+      "tmdb_id": 15712,
+      "rank": 1101
+    },
+    {
+      "title": "Viper in the Fist",
+      "year": 2004,
+      "tmdb_id": 24685,
+      "rank": 1102
+    },
+    {
+      "title": "Un plan parfait",
+      "year": 2012,
+      "tmdb_id": 133698,
+      "rank": 1103
+    },
+    {
+      "title": "Asphalte",
+      "year": 1959,
+      "tmdb_id": 362364,
+      "rank": 1104
+    },
+    {
+      "title": "Playtime",
+      "year": 1967,
+      "tmdb_id": 10227,
+      "rank": 1105
+    },
+    {
+      "title": "Father & Soldier",
+      "year": 2022,
+      "tmdb_id": 967874,
+      "rank": 1106
+    },
+    {
+      "title": "Gainsbourg",
+      "year": 2010,
+      "tmdb_id": 31900,
+      "rank": 1107
+    },
+    {
+      "title": "Boudu",
+      "year": 2005,
+      "tmdb_id": 14644,
+      "rank": 1108
+    },
+    {
+      "title": "The Parisian Bitch, Princess of Hearts",
+      "year": 2015,
+      "tmdb_id": 325848,
+      "rank": 1109
+    },
+    {
+      "title": "La brune que voilà",
+      "year": 1960,
+      "tmdb_id": 344017,
+      "rank": 1110
+    },
+    {
+      "title": "Beau-père",
+      "year": 1981,
+      "tmdb_id": 42337,
+      "rank": 1111
+    },
+    {
+      "title": "This Pretty World",
+      "year": 1957,
+      "tmdb_id": 511884,
+      "rank": 1112
+    },
+    {
+      "title": "Du rififi chez les femmes",
+      "year": 1959,
+      "tmdb_id": 191891,
+      "rank": 1113
+    },
+    {
+      "title": "Pile ou Face",
+      "year": 1980,
+      "tmdb_id": 64220,
+      "rank": 1114
+    },
+    {
+      "title": "Mommy",
+      "year": 2014,
+      "tmdb_id": 265177,
+      "rank": 1115
+    },
+    {
+      "title": "Association of Wrongdoers",
+      "year": 1987,
+      "tmdb_id": 64080,
+      "rank": 1116
+    },
+    {
+      "title": "Are You Engaged to a Greek Sailor or an Airline Pilot?",
+      "year": 1970,
+      "tmdb_id": 273327,
+      "rank": 1117
+    },
+    {
+      "title": "La Bande à Bonnot",
+      "year": 1968,
+      "tmdb_id": 64237,
+      "rank": 1118
+    },
+    {
+      "title": "What's with This Granny!?",
+      "year": 2019,
+      "tmdb_id": 579898,
+      "rank": 1119
+    },
+    {
+      "title": "A Thousand Billion Dollars",
+      "year": 1982,
+      "tmdb_id": 4023,
+      "rank": 1120
+    },
+    {
+      "title": "Le Gang",
+      "year": 1977,
+      "tmdb_id": 146886,
+      "rank": 1121
+    },
+    {
+      "title": "Méfiez-vous",
+      "year": 1963,
+      "tmdb_id": 359230,
+      "rank": 1122
+    },
+    {
+      "title": "Tom Thumb",
+      "year": 2001,
+      "tmdb_id": 47437,
+      "rank": 1123
+    },
+    {
+      "title": "Ma femme s'appelle reviens",
+      "year": 1982,
+      "tmdb_id": 78830,
+      "rank": 1124
+    },
+    {
+      "title": "Timbuktu",
+      "year": 2014,
+      "tmdb_id": 265228,
+      "rank": 1125
+    },
+    {
+      "title": "Most Promising Young Actress",
+      "year": 2000,
+      "tmdb_id": 64357,
+      "rank": 1126
+    },
+    {
+      "title": "Des femmes disparaissent",
+      "year": 1959,
+      "tmdb_id": 271711,
+      "rank": 1127
+    },
+    {
+      "title": "Arsène Lupin",
+      "year": 2004,
+      "tmdb_id": 11540,
+      "rank": 1128
+    },
+    {
+      "title": "Black Box",
+      "year": 2021,
+      "tmdb_id": 663260,
+      "rank": 1129
+    },
+    {
+      "title": "Chaos",
+      "year": 2001,
+      "tmdb_id": 44164,
+      "rank": 1130
+    },
+    {
+      "title": "La Première Fois",
+      "year": 1976,
+      "tmdb_id": 36882,
+      "rank": 1131
+    },
+    {
+      "title": "Carom Shots",
+      "year": 1963,
+      "tmdb_id": 61697,
+      "rank": 1132
+    },
+    {
+      "title": "10 jours sans maman",
+      "year": 2020,
+      "tmdb_id": 605735,
+      "rank": 1133
+    },
+    {
+      "title": "Souvenirs, Souvenirs",
+      "year": 1984,
+      "tmdb_id": 66907,
+      "rank": 1134
+    },
+    {
+      "title": "Mon Curé Chez les Nudistes",
+      "year": 1982,
+      "tmdb_id": 91136,
+      "rank": 1135
+    },
+    {
+      "title": "Our Agent Tiger",
+      "year": 1965,
+      "tmdb_id": 66797,
+      "rank": 1136
+    },
+    {
+      "title": "La Bonne Soupe",
+      "year": 1964,
+      "tmdb_id": 533455,
+      "rank": 1137
+    },
+    {
+      "title": "Open Season 2",
+      "year": 2025,
+      "tmdb_id": 1437985,
+      "rank": 1138
+    },
+    {
+      "title": "The Seventh Juror",
+      "year": 1962,
+      "tmdb_id": 21070,
+      "rank": 1139
+    },
+    {
+      "title": "My Life Is Hell",
+      "year": 1991,
+      "tmdb_id": 4272,
+      "rank": 1140
+    },
+    {
+      "title": "The Dictator's Guns",
+      "year": 1965,
+      "tmdb_id": 75978,
+      "rank": 1141
+    },
+    {
+      "title": "Confidentially Yours",
+      "year": 1983,
+      "tmdb_id": 2455,
+      "rank": 1142
+    },
+    {
+      "title": "Cycling with Moliere",
+      "year": 2013,
+      "tmdb_id": 156236,
+      "rank": 1143
+    },
+    {
+      "title": "Horace 62",
+      "year": 1962,
+      "tmdb_id": 490093,
+      "rank": 1144
+    },
+    {
+      "title": "A Very Curious Girl",
+      "year": 1969,
+      "tmdb_id": 67496,
+      "rank": 1145
+    },
+    {
+      "title": "The Money Maker",
+      "year": 2025,
+      "tmdb_id": 1376415,
+      "rank": 1146
+    },
+    {
+      "title": "Courage - Let's Run",
+      "year": 1979,
+      "tmdb_id": 256431,
+      "rank": 1147
+    },
+    {
+      "title": "All Your Faces",
+      "year": 2023,
+      "tmdb_id": 1000492,
+      "rank": 1148
+    },
+    {
+      "title": "Father and Sons",
+      "year": 2003,
+      "tmdb_id": 51870,
+      "rank": 1149
+    },
+    {
+      "title": "Cousin Cousine",
+      "year": 1975,
+      "tmdb_id": 5618,
+      "rank": 1150
+    },
+    {
+      "title": "Romantics Anonymous",
+      "year": 2010,
+      "tmdb_id": 51991,
+      "rank": 1151
+    },
+    {
+      "title": "Le Majordome",
+      "year": 1965,
+      "tmdb_id": 165920,
+      "rank": 1152
+    },
+    {
+      "title": "Un homme se penche sur son passé",
+      "year": 1958,
+      "tmdb_id": 291398,
+      "rank": 1153
+    },
+    {
+      "title": "La Vendetta",
+      "year": 1962,
+      "tmdb_id": 188567,
+      "rank": 1154
+    },
+    {
+      "title": "Sept morts sur ordonnance",
+      "year": 1975,
+      "tmdb_id": 78267,
+      "rank": 1155
+    },
+    {
+      "title": "The Butcher",
+      "year": 1970,
+      "tmdb_id": 2912,
+      "rank": 1156
+    },
+    {
+      "title": "Stolen Kisses",
+      "year": 1968,
+      "tmdb_id": 255,
+      "rank": 1157
+    },
+    {
+      "title": "La Maison du Bonheur",
+      "year": 2006,
+      "tmdb_id": 36727,
+      "rank": 1158
+    },
+    {
+      "title": "The Exterminators",
+      "year": 1966,
+      "tmdb_id": 372176,
+      "rank": 1159
+    },
+    {
+      "title": "Neuilly sa mère, sa mère !",
+      "year": 2018,
+      "tmdb_id": 481762,
+      "rank": 1160
+    },
+    {
+      "title": "Law Breakers",
+      "year": 1971,
+      "tmdb_id": 4386,
+      "rank": 1161
+    },
+    {
+      "title": "The French Woman",
+      "year": 1977,
+      "tmdb_id": 194708,
+      "rank": 1162
+    },
+    {
+      "title": "If I Were a Rich Man",
+      "year": 2002,
+      "tmdb_id": 18303,
+      "rank": 1163
+    },
+    {
+      "title": "The Bureaucrats",
+      "year": 1959,
+      "tmdb_id": 379669,
+      "rank": 1164
+    },
+    {
+      "title": "La tête du client",
+      "year": 1965,
+      "tmdb_id": 352345,
+      "rank": 1165
+    },
+    {
+      "title": "The Butterfly",
+      "year": 2002,
+      "tmdb_id": 45699,
+      "rank": 1166
+    },
+    {
+      "title": "Laughter and Punishment",
+      "year": 2003,
+      "tmdb_id": 18295,
+      "rank": 1167
+    },
+    {
+      "title": "Un été d'enfer",
+      "year": 1984,
+      "tmdb_id": 242248,
+      "rank": 1168
+    },
+    {
+      "title": "L'ascension",
+      "year": 2017,
+      "tmdb_id": 421447,
+      "rank": 1169
+    },
+    {
+      "title": "T'empêches tout le monde de dormir",
+      "year": 1982,
+      "tmdb_id": 215673,
+      "rank": 1170
+    },
+    {
+      "title": "Ducobu 4 President",
+      "year": 2022,
+      "tmdb_id": 811886,
+      "rank": 1171
+    },
+    {
+      "title": "Immoral Tales",
+      "year": 1973,
+      "tmdb_id": 46581,
+      "rank": 1172
+    },
+    {
+      "title": "The Cost of Living",
+      "year": 2003,
+      "tmdb_id": 54157,
+      "rank": 1173
+    },
+    {
+      "title": "The Day and the Hour",
+      "year": 1963,
+      "tmdb_id": 78222,
+      "rank": 1174
+    },
+    {
+      "title": "22 Bullets",
+      "year": 2010,
+      "tmdb_id": 37645,
+      "rank": 1175
+    },
+    {
+      "title": "Cat and Dog",
+      "year": 2024,
+      "tmdb_id": 977331,
+      "rank": 1176
+    },
+    {
+      "title": "The Verdict",
+      "year": 1959,
+      "tmdb_id": 208937,
+      "rank": 1177
+    },
+    {
+      "title": "Countdown to Vengeance",
+      "year": 1971,
+      "tmdb_id": 356825,
+      "rank": 1178
+    },
+    {
+      "title": "The Lacemaker",
+      "year": 1977,
+      "tmdb_id": 56935,
+      "rank": 1179
+    },
+    {
+      "title": "Pleins feux sur Stanislas",
+      "year": 1965,
+      "tmdb_id": 104307,
+      "rank": 1180
+    },
+    {
+      "title": "Let Joy Reign Supreme",
+      "year": 1975,
+      "tmdb_id": 76482,
+      "rank": 1181
+    },
+    {
+      "title": "Holy Year",
+      "year": 1976,
+      "tmdb_id": 144726,
+      "rank": 1182
+    },
+    {
+      "title": "Les loups dans la bergerie",
+      "year": 1960,
+      "tmdb_id": 4900,
+      "rank": 1183
+    },
+    {
+      "title": "The Big Brother",
+      "year": 1982,
+      "tmdb_id": 67649,
+      "rank": 1184
+    },
+    {
+      "title": "La Bonne Occase",
+      "year": 1965,
+      "tmdb_id": 533470,
+      "rank": 1185
+    },
+    {
+      "title": "Le Chat et la souris",
+      "year": 1975,
+      "tmdb_id": 76347,
+      "rank": 1186
+    },
+    {
+      "title": "Elle cause plus... Elle flingue",
+      "year": 1972,
+      "tmdb_id": 78193,
+      "rank": 1187
+    },
+    {
+      "title": "Western",
+      "year": 1997,
+      "tmdb_id": 39968,
+      "rank": 1188
+    },
+    {
+      "title": "Una aventura de Gil Blas",
+      "year": 1956,
+      "tmdb_id": 561718,
+      "rank": 1189
+    },
+    {
+      "title": "Vive la France",
+      "year": 2013,
+      "tmdb_id": 169020,
+      "rank": 1190
+    },
+    {
+      "title": "Attention ! Une femme peut en cacher une autre",
+      "year": 1983,
+      "tmdb_id": 82052,
+      "rank": 1191
+    },
+    {
+      "title": "District 13: Ultimatum",
+      "year": 2009,
+      "tmdb_id": 15357,
+      "rank": 1192
+    },
+    {
+      "title": "Rookies Run Amok 2",
+      "year": 1983,
+      "tmdb_id": 72373,
+      "rank": 1193
+    },
+    {
+      "title": "Mauvais Esprit",
+      "year": 2003,
+      "tmdb_id": 38209,
+      "rank": 1194
+    },
+    {
+      "title": "Cash",
+      "year": 2008,
+      "tmdb_id": 13652,
+      "rank": 1195
+    },
+    {
+      "title": "Father's Trip",
+      "year": 1966,
+      "tmdb_id": 140390,
+      "rank": 1196
+    },
+    {
+      "title": "To Die in Madrid",
+      "year": 1963,
+      "tmdb_id": 116684,
+      "rank": 1197
+    },
+    {
+      "title": "La grande maffia...",
+      "year": 1971,
+      "tmdb_id": 114770,
+      "rank": 1198
+    },
+    {
+      "title": "Ramuntcho",
+      "year": 1959,
+      "tmdb_id": 562173,
+      "rank": 1199
+    },
+    {
+      "title": "The Crime Is Mine",
+      "year": 2023,
+      "tmdb_id": 977506,
+      "rank": 1200
+    },
+    {
+      "title": "Comedy of Power",
+      "year": 2006,
+      "tmdb_id": 12713,
+      "rank": 1201
+    },
+    {
+      "title": "Les Charlots en délire",
+      "year": 1979,
+      "tmdb_id": 79386,
+      "rank": 1202
+    },
+    {
+      "title": "Lucky Jo",
+      "year": 1964,
+      "tmdb_id": 216684,
+      "rank": 1203
+    },
+    {
+      "title": "A Sunday in the Country",
+      "year": 1984,
+      "tmdb_id": 42102,
+      "rank": 1204
+    },
+    {
+      "title": "Love Me If You Dare",
+      "year": 2003,
+      "tmdb_id": 8424,
+      "rank": 1205
+    },
+    {
+      "title": "This Man Must Die",
+      "year": 1969,
+      "tmdb_id": 2527,
+      "rank": 1206
+    },
+    {
+      "title": "The Good and the Bad",
+      "year": 1976,
+      "tmdb_id": 4735,
+      "rank": 1207
+    },
+    {
+      "title": "La Cérémonie",
+      "year": 1995,
+      "tmdb_id": 1802,
+      "rank": 1208
+    },
+    {
+      "title": "Adopte un veuf",
+      "year": 2016,
+      "tmdb_id": 384371,
+      "rank": 1209
+    },
+    {
+      "title": "Merci la vie",
+      "year": 1991,
+      "tmdb_id": 32853,
+      "rank": 1210
+    },
+    {
+      "title": "The Woman Next Door",
+      "year": 1981,
+      "tmdb_id": 12579,
+      "rank": 1211
+    },
+    {
+      "title": "Tomorrow",
+      "year": 2015,
+      "tmdb_id": 371492,
+      "rank": 1212
+    },
+    {
+      "title": "World Without Sun",
+      "year": 1964,
+      "tmdb_id": 91288,
+      "rank": 1213
+    },
+    {
+      "title": "Cookies",
+      "year": 1975,
+      "tmdb_id": 35549,
+      "rank": 1214
+    },
+    {
+      "title": "Circulez y'a rien à voir",
+      "year": 1983,
+      "tmdb_id": 78409,
+      "rank": 1215
+    },
+    {
+      "title": "Croque la vie",
+      "year": 1981,
+      "tmdb_id": 4239,
+      "rank": 1216
+    },
+    {
+      "title": "Kirikou and the Men and Women",
+      "year": 2012,
+      "tmdb_id": 139649,
+      "rank": 1217
+    },
+    {
+      "title": "The Phantom of Liberty",
+      "year": 1974,
+      "tmdb_id": 5558,
+      "rank": 1218
+    },
+    {
+      "title": "Vagabond",
+      "year": 1985,
+      "tmdb_id": 44018,
+      "rank": 1219
+    },
+    {
+      "title": "The Flower of Evil",
+      "year": 2003,
+      "tmdb_id": 10930,
+      "rank": 1220
+    },
+    {
+      "title": "Les 2 papas et la maman",
+      "year": 1996,
+      "tmdb_id": 100075,
+      "rank": 1221
+    },
+    {
+      "title": "Circle of Love",
+      "year": 1964,
+      "tmdb_id": 63876,
+      "rank": 1222
+    },
+    {
+      "title": "And Hope to Die",
+      "year": 1972,
+      "tmdb_id": 91571,
+      "rank": 1223
+    },
+    {
+      "title": "Signes extérieurs de richesse",
+      "year": 1983,
+      "tmdb_id": 79756,
+      "rank": 1224
+    },
+    {
+      "title": "Jeff",
+      "year": 1969,
+      "tmdb_id": 189038,
+      "rank": 1225
+    },
+    {
+      "title": "Violette Nozière",
+      "year": 1978,
+      "tmdb_id": 2813,
+      "rank": 1226
+    },
+    {
+      "title": "Le bois des amants",
+      "year": 1960,
+      "tmdb_id": 311055,
+      "rank": 1227
+    },
+    {
+      "title": "Lady Cops",
+      "year": 1987,
+      "tmdb_id": 120910,
+      "rank": 1228
+    },
+    {
+      "title": "Good King Dagobert",
+      "year": 1984,
+      "tmdb_id": 63229,
+      "rank": 1229
+    },
+    {
+      "title": "Atlantis",
+      "year": 1991,
+      "tmdb_id": 15466,
+      "rank": 1230
+    },
+    {
+      "title": "Jet Lag",
+      "year": 2002,
+      "tmdb_id": 18300,
+      "rank": 1231
+    },
+    {
+      "title": "Babes a GoGo",
+      "year": 1956,
+      "tmdb_id": 95216,
+      "rank": 1232
+    },
+    {
+      "title": "Les souvenirs",
+      "year": 2014,
+      "tmdb_id": 316854,
+      "rank": 1233
+    },
+    {
+      "title": "Le bourgeois gentilhomme",
+      "year": 1982,
+      "tmdb_id": 533846,
+      "rank": 1234
+    },
+    {
+      "title": "State of Siege",
+      "year": 1972,
+      "tmdb_id": 91487,
+      "rank": 1235
+    },
+    {
+      "title": "My Best Friend",
+      "year": 2006,
+      "tmdb_id": 4516,
+      "rank": 1236
+    },
+    {
+      "title": "Je te tiens, tu me tiens par la barbichette",
+      "year": 1979,
+      "tmdb_id": 71629,
+      "rank": 1237
+    },
+    {
+      "title": "The Adversary",
+      "year": 2002,
+      "tmdb_id": 52999,
+      "rank": 1238
+    },
+    {
+      "title": "The Missionaries",
+      "year": 2014,
+      "tmdb_id": 289153,
+      "rank": 1239
+    },
+    {
+      "title": "It's Only the End of the World",
+      "year": 2016,
+      "tmdb_id": 338189,
+      "rank": 1240
+    },
+    {
+      "title": "Une chance sur deux",
+      "year": 1998,
+      "tmdb_id": 49938,
+      "rank": 1241
+    },
+    {
+      "title": "Ducoboo 2: Crazy Vacation",
+      "year": 2012,
+      "tmdb_id": 103327,
+      "rank": 1242
+    },
+    {
+      "title": "I, Cesar",
+      "year": 2003,
+      "tmdb_id": 60025,
+      "rank": 1243
+    },
+    {
+      "title": "Rat Race",
+      "year": 1980,
+      "tmdb_id": 51437,
+      "rank": 1244
+    },
+    {
+      "title": "The Simple Past",
+      "year": 1977,
+      "tmdb_id": 245071,
+      "rank": 1245
+    },
+    {
+      "title": "Va voir maman, papa travaille",
+      "year": 1978,
+      "tmdb_id": 289780,
+      "rank": 1246
+    },
+    {
+      "title": "A Bad Son",
+      "year": 1980,
+      "tmdb_id": 61389,
+      "rank": 1247
+    },
+    {
+      "title": "Second Chance",
+      "year": 2010,
+      "tmdb_id": 53010,
+      "rank": 1248
+    },
+    {
+      "title": "A View of Love",
+      "year": 2010,
+      "tmdb_id": 52259,
+      "rank": 1249
+    },
+    {
+      "title": "Among Wolves",
+      "year": 1985,
+      "tmdb_id": 268214,
+      "rank": 1250
+    },
+    {
+      "title": "Shut Up, Gulli",
+      "year": 1974,
+      "tmdb_id": 139416,
+      "rank": 1251
+    },
+    {
+      "title": "Descente Aux Enfers",
+      "year": 1986,
+      "tmdb_id": 53357,
+      "rank": 1252
+    },
+    {
+      "title": "Practice Makes Perfect",
+      "year": 1979,
+      "tmdb_id": 57572,
+      "rank": 1253
+    },
+    {
+      "title": "En légitime défense",
+      "year": 1958,
+      "tmdb_id": 114386,
+      "rank": 1254
+    },
+    {
+      "title": "A Very Bad Friend",
+      "year": 2019,
+      "tmdb_id": 589984,
+      "rank": 1255
+    },
+    {
+      "title": "Blue Is the Warmest Colour",
+      "year": 2013,
+      "tmdb_id": 152584,
+      "rank": 1256
+    },
+    {
+      "title": "Le Chat",
+      "year": 1971,
+      "tmdb_id": 24984,
+      "rank": 1257
+    },
+    {
+      "title": "Paulette",
+      "year": 2012,
+      "tmdb_id": 159121,
+      "rank": 1258
+    },
+    {
+      "title": "Strange Gardens",
+      "year": 2003,
+      "tmdb_id": 51163,
+      "rank": 1259
+    },
+    {
+      "title": "Love Without Pity",
+      "year": 1989,
+      "tmdb_id": 43281,
+      "rank": 1260
+    },
+    {
+      "title": "The Savage State",
+      "year": 1978,
+      "tmdb_id": 265586,
+      "rank": 1261
+    },
+    {
+      "title": "Les bidasses au pensionnat",
+      "year": 1978,
+      "tmdb_id": 84516,
+      "rank": 1262
+    },
+    {
+      "title": "Coco Before Chanel",
+      "year": 2009,
+      "tmdb_id": 11156,
+      "rank": 1263
+    },
+    {
+      "title": "Enemy in the Shadows",
+      "year": 1960,
+      "tmdb_id": 85742,
+      "rank": 1264
+    },
+    {
+      "title": "Le prince du Pacifique",
+      "year": 2000,
+      "tmdb_id": 80959,
+      "rank": 1265
+    },
+    {
+      "title": "Hell Train",
+      "year": 1985,
+      "tmdb_id": 67650,
+      "rank": 1266
+    },
+    {
+      "title": "Seasons",
+      "year": 2015,
+      "tmdb_id": 352342,
+      "rank": 1267
+    },
+    {
+      "title": "Le repas des fauves",
+      "year": 1964,
+      "tmdb_id": 77508,
+      "rank": 1268
+    },
+    {
+      "title": "My Piece of the Pie",
+      "year": 2011,
+      "tmdb_id": 58043,
+      "rank": 1269
+    },
+    {
+      "title": "Dog Day",
+      "year": 1983,
+      "tmdb_id": 78321,
+      "rank": 1270
+    },
+    {
+      "title": "Mado",
+      "year": 1976,
+      "tmdb_id": 3424,
+      "rank": 1271
+    },
+    {
+      "title": "Kaamelott: The Second Chapter part 1",
+      "year": 2025,
+      "tmdb_id": 1076897,
+      "rank": 1272
+    },
+    {
+      "title": "L'étoile du nord",
+      "year": 1982,
+      "tmdb_id": 77700,
+      "rank": 1273
+    },
+    {
+      "title": "Robert et Robert",
+      "year": 1978,
+      "tmdb_id": 265582,
+      "rank": 1274
+    },
+    {
+      "title": "Fanfan",
+      "year": 1993,
+      "tmdb_id": 38012,
+      "rank": 1275
+    },
+    {
+      "title": "My Night at Maud's",
+      "year": 1969,
+      "tmdb_id": 48831,
+      "rank": 1276
+    },
+    {
+      "title": "Death Watch",
+      "year": 1980,
+      "tmdb_id": 3418,
+      "rank": 1277
+    },
+    {
+      "title": "Gibraltar",
+      "year": 1964,
+      "tmdb_id": 9370,
+      "rank": 1278
+    },
+    {
+      "title": "Stavisky",
+      "year": 1974,
+      "tmdb_id": 61296,
+      "rank": 1279
+    },
+    {
+      "title": "Porn in the Hood",
+      "year": 2012,
+      "tmdb_id": 123229,
+      "rank": 1280
+    },
+    {
+      "title": "À nous les garçons",
+      "year": 1985,
+      "tmdb_id": 155219,
+      "rank": 1281
+    },
+    {
+      "title": "Casque bleu (Blue Helmet )",
+      "year": 1994,
+      "tmdb_id": 50156,
+      "rank": 1282
+    },
+    {
+      "title": "The Freshman",
+      "year": 2018,
+      "tmdb_id": 463858,
+      "rank": 1283
+    },
+    {
+      "title": "Danse avec lui",
+      "year": 2007,
+      "tmdb_id": 61659,
+      "rank": 1284
+    },
+    {
+      "title": "Bed and Board",
+      "year": 1970,
+      "tmdb_id": 258,
+      "rank": 1285
+    },
+    {
+      "title": "The Secret of the Grain",
+      "year": 2007,
+      "tmdb_id": 8280,
+      "rank": 1286
+    },
+    {
+      "title": "My Favorite Season",
+      "year": 1993,
+      "tmdb_id": 52873,
+      "rank": 1287
+    },
+    {
+      "title": "Raining Cats and Frogs",
+      "year": 2003,
+      "tmdb_id": 22624,
+      "rank": 1288
+    },
+    {
+      "title": "L'argent des autres",
+      "year": 1978,
+      "tmdb_id": 78376,
+      "rank": 1289
+    },
+    {
+      "title": "R.T.T.",
+      "year": 2009,
+      "tmdb_id": 26629,
+      "rank": 1290
+    },
+    {
+      "title": "The Menace",
+      "year": 1961,
+      "tmdb_id": 410173,
+      "rank": 1291
+    },
+    {
+      "title": "Le Bal des espions",
+      "year": 1960,
+      "tmdb_id": 533434,
+      "rank": 1292
+    },
+    {
+      "title": "Ugly Melanie",
+      "year": 2008,
+      "tmdb_id": 17630,
+      "rank": 1293
+    },
+    {
+      "title": "Quand passent les faisans",
+      "year": 1965,
+      "tmdb_id": 74703,
+      "rank": 1294
+    },
+    {
+      "title": "On ne meurt que deux fois",
+      "year": 1985,
+      "tmdb_id": 78538,
+      "rank": 1295
+    },
+    {
+      "title": "Lost Illusions",
+      "year": 2021,
+      "tmdb_id": 660000,
+      "rank": 1296
+    },
+    {
+      "title": "L'Hermine",
+      "year": 2015,
+      "tmdb_id": 329809,
+      "rank": 1297
+    },
+    {
+      "title": "Les Misérables",
+      "year": 1995,
+      "tmdb_id": 48750,
+      "rank": 1298
+    },
+    {
+      "title": "The Other One's Mug",
+      "year": 1979,
+      "tmdb_id": 4268,
+      "rank": 1299
+    },
+    {
+      "title": "Ducobu passe au vert",
+      "year": 2024,
+      "tmdb_id": 1137752,
+      "rank": 1300
+    },
+    {
+      "title": "Ah ! Quelle équipe",
+      "year": 1957,
+      "tmdb_id": 309896,
+      "rank": 1301
+    },
+    {
+      "title": "Autumn and the Black Jaguar",
+      "year": 2024,
+      "tmdb_id": 959098,
+      "rank": 1302
+    },
+    {
+      "title": "Second Tour",
+      "year": 2023,
+      "tmdb_id": 962309,
+      "rank": 1303
+    },
+    {
+      "title": "Les Bodin's partent en vrille",
+      "year": 2025,
+      "tmdb_id": 1235619,
+      "rank": 1304
+    },
+    {
+      "title": "Holy Cow",
+      "year": 2024,
+      "tmdb_id": 1079310,
+      "rank": 1305
+    },
+    {
+      "title": "LOL 2.0",
+      "year": 2026,
+      "tmdb_id": 1477170,
+      "rank": 1306
+    },
+    {
+      "title": "Arthur 3: The War of the Two Worlds",
+      "year": 2010,
+      "tmdb_id": 42949,
+      "rank": 1307
+    },
+    {
+      "title": "Menteur",
+      "year": 2022,
+      "tmdb_id": 829165,
+      "rank": 1308
+    },
+    {
+      "title": "The Lost Prince",
+      "year": 2020,
+      "tmdb_id": 520725,
+      "rank": 1309
+    },
+    {
+      "title": "Chers parents",
+      "year": 2026,
+      "tmdb_id": 1368830,
+      "rank": 1310
+    },
+    {
+      "title": "The Richest Woman in the World",
+      "year": 2025,
+      "tmdb_id": 1309725,
+      "rank": 1311
+    },
+    {
+      "title": "Colours of Time",
+      "year": 2025,
+      "tmdb_id": 1235304,
+      "rank": 1312
+    },
+    {
+      "title": "Les Rayons et les Ombres",
+      "year": 2026,
+      "tmdb_id": 1318335,
+      "rank": 1313
+    },
+    {
+      "title": "A Difficult Year",
+      "year": 2023,
+      "tmdb_id": 965791,
+      "rank": 1314
+    },
+    {
+      "title": "Cycle of Time",
+      "year": 2025,
+      "tmdb_id": 1284496,
+      "rank": 1315
+    },
+    {
+      "title": "Epic Tails",
+      "year": 2023,
+      "tmdb_id": 939338,
+      "rank": 1316
+    },
+    {
+      "title": "Masquerade",
+      "year": 2022,
+      "tmdb_id": 892515,
+      "rank": 1317
+    },
+    {
+      "title": "Abbé Pierre: A Century of Devotion",
+      "year": 2023,
+      "tmdb_id": 944117,
+      "rank": 1318
+    },
+    {
+      "title": "Notre-Dame on Fire",
+      "year": 2022,
+      "tmdb_id": 811596,
+      "rank": 1319
+    },
+    {
+      "title": "Bernadette",
+      "year": 2023,
+      "tmdb_id": 961084,
+      "rank": 1320
+    },
+    {
+      "title": "LOL",
+      "year": 2008,
+      "tmdb_id": 21861,
+      "rank": 1321
+    },
+    {
+      "title": "Life for Real",
+      "year": 2023,
+      "tmdb_id": 967370,
+      "rank": 1322
+    },
+    {
+      "title": "The Ties That Bind Us",
+      "year": 2024,
+      "tmdb_id": 1096642,
+      "rank": 1323
+    },
+    {
+      "title": "Goliath",
+      "year": 2022,
+      "tmdb_id": 884971,
+      "rank": 1324
+    },
+    {
+      "title": "The Stranger",
+      "year": 2025,
+      "tmdb_id": 1429348,
+      "rank": 1325
+    },
+    {
+      "title": "My Donkey, My Lover & I",
+      "year": 2020,
+      "tmdb_id": 669664,
+      "rank": 1326
+    },
+    {
+      "title": "Jeanne du Barry",
+      "year": 2023,
+      "tmdb_id": 921452,
+      "rank": 1327
+    },
+    {
+      "title": "Employee of the Month",
+      "year": 2022,
+      "tmdb_id": 745608,
+      "rank": 1328
+    },
+    {
+      "title": "Class Reunion",
+      "year": 2025,
+      "tmdb_id": 1302848,
+      "rank": 1329
+    },
+    {
+      "title": "Good Vibes Only",
+      "year": 2026,
+      "tmdb_id": 1516724,
+      "rank": 1330
+    },
+    {
+      "title": "Jamais sans mon psy",
+      "year": 2024,
+      "tmdb_id": 1130402,
+      "rank": 1331
+    },
+    {
+      "title": "Y'a pas de réseau",
+      "year": 2025,
+      "tmdb_id": 1284787,
+      "rank": 1332
+    },
+    {
+      "title": "Case 137",
+      "year": 2025,
+      "tmdb_id": 1294698,
+      "rank": 1333
+    },
+    {
+      "title": "It Was Just an Accident",
+      "year": 2025,
+      "tmdb_id": 1456349,
+      "rank": 1334
+    },
+    {
+      "title": "Espace Détente",
+      "year": 2005,
+      "tmdb_id": 18825,
+      "rank": 1335
+    },
+    {
+      "title": "The American Dream",
+      "year": 2026,
+      "tmdb_id": 1365378,
+      "rank": 1336
+    },
+    {
+      "title": "An Ordinary Case",
+      "year": 2024,
+      "tmdb_id": 1136394,
+      "rank": 1337
+    },
+    {
+      "title": "The Wizard of the Kremlin",
+      "year": 2025,
+      "tmdb_id": 1291659,
+      "rank": 1338
+    },
+    {
+      "title": "Freres",
+      "year": 2024,
+      "tmdb_id": 1001089,
+      "rank": 1339
+    },
+    {
+      "title": "Forsaken",
+      "year": 2026,
+      "tmdb_id": 1645368,
+      "rank": 1340
+    },
+    {
+      "title": "When Fall Is Coming",
+      "year": 2024,
+      "tmdb_id": 1171634,
+      "rank": 1341
+    },
+    {
+      "title": "Louise Violet",
+      "year": 2024,
+      "tmdb_id": 1063875,
+      "rank": 1342
+    },
+    {
+      "title": "Leave One Day",
+      "year": 2025,
+      "tmdb_id": 1277884,
+      "rank": 1343
+    },
+    {
+      "title": "The Vets",
+      "year": 2019,
+      "tmdb_id": 613348,
+      "rank": 1344
+    },
+    {
+      "title": "Price of Parenting",
+      "year": 2021,
+      "tmdb_id": 770554,
+      "rank": 1345
+    },
+    {
+      "title": "Dracula: A Love Tale",
+      "year": 2025,
+      "tmdb_id": 1246049,
+      "rank": 1346
+    },
+    {
+      "title": "Souleymane's Story",
+      "year": 2024,
+      "tmdb_id": 1158996,
+      "rank": 1347
+    },
+    {
+      "title": "The Electric Kiss",
+      "year": 2026,
+      "tmdb_id": 1442669,
+      "rank": 1348
+    },
+    {
+      "title": "A Private Life",
+      "year": 2025,
+      "tmdb_id": 1290432,
+      "rank": 1349
+    },
+    {
+      "title": "Poly",
+      "year": 2020,
+      "tmdb_id": 659943,
+      "rank": 1350
+    },
+    {
+      "title": "The Most Precious of Cargoes",
+      "year": 2024,
+      "tmdb_id": 842859,
+      "rank": 1351
+    },
+    {
+      "title": "Sage homme",
+      "year": 2023,
+      "tmdb_id": 957770,
+      "rank": 1352
+    },
+    {
+      "title": "The Velvet Queen",
+      "year": 2021,
+      "tmdb_id": 842356,
+      "rank": 1353
+    },
+    {
+      "title": "The Seed of the Sacred Fig",
+      "year": 2024,
+      "tmdb_id": 1278263,
+      "rank": 1354
+    },
+    {
+      "title": "Kompromat",
+      "year": 2022,
+      "tmdb_id": 852427,
+      "rank": 1355
+    },
+    {
+      "title": "Riviera Revenge",
+      "year": 2024,
+      "tmdb_id": 1192195,
+      "rank": 1356
+    },
+    {
+      "title": "Bagarre",
+      "year": 2026,
+      "tmdb_id": 1418709,
+      "rank": 1357
+    },
+    {
+      "title": "Licence to Build",
+      "year": 2021,
+      "tmdb_id": 886563,
+      "rank": 1358
+    },
+    {
+      "title": "Waiting for Bojangles",
+      "year": 2002,
+      "tmdb_id": 851303,
+      "rank": 1359
+    },
+    {
+      "title": "The Book of Wonders",
+      "year": 2023,
+      "tmdb_id": 890203,
+      "rank": 1360
+    },
+    {
+      "title": "Meet the Leroys",
+      "year": 2024,
+      "tmdb_id": 964877,
+      "rank": 1361
+    },
+    {
+      "title": "Ride Away",
+      "year": 2024,
+      "tmdb_id": 1321412,
+      "rank": 1362
+    },
+    {
+      "title": "Plancha",
+      "year": 2022,
+      "tmdb_id": 926516,
+      "rank": 1363
+    },
+    {
+      "title": "Paris Memories",
+      "year": 2022,
+      "tmdb_id": 915931,
+      "rank": 1364
+    },
+    {
+      "title": "Les Vengeances de Maître Poutifard",
+      "year": 2023,
+      "tmdb_id": 1005685,
+      "rank": 1365
+    },
+    {
+      "title": "Boy from Heaven",
+      "year": 2022,
+      "tmdb_id": 788977,
+      "rank": 1366
+    },
+    {
+      "title": "Little Nicholas' Treasure",
+      "year": 2021,
+      "tmdb_id": 740844,
+      "rank": 1367
+    },
+    {
+      "title": "Delete History",
+      "year": 2020,
+      "tmdb_id": 659699,
+      "rank": 1368
+    },
+    {
+      "title": "Pimp My Bride",
+      "year": 2024,
+      "tmdb_id": 1235502,
+      "rank": 1369
+    },
+    {
+      "title": "Ernest and Celestine: A Trip to Gibberitia",
+      "year": 2022,
+      "tmdb_id": 947219,
+      "rank": 1370
+    },
+    {
+      "title": "Doux Jésus",
+      "year": 2025,
+      "tmdb_id": 1284514,
+      "rank": 1371
+    },
+    {
+      "title": "Les Déguns 2",
+      "year": 2023,
+      "tmdb_id": 1000614,
+      "rank": 1372
+    },
+    {
+      "title": "We Will Go",
+      "year": 2025,
+      "tmdb_id": 1003504,
+      "rank": 1373
+    },
+    {
+      "title": "You Are So Beautiful",
+      "year": 2005,
+      "tmdb_id": 10268,
+      "rank": 1374
+    },
+    {
+      "title": "Never Say... Never!",
+      "year": 2005,
+      "tmdb_id": 40004,
+      "rank": 1375
+    },
+    {
+      "title": "Let's Talk About the Rain",
+      "year": 2008,
+      "tmdb_id": 15436,
+      "rank": 1376
+    },
+    {
+      "title": "Blanche",
+      "year": 2002,
+      "tmdb_id": 60989,
+      "rank": 1377
+    },
+    {
+      "title": "Du jour au lendemain",
+      "year": 2006,
+      "tmdb_id": 13044,
+      "rank": 1378
+    },
+    {
+      "title": "Tellement proches",
+      "year": 2009,
+      "tmdb_id": 19268,
+      "rank": 1379
+    },
+    {
+      "title": "From Behind",
+      "year": 1999,
+      "tmdb_id": 69728,
+      "rank": 1380
+    },
+    {
+      "title": "A Housekeeper",
+      "year": 2002,
+      "tmdb_id": 34840,
+      "rank": 1381
+    },
+    {
+      "title": "Tomorrow's Another Day",
+      "year": 2000,
+      "tmdb_id": 15329,
+      "rank": 1382
+    },
+    {
+      "title": "My Wife Is an Actress",
+      "year": 2001,
+      "tmdb_id": 14651,
+      "rank": 1383
+    },
+    {
+      "title": "Camille redouble",
+      "year": 2012,
+      "tmdb_id": 135281,
+      "rank": 1384
+    },
+    {
+      "title": "I'm Fine, Don't Worry",
+      "year": 2006,
+      "tmdb_id": 1254,
+      "rank": 1385
+    },
+    {
+      "title": "The Man Who Loved Women",
+      "year": 1977,
+      "tmdb_id": 1421,
+      "rank": 1386
+    },
+    {
+      "title": "Us Two",
+      "year": 1979,
+      "tmdb_id": 76348,
+      "rank": 1387
+    },
+    {
+      "title": "Marrakesh Cult",
+      "year": 1979,
+      "tmdb_id": 373030,
+      "rank": 1388
+    },
+    {
+      "title": "Violette et François",
+      "year": 1977,
+      "tmdb_id": 320948,
+      "rank": 1389
+    },
+    {
+      "title": "The Hurried Man",
+      "year": 1977,
+      "tmdb_id": 191101,
+      "rank": 1390
+    }
+  ]
+}

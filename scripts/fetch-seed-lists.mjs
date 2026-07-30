@@ -18,7 +18,7 @@
  */
 
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -116,6 +116,7 @@ async function fetchCriterion() {
   return {
     slug: 'criterion-collection',
     name: 'The Criterion Collection',
+    tags: ['collection', 'canon'],
     category: 'collection',
     source: 'Wikidata — Criterion Collection spine number (P12279)',
     // The data comes from Wikidata, but query.wikidata.org isn't somewhere a
@@ -181,10 +182,18 @@ async function fetchWikidataAward(awardQid, meta) {
     .filter((entry) => entry.year === null || entry.year <= THIS_YEAR)
     .sort((a, b) => (a.year ?? 0) - (b.year ?? 0) || a.title.localeCompare(b.title));
 
-  return { category: 'awards', ...meta, entries };
+  return { tags: ['awards'], category: 'awards', ...meta, entries };
 }
 
 // --- Wikipedia categories -------------------------------------------------
+
+/** Thrown for throttling specifically, so callers can tell it from a bad page. */
+class RateLimited extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'RateLimited';
+  }
+}
 
 async function wikipediaApi(lang, params, attempt = 0) {
   const url = new URL(`https://${lang}.wikipedia.org/w/api.php`);
@@ -197,35 +206,148 @@ async function wikipediaApi(lang, params, attempt = 0) {
     signal: AbortSignal.timeout(60_000),
   });
   if (response.status === 429 || response.status >= 500) {
-    if (attempt >= 4) throw new Error(`${lang}.wikipedia responded ${response.status}`);
-    await sleep(3000 * 2 ** attempt);
+    // Honour Retry-After when the server sends it — guessing shorter than it
+    // asked for is what turns a pause into a ban. Eight attempts with a 4s base
+    // gives up after ~8 minutes of trying, which suits a build-time script
+    // walking 80+ pages far better than the 45 seconds four attempts allowed.
+    if (attempt >= 8) {
+      throw new RateLimited(`${lang}.wikipedia responded ${response.status} after ${attempt} retries`);
+    }
+    const retryAfter = Number(response.headers.get('retry-after'));
+    await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 4000 * 2 ** attempt);
     return wikipediaApi(lang, params, attempt + 1);
   }
   if (!response.ok) throw new Error(`${lang}.wikipedia responded ${response.status}`);
-  return response.json();
+
+  // The rate limiter answers with HTTP 200 and a PLAIN TEXT body — "You are
+  // making too many requests to the API." — so a bare response.json() throws a
+  // JSON syntax error that looks nothing like throttling. Hit repeatedly while
+  // building the box-office fetcher, which walks 82 pages in one run.
+  const body = await response.text();
+  if (/^You are making too many requests/i.test(body)) {
+    if (attempt >= 8) throw new RateLimited(`${lang}.wikipedia is rate limiting this client`);
+    await sleep(4000 * 2 ** attempt);
+    return wikipediaApi(lang, params, attempt + 1);
+  }
+  try {
+    return JSON.parse(body);
+  } catch {
+    throw new Error(`${lang}.wikipedia returned a non-JSON body (${body.slice(0, 80)})`);
+  }
 }
 
 /**
- * Award winners taken from a Wikipedia category rather than Wikidata's P166.
+ * Where a run may cache what it downloads, when SEED_CACHE_DIR is set.
  *
- * For the national awards, Wikidata's award-received data is badly incomplete —
- * measured at 32 films for BAFTA Best Film, 26 for the César and 12 for the
- * Goya, against many decades of ceremonies. The language Wikipedias curate
- * their own awards properly, and a category is already exactly the list we
- * want, so this walks:
+ * **Off by default on purpose**: a committed seed file should come from a fresh
+ * fetch, and a cache that silently served stale data would be a worse bug than
+ * the waste it saves. It exists for the case that actually hurts — iterating on
+ * a parser across 82 articles and ~3,400 TMDB lookups, where every run after
+ * the first re-downloads identical data.
  *
- *     category members  ->  each page's Wikidata QID  ->  that item's TMDB id
- *
- * which yields 79 / 51 / 41 films at 98-100% TMDB coverage. Going through the
- * QID rather than the page title means no fuzzy title matching at all, and it
- * sidesteps the localisation problem entirely: the French page for a film is
- * linked to the same Wikidata item as the English one.
- *
- * The category also contains the award's own article ("BAFTA Award for Best
- * Film"), which naturally drops out for having no TMDB id.
+ *   SEED_CACHE_DIR=.cache npm run fetch-seeds -- box-office
  */
-async function fetchWikipediaCategoryAward(lang, category, awardQid, meta) {
-  // 1. Category members, following continuation.
+const cacheDir = () => process.env.SEED_CACHE_DIR?.trim() || null;
+
+/** One page's raw wikitext, optionally served from the cache. */
+async function fetchWikitext(lang, title) {
+  const dir = cacheDir() ? join(cacheDir(), 'wiki') : null;
+  const cacheFile = dir
+    ? join(dir, `${lang}-${title.replace(/[^\w.-]+/g, '_')}.wikitext`)
+    : null;
+
+  if (cacheFile) {
+    try {
+      return await readFile(cacheFile, 'utf8');
+    } catch {
+      // Not cached yet — fall through and fetch it.
+    }
+  }
+
+  const data = await wikipediaApi(lang, {
+    action: 'parse',
+    page: title,
+    prop: 'wikitext',
+    redirects: '1',
+  });
+  const wikitext = data.parse?.wikitext ?? null;
+
+  if (cacheFile && wikitext) {
+    await mkdir(dir, { recursive: true });
+    await writeFile(cacheFile, wikitext);
+  }
+  return wikitext;
+}
+
+// TMDB's terms cap cached data at six months, which is why the app's own
+// refresh job runs at 150 days. This dev cache holds ONE field per film — the
+// original language — and expires far sooner than that, so it never drifts near
+// the limit. It is not redistributed: .cache/ is gitignored.
+const LANGUAGE_CACHE_DAYS = 30;
+
+/**
+ * original_language for many tmdb ids, reusing anything already known.
+ *
+ * Caches the ANSWER, not the response. A full /movie detail payload is tens of
+ * kilobytes and we need one field of it, so storing responses would mean ~120MB
+ * to avoid re-reading ~60KB of actual information.
+ */
+async function originalLanguages(tmdbIds, getMovie, { log = () => {} } = {}) {
+  const dir = cacheDir();
+  const cacheFile = dir ? join(dir, 'tmdb-language.json') : null;
+  const cutoff = Date.now() - LANGUAGE_CACHE_DAYS * 24 * 60 * 60 * 1000;
+
+  const known = new Map();
+  if (cacheFile) {
+    try {
+      const raw = JSON.parse(await readFile(cacheFile, 'utf8'));
+      for (const [id, entry] of Object.entries(raw)) {
+        if (entry && Date.parse(entry.at) > cutoff) known.set(Number(id), entry.lang);
+      }
+    } catch {
+      // No cache yet, or it is unreadable — refetch everything.
+    }
+  }
+
+  const missing = tmdbIds.filter((id) => !known.has(id));
+  if (cacheFile) log(`\n  ${known.size} language(s) from cache, ${missing.length} to fetch`);
+
+  let done = 0;
+  await Promise.all(
+    missing.map(async (id) => {
+      // Through server/tmdb.js, whose semaphore caps this at 8 in flight.
+      // Firing them unthrottled loses ~40% to rate limiting.
+      const movie = await getMovie(id).catch(() => null);
+      known.set(id, movie?.original_language ?? null);
+      done += 1;
+      if (done % 250 === 0) process.stdout.write(`${done} `);
+    }),
+  );
+
+  if (cacheFile && missing.length) {
+    const at = new Date().toISOString();
+    const payload = Object.fromEntries([...known].map(([id, lang]) => [id, { lang, at }]));
+    await mkdir(dir, { recursive: true });
+    await writeFile(cacheFile, JSON.stringify(payload));
+  }
+  return known;
+}
+
+// --- The Wikipedia -> Wikidata -> TMDB pipeline ----------------------------
+//
+// Three steps that used to be one function. They are split because the middle
+// two are the reusable part: any list of Wikipedia page titles — an award
+// category, a box-office table, whatever comes next — resolves to TMDB ids the
+// same way, and only the way the TITLES are gathered differs.
+//
+//     titles  ->  Wikidata QIDs  ->  TMDB ids
+//
+// Going through the QID rather than the page title means no fuzzy title
+// matching anywhere, and it sidesteps localisation entirely: the French page
+// for a film points at the same Wikidata item as the English one.
+
+/** Step 1a: every page in a Wikipedia category, following continuation. */
+export async function fetchCategoryMembers(lang, category) {
   const titles = [];
   let cont;
   do {
@@ -243,47 +365,82 @@ async function fetchWikipediaCategoryAward(lang, category, awardQid, meta) {
   } while (cont);
 
   if (titles.length === 0) throw new Error(`category "${category}" is empty or missing`);
+  return titles;
+}
 
-  // 2. Page titles -> Wikidata QIDs (50 titles per request is the API limit).
-  const qids = [];
+/**
+ * Step 2: page titles -> Wikidata QIDs, keyed by the title as it was PASSED IN.
+ *
+ * The API normalises titles and follows redirects, so what comes back is often
+ * spelled differently from what went out. Box office needs the round trip to
+ * survive — each film's admissions figure is held against the original title —
+ * so the normalised/redirected names are mapped back before returning.
+ * 50 titles per request is the API limit.
+ */
+export async function titlesToQidMap(lang, titles) {
+  const byTitle = new Map();
   for (let i = 0; i < titles.length; i += 50) {
     const data = await wikipediaApi(lang, {
       action: 'query',
       prop: 'pageprops',
       ppprop: 'wikibase_item',
       titles: titles.slice(i, i + 50).join('|'),
+      redirects: '1',
     });
+    const original = new Map();
+    for (const entry of data.query?.normalized ?? []) original.set(entry.to, entry.from);
+    for (const entry of data.query?.redirects ?? []) {
+      original.set(entry.to, original.get(entry.from) ?? entry.from);
+    }
     for (const page of data.query?.pages ?? []) {
-      if (page.pageprops?.wikibase_item) qids.push(page.pageprops.wikibase_item);
+      if (page.pageprops?.wikibase_item) {
+        byTitle.set(original.get(page.title) ?? page.title, page.pageprops.wikibase_item);
+      }
     }
     await sleep(400);
   }
+  return byTitle;
+}
 
-  // 3. QIDs -> TMDB id, English title, release year, and the ceremony year
-  //    where Wikidata happens to record it. That last one is patchy for these
-  //    three awards (28-39%) — it comes from the same sparse P166 data that
-  //    made the category route necessary in the first place — so a missing
-  //    award_year is expected here and the UI simply omits the year.
+/** The same step, when only the set of QIDs matters (the award lists). */
+export async function titlesToQids(lang, titles) {
+  return [...new Set((await titlesToQidMap(lang, titles)).values())];
+}
+
+/**
+ * Step 3: QIDs -> TMDB id, English title and release year.
+ *
+ * `awardQid`, when given, additionally pulls the ceremony year from the
+ * point-in-time (P585) qualifier on that award's statement. Optional because
+ * it is the one award-specific thing in this pipeline — box office has no
+ * ceremony — and because the data is patchy anyway: 28-39% for the three
+ * national awards, since it comes from the same sparse P166 statements that
+ * made the category route necessary in the first place.
+ */
+export async function qidsToFilms(qids, { awardQid = null } = {}) {
   const entries = [];
   for (let i = 0; i < qids.length; i += 120) {
     const values = qids.slice(i, i + 120).map((q) => `wd:${q}`).join(' ');
-    const rows = await sparql(`
-      SELECT ?item ?name ?date ?tmdb ?awarded WHERE {
-        VALUES ?item { ${values} }
-        OPTIONAL { ?item wdt:P4947 ?tmdb . }
-        OPTIONAL { ?item wdt:P577 ?date . }
-        OPTIONAL {
+    const awardClause = awardQid
+      ? `OPTIONAL {
           ?item p:P166 ?statement .
           ?statement ps:P166 wd:${awardQid} .
           ?statement pq:P585 ?awarded .
-        }
+        }`
+      : '';
+    const rows = await sparql(`
+      SELECT ?item ?name ?date ?tmdb ${awardQid ? '?awarded' : ''} WHERE {
+        VALUES ?item { ${values} }
+        OPTIONAL { ?item wdt:P4947 ?tmdb . }
+        OPTIONAL { ?item wdt:P577 ?date . }
+        ${awardClause}
         OPTIONAL { ?item rdfs:label ?name . FILTER(LANG(?name) = "en") }
       }`);
 
     const byQid = new Map();
     for (const row of rows) {
       const qid = row.item.value.split('/').pop();
-      const entry = byQid.get(qid) ?? { title: null, year: null, award_year: null, tmdb_id: null };
+      const entry = byQid.get(qid) ?? { qid, title: null, year: null, award_year: null, tmdb_id: null };
       if (row.tmdb?.value && !entry.tmdb_id) entry.tmdb_id = Number(row.tmdb.value);
       if (row.name?.value && !entry.title) entry.title = row.name.value;
       if (row.date?.value) {
@@ -299,6 +456,26 @@ async function fetchWikipediaCategoryAward(lang, category, awardQid, meta) {
     entries.push(...byQid.values());
     if (i + 120 < qids.length) await sleep(1200);
   }
+  return entries;
+}
+
+/**
+ * Award winners taken from a Wikipedia category rather than Wikidata's P166.
+ *
+ * For the national awards, Wikidata's award-received data is badly incomplete —
+ * measured at 32 films for BAFTA Best Film, 26 for the César and 12 for the
+ * Goya, against many decades of ceremonies. The language Wikipedias curate
+ * their own awards properly, and a category is already exactly the list we
+ * want, so this walks the pipeline above and yields 79 / 51 / 41 films at
+ * 98-100% TMDB coverage.
+ *
+ * The category also contains the award's own article ("BAFTA Award for Best
+ * Film"), which naturally drops out for having no TMDB id.
+ */
+async function fetchWikipediaCategoryAward(lang, category, awardQid, meta) {
+  const titles = await fetchCategoryMembers(lang, category);
+  const qids = await titlesToQids(lang, titles);
+  const entries = await qidsToFilms(qids, { awardQid });
 
   const films = entries
     // No TMDB id means either the award's own article or a film TMDB doesn't
@@ -306,9 +483,283 @@ async function fetchWikipediaCategoryAward(lang, category, awardQid, meta) {
     // of taking this route.
     .filter((entry) => entry.tmdb_id && entry.title)
     .filter((entry) => entry.year === null || entry.year <= THIS_YEAR)
-    .sort((a, b) => (a.year ?? 0) - (b.year ?? 0) || a.title.localeCompare(b.title));
+    .sort((a, b) => (a.year ?? 0) - (b.year ?? 0) || a.title.localeCompare(b.title))
+    .map(({ qid, ...entry }) => entry);
 
-  return { category: 'awards', ...meta, entries: films };
+  return { tags: ['awards'], category: 'awards', ...meta, entries: films };
+}
+
+// --- Box office -----------------------------------------------------------
+//
+// fr.wikipedia keeps one "Box-office France <year>" article per year, verified
+// present for all 82 years 1945-2026 with no gaps. Each carries a wikitable of
+// that year's releases above the page's own admissions threshold (usually one
+// million), with the film title as a wikilink — so identity goes through the
+// QID, never through title matching.
+//
+// The all-time page was rejected as the source: it is cumulative and dominated
+// by recent Hollywood, which is exactly what this list exists NOT to be. See
+// BACKLOG.md for the measurement.
+
+const BOX_OFFICE_FIRST_YEAR = 1945;
+
+// Column headers vary across the corpus. These were read off a survey of all 82
+// pages rather than guessed, which is why "Box-Office France" appears twice —
+// the capitalisation genuinely changes in 2013.
+const BOX_OFFICE_COLUMNS = {
+  title: ['titre', 'film'],
+  admissions: ['entrées', 'entrees', 'box-office france', 'box office france', 'spectateurs'],
+};
+
+const ADMISSIONS_TEMPLATE = /\{\{\s*(?:unité|nombre|formatnum:)\s*\|?\s*([\d][\d\s .,  ]*)/i;
+// Not (?:Fichier|File) alone: the pre-1970s pages use "Image:", and missing
+// that left a third of all rows looking as though they had no country.
+const FILM_LINK = /\[\[(?!Fichier:|File:|Image:|Catégorie:|Category:)([^\]|#]+?)(?:\|([^\]]*))?\]\]/;
+
+function normalizeHeaderCell(cell) {
+  return cell
+    // Footnotes ride ON the header: `Entrées<ref>Selon les sites…</ref>`.
+    // Stripping only the tags leaves the footnote TEXT glued to the column
+    // name, which no longer matches "entrées" — that silently emptied 1976-1982
+    // once matching was tightened to exact.
+    .replace(/<ref[\s\S]*?(?:\/>|<\/ref>)/gi, ' ')
+    .replace(/\{\{[^{}]*\}\}/g, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\[\[[^\]]*\]\]/g, ' ')
+    .replace(/\b(?:scope|style|width|align|colspan|rowspan|class|bgcolor|data-sort-type)\s*=\s*"?[^"|\s]*"?/gi, ' ')
+    .replace(/'''/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * Splits one wikitable row into cells, handling both `| a || b` and
+ * one-cell-per-line.
+ *
+ * Each cell is tagged with whether it came from `!` (header) markup. Counting
+ * header LINES instead would misread the single-line form
+ * `! Rang !! Titre !! Entrées` as one cell and skip the table — that form does
+ * not appear anywhere in the current 82 pages, but it is perfectly valid
+ * wikitable syntax, so relying on its absence would be relying on a formatting
+ * convention nobody promised us.
+ */
+function splitRowCells(rowText) {
+  const cells = [];
+  for (const line of rowText.split('\n')) {
+    const trimmed = line.trim();
+    const isHeader = trimmed.startsWith('!');
+    // `|+` is the table CAPTION, not a cell. On the 2013+ pages the header row
+    // follows the caption with no `|-` between them, so counting it as a cell
+    // shifted every column index by one — which did not drop rows, it read the
+    // WRONG COLUMN and reported 2022's Avatar at 2.7M against a real 14.0M.
+    if (trimmed.startsWith('|+')) continue;
+    if (!trimmed.startsWith('|') && !isHeader) {
+      // A ref or template spilling onto its own line belongs to the cell above.
+      if (cells.length) cells[cells.length - 1].text += `\n${line}`;
+      continue;
+    }
+
+    const body = trimmed.replace(/^[|!]+/, '');
+    let depth = 0;
+    let current = '';
+    for (let i = 0; i < body.length; i += 1) {
+      const pair = body.slice(i, i + 2);
+      if (pair === '[[' || pair === '{{') { depth += 1; current += pair; i += 1; continue; }
+      if (pair === ']]' || pair === '}}') { depth -= 1; current += pair; i += 1; continue; }
+      if (depth === 0 && (pair === '||' || pair === '!!')) { cells.push({ text: current, isHeader }); current = ''; i += 1; continue; }
+      current += body[i];
+    }
+    cells.push({ text: current, isHeader });
+  }
+
+  // A `style="…" |` prefix inside a single cell is markup, not content.
+  return cells.map((cell) => {
+    const prefix = /^[^|[{]*?(?:scope|style|width|align|colspan|rowspan|class|bgcolor)\s*=\s*[^|]*\|(?!\|)/i.exec(cell.text);
+    return { text: (prefix ? cell.text.slice(prefix[0].length) : cell.text).trim(), isHeader: cell.isHeader };
+  });
+}
+
+export function parseAdmissions(cell) {
+  // Strip everything that contains digits but is NOT the figure, before either
+  // branch. External links are the dangerous one: a citation like
+  // `[http://www.boxofficestory.com/paris-1972-c23262779/2]` handed the bare
+  // fallback a 23-million "admissions" count, which then outranked every real
+  // film in the list — three different films all landed on the same impossible
+  // number, which is what gave it away.
+  const cleaned = cell
+    .replace(/<ref[\s\S]*?(?:\/>|<\/ref>)/gi, ' ')
+    .replace(/\[https?:\/\/[^\]]*\]/gi, ' ')
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/\[\[[^\]]*\]\]/g, ' ');
+
+  const templated = ADMISSIONS_TEMPLATE.exec(cleaned);
+  if (templated) return Number(templated[1].replace(/[\s.,\u00a0\u202f]/g, ''));
+
+  // The 2013+ pages write the figure bare ("10 830 209"). Anchor it to the whole
+  // cell so a number embedded in prose is never mistaken for the count.
+  const bare = /^\D{0,3}(\d[\d\s\u00a0\u202f]{4,}\d)\D{0,12}$/.exec(cleaned.trim());
+  return bare ? Number(bare[1].replace(/[\s\u00a0\u202f]/g, '')) : null;
+}
+
+/**
+ * Every film row on one year's page.
+ *
+ * Driven by each table's own header row, NEVER by "the first wikilink" or "the
+ * first number" in a row. A quick version built that way produced plausible
+ * wrong answers rather than obvious failures: it listed the director
+ * Jean-Marie Poiré as a film, and put Fantomas se déchaîne at 0.1M against a
+ * real 4.5M.
+ */
+export function parseBoxOfficePage(wikitext) {
+  const films = [];
+  for (const table of wikitext.split(/\n\{\|/).slice(1)) {
+    const body = table.split(/\n\|\}/)[0];
+    let columns = null;
+
+    for (const chunk of body.split(/\n\|-+[^\n]*/)) {
+      const cells = splitRowCells(chunk);
+      if (cells.length === 0) continue;
+      const text = cells.map((cell) => cell.text);
+
+      // The rank cell is often itself a header cell (`! scope=row | 1.`), so
+      // one header cell does not make a header row — require at least two.
+      if (cells.filter((cell) => cell.isHeader).length >= 2) {
+        const candidate = {};
+        text.forEach((raw, index) => {
+          const cell = normalizeHeaderCell(raw);
+          if (!cell) return;
+          for (const [field, synonyms] of Object.entries(BOX_OFFICE_COLUMNS)) {
+            // EXACT match, never startsWith. These pages carry a second table,
+            // "Box-office parisien par semaine", whose header `Film {{n°}}1`
+            // normalises to "film 1" — startsWith accepted that as the title
+            // column, so a weekly Paris chart was parsed as the annual list.
+            if (candidate[field] === undefined && synonyms.includes(cell)) {
+              candidate[field] = index;
+            }
+          }
+        });
+        if (candidate.title !== undefined && candidate.admissions !== undefined) columns = candidate;
+        continue;
+      }
+      if (!columns) continue;
+
+      const link = FILM_LINK.exec(text[columns.title] ?? '');
+      if (!link) continue;
+      const admissions = parseAdmissions(text[columns.admissions] ?? '');
+      if (admissions === null) continue;
+
+      films.push({ page: link[1].trim(), title: (link[2] ?? link[1]).trim(), admissions });
+    }
+  }
+  return films;
+}
+
+/**
+ * The Box-office France list: francophone films that French audiences actually
+ * went to see, ranked by admissions.
+ *
+ * "Francophone" is decided by TMDB's `original_language`, NOT by the country
+ * column on the page. Measured across all 82 years, a country rule admitted 69
+ * films beyond French-produced ones and they were almost all Hollywood
+ * blockbusters carrying Canadian co-production credits (Dune, X-Men 3, Man of
+ * Steel). `original_language` reads the thing itself, agrees with the app's own
+ * language filter by construction, and — verified — still keeps the
+ * English-DIALOGUE French productions (Léon, Le Cinquième Élément, Le Grand
+ * Bleu), because TMDB tracks the production's origin language rather than the
+ * spoken one.
+ */
+async function fetchBoxOfficeFrance(meta) {
+  const lastYear = THIS_YEAR;
+  const perYear = [];
+  const best = new Map();
+
+  for (let year = BOX_OFFICE_FIRST_YEAR; year <= lastYear; year += 1) {
+    let rows = [];
+    try {
+      const wikitext = await fetchWikitext('fr', `Box-office France ${year}`);
+      if (wikitext) rows = parseBoxOfficePage(wikitext);
+    } catch (error) {
+      // A rate limit is not a bad page, it is "slow down" — skipping the year
+      // would silently drop its films and still report success. Only genuine
+      // page/layout problems are survivable here; throttling aborts the source
+      // so the run can be repeated rather than half-written.
+      if (error instanceof RateLimited) throw error;
+      // One bad year must not cost the other 81. Warn loudly and carry on.
+      console.log(`\n  ⚠️  ${year}: ${error.message} — skipped`);
+    }
+    perYear.push({ year, count: rows.length });
+
+    for (const row of rows) {
+      // The same film can chart in more than one year (re-releases). Keep its
+      // best showing rather than double-counting it.
+      const previous = best.get(row.page);
+      if (!previous || row.admissions > previous.admissions) best.set(row.page, { ...row, year });
+    }
+    await sleep(1500);
+  }
+
+  // A year that parses to far fewer rows than its neighbours means the page
+  // layout moved, not that cinema stopped. Warn — never fail — so a single
+  // restyled page is visible without costing the whole run. The seed-level
+  // shrink guard still refuses a mass failure at write time.
+  const counts = perYear.map((entry) => entry.count).sort((a, b) => a - b);
+  const median = counts[counts.length >> 1] ?? 0;
+  const floor = Math.max(3, Math.floor(median * 0.25));
+  const thin = perYear.filter((entry) => entry.count < floor);
+  if (thin.length) {
+    console.log(
+      `\n  ⚠️  ${thin.length} year(s) parsed unusually thin (under ${floor} rows, median ${median}): ` +
+        thin.map((entry) => `${entry.year}:${entry.count}`).join(' '),
+    );
+  }
+
+  // Wikipedia page title -> QID -> TMDB id, the same pipeline the award lists
+  // use, so there is no fuzzy title matching anywhere.
+  const pages = [...best.keys()];
+  const qidByTitle = await titlesToQidMap('fr', pages);
+  const films = await qidsToFilms([...new Set(qidByTitle.values())]);
+  const byQid = new Map(films.map((film) => [film.qid, film]));
+
+  const candidates = [];
+  for (const page of pages) {
+    const film = byQid.get(qidByTitle.get(page));
+    if (!film?.tmdb_id) continue;
+    const row = best.get(page);
+    candidates.push({ title: film.title ?? row.title, year: film.year ?? row.year, tmdb_id: film.tmdb_id, admissions: row.admissions });
+  }
+
+  // The language cut. Needs TMDB, so this source is skipped without credentials
+  // exactly as the TMDB top-rated one is.
+  const { hasTmdbCredentials } = await import('../server/config.js');
+  if (!hasTmdbCredentials()) {
+    console.log('\n  ⚠️  no TMDB credentials — cannot apply the language filter');
+    return null;
+  }
+  const { getMovie } = await import('../server/tmdb.js');
+
+  const languages = await originalLanguages(
+    candidates.map((candidate) => candidate.tmdb_id),
+    getMovie,
+    { log: (message) => process.stdout.write(message) },
+  );
+
+  const entries = candidates
+    .filter((candidate) => languages.get(candidate.tmdb_id) === 'fr')
+    .map(({ title, year, tmdb_id, admissions }) => ({ title, year, tmdb_id, admissions }));
+
+  // Ranked by admissions across the whole list, not within each year: with
+  // per-year ranks topping out around 60, a "top 100" cut would select
+  // everything and the Top-N control would do nothing. Global ranks also match
+  // how TSPDT and Sight & Sound behave, so "top 100" means the same kind of
+  // thing on every ranked list.
+  entries.sort((a, b) => b.admissions - a.admissions);
+  entries.forEach((entry, index) => {
+    entry.rank = index + 1;
+    delete entry.admissions;
+  });
+
+  return { tags: ['box-office'], category: 'box-office', ...meta, entries };
 }
 
 async function fetchWikidataSeries(seriesQid, meta) {
@@ -361,6 +812,7 @@ async function fetchSightAndSound() {
   return {
     slug: 'sight-and-sound',
     name: 'Sight & Sound Greatest Films (2022 critics’ poll)',
+    tags: ['canon'],
     category: 'canon',
     source: 'British Film Institute — Sight and Sound 2022 critics’ poll',
     source_url: 'https://www.bfi.org.uk/sight-and-sound/greatest-films-all-time',
@@ -406,6 +858,7 @@ async function fetchTspdt() {
   return {
     slug: 'tspdt-1000',
     name: 'TSPDT 1,000 Greatest Films',
+    tags: ['canon'],
     category: 'canon',
     source: "They Shoot Pictures, Don't They? — the list's publisher",
     source_url: 'https://www.theyshootpictures.com/gf1000_all1000films.htm',
@@ -465,6 +918,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataSeries('Q56070713', {
         slug: 'disney-animated-canon',
+        tags: ['collection', 'family', 'animation'],
         category: 'collection',
         name: 'Disney Animated Canon',
         source: 'Wikidata — "Walt Disney Animation Studios feature film" series (Q56070713)',
@@ -477,6 +931,7 @@ const SOURCES = [
     run: () =>
       fetchWikidataSeries('Q104830727', {
         slug: 'studio-ghibli',
+        tags: ['collection', 'family', 'animation'],
         category: 'collection',
         name: 'Studio Ghibli',
         source: 'Wikidata — "Studio Ghibli Feature Films" series (Q104830727)',
@@ -485,6 +940,24 @@ const SOURCES = [
       }),
   },
   { label: 'TMDB Top Rated 100', run: fetchTmdbTopRated },
+
+  {
+    label: 'Box-office France',
+    // 82 pages walked at ~0.7s each plus ~3,400 TMDB lookups, so this is by far
+    // the slowest source. Run it on its own: `npm run fetch-seeds -- box-office`.
+    minCount: 400,
+    run: () =>
+      fetchBoxOfficeFrance({
+        slug: 'box-office-france',
+        name: 'Box-office France',
+        source: 'fr.wikipedia "Box-office France <year>", 1945-2026, resolved to TMDB ids via Wikidata',
+        source_url: 'https://fr.wikipedia.org/wiki/Liste_des_plus_gros_succ%C3%A8s_du_box-office_en_France',
+        note:
+          'Admissions, not revenue, so ticket-price inflation never enters. Francophone films only, ' +
+          'decided by TMDB original_language rather than the page\'s country column — a country rule ' +
+          'admitted Hollywood blockbusters carrying Canadian co-production credits. Ranked by admissions.',
+      }),
+  },
 
   // --- Awards -------------------------------------------------------------
   //
@@ -530,6 +1003,7 @@ const SOURCES = [
       fetchWikidataAward('Q179808', {
         slug: 'award-palme-dor',
         name: 'Palme d’Or (Cannes)',
+        tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Palme d’Or (Q179808)',
         source_url: 'https://en.wikipedia.org/wiki/Palme_d%27Or',
         note: 'The most redundant of the award lists against a canon-heavy library (58% already present) — included for the axis rather than the additions.',
@@ -541,6 +1015,7 @@ const SOURCES = [
       fetchWikidataAward('Q209459', {
         slug: 'award-golden-lion',
         name: 'Golden Lion (Venice)',
+        tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Golden Lion (Q209459)',
         source_url: 'https://en.wikipedia.org/wiki/Golden_Lion',
       }),
@@ -551,6 +1026,7 @@ const SOURCES = [
       fetchWikidataAward('Q154590', {
         slug: 'award-golden-bear',
         name: 'Golden Bear (Berlin)',
+        tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Golden Bear (Q154590)',
         source_url: 'https://en.wikipedia.org/wiki/Golden_Bear',
         note: 'Q154590 is the Berlinale prize. Note that a plain search for "Golden Bear" returns a US training ship first (Q2512671) — the qid here is the award.',
@@ -600,15 +1076,37 @@ const SOURCES = [
   },
 ];
 
-/** How many entries the committed seed file already has, if any. */
-async function readExistingCount(slug) {
+/** The committed seed file for a slug, if there is one. */
+async function readExisting(slug) {
   try {
-    const raw = await readFile(join(SEEDS, `${slug}.json`), 'utf8');
-    const count = JSON.parse(raw).count;
-    return Number.isInteger(count) ? count : null;
+    return JSON.parse(await readFile(join(SEEDS, `${slug}.json`), 'utf8'));
   } catch {
     return null; // First fetch of this list.
   }
+}
+
+// List-level keys a re-fetch must never silently drop. `tags` is here because
+// it already happened: the payload below was written without it while every
+// committed seed file carried one, so a fetch run quietly deleted the tags from
+// the JSON. Nothing failed — seed.mjs only syncs tags when the key is present,
+// so an existing database kept its stale values — and it only surfaced on the
+// next FRESH install, where every list came up untagged and therefore every
+// vibe resolved to an empty pool. seeds/studio-ghibli.json had already lost its
+// tags this way before anyone noticed.
+//
+// Same shape of protection as the shrink guard below, one level up: that one
+// watches the entries, this one watches the metadata around them.
+const PRESERVED_KEYS = ['tags', 'category', 'name'];
+
+export function droppedKeys(existing, payload) {
+  if (!existing) return [];
+  return PRESERVED_KEYS.filter((key) => {
+    const had = existing[key];
+    if (had === undefined || had === null) return false;
+    if (Array.isArray(had) && had.length === 0) return false;
+    const now = payload[key];
+    return now === undefined || now === null || (Array.isArray(now) && now.length === 0);
+  });
 }
 
 async function main() {
@@ -635,13 +1133,14 @@ async function main() {
       // next seed shrinks the list. The Sight & Sound and TSPDT scrapers have
       // had their own thresholds from the start; this covers everything else,
       // including every future fetcher.
-      const existing = await readExistingCount(list.slug);
-      const guardFloor = Math.max(source.minCount ?? 1, Math.ceil((existing ?? 0) * 0.5));
+      const existing = await readExisting(list.slug);
+      const existingCount = Number.isInteger(existing?.count) ? existing.count : null;
+      const guardFloor = Math.max(source.minCount ?? 1, Math.ceil((existingCount ?? 0) * 0.5));
       if (list.entries.length < guardFloor) {
         failures += 1;
         console.log(
           `REFUSED — ${list.entries.length} films, expected at least ${guardFloor}` +
-            (existing ? ` (previous run had ${existing})` : '') +
+            (existingCount ? ` (previous run had ${existingCount})` : '') +
             '. Existing seed file left untouched.',
         );
         continue;
@@ -649,9 +1148,12 @@ async function main() {
 
       const payload = {
         name: list.name,
-        // Must be carried through: seed.mjs reads it to group the list in the
-        // picker, and omitting it here would silently strip the category from
-        // an existing seed file on the next fetch run.
+        // Both of these must be carried through: seed.mjs reads them to group
+        // the list in the picker, and omitting either here would silently strip
+        // it from an existing seed file on the next fetch run. `tags` is the
+        // live one — see PRESERVED_KEYS — and `category` is the legacy column
+        // it replaced, kept in sync only so an old database still migrates.
+        ...(list.tags ? { tags: list.tags } : {}),
         category: list.category ?? null,
         source: list.source,
         source_url: list.source_url,
@@ -660,6 +1162,17 @@ async function main() {
         count: list.entries.length,
         entries: list.entries,
       };
+
+      const dropped = droppedKeys(existing, payload);
+      if (dropped.length) {
+        failures += 1;
+        console.log(
+          `REFUSED — would drop ${dropped.join(', ')} from the existing seed file. ` +
+            'Add it to this source in SOURCES, or remove it from PRESERVED_KEYS if the ' +
+            'removal is deliberate. Existing seed file left untouched.',
+        );
+        continue;
+      }
 
       await writeFile(join(SEEDS, `${list.slug}.json`), `${JSON.stringify(payload, null, 2)}\n`);
       const withIds = list.entries.filter((entry) => entry.tmdb_id).length;
@@ -679,4 +1192,8 @@ async function main() {
   }
 }
 
-main();
+// Only run when invoked as a script, so the guards above can be unit-tested by
+// importing this module.
+if (process.argv[1] && resolvePath(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main();
+}

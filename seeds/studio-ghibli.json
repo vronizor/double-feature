@@ -1,5 +1,10 @@
 {
   "name": "Studio Ghibli",
+  "tags": [
+    "collection",
+    "family",
+    "animation"
+  ],
   "category": "collection",
   "source": "Wikidata — \"Studio Ghibli Feature Films\" series (Q104830727)",
   "source_url": "https://en.wikipedia.org/wiki/List_of_Studio_Ghibli_works",

@@ -11,3 +11,7 @@ data/*.db.*
 # Local tool state only — .claude/CLAUDE.md is a shared project convention and
 # is deliberately tracked.
 .claude/settings.local.json
+
+# Optional local cache for the seed fetchers (WIKI_CACHE_DIR). Never committed:
+# a stale page served from here would silently produce a wrong seed file.
+.cache/
