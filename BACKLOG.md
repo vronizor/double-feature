@@ -111,7 +111,11 @@ Two distinct axes, needing two distinct lists:
 | **Popularity** | reach / admissions, with a rating *gate* | Ace Ventura, Taxi, Les Visiteurs |
 
 Renaming the existing list (to something like "Modern Classics") and adding a
-separate reach-sorted one is probably the honest fix.
+separate reach-sorted one was the conclusion at the time. **Half of that was
+right.** The rename shipped in v2. The reach-sorted list was dropped in v4
+planning — see "Dropped" below — because box office answers the same question
+with better data. The *axis* still stands: acclaim and popularity are genuinely
+different, and rating-sorted can never reach the 6.6–7.0 band.
 
 ## National popularity — box-office admissions
 
@@ -350,7 +354,32 @@ these were considered rather than missed.
 > only because of the second. None of them is a leak; item 1 is the only one
 > whose meaning actually changes with repo visibility.
 
+## v5 — deferred with a decision, not undecided
+
+These were considered during v4 planning and consciously pushed out. Distinct
+from "Unscheduled" below, which is material nobody has ruled on yet.
+
+- **Cultness.** The axis that survives the reach-sorted list being dropped:
+  films whose fame arrived *after* the cinema, through television and home
+  video. *Le Père Noël est une ordure* is the canonical case — a modest
+  theatrical run and total cultural saturation, invisible to every box-office
+  source by construction. Needs its own evidence before it is built; there is
+  no obvious data source, and that is the whole problem.
+
+- **Letterboxd ratings.** v4 researches whether it is obtainable at all and
+  records the outcome; any *build* is v5, and only if their terms allow it.
+  See `ROADMAP.md` §6.3.
+
+- **Actor's night.** The same shape as director night — a credit-filtered
+  person list with `job` swapped — which is why v4 builds director night as
+  exactly that rather than as a one-off. See `ROADMAP.md` §6.5.
+
 ## Unscheduled
+
+Nobody has ruled on these. A few carry a **⚠️ scheduled for v4** marker: the
+measurement write-up stays here, where the evidence lives, but the work itself
+is now on `ROADMAP.md` §6 and that table is the authority on its state.
+
 
 - **Alternative ratings on hover (IMDb, Letterboxd, SensCritique).** Show a
   second opinion beside TMDB's score on the card or in the detail overlay.
@@ -359,9 +388,9 @@ these were considered rather than missed.
 
   | Source | Status | Notes |
   |---|---|---|
-  | **IMDb** | ✅ verified obtainable | Official dataset `title.ratings.tsv.gz`, **8 MB**, every title, updated daily, free for personal/non-commercial use. Joins exactly via `imdb_id`, which TMDB already returns in the detail response — no fuzzy matching. Would need an `imdb_id` column plus a backfill. |
+  | **IMDb** | 🔨 **scheduled for v4** — see `ROADMAP.md` §6.3 | Official dataset `title.ratings.tsv.gz`, **8 MB**, every title, updated daily, free for personal/non-commercial use. Joins exactly via `imdb_id`, which TMDB already returns in the detail response — no fuzzy matching. Would need an `imdb_id` column plus a backfill. |
   | **SensCritique** | ❌ verified blocked | Returns 403 to scripted requests, same as criterion.com. The family-films seed list had to be exported by hand for this reason. |
-  | **Letterboxd** | ❓ unassessed | No public API historically; believed to be invite/beta only. Needs checking before any design — do not assume scraping is acceptable, their terms are the deciding factor. |
+  | **Letterboxd** | 🔍 **v4 researches it, does not build it** — see `ROADMAP.md` §6.3. | No public API historically; believed to be invite/beta only. Needs checking before any design — do not assume scraping is acceptable, their terms are the deciding factor. |
 
   Design notes if picked up: the licence on the IMDb data is
   personal/non-commercial, which fits this app but means **the dataset must not
@@ -381,33 +410,56 @@ kept because the v3 items in `ROADMAP.md` reference their evidence.
   History something worth revisiting and the exclusion filter something to work
   with.
 
-- **A genuinely reach-sorted "popularity" list.** The third axis, still empty.
-  Distinct from box-office (v3): box-office measures what one country went to
-  the cinema for, reach measures what the world has seen. Box-office France
-  surfaces *Bienvenue chez les Ch'tis*; reach-sorted surfaces *Ace Ventura* and
-  *Austin Powers*. Neither substitutes for the other. Sort by reach with a
-  rating **gate** rather than a rating sort — see the metric write-up above for
-  why rating-sorted can never reach them.
-
 - **Nominees, not just winners.** Wikidata models nominations (`P1411`) and the
   Wikipedia categories have sibling nominee categories. Would multiply the pool
   considerably and dilute "award winner" as a signal; noted rather than
   proposed.
 
-- **Separate "dynamic" as a mechanism from "dynamic" as a tag.** Query-backed
-  lists are identifiable by `query_json IS NOT NULL`, but the Crowd-pleasers
-  vibe resolves on the `dynamic` *tag*. A second query-backed list family would
-  therefore be absorbed by that vibe whether or not it belongs there. Gated on a
+- **Separate "dynamic" as a mechanism from "dynamic" as a tag.**
+  ⚠️ **No longer hypothetical — scheduled for v4, see `ROADMAP.md` §6.4.**
+  National cinema night is the second query-backed list this was waiting for.
+  Query-backed lists are identifiable by `query_json IS NOT NULL`, but the
+  Modern Classics vibe resolves on the `dynamic` *tag*. A second query-backed
+  list family would therefore be absorbed by that vibe whether or not it
+  belongs there. Was gated on a
   second query-backed list existing — not on box office, which produces static
   scraped lists.
 
-- **`materialiseList`: set rank on reconcile, and wrap in a transaction.** The
+- **`materialiseList`: set rank on reconcile, and wrap in a transaction.**
+  ⚠️ **No longer hypothetical — scheduled for v4, see `ROADMAP.md` §6.4.**
+  National cinema night ranked by popularity is exactly the ranked dynamic list
+  this was waiting for, so it must be fixed *before* that list exists or the
+  ranks are wrong from the first refresh. The
   reconcile path keeps existing rows and never updates rank, so a *ranked*
   dynamic list would freeze its ranks at first materialisation while membership
-  moved on. No such list exists yet. The missing transaction self-heals on the
+  moved on. No such list existed when this was written — national cinema night
+  in v4 is the first. The missing transaction self-heals on the
   next run.
 
 ## Dropped
+
+- **A reach-sorted "popularity" list.** Dropped during v4 planning
+  (2026-07-30). It was framed as a third axis — "box office surfaces *Ch'tis*,
+  reach surfaces *Ace Ventura*" — and that framing does not survive the numbers.
+
+  *Ace Ventura* **was** a US box-office hit: roughly $72M domestic in 1994,
+  about thirteenth for the year. It sits comfortably in any per-year US
+  box-office list, so the film used to justify the axis is reached without it.
+
+  And "reach" measured by vote counts carries the exact language skew measured
+  further up this file: *Le Père Noël est une ordure* has 11,588 IMDb votes not
+  because it is obscure but because it never left France. So vote-count reach
+  measures **anglophone familiarity**, making it a worse-sourced restatement of
+  "was this big in America" — which US box office answers directly.
+
+  **Superseded by extending box office to the US** (`ROADMAP.md` §6.2).
+
+  > What genuinely survives is a *different* thing: films whose fame arrived
+  > **after** the cinema, via television and home video. *Le Père Noël est une
+  > ordure* again — a modest theatrical run and total cultural saturation. That
+  > is **cultness**, no box-office source can see it, and it is a v5 item
+  > needing its own evidence. It is not reach.
+
 
 - **Worker-pooling the refresh job.** `refreshStaleMovies` does `Promise.all`
   over up to 250 films, which looks alarming but isn't: `request()` in
