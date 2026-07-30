@@ -304,6 +304,14 @@ npm test          # Borda scoring, ranking, parsing, filters, full API pass
 npm run dev       # auto-restarting server
 ```
 
+**`npm test` needs a `.env` with TMDB credentials.** Most of the suite stubs
+TMDB at `fetch` and runs anywhere, but four tests in `dynamic-lists.test.js`
+exercise the real discover query, so a fresh clone with no `.env` reports four
+failures. That is expected, not a broken checkout — set up `.env` as in Setup
+above and they pass. Left this way deliberately: the app is unusable without a
+key, so a suite that pretends otherwise would be testing a configuration nobody
+runs.
+
 The frontend is plain ES modules with no build step — edit files in `public/`
 and reload.
 

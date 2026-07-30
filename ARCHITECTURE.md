@@ -7,6 +7,14 @@ pipelines and data modelling, and explains the web-specific machinery instead.
 Numbers in this document are real, measured against `data/double-feature.db`
 on 2026-07-30.
 
+> **This is a snapshot, not a living document.** Written 2026-07-30, against
+> commit `93bf402`. Nothing keeps it in step with the code — unlike
+> `ROADMAP.md` and `BACKLOG.md`, which are updated as decisions land and are
+> the authority when they disagree with this file. Re-generating it is cheap;
+> quietly trusting a stale copy is not. If you are reading this long after that
+> date, treat the shapes and reasoning as durable and the specific line
+> numbers, counts and file lists as historical.
+
 ---
 
 ## 1. The one-paragraph version
