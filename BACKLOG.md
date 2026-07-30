@@ -264,8 +264,16 @@ Three problems, any one of which is disqualifying today:
 **The better thread for a future attempt** is the ICAA's own *Catálogo de
 Películas* (`sede.mcu.gob.es/CatalogoICAA`), which is official rather than
 Rentrak-sourced and appears to span decades. It is a search UI, so the open
-question is whether any bulk export or API exists behind it. Not investigated —
-Spain is deferred.
+question is whether any bulk export or API exists behind it.
+
+> **Since investigated — `ROADMAP.md` §6.1 is the authority now.** An
+> unauthenticated JSON endpoint was verified live
+> (`/Buscador/GetPeliculasPreview?T_general=<title>`), with admissions going
+> back to the 1950s. The remaining open question is narrower and is the one that
+> matters: the endpoint needs a **title** to search for, and no browse-by-year
+> or bulk export has been found — so there may be no way to enumerate "every
+> Spanish film of 1994", which is what a list needs. Spain is in v4 as 🗣, not
+> deferred.
 
 > Note for whoever picks this up: both government hosts fail strict TLS
 > verification (incomplete certificate chain). They are fine over plain `curl`;
@@ -359,6 +367,14 @@ these were considered rather than missed.
 These were considered during v4 planning and consciously pushed out. Distinct
 from "Unscheduled" below, which is material nobody has ruled on yet.
 
+- **US box office.** Moved out of v4 on 2026-07-30. The *axis* is settled and
+  still supersedes the reach-sorted list below — that stays dropped. What is
+  missing is a **source**: France had 82 verified per-year Wikipedia pages and
+  the US equivalent was never probed, so the item had two open ends (source, and
+  whether to rank dollars or find admissions) on a version that already carries
+  Spain, IMDb and two dynamic-list fixes. See `ROADMAP.md` §6.2, which keeps the
+  full reasoning.
+
 - **Cultness.** The axis that survives the reach-sorted list being dropped:
   films whose fame arrived *after* the cinema, through television and home
   video. *Le Père Noël est une ordure* is the canonical case — a modest
@@ -373,6 +389,24 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 - **Actor's night.** The same shape as director night — a credit-filtered
   person list with `job` swapped — which is why v4 builds director night as
   exactly that rather than as a one-off. See `ROADMAP.md` §6.5.
+
+## v6 — deferred with a decision
+
+- **Run Impeccable over the UI** (`https://impeccable.style/`). A design tool
+  for AI-generated interfaces — "the missing design vocabulary for agents" —
+  offering a command set (`/polish`, `/distill`, `/typeset`) and a detector of
+  58 checks for the visual tells of machine-written UI. Available as a Claude
+  Code skill, an npm CLI, a Chrome extension and a CI step.
+
+  **Why v6 and not sooner.** It is a pass over the *presentation* of a UI whose
+  shape is still moving: v4 alone adds a parametric chip that does not exist
+  yet, and a picker that has to survive a second family of query-backed lists.
+  Polishing before those land means polishing twice. It also wants a stable
+  design system to respect, and this app's is a single hand-written
+  `styles.css`.
+
+  Worth stating plainly because it is not obvious: **this is a cosmetic pass,
+  not a feature**, and nothing in v4 or v5 depends on it.
 
 ## Unscheduled
 

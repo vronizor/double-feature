@@ -576,6 +576,11 @@ at all and need a decision about what the thing *is*.
   the axis that actually drives the pool query, and which has no representation
   in the schema at all.
 
+  > **Settled 2026-07-30 — see §6.6.** The second axis needed no representation,
+  > because it was three separate things that each already had one:
+  > `query_json IS NOT NULL`, tags, and a pool-query clause that was never a
+  > list. The word "kind" is retired and the column becomes `origin`.
+
 ### 5.3 Box office France — the spec, and what building it changed
 
 **Goal.** A `Box-office France` list of films French audiences actually went to
@@ -959,23 +964,43 @@ The in-flight view. **One axis only: distance from shipped.**
 measurement that settled it, in the subsections below or in `BACKLOG.md`. The
 table only says how far along a thing is.
 
+> **The version in the app footer.** `package.json` is the single source; the
+> server reads it at boot and serves it on `/api/config`, and the footer shows
+> the first two components (`4.1.0` renders as `v4.1`). **MAJOR is the roadmap
+> version** — 4 while v4 is in flight. **MINOR is a decision round**: bump it
+> once per session in which decisions were actually settled, which is the unit
+> this project already reports in. A session that settles nothing does not bump
+> it, and that is the point — the number says how many times the plan has moved,
+> not how many times someone typed.
+
 | Item | State | Where it stands |
 |---|---|---|
-| Box office — Spain (ICAA) | ⏳ ready | **Decided: fuzzy matching is accepted here.** ICAA is official and 70 years deep but carries no TMDB id or QID — see §6.1 |
-| Box office — United States | ⏳ ready | Extends the axis. **Replaces the "reach-sorted list" idea**, which measured something worse — see §6.2 |
+| Box office — Spain (ICAA) | ⏳ ready | **Enumeration exists** — an undocumented `Ano` filter, probed live 2026-07-30. Fuzzy matching stands, because ICAA can now drive the list. Ships with a declared match-rate floor — see §6.1 |
 | Alternative ratings — IMDb | ⏳ ready | `title.ratings.tsv.gz`, joins on `imdb_id`. Needs a column, a backfill, and a licence rule: never commit the dataset — see §6.3 |
 | Alternative ratings — Letterboxd | 🔍 research only | **Research, do not build.** Terms are the deciding factor. Any build is v5 |
-| National cinema night | ⏳ ready | Query-backed list per country, `with_origin_country`. First real test of the two dynamic-list gaps below |
+| National cinema night | ⏳ ready | **Decided: one parametric vibe, not a list per country** — director night needs the `▾` chip anyway, so it is built once and serves both (§6.5). First real test of the two dynamic-list gaps |
 | Director night | ⏳ ready | Parametric vibe. `/person/{id}/movie_credits` filtered to `job=Director`, never `with_crew` (§2). Base for actor's night in v5 |
 | `dynamic`: mechanism vs tag | ⏳ ready | **No longer hypothetical** — v4 adds query-backed lists. See §6.4 |
-| `materialiseList`: rank on reconcile, and a transaction | ⏳ ready | **Becomes live the moment a ranked dynamic list exists**, which national cinema night is. See §6.4 |
+| `materialiseList`: write rank, and a transaction | ⏳ ready | **Bigger than logged** — rank is not written *at all*, not merely stale on reconcile (verified: 120 rows, 0 ranked). Decided: write it from discover order. See §6.4 |
+| Guest vote route 404s under a dotted path | ⏳ ready | **A one-line fix, found by running the app 2026-07-30.** `res.sendFile` with no `root` rejects any absolute path containing a dot-directory, so `/vote/:slug` 404s while `/` is fine. See §6.7 |
 | `seed.mjs` keyed on `tmdb_id` | ⏳ ready | The one v3 item not done. A tidy-up: `recordEntry` already guards duplicates, so the real exposure is unresolved rows, `backfill-list-fields.mjs`, and wasted TMDB calls. Additive key — see §5 notes |
-| What is a *kind* of list? | 🗣 discussing | `lists.kind` is `seed\|custom` (provenance); §1 means curated \| dynamic \| property-filter — the axis that drives the pool query and has no schema representation. **Settle before national cinema night**, which adds a third kind |
+| Retire "kind": `lists.kind` → `origin` | ⏳ ready | **Decided 2026-07-30 — there is no missing third kind.** All three things §1 called "kind" already have a home: provenance is the column, mechanism is `query_json IS NOT NULL`, family is tags. The word goes, the column is renamed. See §6.6 |
 | Two chip rows, same labels | 🗣 revisit after use | A chip "Awards" that *selects* lists sits beside one that *narrows the picker*. Parked until real use says whether it confuses anyone |
 | `includeWatched` default | 🗣 revisit at F3 | README says exclude, the UI ships include. Inert until something is actually marked watched |
 | LICENSE, and seed-list provenance | 🗣 discussing | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag. Both consciously accepted for now — see `BACKLOG.md` |
 
-Deferred to **v5**, recorded so they are not re-proposed early: cultness (§6.2),
+> **How the table came to be wrong, 2026-07-30.** Spain, the US and national
+> cinema night were all marked ⏳ while their own subsections each ended with an
+> explicit open question — and ⏳ promises *"anyone can pick it up without asking
+> another question"*. They were demoted to 🗣, the three questions were answered
+> in one sitting, and two came straight back to ⏳; the US went to v5 for want of
+> a source. **A state that overstates readiness is worse than no state**, because
+> the gap is only discovered after the work starts. If a row says ⏳, its
+> subsection must not end in a question.
+
+Deferred to **v5**, recorded so they are not re-proposed early: **US box office**
+(the axis is settled and still replaces the reach-sorted list — but no source is
+identified, and dollars-vs-admissions is unresolved; see §6.2), cultness (§6.2),
 actor's night (director night generalised), a Letterboxd build, household
 memory, and nominees as well as winners.
 
@@ -1020,14 +1045,65 @@ Given that, the guard rails matter more than usual:
 - **Report the match rate.** If it comes in materially below the 98–100% the
   QID route achieves, that is a finding worth acting on, not a number to bury.
 
-**Open: enumeration.** The search endpoint needs a query string, and no
-browse-by-year or bulk export was found. Without one there is no way to ask for
-"every Spanish film of 1994", which is what a list needs. **Settle this before
-building** — if no enumeration exists, the fallback is to drive it from a
-Wikipedia list of Spanish films and use ICAA only for the admissions figure,
-which changes the shape of the work.
+**Settled 2026-07-30: enumeration exists. The Wikipedia fallback is not needed.**
+
+`GetPeliculasPreview` is only the type-ahead — a 3-character minimum, capped
+results, and the wrong tool for this. The page's own search JS calls a different
+endpoint, and its guard clause explicitly permits an **empty** `T_General` as
+long as any one filter is set:
+
+```
+sortOrder, T_General, Metraje, Calificacion, Ano, Ano_Calificacion,
+Paiscopro, Pais, Titulo, Director, productora, distribuidora,
+Interprete, Fotografia, Guionista, Musica, SoloEspana, SoloVideo, SoloPorno
+```
+
+`Ano` is the axis this section said did not exist. Probed live:
+
+```
+GET /CatalogoICAA/?Ano=1994   42 pages x 24 = ~1,000 titles
+GET /CatalogoICAA/?Ano=1961   22 pages
+```
+
+> **The trap, and it is the silent kind.** Plain
+> `GET /CatalogoICAA/?Ano=1994&page=2` returns **HTTP 200 carrying page 1
+> again** — pages 1, 2 and 3 came back with identical id sets. Pagination is only
+> honoured with a session cookie *and* `X-Requested-With: XMLHttpRequest`; with
+> both, the same three pages intersect at zero. A fetcher written the obvious way
+> would collect the same 24 films 42 times, deduplicate to 24, and report
+> success. Nothing throws, nothing 404s, and the per-year row count would look
+> merely small rather than wrong — exactly the §5.3 failure mode again.
+
+Two consequences for the build:
+
+- **`SoloEspana=true` does nothing over the query string** (42 pages either way),
+  so "Spanish films only" cannot come from the listing filter. The preview JSON
+  carries an `EsCineEspanol` flag per film; that is the cut to use.
+- **The listing is everything classified in Spain that year, foreign films
+  included** — ~1,000 for 1994. So this enumerates the catalogue, and the
+  Spanish-cinema filter happens after.
+
+Rough cost: ~3,000 listing requests across ~75 years, plus one detail page per
+Spanish film for the *espectadores* figure. Comparable to the France build.
+
+**Match-rate floor, declared before the build rather than after** (per the
+guard rails above): if confident title+year matching lands below **90%**, the
+list is not seeded and the shortfall is investigated. The France route achieved
+98–100% through QIDs; a materially worse number means the normaliser is wrong,
+not that Spanish cinema is harder. And per §5.3's lesson, a rate is not
+evidence — eyeball actual matched pairs, because 97% tells you nothing about
+whether *Viridiana* matched the right film.
 
 ### 6.2 Box office — United States, and why "reach" is not the axis
+
+> **Deferred to v5, decided 2026-07-30.** Everything below stands — the *axis*
+> is settled and it still replaces the reach-sorted list, which is why that item
+> stays dropped. What is missing is a **source**: France had 82 verified per-year
+> Wikipedia pages, and no US equivalent has been probed. That plus the unresolved
+> dollars-vs-admissions question is two open ends on an item v4 does not need,
+> while Spain, IMDb and the two dynamic-list fixes are all ready. Kept here rather
+> than moved, because the reasoning is what stops the reach-sorted list being
+> re-proposed.
 
 **The reach-sorted list is dropped as a separate item.** It was described as a
 third axis — "box office surfaces *Ch'tis*, reach surfaces *Ace Ventura*" — and
@@ -1109,21 +1185,66 @@ it into the **Modern Classics vibe** — a vibe about recent acclaim would
 silently start including Japanese cinema. The tag is doing two jobs: "this
 updates itself" and "this belongs to the modern-classics family".
 
-Fix: the vibe pins its list explicitly, and `dynamic` as a tag becomes purely
-descriptive (or goes away, since `query_json IS NOT NULL` already answers the
-mechanism question).
+~~Fix: the vibe pins its list explicitly, and `dynamic` as a tag becomes purely
+descriptive.~~
 
-**"`materialiseList`: set rank on reconcile, and wrap in a transaction."**
+> **That fix would not have worked — corrected 2026-07-30, during the build.**
+> Pinning is **additive**, not a replacement: `resolveVibe`
+> (`server/vibes.js:43-54`) returns `tag matches ∪ pinned lists`. Keeping
+> `tags: ['dynamic']` and pinning list 17 alongside it would have left every
+> future query-backed list joining the vibe exactly as before. The schema
+> comment says as much — *"a vibe draws on tags, on specific lists, or both, and
+> resolves to the union"* — which is why the wrong fix reads plausibly.
+
+**What was done instead: the tag keeps its job and changes its meaning.**
+`dynamic` was doing two at once — "this updates itself" and "this belongs to the
+modern-classics family" — so it was renamed to the second, `modern`
+(*"Modern classics"*). The vibe stays **tag-driven**, which preserves the
+property tags exist for: a second recent-acclaim list should join on its own.
+The mechanism half needs no tag at all, because `query_json IS NOT NULL` answers
+it exactly and is what `findDynamicLists` has always used.
+
+> **Confirmed 2026-07-30: `modern` is the name.** Recorded because it was a
+> naming call made mid-build, which is the failure mode `category` vs `tag` came
+> from. Every tag in `TAGS` now names a *family* and none names a mechanism —
+> that invariant is the thing to protect, more than the particular word.
+
+> **A migration was required, not just a seed-file edit**, for a reason that is
+> not obvious: `ensureBuiltinVibes` skips any vibe whose **name** already
+> exists, so editing `BUILTIN_VIBES` is a no-op on every database that has
+> booted once. The Modern Classics vibe would have gone on resolving against a
+> tag nothing carried, and selected no lists at all. See `retagDynamicAsModern`
+> in `server/db.js`.
+
+> **One visible loss, and where it should come back from.** The picker no longer
+> shows an "Auto-updating" tag chip. If that information is wanted, it belongs
+> to `query_json IS NOT NULL` as a per-list badge — never again as a tag.
+
+**"`materialiseList`: write rank, and wrap in a transaction."**
 Re-running a query-backed list *reconciles* rather than rebuilds: rows already
 present are kept, new ones inserted, departed ones deleted. It never **updates**
-a row that stayed. Rank is therefore written once, at first materialisation, and
-never again — so a *ranked* dynamic list would freeze its ranks on day one while
-its membership moved on underneath. A film ranked #5 last year would still read
-#5 after dropping to #40.
+a row that stayed.
 
-That is fine today because no dynamic list is ranked. **National cinema night
-ranked by popularity is exactly such a list**, so this has to be fixed first or
-the ranks are wrong from the first refresh.
+> **Corrected 2026-07-30 — this was logged wrongly, and the fix is bigger than
+> the entry claimed.** The original wording said rank *"is written once, at first
+> materialisation, and never again"*. It is not written at all. The insert is
+> `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)` —
+> there is no rank column in it, and `rank` does not appear anywhere in
+> `server/dynamic-lists.js`. Verified against the real database: Modern Classics
+> has **120 rows and 0 ranks**, against 1000/1000 for TSPDT and 1390/1390 for
+> Box-office France.
+>
+> So the job is not "update rank on reconcile" — it is **write rank in the first
+> place, from the discover result order, and then keep it correct when membership
+> moves**. The knock-on worth naming: that makes `discoverMovies`' sort order
+> semantically load-bearing, which it currently is not. A list ranked by
+> `popularity.desc` means something; one ranked by whatever discover happened to
+> return does not.
+
+Without it a *ranked* dynamic list would have no ranks at all on day one, and
+then frozen ones if they were written naively — a film ranked #5 last year still
+reading #5 after dropping to #40. **National cinema night ranked by popularity is
+exactly such a list**, so this lands first.
 
 The transaction half is smaller: the insert/delete loop is not atomic, so a
 crash mid-run leaves the list half-updated. It self-heals on the next run, but a
@@ -1135,16 +1256,21 @@ Both are query-backed, and together they are the reason §6.4 has to land first.
 
 **National cinema night.** `§2` already established this is nearly free:
 `movies.countries` is cached, and TMDB's `with_origin_country` works for a
-dynamic list. The open design question is whether it is **one list per country**
-(fixed, tagged, groupable in the picker) or **one parametric vibe** taking a
-country at selection time. One list per country is simpler and reuses the
-picker; it also reintroduces the list-proliferation risk `BACKLOG.md` flags. A
-parametric vibe avoids proliferation but needs the `▾` chip shape.
+dynamic list.
 
-> Settle **"what is a *kind* of list?"** (still 🗣 in the table above) before
-> this. A per-country dynamic list is precisely the third kind the schema has no
-> word for, and naming it after building it is how the `category`/`tag`
-> confusion happened the first time.
+**Decided 2026-07-30: one parametric vibe, not one list per country.** The
+alternative — a fixed, tagged list per country, groupable in the picker — is
+simpler in isolation and reuses machinery that already exists. It loses on two
+counts. It reintroduces the list-proliferation risk `BACKLOG.md` flags, at the
+worst possible scale, since there is no natural stopping point between five
+countries and fifty. And **director night needs the `▾` chip regardless**, so
+the parametric shape is being built either way; choosing lists here means
+building both interactions and maintaining them in parallel. One chip shape,
+three callers — national cinema night, director night, and actor's night in v5.
+
+> The related question, **"what is a *kind* of list?"**, is settled — see §6.6.
+> The short version: a per-country dynamic list is not a third kind, it is a
+> second query-backed list, and nothing new needs naming.
 
 **Director night.** Already specified in §7 and unchanged: resolve the person,
 then `/person/{id}/movie_credits` filtered to `job=Director`. **Never
@@ -1156,6 +1282,86 @@ than a list sitting in the picker. That interaction is the part worth getting
 right, because **actor's night in v5 is the same shape with `job` swapped** — if
 director night is built as a one-off rather than as "a credit-filtered person
 list", v5 rewrites it.
+
+### 6.6 "Kind" of list — the word is retired, not defined
+
+**Decided 2026-07-30.** The question was which of two meanings `kind` should
+carry: `lists.kind` is `seed|custom` (provenance), while §1's table used "Kind"
+for curated | dynamic | property-filter. The answer is neither — **there is no
+missing axis to name.** All three things §1 called a kind already have a home,
+and none of them is the `kind` column:
+
+| §1 called it | Where it actually lives | Status |
+|---|---|---|
+| curated vs **dynamic** | `query_json IS NOT NULL` | already exact — §6.4 says so itself |
+| **property filter** | `buildPoolQuery` clauses | never was a list; it has no row in `lists` and never will |
+| the *family* (canon, awards, box-office, national) | `list_tags` | already the picker's grouping mechanism |
+
+So the third kind the schema supposedly had no word for does not exist.
+National cinema night does not add one; it adds a **second query-backed list**,
+which is what §6.4 is about. Defining "kind" would have created a fourth
+overlapping vocabulary next to `category` — the column §5.2 records as dead
+precisely because it duplicated tags.
+
+**The work:** rename the column `kind` → `origin`, so the surviving concept says
+what it is. Verified against the code before deciding — four readers, and one of
+them is user-visible:
+
+```
+server/routes/lists.js:45    ORDER BY l.kind DESC, l.name
+server/routes/lists.js:75    INSERT INTO lists (name, kind, is_active) VALUES (?, 'custom', 0)
+server/routes/lists.js:117   list.kind === 'seed'  -> deletion needs ?force=true
+public/views/lists.js:66     first 'custom' list is the default selection
+public/views/lists.js:527    renders the raw value in a badge-kind chip
+public/views/lists.js:539    force-delete gate, mirrors routes/lists.js:117
+```
+
+> **Traps for whoever does it.** The badge at `views/lists.js:527` prints the
+> *value*, so `seed`/`custom` stay on screen unchanged and the rename is
+> invisible to the user — that is the point, and it is also why a careless
+> find-and-replace on the string "kind" would break the `badge-kind` CSS class
+> and `toast(message, kind)` in `dom.js`, neither of which has anything to do
+> with lists. Rename the column and its six call sites, nothing else.
+>
+> `parseListQuery` also has a field called `kind` (`{kind, params, limit}`,
+> always `'discover'`). **Leave it alone** — it is the query's kind, not the
+> list's, and it is the hook a parametric vibe injects into. Renaming it would
+> undo the very distinction this decision draws.
+>
+> And per `CLAUDE.md`: the schema lives in one template literal in
+> `server/db.js`, so no backticks in any comment written near it.
+
+### 6.7 The guest vote route 404s under a dotted path
+
+Found by running the app out of a git worktree at
+`.claude/worktrees/…` on 2026-07-30. The host UI worked; `/vote/abc` returned
+**404**. Same file, same handler, two different mechanisms reaching it:
+
+```
+GET /          200   served by express.static, which has a root set
+GET /vote/abc  404   served by res.sendFile(<absolute path>), which does not
+```
+
+`send` applies its `dotfiles` rule to the path **relative to `root`**. Static
+sets one, so it checks `index.html` and passes. `sendFile` here is called with a
+bare absolute path and no `root`, so the whole path is checked, `.claude` is seen
+as a dot component, and the default `dotfiles: 'ignore'` turns a file that
+plainly exists into a 404.
+
+**Fix** — give `sendFile` a root, in `server/index.js`:
+
+```js
+const index = (req, res) => res.sendFile('index.html', { root: join(ROOT, 'public') });
+```
+
+> **Why this is worth fixing rather than filing as an artefact of how it was
+> found.** It is latent in a normal checkout, so no test on a normal path can
+> catch it — `test/api.test.js`'s *"the SPA is served for the guest route"*
+> passes there and fails from a dotted directory, which is the only reason
+> anyone saw it. But it is the route **guests** load on their phones, its
+> failure mode is a blank 404 rather than an error, and any deployment under a
+> dotted directory hits it. The host screen would keep working, so the QR code
+> would look fine and only the guests would be broken.
 
 ---
 
