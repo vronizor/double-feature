@@ -236,6 +236,17 @@ CREATE TABLE IF NOT EXISTS meta (
  * The tag vocabulary. Fixed on purpose — adding one is a deliberate edit here
  * rather than a side effect of a typo in a text field. Order is display order
  * in the picker.
+ *
+ * Every tag names a FAMILY — what a list is about — and never a mechanism.
+ * That distinction is why 'dynamic' was replaced by 'modern' (ROADMAP §6.4):
+ * it was doing two jobs at once, "this list updates itself" and "this list
+ * belongs to the modern-classics family", and the Modern Classics vibe
+ * resolves on it. With one query-backed list those two meanings coincided
+ * harmlessly. The second one — national cinema night — would have been swept
+ * into a vibe about recent acclaim purely for being self-updating.
+ *
+ * The mechanism half needs no tag at all: query_json IS NOT NULL already
+ * answers it, exactly, and is what findDynamicLists has always used.
  */
 export const TAGS = [
   'canon',
@@ -246,7 +257,7 @@ export const TAGS = [
   'comedy',
   'collection',
   'box-office',
-  'dynamic',
+  'modern',
 ];
 
 export const TAG_LABELS = {
@@ -258,7 +269,7 @@ export const TAG_LABELS = {
   comedy: 'Comedy',
   collection: 'Collections',
   'box-office': 'Box office',
-  dynamic: 'Auto-updating',
+  modern: 'Modern classics',
 };
 
 // `CREATE TABLE IF NOT EXISTS` covers fresh installs, but a column added to an
@@ -292,6 +303,39 @@ function migrate(target) {
   ensureColumn(target, 'list_movies', 'award_year', 'INTEGER');
   migrateCategoriesToTags(target);
   renameCrowdPleasers(target);
+  retagDynamicAsModern(target);
+}
+
+/**
+ * Retags the 'dynamic' family tag as 'modern', on lists and on vibes alike.
+ *
+ * Needed as a migration and not just a seed-file edit for two separate
+ * reasons, either of which alone would be enough:
+ *
+ *   - ensureBuiltinVibes skips any vibe whose NAME already exists, so editing
+ *     BUILTIN_VIBES is a no-op on every database that has already booted once.
+ *     The Modern Classics vibe would keep resolving on a tag nothing carries
+ *     and would silently select no lists at all.
+ *   - seed.mjs replaces a seed list's tags from the JSON, but only when the
+ *     seeder is actually re-run, which is not part of a deploy.
+ *
+ * Idempotent: it matches on the old tag, so a second run finds nothing. Uses
+ * ON CONFLICT DO NOTHING because a row could in principle carry both tags.
+ */
+function retagDynamicAsModern(target) {
+  const moves = [
+    ['list_tags', 'list_id'],
+    ['vibe_tags', 'vibe_id'],
+  ];
+  for (const [table, owner] of moves) {
+    const rows = target.prepare(`SELECT ${owner} AS id FROM ${table} WHERE tag = 'dynamic'`).all();
+    if (rows.length === 0) continue;
+    const insert = target.prepare(
+      `INSERT INTO ${table} (${owner}, tag) VALUES (?, 'modern') ON CONFLICT DO NOTHING`,
+    );
+    for (const row of rows) insert.run(row.id);
+    target.exec(`DELETE FROM ${table} WHERE tag = 'dynamic'`);
+  }
 }
 
 /**
@@ -350,7 +394,11 @@ function migrateCategoriesToTags(target) {
 const BUILTIN_VIBES = [
   { name: 'Cinephile', tags: ['canon'], position: 1 },
   { name: 'Awards', tags: ['awards'], position: 2 },
-  { name: 'Modern Classics', tags: ['dynamic'], position: 3 },
+  // Resolves on a family tag, not on 'dynamic' — see the TAGS comment. Being
+  // tag-driven is still right: if a second recent-acclaim list is ever added
+  // it should join this vibe on its own. What it must not do is absorb every
+  // list that merely happens to be query-backed.
+  { name: 'Modern Classics', tags: ['modern'], position: 3 },
   // The one built-in carrying a filter as well as a selection — which is what
   // makes it a vibe rather than just a tag shortcut.
   { name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },
@@ -386,6 +434,28 @@ export function ensureBuiltinVibes(target) {
         .prepare('INSERT INTO vibe_tags (vibe_id, tag) VALUES (?, ?)')
         .run(Number(lastInsertRowid), tag);
     }
+  }
+}
+
+/**
+ * Runs `work` as one unit, rolling back if it throws.
+ *
+ * Lived in vibes.js first, for the reason recorded there: without it, a create
+ * whose tag list was rejected left the vibe row behind with no tags — a vibe
+ * that resolved to nothing and that the user never successfully made. Observed,
+ * not hypothetical. Moved here when materialiseList needed the same guarantee.
+ *
+ * Does not nest. Nothing that runs inside one of these may open another.
+ */
+export function inTransaction(target, work) {
+  target.exec('BEGIN');
+  try {
+    const result = work();
+    target.exec('COMMIT');
+    return result;
+  } catch (error) {
+    target.exec('ROLLBACK');
+    throw error;
   }
 }
 

@@ -16,6 +16,7 @@
 
 import { discoverMovies, getMovie } from './tmdb.js';
 import { upsertMovie } from './movies.js';
+import { inTransaction } from './db.js';
 
 /**
  * Validates and normalises a stored query.
@@ -126,32 +127,65 @@ export async function materialiseList(db, list, { log = () => {} } = {}) {
     .all(list.id);
   const existingIds = new Set(existing.map((row) => row.tmdb_id));
 
+  // Rank comes from the order `discover` returned, which is the order the
+  // query asked for — so it means whatever `sort_by` means, and nothing more.
+  // Taken from `found` rather than from `wanted`, because `wanted` is keyed by
+  // id and its iteration order is the order rows were ADDED to the Map (the
+  // fetched ones, then the cached ones), which has nothing to do with the
+  // query. Ranking off that would produce a stable-looking, meaningless order.
+  //
+  // Numbered over the films that survived rather than over the raw result, so
+  // ranks stay contiguous 1..N when a detail fetch fails. Top-N cuts on rank,
+  // and "the top 100" has to mean 100 films, not 97 with three holes.
+  const ranks = new Map();
+  for (const summary of found) {
+    if (wanted.has(summary.id)) ranks.set(summary.id, ranks.size + 1);
+  }
+
   let added = 0;
   let removed = 0;
 
   const insert = db.prepare(
-    `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)
-     VALUES (?, ?, ?, ?, 'resolved')`,
+    `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, rank, status)
+     VALUES (?, ?, ?, ?, ?, 'resolved')`,
   );
+  const reRank = db.prepare('UPDATE list_movies SET rank = ? WHERE id = ?');
   const drop = db.prepare('DELETE FROM list_movies WHERE id = ?');
+  const existingRows = new Map(existing.map((row) => [row.tmdb_id, row.id]));
 
-  for (const [tmdbId, movie] of wanted) {
-    // null means the row was already cached and complete — see above.
-    if (movie) upsertMovie(db, movie);
-    if (existingIds.has(tmdbId)) continue;
-    const row = movie ?? db.prepare('SELECT title, year FROM movies WHERE tmdb_id = ?').get(tmdbId);
-    insert.run(list.id, tmdbId, row?.title ?? String(tmdbId), row?.year ?? null);
-    added += 1;
-  }
-
-  for (const row of existing) {
-    if (!wanted.has(row.tmdb_id)) {
-      drop.run(row.id);
-      removed += 1;
+  // Everything that mutates runs as one unit. Without it a crash between the
+  // inserts and the deletes leaves a list that is neither its old membership
+  // nor its new one — it self-heals on the next nightly run, but a draw made
+  // in between comes from a list that never existed.
+  inTransaction(db, () => {
+    for (const [tmdbId, movie] of wanted) {
+      // null means the row was already cached and complete — see above.
+      if (movie) upsertMovie(db, movie);
+      const rank = ranks.get(tmdbId) ?? null;
+      if (existingIds.has(tmdbId)) {
+        // The reconcile path keeps this row, so its rank is the one thing that
+        // has to be rewritten: membership moved underneath it. Before this,
+        // rank was never written at all — a film that fell from #5 to #40 kept
+        // whatever it had, which was NULL for every dynamic list ever made.
+        reRank.run(rank, existingRows.get(tmdbId));
+        continue;
+      }
+      const row =
+        movie ?? db.prepare('SELECT title, year FROM movies WHERE tmdb_id = ?').get(tmdbId);
+      insert.run(list.id, tmdbId, row?.title ?? String(tmdbId), row?.year ?? null, rank);
+      added += 1;
     }
-  }
 
-  db.prepare("UPDATE lists SET materialised_at = datetime('now') WHERE id = ?").run(list.id);
+    for (const row of existing) {
+      if (!wanted.has(row.tmdb_id)) {
+        drop.run(row.id);
+        removed += 1;
+      }
+    }
+
+    db.prepare("UPDATE lists SET materialised_at = datetime('now') WHERE id = ?").run(list.id);
+  });
+
   return { added, removed, kept: wanted.size - added, total: wanted.size };
 }
 

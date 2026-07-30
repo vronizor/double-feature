@@ -16,7 +16,9 @@
  * extras pinned on.
  */
 
-import { TAGS } from './db.js';
+// inTransaction lives in db.js because materialiseList needs it too — the
+// reason it exists at all is recorded there.
+import { TAGS, inTransaction } from './db.js';
 
 const clean = (value) => String(value ?? '').trim();
 
@@ -112,25 +114,6 @@ function writeMembership(db, vibeId, { tags, lists }) {
       db.prepare('INSERT INTO vibe_lists (vibe_id, list_id) VALUES (?, ?) ON CONFLICT DO NOTHING')
         .run(vibeId, listId);
     }
-  }
-}
-
-/**
- * Writes that touch several tables run in a transaction.
- *
- * Without one, a create whose tag list is rejected leaves the vibe row behind
- * with no tags — a vibe that resolves to nothing and that the user never
- * successfully made. Observed, not hypothetical.
- */
-function inTransaction(db, work) {
-  db.exec('BEGIN');
-  try {
-    const result = work();
-    db.exec('COMMIT');
-    return result;
-  } catch (error) {
-    db.exec('ROLLBACK');
-    throw error;
   }
 }
 
