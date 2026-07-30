@@ -79,6 +79,8 @@ add a film, then publish it as a vote once you're happy with it:
   that go with it), or tick lists by hand in the collapsible **Pool setup**
   section. Lists carry **tags**, so the picker groups them and a tag filter row
   narrows sixteen lists to four; a list appears under every tag it carries.
+  Groups collapse and expand individually or all at once, separately from
+  selecting — opening a group to look inside never changes what you draw from.
   Vibes are yours to add: set the pool up how you like it and hit
   **+ Save current…**. Narrow further by genre, language, year or runtime;
   ranked lists (TSPDT, Sight & Sound) also get a **Top N** control, so "draw from the TSPDT top 100" is a
@@ -126,7 +128,7 @@ own phone (no need to scan your own QR code). Guests scan, rank by tapping
 (first tap = #1, tapping a ranked film again removes it and renumbers the
 rest), enter a name and submit. The host's running tally updates every 3.5s.
 
-**Close voting** ends the session and shows the result — final for that draw,
+**Close voting** ends the session and shows the result — final for that vote,
 so another round means building a new lineup. **Cancel** is the other option
 while voting is still open: it throws the whole thing away instead, including
 any ballots already cast, and it never appears in history — for when a vote

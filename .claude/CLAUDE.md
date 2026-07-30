@@ -15,6 +15,63 @@
 - Ask when the request is genuinely ambiguous; infer when the
   answer is in the codebase.
 
+## How to report
+
+Sessions here run long and produce a lot, and the context is gone by the
+next one. So the report is not a courtesy — it is the handoff. Three
+formats, two rules. Nothing else: no sprints, points, velocity or
+burndown, and no daily cadence. The unit is a session, not a day.
+
+**Open a session with this, before doing any work.** Five lines, so a
+wrong plan can be redirected in one reply rather than after an hour.
+
+```
+STATE    <tests / build / what is green>
+LAST     <what landed last session>
+TODAY    <what I intend to pick up>
+NEEDS    <decisions blocking today, by id — or "nothing to start">
+```
+
+**Checkpoint after each finished chunk.** Three lines, so progress is
+visible without stopping to write an essay, and surprises surface when
+found rather than at the end.
+
+```
+✅ <what landed> — <how it was verified>
+⏭  next: <the next chunk>
+⚠️  found: <anything unexpected, and what I did with it>
+```
+
+**Close a session with four sections, always in this order.**
+
+- **LANDED** — what is done *and how it was verified*. One line each.
+  A line with no verification is a claim, not a result. Write
+  `⚠️ landed, not verified against the real DB` rather than a clean
+  tick — a report that looks authoritative and is wrong is worse than
+  loose prose.
+- **NEEDS YOUR CALL** — numbered `D1, D2…`, each with exactly four
+  things: the question, one line of context, the options with a
+  recommendation, and what it blocks. Numbered so the reply can be
+  `D1 yes, D2 a, D3 defer` without hunting through paragraphs.
+- **BLOCKED** — genuinely stuck on something external. Distinct from a
+  decision: a decision means the work *can* proceed and the choice is
+  the user's; blocked means it cannot. Usually empty.
+- **NEXT** — what happens if the user says nothing, so silence is a
+  valid answer.
+
+Two working rules:
+
+- **WIP limit of three.** More than three live threads is what makes a
+  session sprawl. Everything else waits its turn as ⏳ ready in
+  `ROADMAP.md` §5.
+- **Findings are reported, not folded into the diff.** Something noticed
+  mid-task goes in the report; it does not quietly join the work the
+  user asked for.
+
+Decisions, once made, still get written where they already belong —
+inline in `ROADMAP.md`, measurements in `BACKLOG.md`, state in the §5
+status table. The report adds no new files and no new bookkeeping.
+
 ## Project conventions
 
 - Verify against the real API and the real database rather than
@@ -47,7 +104,7 @@ globalThis.document = { createElement: () => ({ style:{}, setAttribute(){}, appe
 globalThis.window = { addEventListener(){}, location:{ hash:'', pathname:'/' } };
 globalThis.localStorage = { getItem: () => null, setItem(){} };
 globalThis.location = { hash:'', pathname:'/' };
-for (const m of ['pool-state.js','browse.js','occasions.js','app.js','views/draw.js', /* … */]) await import('./public/' + m);
+for (const m of ['pool-state.js','browse.js','vibes.js','app.js','views/draw.js', /* … */]) await import('./public/' + m);
 ```
 
 ## Where the context lives

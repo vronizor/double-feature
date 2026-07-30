@@ -368,21 +368,493 @@ vocabulary exists.
 
 ## 5. v3
 
-Agreed direction, not yet started.
+### Status
 
-- **Streaming badge.** Moved here from v2: it is the only remaining piece with
-  no user-visible urgency, being deliberately informational rather than a
-  filter. Card meta line and modal only — **never a pool filter**. Measured FR
-  flatrate coverage is ~30% of this library and 0% pre-1930, so filtering on it
-  would gut the arthouse canon. Absent must mean "unknown", not "excluded".
+The in-flight view. **One axis only: distance from shipped.** An earlier version
+of this table mixed that with "when was this decided", which produced two states
+that meant the same thing.
 
-  Free to fetch: `append_to_response=watch/providers` rides the detail call the
-  refresh job already makes. Needs a providers join table (same shape as
-  `movie_genres`), a region setting in `.env` beside `HOST_LAN_IP`, and display.
+| State | Meaning |
+|---|---|
+| 🗣 **discussing** | The approach is not settled. Do not build it yet — a decision is owed first, and it is recorded here when made. |
+| ⏳ **ready** | Approach settled, work not started. Anyone can pick it up from what is written here without asking another question. |
+| 🔨 **building** | In progress. |
+| 👀 **review** | Written, tests green, not yet accepted. |
+| ✅ **landed** | Done and accepted. Stays in the table for one version, then folds into the "done" section like §4. |
 
-  One knock-on: provider data goes stale far faster than the rest. Tightening
-  the refresh cycle from 150 days to ~14 costs `2455 / 14 approx 175` films/day,
-  below the existing 250/day budget — a cadence change, not new infrastructure.
+*Why the reasoning isn't a state:* what was decided and why lives in the
+subsections below and in `BACKLOG.md`, next to the measurement that settled it.
+The table only says how far along a thing is.
+
+| Item | State | Where it stands |
+|---|---|---|
+| Seed-file `tags` no longer stripped by a re-fetch | ✅ landed | Was a live regression — Ghibli had already lost its tags |
+| Award badges resolve on the `awards` tag, not `category` | ✅ landed | `category` had one reader left; now none |
+| Six scan findings (§5.1) | ✅ landed | All six re-verified by execution before fixing, all six now covered by tests |
+| Vocabulary divergences (§5.2) | 🗣 discussing | "occasion" vs "vibe" and five more; two need a product decision, not a rename |
+| Split `fetchWikipediaCategoryAward` in three | ✅ landed | `fetchCategoryMembers` / `titlesToQids` / `qidsToFilms`; the award year is now an option, not baked in |
+| "draw" (noun) → "vote" in UI strings | ✅ landed | Also fixed History pointing at "the Draw tab", renamed Lineup in v2 |
+| Expand / collapse all lists in the picker | ✅ landed | Open/closed marker rule extracted to `isGroupOpen`/`setGroupOpen` + 5 tests |
+| Box office — France | 👀 review | **1,390 films, 1945–2026, ranks contiguous, seed file written.** Not yet seeded into a database |
+| Dynamic-list refresh refetches all 120 members daily | ⏳ ready | ~44k needless TMDB calls/year, and it bypasses the concurrency semaphore |
+| `GET /api/sessions` N+1 | ⏳ ready | 3 queries per session, ~120× slower than one join; grows with history |
+| Streaming | ⏳ ready | **Link out, don't cache** — no column, no region config, no refresh change |
+| Award years | ⏳ ready | Option C, far cheaper than feared — the ceremony wikilink carries the year in all three editions |
+| Box office — Spain | 🗣 next version | No source exists on es.wikipedia; dropped from v3 until one is found |
+| Award short names as data | ⏳ ready | |
+| Award-winner filter | ⏳ ready | Unblocked by the tag fix above |
+| `seed.mjs` keyed on `tmdb_id` | ⏳ ready | Additive key — severity was lower than assumed, see below |
+| `includeWatched` default: README vs UI disagree | 🗣 revisit at F3 | No effect until something is marked watched; F3 starts doing that |
+
+### 5.1 Scan findings — fix before any v3 feature
+
+A full-stack scan turned these up outside the v3 scope. Every one was
+re-verified by running code, not by reading. Ordered by severity.
+
+1. **Applying a vibe aliases its filter objects** (`public/occasions.js:28` →
+   `pool-state.js:105`). Both spreads are shallow, so
+   `poolState.filters.genres` **is** `vibe.filters.genres`, and `browse.js`'s
+   chip handler mutates it in place (`group.include.push(key)`). Verified:
+   apply Family → click the Animation chip → apply Cinephile → apply Family, and
+   Family now applies `{include:[16],exclude:[27]}` while the chip still reads
+   "Family". `rangeInputs` does the same to any vibe carrying a year or runtime
+   range — a saved "Seventies" vibe came back starting at 1995.
+   Fix at `applyOccasion`, the single choke point, not at the call site.
+
+2. **The Draw tab's "N films match" ignores every filter on remount**
+   (`public/views/draw.js:82`). `refreshData()` seeds `state.poolCount` from
+   `facets.total`, which `server/routes/draw.js:41` computes from the list
+   selection alone — genres, year, runtime, topN and `includeWatched` are all
+   dropped. Measured on the real library: Ghibli + year ≤ 1990 reports **23**
+   against a real pool of **5**; TSPDT + top-100 reports **954** against **97**.
+   It also gates the Draw button via `disabled: state.poolCount === 0`.
+
+   Latent second half: `emptyFilters()` sends `includeWatched: true` while
+   `normalizeFilters({})` defaults it to `false`. No effect today (nothing is
+   marked watched) but it diverges the moment something is — measured 2406 vs
+   2455 with 50 films marked.
+
+3. **Explore repaints on every keystroke and drops focus**
+   (`public/views/explore.js:140`, `:254`). `browse.js:450` documents the
+   contract: *"range inputs and the checkbox must NOT be repainted."* `draw.js`
+   honours it by calling `refreshCount()`; Explore calls
+   `loadPage({reset:true})`, which paints synchronously at `explore.js:64`
+   before its first await. `paint()`'s focus restore only covers
+   `#explore-search`, so all five number inputs lose the caret after one digit.
+
+4. **`INCOMPLETE` treats legitimately-empty TMDB fields as broken**
+   (`server/refresh.js:22`). The comment directly above excludes `trailer_key`
+   for precisely this reason; `countries` and `languages` have the same
+   property. Verified against the live API: `getMovie(1578)` (*Raging Bull*) and
+   `getMovie(637)` (*Life Is Beautiful*) both return `languages === null`, and
+   1204194 returns null for both fields. Five rows therefore re-fetch every
+   single day and, because of `ORDER BY ${INCOMPLETE} DESC`, permanently head
+   the 250-row queue. `npm run backfill` reports "5 updated" forever without
+   converging.
+
+5. **One transient fetch failure permanently kills the poll**
+   (`public/views/session.js:41`, `public/views/vote.js:41`). Both catch blocks
+   replace the whole panel with a bare error and `clearInterval` with no retry:
+   on the host screen a single dropped request wipes the QR code, link and live
+   tally mid-movie-night; on a guest's phone it wipes the ballot they are
+   ranking. Confirmed as a code path; how likely a blip is on a wired LAN is a
+   judgement call, which is why it sits below the four measured ones.
+
+6. **`PATCH /api/lists/:id` 500s on a duplicate name**
+   (`server/routes/lists.js:87`). `POST /` guards this with a 400; PATCH does
+   not, so it surfaces a raw `UNIQUE constraint failed: lists.name`. API-only
+   today — no rename control exists in `views/lists.js`.
+
+**Checked and clean**, worth recording so it isn't re-audited: every `public/`
+module's imports resolve under the stubbed-DOM loop from `CLAUDE.md`; Borda
+tally and tie-break; the TMDB semaphore's acquire/release handoff; LIKE-wildcard
+escaping; the three-state `lists` convention; anonymity-on-write; and
+`materialiseList`'s reconcile logic.
+
+### 5.1b Wasted work, found by a caching scan (2026-07-30)
+
+Two worth doing, one deliberately not. All confirmed by execution.
+
+- **`materialiseList` re-downloads every member film, daily**
+  (`server/dynamic-lists.js:79`). It calls `getMovie()` for each film the
+  discover query returns with **no database check at all**. Measured: all 120
+  "Modern Classics" members are already cached, complete, and were refreshed
+  the same day — and tomorrow's job will fetch all 120 again. That is ~120 TMDB
+  calls a day, ~44k a year, for rows the app already holds and its own policy
+  considers good for 150 days.
+
+  It is also a `for…of await` loop, so it **bypasses the 8-way semaphore** in
+  `tmdb.js` — 120 sequential round trips rather than 15 batches.
+
+  Fix: look the discovered ids up in `movies` first and only fetch the ones
+  absent or genuinely stale. No staleness risk — it hands freshness back to
+  `refreshStaleMovies`, which already owns it for the other 2,460 films.
+
+  > Side effect to expect, and it is correct: those 120 stop having
+  > `refreshed_at` bumped daily, so they start appearing in the normal 250-row
+  > refresh queue like everything else.
+
+- **`GET /api/sessions` is an N+1 that throws away most of what it fetches**
+  (`server/routes/sessions.js:144`). Three queries per session — including two
+  correlated `group_concat` subqueries for genres and list names — then `.map()`
+  keeps four columns and discards the rest. Measured 8.2ms against 0.07ms for a
+  single batched join, ~120×. Small at four sessions; it grows linearly with
+  history, and the Pi is several times slower than the machine measured.
+
+**Deliberately not doing: the QR image re-request.** `renderOpen` rebuilds the
+`<img>` on every 3.5s poll and the route sends `no-store`, so it is re-requested
+~340 times over a vote night. Measured 2ms and 1.6KB — below the bar. Kept here
+only because the node is destroyed while guests are pointing phones at it;
+whether that flickers was never confirmed. Revisit only if someone sees it.
+
+### 5.2 Vocabulary — one concept, several words
+
+A terminology audit of code, schema, API and docs. Recorded here because a
+divergence that nobody writes down gets re-litigated every few months. Ranked by
+how much confusion each can actually cause; the last two are not naming problems
+at all and need a decision about what the thing *is*.
+
+**Cheap and purely internal:**
+
+- **"occasion" is "vibe".** The two are one function call apart: `applyVibe()`
+  in `public/occasions.js` calls `poolState.applyOccasion()`. "Vibe" owns the
+  schema (`vibes`, `vibe_tags`, `vibe_lists`), the API path, and **100% of the
+  user-visible strings** — "Name this vibe", "Delete the X vibe?". "Occasion"
+  appears in zero of them. It survives in the filename, `poolState.occasion`,
+  `applyOccasion`, the `chip--occasion` CSS class, and §1/§3 of this file.
+  ~25 sites, no schema, no API, no stored data, no user-visible text.
+
+  > One caveat: §1's "occasion" is a **superset** — it includes the parametric
+  > director/theme nights of §6, which the `vibes` schema cannot express. F10
+  > declared §1–§3 stale but never rewrote them, so a cold session still reads
+  > the wrong noun in the file that exists to stop exactly that.
+
+- **"draw" (noun) means a published vote session, and is now factually wrong.**
+  `history.js` says "past draw" and "No draws yet"; `sessions.js` errors say
+  "Publish a draw with at least one movie". Since F5/F6 a lineup can be built
+  entirely by search, paste, manual entry or Explore, so **a "past draw" can
+  contain zero drawn films**. Worse, `history.js:23` points the user at "the
+  Draw tab", which `app.js` has labelled **Lineup** since v2. Winner: "vote" in
+  UI strings, `session` in code — both already dominate everywhere else.
+  ~10 strings, cosmetic.
+
+- **`source` means two things** — where a *list* came from, and how a *lineup
+  film* got there. F5 already calls the latter "provenance"; renaming it is 6
+  internal sites.
+
+- **Dead `category`.** No readers left (§5.1 removed the last one) but three
+  writers persist, and its schema comment is still the *first* thing in
+  `SCHEMA` — presenting it as the live grouping mechanism, and claiming the
+  picker renders "Uncategorised" where the picker actually says "Untagged". A
+  cold reader hits that 160 lines before the tags comment. Dropping the column
+  is a table rebuild and not worth it; rewriting the comment is free.
+
+**Needs a decision about the concept, not the word:**
+
+- **Is the list selection a filter?** The API says yes (`lists` and `topN` ride
+  inside `filters`), the UI says no (they sit above the "Filters" card, under
+  "Pool setup"), `clearFilters()` says no (it explicitly preserves `lists`, with
+  a comment apologising for the name), and `describeFilters()` says maybe (takes
+  list names as a *separate* argument, then writes them into a column called
+  `filter_summary`). Each is defensible alone; together they mean nobody
+  decided. **Settle this before renaming anything** — the rename follows the
+  decision. Note the wide rename would be a breaking API change across four
+  endpoints plus a stored column, so the internal-only half (`poolState.filters`
+  → `poolState.setup`) is the affordable version.
+
+- **`is_active` has three jobs**, and only §0's storage question was settled:
+  a user preference, the server-side fallback when no selection is sent, and the
+  seed for tonight's selection on first paint. Ticking it on the Lists tab also
+  changes tonight's selection, so it is not purely a default. It also has **no
+  user-visible name at all** — the checkbox that writes it is unlabelled, while
+  Explore tells the user it browses "your active lists" when it actually reads
+  the selection.
+
+- **Two chip rows, same labels, different jobs.** The tag-filter row and the
+  vibe row sit a few lines apart in the same panel, and the built-in vibes are
+  named after the tags they resolve on. So the user sees a chip **"Awards"**
+  that *selects* the awards lists, and a chip **"Awards 5"** that merely
+  *narrows what the picker displays*. The tag row has no label. Genuinely
+  conflated in the UI, not just in the naming.
+
+  > **Deliberately left alone for now (decided 2026-07-30).** Changing it on
+  > the strength of a code read would be guessing at a UI problem nobody has
+  > actually hit. **Re-check after real use** — the question to answer then is
+  > whether the two rows were ever confused in practice, not whether they look
+  > confusable on paper. If they were, the fix is probably labelling the tag
+  > row rather than moving either.
+
+- **"Kind" of list means two different axes.** `lists.kind` is `seed|custom`
+  (provenance). §1's "Kind" column means curated | dynamic | property-filter —
+  the axis that actually drives the pool query, and which has no representation
+  in the schema at all.
+
+### 5.3 Box office France — spec, awaiting green light
+
+**Goal.** A `Box-office France` list of films French audiences actually went to
+see, tagged `box-office`, so a draw can reach *La Cité de la peur* and
+*L'Aile ou la Cuisse* — the beloved-but-not-canon register that no rating metric
+can surface. Evidence and the source comparison are in `BACKLOG.md`.
+
+#### Source
+
+`fr.wikipedia.org/wiki/Box-office France <year>`. **Verified: 82 pages,
+1945–2026, no gaps in the range.** Each carries a wikitable of that year's
+releases above some admissions threshold, with the film title as a wikilink.
+
+Not the all-time page: it is cumulative and dominated by recent Hollywood.
+
+#### What the survey found — the parser cannot be one regex
+
+A first pass over 17 sampled years produced *plausible-looking wrong answers*,
+which is the dangerous kind. Recorded so the real parser is not written the same
+way:
+
+| Symptom | Cause |
+|---|---|
+| 2008 parsed to 2 rows | admissions are `{{unité|20489303|entrées}}` — the extra parameter broke a regex expecting `{{unité|N}}` |
+| 1998 listed *Jean-Marie Poiré* as a film | took the **first wikilink in the row**, which in that layout is the director |
+| 1966 reported *Fantomas se déchaîne* at 0.1M (really ~4.5M) | took the **first number in the row**, which was not the admissions column |
+| 1950, 1960 reported 0 French films | country marker absent or different in early years |
+
+Three encodings of the same fact, all in live use:
+
+```
+country     {{FRA-d}}                                  (template)
+            [[Fichier:Flag of France.svg|20px]]        (flag image)
+            — absent entirely in the earliest years —
+admissions  {{unité|N}}  {{unité|N|entrées}}  {{formatnum:N}}
+column name Rang | Classement      Entrées | Box-office France
+```
+
+**Therefore: parse by column position, read from the table's own header row,
+never by "first link" or "first number".** The header names vary too, so they
+need a synonym map — built from data, not guessed.
+
+#### Build order
+
+- **Phase 0 — survey before parsing.** Fetch all 82 pages once, dump every
+  table's header row, and build the synonym map from what is actually there.
+  Cheap, and it turns every surprise above into a known case up front. Commit
+  the survey output so the next person doesn't refetch 82 pages to see it.
+- **Phase 1 — the fetcher.** `fetchWikipediaBoxOffice({ lang, pageTitle, ... })`,
+  parameterised from the start even though France is its only caller: Spain will
+  not reuse it, but a rewrite for the second country that *does* is worse than a
+  few unused parameters. Depends on the `fetchWikipediaCategoryAward` split.
+- **Phase 2 — resolution.** Wikilink → QID → TMDB id, via the extracted helpers.
+  No fuzzy title matching anywhere.
+- **Phase 3 — the list.** One seed file, `box-office` tag (already in `TAGS`).
+
+#### Rules
+
+- **Take every row the page lists.** No admissions threshold of our own — if a
+  film was a hit that year, that is the qualification. The pages already apply
+  their own cut.
+- **Francophone by TMDB `original_language`, NOT by the country column**
+  (decided 2026-07-30, after measurement reversed the first plan).
+
+  The original rule was "any production country is French-speaking". Measured
+  across all 82 years, that admits **69 films beyond French-produced ones, and
+  they are almost all Hollywood blockbusters carrying Canadian co-production
+  credits**:
+
+  ```
+  Dune, deuxième partie [USA/CAN] · X-Men 3 [USA/UK/Canada]
+  Kung Fu Panda 2 [USA/Canada] · Man of Steel [USA/CAN/GBR]
+  La Pat' Patrouille [USA/CAN] · La Planète des singes [USA/UK/Canada]
+  ```
+
+  The country column matches co-production paperwork, not francophone cinema.
+  Genuine additions came to two 1945 Swiss films.
+
+  `original_language` is free — every title is resolved to a TMDB id anyway,
+  and `movies.original_language` is already what the app's own language filter
+  uses, so the list agrees with the filter by construction. It also rescues the
+  **183 rows that carry no country marker at all**, which skew French
+  (*Le Viager*, *Le Grand Blond avec une chaussure noire*) and which a
+  table-only rule would silently drop.
+
+  > **The feared trade-off does not exist — measured 2026-07-30.** The worry
+  > was that a French-*produced* film shot in English would drop out. It does
+  > not: TMDB's `original_language` tracks the production's origin language,
+  > not the spoken dialogue.
+  >
+  > ```
+  > Léon                    English dialogue   original_language = fr  kept
+  > Le Cinquième Élément    English dialogue   original_language = fr  kept
+  > Le Grand Bleu           English/French     original_language = fr  kept
+  > The Artist              silent/English     original_language = fr  kept
+  > Dune  {USA, CAN}        English            original_language = en  dropped
+  > ```
+  >
+  > So no country logic is needed at all, in either direction. A proposed
+  > refinement — "exclude CAN + any non-francophone country" — was also
+  > considered and is unnecessary: it infers language from co-production
+  > paperwork, which is what `original_language` reads directly, and it would
+  > wrongly admit an anglophone Canada-only production.
+  >
+  > Method note: the first check of this used hand-guessed TMDB ids and gave
+  > the opposite answer, because `Le Dîner de cons` resolved to the US remake
+  > *Dinner for Schmucks*. Look ids up; never type them from memory.
+
+  > **The threshold, not the country rule, is the real limit.** Each page
+  > carries its own cut — 2006's caption is *"Films sortis en 2006 ayant dépassé
+  > 1 000 000 de spectateurs"*. So *Dikkenek* (2006, Belgian, ~350k admissions
+  > in France) is **not reachable**, and no country rule changes that: it is a
+  > cult film that was never a theatrical hit, exactly like *Le Père Noël est
+  > une ordure*. Verified against the 2006 page. Worth stating plainly so the
+  > absence isn't later mistaken for a bug in the country matching.
+- **Rank, don't store admissions** (decided 2026-07-30). `list_movies` has no
+  admissions column and nothing displays them, so the figure is used to order
+  films within their year and written as `rank`. The Top-N control already
+  understands `rank`, so "the top 20 of 1982" works with no new UI.
+- **A weird year warns, it does not fail.** Agreed explicitly: if a year's row
+  count looks nothing like its neighbours, print a loud warning naming the year
+  and carry on with the other 81. The point is that a layout change gets
+  *noticed* rather than silently swallowing a year — but one odd page must not
+  cost the whole fetch. The existing seed-level shrink guard still applies to the
+  finished list, so a mass failure is still refused at write time.
+
+#### Parser traps, found by building it (2026-07-30)
+
+The phase 0 survey said the corpus was uniform — all 82 pages carry `Titre`,
+`Pays` and `Réalisateur`. That was right, and it corrected an earlier claim in
+this file that 2008 and 2022 were "laid out differently"; they are not. What
+actually bit was smaller and nastier:
+
+- **`|+` is the table CAPTION, not a cell.** On the 2013+ pages the header row
+  follows the caption with no `|-` between them, so counting it as a cell
+  shifted every column index by one. This did not produce missing rows — it
+  produced **wrong numbers that looked plausible**: 2022's *Avatar : La Voie de
+  l'eau* came out at 2.7M against a real 14.0M. The single strongest argument
+  for parsing by header position and then sanity-checking the result.
+- **Pre-1970s pages use `[[Image:Flag of France.svg]]`**, not `Fichier:` or
+  `File:`. Missing that left a third of all rows with no country at all.
+
+Two more surfaced only once the finished list was eyeballed, and both are the
+same species — a plausible number from the wrong place:
+
+- **A citation URL became an admissions count.** `parseAdmissions`' bare-digit
+  fallback matched the id inside
+  `[http://www.boxofficestory.com/paris-1972-c23262779/2]`, giving three
+  unrelated 1972 films **23,262,779 admissions each** — above *Bienvenue chez
+  les Ch'tis*. Three different films landing on one impossible figure is what
+  gave it away; nothing crashed.
+- **A second table was parsed as the list.** Each page also carries
+  *"Box-office parisien par semaine"*, whose header `Film {{n°}}1` normalises to
+  `film 1` — which `startsWith` column matching accepted as the title column.
+  Matching is now exact.
+
+Tightening to exact matching then silently emptied **1976–1982**, because those
+years write `Entrées<ref>Selon les sites…</ref>`: stripping the tags leaves the
+footnote text glued to the column name.
+
+Final: **3,668 film rows, 16–80 per year (median 42), only 1945 below 20** (16
+rows, plausible for the first post-war year). The top of the list now reads
+Titanic 20.6M · Ch'tis 20.5M · Intouchables 19.5M · La Grande Vadrouille 17.3M,
+which are the real French all-time records.
+
+> **The lesson worth keeping.** Four separate wrong-number bugs, and not one of
+> them crashed, threw, or dropped a visible row. The per-year row-count alarm
+> caught **none** of them — every one was found by looking at actual values and
+> asking whether they could be true. A guard on volume does not substitute for
+> checking that the numbers are sane; both are needed.
+
+#### Iterating on this fetcher
+
+A full run is 82 Wikipedia pages plus ~3,400 TMDB lookups, and every run after
+the first re-downloads identical data. `SEED_CACHE_DIR` makes both reusable:
+
+```
+SEED_CACHE_DIR=.cache npm run fetch-seeds -- box-office
+```
+
+```
+.cache/wiki/fr-Box-office_France_1972.wikitext   the raw pages
+.cache/tmdb-language.json                        tmdb_id -> original_language
+```
+
+Two deliberate choices:
+
+- **Off by default.** A committed seed file should come from a fresh fetch, and
+  a cache that quietly served stale data would be a worse bug than the waste it
+  saves. `.cache/` is gitignored.
+- **The TMDB cache stores the ANSWER, not the response.** A `/movie` payload is
+  tens of kilobytes and we need one field of it, so caching responses would mean
+  ~120MB to avoid re-reading ~60KB of actual information. It also carries a
+  timestamp and expires after 30 days — well inside the six-month cap TMDB's
+  terms place on cached data, which is the same constraint that sets the app's
+  own 150-day refresh cycle.
+
+#### Result
+
+**1,390 films, 1945–2026**, written to `seeds/box-office-france.json`. Verified:
+ranks contiguous 1..N, no duplicate tmdb ids, every entry carries a tmdb id and
+a year, and admissions do not leak into the committed file.
+
+```
+  1  2008  Bienvenue chez les Ch'tis        9  2006  Camping
+  2  2011  Intouchables                    10  2000  Taxi 2
+  3  1966  La Grande Vadrouille            11  1985  Trois hommes et un couffin
+  4  2002  Astérix : Mission Cléopâtre     12  1958  Les Misérables
+  5  1993  Les Visiteurs                   13  1962  La Guerre des boutons
+  6  2014  Qu'est-ce qu'on a fait au…      14  2024  Le Comte de Monte-Cristo
+  7  1965  Le Corniaud                     15  1998  Le Dîner de cons
+  8  2024  Un p'tit truc en plus
+```
+
+Per decade: 1940s 60 · 1950s 198 · 1960s 229 · 1970s 222 · 1980s 180 ·
+1990s 92 · 2000s 158 · 2010s 135 · 2020s 116. Era-balanced, which was the point
+of choosing the per-year pages over the all-time one. Titanic and Avatar are
+correctly absent — both were bigger in France than most of this list, and both
+are English.
+
+> Cosmetic, not a defect: some `title` values in the seed file are Wikidata's
+> English labels (*The Sucker* for *Le Corniaud*). Nothing displays them — every
+> entry carries a `tmdb_id`, so `resolveEntry` takes the id path and the movie
+> row gets TMDB's own title. The seed title is only ever provenance.
+
+**Still to do before this is done:** run `npm run seed -- box-office` against a
+real database and confirm the pool, the picker grouping under the `box-office`
+tag, and a draw. The seed file existing is not the same as the feature working.
+
+#### Open, to settle during the build
+
+- What the earliest years (1945–1965) actually look like, and whether they carry
+  a usable country column at all. If not, the list simply starts later — worth
+  knowing, not worth blocking on.
+- Whether admissions get stored. `list_movies` has no column for them, and
+  nothing in the UI shows them. Cheapest honest answer is not to store them at
+  all; rank by admissions within the year *at fetch time* and write it as `rank`,
+  which the Top-N control already understands.
+
+### Streaming — a link, not cached data
+
+**Reversal of the plan above.** v3 originally specified a providers join table,
+a region setting and a refresh cadence drop from 150 days to ~14. All of that is
+now unnecessary: TMDB's own watch page is a public URL derivable from the id we
+already store.
+
+```
+https://www.themoviedb.org/movie/346/watch      → 200, no API call, no key
+```
+
+Verified: the page is JustWatch-backed (TMDB's `watch/providers` `link` field
+points at exactly this URL) and carries its own country selector, so the guest
+picks their own region rather than the host baking one into `.env`.
+
+What this deletes from the plan: the join table, `TMDB_WATCH_REGION`, the
+150→14 day cadence change, and the whole staleness problem — provider data is
+the fastest-rotting field in the API and this stores none of it.
+
+What it costs: no at-a-glance "▸ MUBI" on the card; the answer is one click
+away instead. Given the measured ~30% coverage, roughly seven in ten badges
+would have been absent anyway, so the card was never going to carry this well.
+
+> **Trap for whoever implements it:** the id is negated for TV-sourced entries
+> and synthetic below −1,000,000,000 for manual ones. Reuse `tmdbUrl()` in
+> `dom.js`, which already handles both, and render nothing at all when
+> `is_manual` — a manual entry has no TMDB page to link to.
 
 - **Box-office per country — France and Spain first.** National popularity
   cannot be derived from TMDB or IMDb: their vote counts measure international
@@ -393,23 +865,79 @@ Agreed direction, not yet started.
   - **Prerequisite:** extract `resolveTitlesToTmdb` (titles → QIDs → TMDB ids)
     out of `fetchWikipediaCategoryAward`, where it is currently entangled.
     Box-office reuses exactly that pipeline.
-- **Award years via option C** — scrape each award's own Wikipedia article,
-  which carries year-by-year winner tables, to fill the 28–39% coverage gap for
-  BAFTA, César and Goya. Option B (deriving release year + 1) was considered and
-  rejected: it silently mixes real and guessed data in one column.
-  - Watch for: those tables mix winners with nominees, using different
-    conventions in each language edition.
+- **Award years via option C** — scrape each award's own Wikipedia article to
+  fill the 28–39% coverage gap for BAFTA, César and Goya. Option B (deriving
+  release year + 1) stays rejected: it silently mixes real and guessed data in
+  one column.
+
+  Two cheaper structural routes were probed first and **both are dead ends**,
+  recorded so they aren't re-proposed:
+
+  - *Wikidata ceremony items carry the winner.* They don't. Q115891338 (48th
+    César Awards) has `P585` (the ceremony date) and `P179`/`P361` (its series),
+    but **no `P1346` winner statement** — the winners are simply not modelled
+    on the ceremony item.
+  - *Per-ceremony Wikipedia categories.* Also no. A César winner's fr.wikipedia
+    page carries `Catégorie:César du meilleur film` and per-*category* awards
+    ("Film avec un César de la meilleure réalisation") but nothing per-year. The
+    Goya page carries only the plain winners category.
+
+  Option C is however **much cheaper than this roadmap assumed**, because all
+  three editions share one invariant: the ceremony is a wikilink whose *display
+  text is the year*.
+
+  ```
+  fr   * [[15e cérémonie des César|1990]] : '''''[[Trop belle pour toi]]'' …'''
+  es     … [[Anexo:V edición de los Premios Goya|1990]] …
+  en     {{center|'''1990'''<br>{{small|([[44th British Academy Film Awards|44th]])}}}}
+  ```
+
+  Only the winner-vs-nominee signal differs per edition, and in each it is
+  unambiguous rather than a judgement call:
+
+  | Edition | Winner marked by |
+  |---|---|
+  | fr (César) | **List depth** — winner at `*`, nominees at `**` |
+  | en (BAFTA) | Table row with `background:#FAEB86` and bold-italic |
+  | es (Goya) | Table, 6 wikitables on `Anexo:Premio Goya a la mejor película` |
+
+  Note the Goya article title: `Premio Goya a la mejor película` is a redirect,
+  and the API needs `redirects=1` or it returns a 51-character stub.
+
+  Film identity comes from the wikilink → QID → TMDB id, the pipeline the award
+  fetchers already use, so there is no fuzzy title matching anywhere.
+
+  > **Self-check to build in:** a parsed ceremony year must land within a year or
+  > two of `movies.year`. Anything further out is a mis-parse, and it should
+  > refuse rather than write — the same instinct as the shrink guard.
 - **Award short names as data.** `dom.js` carries a hardcoded map of list name →
   display name. A `lists.short_name` column would put it with the rest of the
   list metadata in the seed files.
 - **Award-winner filter** — "only films that won something" as a pool filter,
   not just a badge. Cheap, since `awards` is already computed.
-- **`seed.mjs` keyed on `tmdb_id`** rather than `raw_title + raw_year`. No
-  current symptom, but if title normalisation ever changes, rows re-resolve as
-  new entries — duplicating, and the backfill script can no longer find its row.
-  Most sources now carry a tmdb_id, which is strictly more stable. Deferred
-  rather than done because changing the skip logic is exactly where a
-  duplicate-everything bug would come from.
+- **`seed.mjs` keyed on `tmdb_id`** rather than `raw_title + raw_year`.
+
+  **The severity here was overstated.** "Rows re-resolve as new entries —
+  duplicating" is not what happens for *resolved* rows: `recordEntry`
+  (`server/movies.js:111`) looks the row up by `(list_id, tmdb_id)` before
+  inserting and returns `duplicate`, and `list_movies_unique` enforces it at the
+  schema level regardless. A changed title costs a wasted TMDB call, not a
+  duplicate row.
+
+  What is genuinely exposed is narrower:
+
+  1. **Unresolved rows can duplicate.** `list_movies_unique` is a *partial*
+     index (`WHERE tmdb_id IS NOT NULL`), so a `needs_review` entry whose
+     `raw_title` changes in the seed file does get a second row.
+  2. **`backfill-list-fields.mjs` matches on the same key**, so it would stop
+     finding rows it needs to repair.
+  3. Wasted TMDB calls on a re-seed after any title change.
+
+  So this is a tidy-up, not a landmine. The safe shape is **additive**: key the
+  skip-set on `tmdb_id` *when the entry carries one*, falling back to
+  `raw_title + raw_year` when it doesn't. That strictly widens what gets
+  skipped, so it cannot introduce a duplicate — and it needs the same change in
+  `backfill-list-fields.mjs` or that script silently stops matching.
 
 ## 6. Deferred — but the design must not block them
 
