@@ -266,6 +266,65 @@ export async function discoverMovies(params = {}, { limit = 100 } = {}) {
   return movies.slice(0, limit);
 }
 
+/**
+ * People, for director night — the parameter half of a parametric vibe.
+ *
+ * Sorted so people who actually direct come first. TMDB's own ordering is by
+ * popularity alone, which for a common surname puts an actor above the
+ * director being looked for; `known_for_department` is the field that
+ * separates them, and it costs nothing because search returns it already.
+ */
+export async function searchPerson(query, { limit = 8 } = {}) {
+  const data = await request('/search/person', {
+    query,
+    language: 'en-US',
+    include_adult: false,
+  });
+  return (data?.results ?? [])
+    .map((person) => ({
+      id: person.id,
+      name: person.name,
+      directs: person.known_for_department === 'Directing',
+      popularity: person.popularity ?? 0,
+      profile_path: person.profile_path ?? null,
+      known_for: (person.known_for ?? [])
+        .map((credit) => credit.title || credit.name)
+        .filter(Boolean)
+        .slice(0, 3),
+    }))
+    .sort((a, b) => Number(b.directs) - Number(a.directs) || b.popularity - a.popularity)
+    .slice(0, limit);
+}
+
+/**
+ * The films a person actually DIRECTED.
+ *
+ * Deliberately not `with_crew` on discover. Measured against the live API:
+ * `with_crew=<Kurosawa>` returns 112 films because it matches any crew role,
+ * and his crew credits include 13 "Assistant Director" and 11 "Third Assistant
+ * Director" entries on other people's films. This route returns 32, which is
+ * his actual filmography. Recorded in ROADMAP section 2 as a reversal; do not
+ * re-propose the discover route.
+ *
+ * Deduplicated by id, because one film can carry the same person twice in the
+ * crew list under different department spellings. Sorted oldest first, which
+ * is how a filmography reads.
+ */
+export async function getDirectorCredits(personId) {
+  const data = await request(`/person/${personId}/movie_credits`, { language: 'en-US' });
+  const seen = new Set();
+  return (data?.crew ?? [])
+    .filter((credit) => credit.job === 'Director')
+    .filter((credit) => (seen.has(credit.id) ? false : seen.add(credit.id)))
+    .map((credit) => ({
+      id: credit.id,
+      title: credit.title,
+      year: credit.release_date ? Number(credit.release_date.slice(0, 4)) : null,
+      poster_path: credit.poster_path ?? null,
+    }))
+    .sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
+}
+
 export async function getTopRated(count = 100) {
   const movies = [];
   for (let page = 1; movies.length < count && page <= 10; page += 1) {

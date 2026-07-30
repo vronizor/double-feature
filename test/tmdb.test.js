@@ -167,3 +167,100 @@ test('tvToMovie handles a show with no episode_run_time at all', () => {
   const movie = tvToMovie({ id: 1, name: 'A Show', genres: [] });
   assert.equal(movie.runtime, null);
 });
+
+// --- Director night: the person half of a parametric vibe -----------------
+//
+// These stub fetch rather than calling TMDB, so they run without credentials.
+// The shape they assert against was captured from the live API on 2026-07-30.
+
+const realFetch = globalThis.fetch;
+
+function stubTmdb(payloads) {
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    const key = Object.keys(payloads).find((path) => url.includes(path));
+    if (!key) throw new Error(`unstubbed TMDB path: ${url}`);
+    return { ok: true, status: 200, json: async () => payloads[key] };
+  };
+}
+
+test('person search puts directors above more popular non-directors', async (t) => {
+  t.after(() => {
+    globalThis.fetch = realFetch;
+  });
+  stubTmdb({
+    '/search/person': {
+      results: [
+        { id: 1, name: 'Popular Actor', known_for_department: 'Acting', popularity: 90 },
+        { id: 2, name: 'The Director', known_for_department: 'Directing', popularity: 3 },
+      ],
+    },
+  });
+  const { searchPerson } = await import('../server/tmdb.js');
+  const results = await searchPerson('someone');
+
+  // TMDB orders by popularity alone, which for a shared surname buries the
+  // director under an actor. Directing must win regardless of the gap.
+  assert.equal(results[0].name, 'The Director');
+  assert.equal(results[0].directs, true);
+  assert.equal(results[1].directs, false);
+});
+
+test('directed credits keep only job=Director, never any crew role', async (t) => {
+  t.after(() => {
+    globalThis.fetch = realFetch;
+  });
+  stubTmdb({
+    '/movie_credits': {
+      crew: [
+        { id: 10, title: 'Directed This', job: 'Director', release_date: '1954-04-26' },
+        // The exact noise that makes discover's with_crew return 112 films for
+        // Kurosawa instead of 32 — measured, see ROADMAP section 2.
+        { id: 11, title: 'Assisted On This', job: 'Assistant Director', release_date: '1936-01-01' },
+        { id: 12, title: 'Wrote This', job: 'Screenplay', release_date: '1949-01-01' },
+        { id: 13, title: 'Edited This', job: 'Editor', release_date: '1950-01-01' },
+      ],
+      cast: [{ id: 14, title: 'Acted In This' }],
+    },
+  });
+  const { getDirectorCredits } = await import('../server/tmdb.js');
+  const films = await getDirectorCredits(5026);
+
+  assert.deepEqual(films.map((f) => f.id), [10]);
+  assert.equal(films[0].year, 1954);
+});
+
+test('a film credited twice as director appears once', async (t) => {
+  t.after(() => {
+    globalThis.fetch = realFetch;
+  });
+  stubTmdb({
+    '/movie_credits': {
+      crew: [
+        { id: 10, title: 'Co-directed', job: 'Director', release_date: '1960-01-01' },
+        { id: 10, title: 'Co-directed', job: 'Director', release_date: '1960-01-01' },
+      ],
+    },
+  });
+  const { getDirectorCredits } = await import('../server/tmdb.js');
+  assert.equal((await getDirectorCredits(1)).length, 1);
+});
+
+test('directed credits read oldest first, and undated films sink', async (t) => {
+  t.after(() => {
+    globalThis.fetch = realFetch;
+  });
+  stubTmdb({
+    '/movie_credits': {
+      crew: [
+        { id: 3, title: 'Later', job: 'Director', release_date: '1985-01-01' },
+        { id: 4, title: 'Undated', job: 'Director', release_date: null },
+        { id: 5, title: 'Earlier', job: 'Director', release_date: '1954-01-01' },
+      ],
+    },
+  });
+  const { getDirectorCredits } = await import('../server/tmdb.js');
+  const films = await getDirectorCredits(1);
+  assert.deepEqual(films.map((f) => f.title), ['Earlier', 'Later', 'Undated']);
+  assert.equal(films[2].year, null);
+});
