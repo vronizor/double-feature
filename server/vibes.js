@@ -66,10 +66,21 @@ function hydrate(db, vibe) {
       filters = null;
     }
   }
+  let param = null;
+  if (vibe.param_json) {
+    try {
+      param = JSON.parse(vibe.param_json);
+    } catch {
+      // Same reasoning as filters: a corrupt blob degrades the vibe to an
+      // ordinary one rather than taking the tab down.
+      param = null;
+    }
+  }
   return {
     id: vibe.id,
     name: vibe.name,
     is_builtin: Boolean(vibe.is_builtin),
+    param,
     position: vibe.position,
     tags: db.prepare('SELECT tag FROM vibe_tags WHERE vibe_id = ? ORDER BY tag').all(vibe.id).map((r) => r.tag),
     lists: db.prepare('SELECT list_id FROM vibe_lists WHERE vibe_id = ?').all(vibe.id).map((r) => r.list_id),

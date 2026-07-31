@@ -54,6 +54,11 @@ CREATE TABLE IF NOT EXISTS lists (
   -- NULL is fine and common: only award lists need one, and the UI falls back
   -- to stripping the qualifier off the full name.
   short_name      TEXT,
+  -- A slot list: rewritten wholesale each time a parametric vibe is given a
+  -- value, and kept out of the picker because it is not a list anyone curates.
+  -- It is an ordinary list in every other respect, which is the point -- the
+  -- draw, the filters, Top-N and publishing need no new code path to use it.
+  hidden          INTEGER NOT NULL DEFAULT 0,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -205,10 +210,16 @@ CREATE INDEX IF NOT EXISTS list_tags_tag ON list_tags(tag);
 -- Built-ins are seeded with is_builtin = 1 but are otherwise ordinary rows:
 -- editable and deletable like any other, so there is one mechanism rather than
 -- two kinds of vibe to explain.
+-- param_json, when set, makes this a PARAMETRIC vibe: it needs a value chosen
+-- at selection time rather than resolving to a fixed set of lists. Shape is
+-- {kind, job, label} -- kind says what is being picked ('person'), job narrows
+-- the credit ('Director'), label names the control. Stored rather than
+-- hardcoded so actor's night is a row and not a second interaction.
 CREATE TABLE IF NOT EXISTS vibes (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   name         TEXT    NOT NULL UNIQUE,
   is_builtin   INTEGER NOT NULL DEFAULT 0,
+  param_json   TEXT,
   filters_json TEXT,
   position     INTEGER NOT NULL DEFAULT 0,
   created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
@@ -321,6 +332,8 @@ export function migrate(target) {
   ensureColumn(target, 'lists', 'query_json', 'TEXT');
   ensureColumn(target, 'lists', 'materialised_at', 'TEXT');
   ensureColumn(target, 'lists', 'short_name', 'TEXT');
+  ensureColumn(target, 'lists', 'hidden', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(target, 'vibes', 'param_json', 'TEXT');
   // Populated from the seed files by scripts/backfill-ranks.mjs, NOT by a
   // re-run of the seeder: seed.mjs deliberately skips entries that already
   // landed, so rows seeded before this column existed would stay NULL forever.
@@ -427,6 +440,14 @@ const BUILTIN_VIBES = [
   // The one built-in carrying a filter as well as a selection — which is what
   // makes it a vibe rather than just a tag shortcut.
   { name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },
+  // The first parametric vibe. It resolves to nothing until a person is
+  // chosen, which is why it carries neither tags nor lists.
+  {
+    name: 'Director night',
+    tags: [],
+    position: 5,
+    param: { kind: 'person', job: 'Director', label: 'Director' },
+  },
 ];
 
 /**
@@ -451,8 +472,10 @@ export function ensureBuiltinVibes(target) {
       : null;
 
     const { lastInsertRowid } = target
-      .prepare('INSERT INTO vibes (name, is_builtin, filters_json, position) VALUES (?, 1, ?, ?)')
-      .run(vibe.name, filters, vibe.position);
+      .prepare(
+        'INSERT INTO vibes (name, is_builtin, param_json, filters_json, position) VALUES (?, 1, ?, ?, ?)',
+      )
+      .run(vibe.name, vibe.param ? JSON.stringify(vibe.param) : null, filters, vibe.position);
 
     for (const tag of vibe.tags) {
       target

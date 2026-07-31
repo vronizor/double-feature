@@ -1,7 +1,8 @@
 import { Router } from 'express';
 
 import { getDb, TAGS, TAG_LABELS } from '../db.js';
-import { allVibes, createVibe, updateVibe, deleteVibe, tagCounts } from '../vibes.js';
+import { allVibes, getVibe, createVibe, updateVibe, deleteVibe, tagCounts } from '../vibes.js';
+import { applyParameter } from '../parametric.js';
 
 const router = Router();
 
@@ -34,6 +35,29 @@ router.patch('/vibes/:id', (req, res) => {
     if (req.body?.[key] !== undefined) patch[key] = req.body[key];
   }
   res.json({ vibe: updateVibe(getDb(), id, patch) });
+});
+
+/**
+ * Gives a parametric vibe its value — "director night, but Kurosawa".
+ *
+ * Returns the vibe re-resolved, so the client applies the result the same way
+ * it applies any other vibe. The slot list it now points at is an ordinary
+ * list, which is the entire trick: nothing downstream needs to know this vibe
+ * was parametric.
+ */
+router.post('/vibes/:id/parameter', async (req, res) => {
+  const db = getDb();
+  const vibe = getVibe(db, Number(req.params.id));
+  if (!vibe) return res.status(404).json({ error: 'No such vibe' });
+  if (!vibe.param) return res.status(400).json({ error: `"${vibe.name}" takes no parameter` });
+
+  const value = req.body?.value;
+  if (!value?.id || !value?.name) {
+    return res.status(400).json({ error: 'A parameter needs an id and a name' });
+  }
+
+  const applied = await applyParameter(db, vibe, value);
+  res.json({ vibe: getVibe(db, vibe.id), applied });
 });
 
 router.delete('/vibes/:id', (req, res) => {

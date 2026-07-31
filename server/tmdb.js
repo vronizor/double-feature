@@ -296,6 +296,12 @@ export async function searchPerson(query, { limit = 8 } = {}) {
     .slice(0, limit);
 }
 
+/** A person's canonical name, so a caller can never mislabel one. */
+export async function getPerson(personId) {
+  const data = await request(`/person/${personId}`, { language: 'en-US' });
+  return data?.name ? { id: data.id, name: data.name } : null;
+}
+
 /**
  * The films a person actually DIRECTED.
  *
