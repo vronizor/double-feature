@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "test": "node --test \"test/*.test.js\"",
+    "test": "TMDB_API_KEY=${TMDB_API_KEY:-test-only-not-a-real-key} node --test \"test/*.test.js\"",
     "fetch-seeds": "node scripts/fetch-seed-lists.mjs",
     "seed": "node scripts/seed.mjs",
     "backfill": "node scripts/backfill.mjs",

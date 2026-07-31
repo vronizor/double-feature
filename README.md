@@ -304,13 +304,19 @@ npm test          # Borda scoring, ranking, parsing, filters, full API pass
 npm run dev       # auto-restarting server
 ```
 
-**`npm test` needs a `.env` with TMDB credentials.** Most of the suite stubs
-TMDB at `fetch` and runs anywhere, but four tests in `dynamic-lists.test.js`
-exercise the real discover query, so a fresh clone with no `.env` reports four
-failures. That is expected, not a broken checkout — set up `.env` as in Setup
-above and they pass. Left this way deliberately: the app is unusable without a
-key, so a suite that pretends otherwise would be testing a configuration nobody
-runs.
+**`npm test` needs no credentials and touches no network.** A fresh clone with
+no `.env` passes everything.
+
+> This paragraph used to say the opposite — that four tests in
+> `dynamic-lists.test.js` "exercise the real discover query" and that a clone
+> without `.env` would report four failures, expected rather than broken. Both
+> halves were wrong. Those tests stub TMDB at `fetch` like the rest and never
+> reach the network; they failed only because `request()` rejects missing
+> credentials *before* it fetches, so the suite needed the variable to **exist**
+> rather than to be **valid**. And it was six tests, not four. The `test` script
+> now supplies a dummy key when none is set, which is what makes the suite
+> hermetic — a test run must not depend on whose machine it is on. Recorded
+> rather than quietly deleted because this text was believed and repeated.
 
 The frontend is plain ES modules with no build step — edit files in `public/`
 and reload.
