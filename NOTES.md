@@ -21,15 +21,7 @@ and nothing bigger than a fix is actioned without asking first.
 
 Trimmed each session; git keeps the history.
 
-**2026-07-31**
-- No visual clue whose filmography Explore is showing → `ROADMAP.md` §5, **v4**
-- Country/language chips too wide, use ISO abbreviations → `BACKLOG.md`, v5
-- IMDb vs TMDB: one primary, other on hover, drop vote counts → `BACKLOG.md`, v5
-- Director name splitting across lines on cards → **fixed**, v4.18
-- TMDB 50797 award year → `BACKLOG.md`, v5. **You were right about the Oscars**
-  and the spot checks say it does not generalise: the same change would break
-  the César. Needs the honoured year scraped, not derived. Data unchanged.
-- Cannes Grand Jury Prize → `BACKLOG.md`, v5
-- The vibe `✕` is too risky → `BACKLOG.md`, v5
-- Do not auto-expand Pool setup on a vibe → `BACKLOG.md`, v5, flagged as
-  reversing a decision recorded in `views/draw.js`
+_Six notes filed 2026-07-31 and cleared: one fixed in v4 (director names
+splitting across lines), one answered as a decision rather than a bug (award
+badge years — the data was right, the label is disputed), and four scheduled to
+v5. Nothing outstanding._
