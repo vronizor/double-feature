@@ -100,17 +100,6 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   Whoever does this should update that comment rather than leave it
   contradicting the code. *(From field notes.)*
 
-- **Cultness.** The axis that survives the reach-sorted list being dropped:
-  films whose fame arrived *after* the cinema, through television and home
-  video. *Le Père Noël est une ordure* is the canonical case — a modest
-  theatrical run and total cultural saturation, invisible to every box-office
-  source by construction. Needs its own evidence before it is built; there is
-  no obvious data source, and that is the whole problem.
-
-- **Letterboxd ratings.** v4 researches whether it is obtainable at all and
-  records the outcome; any *build* is v5, and only if their terms allow it.
-  See `ROADMAP.md` §6.3.
-
 - **Actor's night.** The same shape as director night — a credit-filtered
   person list with `job` swapped — which is why v4 builds director night as
   exactly that rather than as a one-off. See `ROADMAP.md` §6.5.
@@ -138,24 +127,26 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 Nobody has ruled on these. Where an item is scheduled, `ROADMAP.md` is the
 authority on its state — this file only says why it is worth doing.
 
+Cultness and Letterboxd moved here from v5 on 2026-07-31: both were "deferred
+with a decision", and neither decision was really made. Cultness has no data
+source at all, which is the whole problem rather than a scheduling detail, and
+Letterboxd depends on an answer nobody has yet obtained. Committing a version
+to something unobtainable is how a roadmap stops being believed.
 
-- **Alternative ratings on hover (IMDb, Letterboxd, SensCritique).** Show a
-  second opinion beside TMDB's score on the card or in the detail overlay.
-  Needs an assessment of what is actually obtainable — partial notes from the
-  session that raised it:
 
-  | Source | Status | Notes |
-  |---|---|---|
-  | **IMDb** | 🔨 **scheduled for v4** — see `ROADMAP.md` §6.3 | Official dataset `title.ratings.tsv.gz`, **8 MB**, every title, updated daily, free for personal/non-commercial use. Joins exactly via `imdb_id`, which TMDB already returns in the detail response — no fuzzy matching. Would need an `imdb_id` column plus a backfill. |
-  | **SensCritique** | ❌ verified blocked | Returns 403 to scripted requests, same as criterion.com. The family-films seed list had to be exported by hand for this reason. |
-  | **Letterboxd** | 🔍 **v4 researches it, does not build it** — see `ROADMAP.md` §6.3. | No public API historically; believed to be invite/beta only. Needs checking before any design — do not assume scraping is acceptable, their terms are the deciding factor. |
+- **Cultness.** The axis that survives the reach-sorted list being dropped:
+  films whose fame arrived *after* the cinema, through television and home
+  video. *Le Père Noël est une ordure* is the canonical case — a modest
+  theatrical run and total cultural saturation, invisible to every box-office
+  source by construction. Needs its own evidence before it is built; there is
+  no obvious data source, and that is the whole problem — which is why it sits
+  here rather than in a version.
 
-  Design notes if picked up: the licence on the IMDb data is
-  personal/non-commercial, which fits this app but means **the dataset must not
-  be committed to the repo** — fetch at setup/refresh time and store only the
-  derived numbers. Worth deciding whether this is display-only (a second score
-  in the overlay) or feeds a metric, because the popularity-vs-acclaim finding
-  above showed that a bigger sample does **not** fix the language skew.
+- **Letterboxd ratings.** v4 still owes the research: are they obtainable at
+  all, and do their terms permit it? Historically no public API and believed
+  invite-only. **Recording the answer is the deliverable**, either way — a
+  build is only worth scheduling once the answer is yes, which is why this is
+  unscheduled rather than assigned to a version.
 
 - **Household memory.** The app picks a winner and then learns nothing —
   `watched` is only ever set by hand, so nothing accumulates between nights.

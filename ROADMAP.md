@@ -19,7 +19,7 @@ themselves.
 |---|---|---|
 | Box office — Spain (ICAA) | ⏳ ready | Enumeration exists (an undocumented `Ano` filter), fuzzy matching accepted here and nowhere else, 90% match floor declared — see §1 |
 | Alternative ratings — IMDb | ✅ landed | 3,819 of 3,824 films carry an id; 3,808 matched a rating. Shown beside the TMDB score above a 1,000-vote floor. `npm run imdb-ratings` re-syncs |
-| Alternative ratings — Letterboxd | ⏳ ready | **Research, not a build.** Their terms decide it. Writing down the answer *is* the deliverable; any build is v5 |
+| Alternative ratings — Letterboxd | ⏳ ready | **Research, not a build.** Their terms decide it. Writing down the answer *is* the deliverable; a build is unscheduled until that answer is yes |
 | National cinema night | ⏳ ready | One parametric vibe. **Decided: filter cached `movies.countries` for v4**, rather than discovering new films — see §3 |
 | Director night | 🔨 doing | The person half has landed (`searchPerson`, `getDirectorCredits`, two routes). Remaining: the `▾` chip, and the slot list — see §3 |
 | A slot list needs a visible label | ✅ landed | Explore names the selection, and the chip reads back the chosen value ("Robert Eggers ▾") |

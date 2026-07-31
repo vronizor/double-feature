@@ -34,6 +34,8 @@ const PER_PAGE = 24;
 // A government server, and the whole build is thousands of requests. Four in
 // flight is brisk enough to finish and slow enough to be polite.
 const CONCURRENCY = 4;
+// Only the top of each year is worth resolving, ranking or drawing.
+const TOP_N = 20;
 const CACHE = process.env.ICAA_CACHE_DIR ? join(ROOT, process.env.ICAA_CACHE_DIR) : null;
 
 let cookie = '';
@@ -179,14 +181,53 @@ async function inBatches(items, worker) {
  */
 async function resolve(film) {
   const title = icaaTitle(film.rawTitle);
-  const results = await searchMovie({ title, year: film.year });
+  const query = searchTitle(title);
+  const results = await searchMovie({ title: query, year: film.year });
+
   let best = null;
   for (const candidate of results) {
-    const scored = scoreCandidate({ title, year: film.year }, candidate);
-    if (!best || scored.score > best.scored.score) best = { candidate, scored };
+    const scored = scoreCandidate({ title: query, year: film.year }, candidate);
+    // `confident` from scoreCandidate is deliberately NOT reused: it hardcodes
+    // ±1, and ICAA's year means something different. Everything else about the
+    // comparison — accent folding, article stripping, original_title — is
+    // reused exactly, so this list resolves the same way as every other one in
+    // every respect but the window.
+    const withinYear =
+      scored.candidateYear === null
+        ? false
+        : Math.abs(scored.candidateYear - film.year) <= YEAR_TOLERANCE;
+    const confident = scored.titleExact && withinYear;
+    if (!best || scored.score > best.scored.score) best = { candidate, scored, confident };
   }
   return { ...film, title, best };
 }
+
+/**
+ * The title to SEARCH with, as distinct from the one to display.
+ *
+ * ICAA appends disambiguators in parentheses — "Flamenco (De Carlos Saura)",
+ * "Flash-Back (El Apartamento)" — which are catalogue apparatus, not part of
+ * the title. Searching with them attached matches nothing, or worse, matches
+ * the parenthetical: "Flash-Back (El Apartamento)" found Billy Wilder's
+ * The Apartment.
+ */
+export function searchTitle(title) {
+  return String(title ?? '').replace(/\s*\([^)]*\)\s*$/, '').trim() || String(title ?? '');
+}
+
+/**
+ * How far ICAA's year may sit from TMDB's before a match is doubted.
+ *
+ * ICAA records the year a film was CLASSIFIED, not released, and the gap is
+ * routine rather than exceptional — a film classified in December is released
+ * the following year, and a re-classification can be later still. The ±1 that
+ * `scoreCandidate` calls confident is calibrated for lists that carry release
+ * years, and applying it here rejected correct matches systematically.
+ *
+ * Two years, not more: past that the year stops disambiguating remakes, which
+ * is the only reason it is in the comparison at all.
+ */
+const YEAR_TOLERANCE = 2;
 
 async function main() {
   // Years are given individually so a probe can SAMPLE across decades rather
@@ -217,15 +258,33 @@ async function main() {
     ...(await admissionsFor(film.id).catch(() => ({ admissions: null, revenue: null }))),
   }));
 
-  // No threshold of our own — same rule as France. But a film with NO figure
-  // recorded cannot be ranked, so it cannot be on a box-office list.
-  const ranked = withAdmissions.filter((film) => film.admissions !== null && film.admissions > 0);
-  console.log(`\n${ranked.length} carry an admissions figure, ${films.length - ranked.length} do not`);
+  // A film with no figure was never released in cinemas — the catalogue carries
+  // course recordings and televised zarzuela at feature LENGTH, and those are
+  // what lack admissions. So this is ICAA's own inclusion rule, not a gap.
+  const released = withAdmissions.filter((film) => film.admissions !== null && film.admissions > 0);
+  console.log(`\n${released.length} were released in cinemas, ${films.length - released.length} were not`);
+
+  // Top N per year, because unlike the French pages ICAA applies no threshold
+  // of its own: without a cut the list opens with films that sold 125 tickets.
+  // Per year rather than a fixed floor, so it adapts to eras when cinema-going
+  // collapsed instead of emptying them.
+  const byYearRank = new Map();
+  for (const film of released) {
+    const list = byYearRank.get(film.year) ?? [];
+    list.push(film);
+    byYearRank.set(film.year, list);
+  }
+  const ranked = [];
+  for (const [, list] of byYearRank) {
+    list.sort((a, b) => b.admissions - a.admissions);
+    list.slice(0, TOP_N).forEach((film, i) => ranked.push({ ...film, rank: i + 1 }));
+  }
+  console.log(`top ${TOP_N} per year -> ${ranked.length} films to resolve`);
 
   console.log('\nresolving against TMDB…');
   const resolved = await inBatches(ranked, (film) => resolve(film).catch(() => ({ ...film, best: null })));
 
-  const confident = resolved.filter((film) => film.best?.scored.confident);
+  const confident = resolved.filter((film) => film.best?.confident);
   const rate = ((confident.length / resolved.length) * 100).toFixed(1);
   console.log(`\n\nconfident matches: ${confident.length}/${resolved.length} (${rate}%)`);
   console.log(`the declared floor is 90% — ${rate >= 90 ? 'CLEARED' : 'NOT met, do not seed'}`);
@@ -236,7 +295,7 @@ async function main() {
   for (const film of resolved) {
     const cell = byYear.get(film.year) ?? { n: 0, ok: 0 };
     cell.n += 1;
-    if (film.best?.scored.confident) cell.ok += 1;
+    if (film.best?.confident) cell.ok += 1;
     byYear.set(film.year, cell);
   }
   console.log('\nper year:');
@@ -262,7 +321,8 @@ async function main() {
           admissions: film.admissions,
           tmdb_id: film.best?.candidate.id ?? null,
           matched: film.best?.candidate.title ?? null,
-          confident: Boolean(film.best?.scored.confident),
+          rank: film.rank,
+          confident: Boolean(film.best?.confident),
         })),
       },
       null,
