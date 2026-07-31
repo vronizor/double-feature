@@ -74,6 +74,27 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
     > tag, so it groups with France and Spain in the picker; what it must not do
     > is imply their metric.
 
+    > **Better still: the SAME pages carry an annual top-N table**, so no
+    > stitching between families is needed. Verified across eleven years:
+    >
+    > ```
+    > 1946        weekly #1s only, no annual table
+    > 1950-1978   Rank | Title | Distributor | Rental      (1975 has none)
+    > 1981-2026   Rank | Title | Distributor | Domestic gross
+    > ```
+    >
+    > **Domestic throughout** — never worldwide, which is what disqualified
+    > `<year> in film`. The rental→gross switch around 1980 does not matter,
+    > because ranking happens only WITHIN a year: this is France's own rule
+    > ("rank within the year, do not store the figure"), and applying it here
+    > dissolves the units objection entirely rather than working around it.
+    >
+    > So there are two usable shapes on one page family: the annual top-N,
+    > which is France's shape and ranks by magnitude, and the weekly #1s, which
+    > is a membership test but has no gaps at all. **Prefer the annual table
+    > where it exists and note the gaps** (1946, 1975 confirmed; the full gap
+    > list is unmeasured).
+
     > Traps, found by inspection: the column order shifts (1946 leads with
     > `Week ending`, later years with `#`), so **parse by header**; `rowspan`
     > carries multi-week runs and a naive row reader drops them; 1946 has
