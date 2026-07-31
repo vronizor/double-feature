@@ -32,6 +32,38 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   Spain, IMDb and two dynamic-list fixes. See `ROADMAP.md` §6.2, which keeps the
   full reasoning.
 
+- **Award badges should show the year each award is NATURALLY labelled by —
+  which is not the same rule for every award.** Raised from field notes:
+  *Burnt by the Sun* renders "Oscar Intl. 1995" while Wikipedia and ordinary
+  usage call it the **1994** winner. That is correct: we store the ceremony
+  year, and the 67th Academy Awards were held in March 1995 for 1994 films.
+
+  Spot-checked across the real database, and the conventions genuinely differ:
+
+  | Award | Natural label | Ceremony year we store |
+  |---|---|---|
+  | Oscars, BAFTA, Goya | the year of the FILMS | one year later |
+  | Cannes, Venice, Berlin | the festival year | the same year — no ambiguity |
+  | César | the CEREMONY year (French usage: "César 2012" for a 2011 film) | already correct |
+
+  So applying "year of films" everywhere would fix the Oscars and **break the
+  César**.
+
+  **Two tempting shortcuts, both unsafe, both already measured:**
+
+  - *Subtract one from the ceremony year.* The offset is not constant — the
+    1st BAFTAs were held in 1949 for 1947 releases.
+  - *Use the film's release year.* **Nomadland** is the counter-example, live in
+    this database: TMDB dates it 2021, it won the Golden Lion in **2020**, and
+    its Oscar and BAFTA both honoured **2020** films. Every awards body calls it
+    a 2020 film and TMDB does not.
+
+  So the honoured year has to be a **scraped fact, not a derived one** — the
+  ceremony article states which year's films it covers, and the fetcher already
+  identifies that article. Real work, and the reason this is v5 rather than a
+  label tweak. Note the data itself is right and should not be touched; what
+  changes is which of two known true facts gets displayed. *(From field notes.)*
+
 - **Cannes Grand Jury Prize as a second Cannes list.** Today only the Palme
   d'Or is carried. The Grand Prix is the runner-up award and reaches a
   different set of films. Same Wikidata `P166` route as the Palme, so it is a

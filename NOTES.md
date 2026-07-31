@@ -22,8 +22,9 @@ and nothing bigger than a fix is actioned without asking first.
 Trimmed each session; git keeps the history.
 
 **2026-07-31**
-- TMDB 50797 award year → **a decision, not a bug** — see the report. The data
-  matches the recorded rule; what is disputed is what the badge should say.
+- TMDB 50797 award year → `BACKLOG.md`, v5. **You were right about the Oscars**
+  and the spot checks say it does not generalise: the same change would break
+  the César. Needs the honoured year scraped, not derived. Data unchanged.
 - Cannes Grand Jury Prize → `BACKLOG.md`, v5
 - The vibe `✕` is too risky → `BACKLOG.md`, v5
 - Do not auto-expand Pool setup on a vibe → `BACKLOG.md`, v5, flagged as
