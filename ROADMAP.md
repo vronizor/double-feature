@@ -142,6 +142,27 @@ Two consequences for the build:
 Rough cost: ~3,000 listing requests across ~75 years, plus one detail page per
 Spanish film for the *espectadores* figure. Comparable to the France build.
 
+**Probe result, 1995 (2026-07-31): 71.2%, below the floor.** 189 Spanish
+features listed, **73 carry an admissions figure and 116 do not**, and 52 of
+those 73 matched confidently. Two separate problems, and only one is the
+matcher's:
+
+- **ICAA's year is the classification year, not the release year**, so
+  `scoreCandidate`'s ±1 window rejects correct matches. This is systematic, not
+  noise.
+- **Parentheticals** — `Flamenco (De Carlos Saura)`, `Flash-Back (El
+  Apartamento)` — are ICAA disambiguators, not part of the title.
+- **Genuinely different titles across languages.** *La Ciudad de los Niños
+  Perdidos* is on TMDB as *La Cité des enfants perdus*: a French co-production
+  whose Spanish release title matches neither `title` nor `original_title`. No
+  normaliser fixes that one.
+- A residue of real misses: *Besos y Abrazos*, *Costa Brava (Family Album)* —
+  small Spanish films TMDB does not carry at all.
+
+And the coverage question is separate from the matching one: **61% of Spanish
+features have no admissions figure in the catalogue**, so even a perfect matcher
+yields a list of roughly a third of them.
+
 **Match-rate floor, declared before the build rather than after** (per the
 guard rails above): if confident title+year matching lands below **90%**, the
 list is not seeded and the shortfall is investigated. The France route achieved

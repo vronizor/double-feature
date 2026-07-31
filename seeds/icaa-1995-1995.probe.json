@@ -1,0 +1,674 @@
+{
+  "years": [
+    1995
+  ],
+  "perYear": {
+    "1995": {
+      "n": 73,
+      "ok": 52
+    }
+  },
+  "listed": 189,
+  "withAdmissions": 73,
+  "confident": 52,
+  "rate": 71.2,
+  "sample": [
+    {
+      "icaa": "Adiós tiburón",
+      "title": "Adiós Tiburón",
+      "year": 1995,
+      "admissions": 85836,
+      "tmdb_id": 486968,
+      "matched": "Adiós, tiburón",
+      "confident": true
+    },
+    {
+      "icaa": "Adosados",
+      "title": "Adosados",
+      "year": 1995,
+      "admissions": 142517,
+      "tmdb_id": 102889,
+      "matched": "Suburbs",
+      "confident": true
+    },
+    {
+      "icaa": "Africa",
+      "title": "Africa",
+      "year": 1995,
+      "admissions": 66902,
+      "tmdb_id": 301230,
+      "matched": "The African Child",
+      "confident": false
+    },
+    {
+      "icaa": "Alma gitana",
+      "title": "Alma Gitana",
+      "year": 1995,
+      "admissions": 231727,
+      "tmdb_id": 186709,
+      "matched": "Alma gitana",
+      "confident": true
+    },
+    {
+      "icaa": "Amores que matan",
+      "title": "Amores Que Matan",
+      "year": 1995,
+      "admissions": 122236,
+      "tmdb_id": 186716,
+      "matched": "Amores que matan",
+      "confident": true
+    },
+    {
+      "icaa": "Animia de cariño",
+      "title": "Animia De Cariño",
+      "year": 1995,
+      "admissions": 4972,
+      "tmdb_id": 537419,
+      "matched": "Animia of Love",
+      "confident": true
+    },
+    {
+      "icaa": "Antártida",
+      "title": "Antártida",
+      "year": 1995,
+      "admissions": 132595,
+      "tmdb_id": 186620,
+      "matched": "Antártida",
+      "confident": true
+    },
+    {
+      "icaa": "Aroma del copal, El",
+      "title": "El Aroma Del Copal",
+      "year": 1995,
+      "admissions": 9442,
+      "tmdb_id": 737960,
+      "matched": "Scent of Vengeance",
+      "confident": false
+    },
+    {
+      "icaa": "Así en el Cielo como en la Tierra",
+      "title": "Así En El Cielo Como En La Tierra",
+      "year": 1995,
+      "admissions": 201019,
+      "tmdb_id": 36505,
+      "matched": "On Earth as It Is in Heaven",
+      "confident": true
+    },
+    {
+      "icaa": "Asunto interno",
+      "title": "Asunto Interno",
+      "year": 1995,
+      "admissions": 54081,
+      "tmdb_id": 124828,
+      "matched": "An Internal Affair",
+      "confident": true
+    },
+    {
+      "icaa": "Asunto privado, Un",
+      "title": "Un Asunto Privado",
+      "year": 1995,
+      "admissions": 77857,
+      "tmdb_id": 109798,
+      "matched": "Justine: A Private Affair",
+      "confident": false
+    },
+    {
+      "icaa": "Atolladero",
+      "title": "Atolladero",
+      "year": 1995,
+      "admissions": 15169,
+      "tmdb_id": 118758,
+      "matched": "Atolladero",
+      "confident": false
+    },
+    {
+      "icaa": "Baules del retorno, Los",
+      "title": "Los Baules Del Retorno",
+      "year": 1995,
+      "admissions": 10020,
+      "tmdb_id": 1416403,
+      "matched": "The trunks of return",
+      "confident": true
+    },
+    {
+      "icaa": "Besos y abrazos",
+      "title": "Besos Y Abrazos",
+      "year": 1995,
+      "admissions": 1168,
+      "tmdb_id": null,
+      "matched": null,
+      "confident": false
+    },
+    {
+      "icaa": "Boca a boca",
+      "title": "Boca A Boca",
+      "year": 1995,
+      "admissions": 763548,
+      "tmdb_id": 62364,
+      "matched": "Mouth to Mouth",
+      "confident": true
+    },
+    {
+      "icaa": "Brujas",
+      "title": "Brujas",
+      "year": 1995,
+      "admissions": 125408,
+      "tmdb_id": 45974,
+      "matched": "The Halloween Tree",
+      "confident": false
+    },
+    {
+      "icaa": "Bwana",
+      "title": "Bwana",
+      "year": 1995,
+      "admissions": 217414,
+      "tmdb_id": 102754,
+      "matched": "Bwana",
+      "confident": true
+    },
+    {
+      "icaa": "Cachito",
+      "title": "Cachito",
+      "year": 1995,
+      "admissions": 101017,
+      "tmdb_id": 101052,
+      "matched": "Cachito",
+      "confident": true
+    },
+    {
+      "icaa": "Casa en las afueras, Una",
+      "title": "Una Casa En Las Afueras",
+      "year": 1995,
+      "admissions": 76603,
+      "tmdb_id": 98970,
+      "matched": "House out of Town",
+      "confident": true
+    },
+    {
+      "icaa": "Celestina, La",
+      "title": "La Celestina",
+      "year": 1995,
+      "admissions": 443979,
+      "tmdb_id": 136726,
+      "matched": "La Celestina",
+      "confident": true
+    },
+    {
+      "icaa": "Ciudad de los niños perdidos, La",
+      "title": "La Ciudad De Los Niños Perdidos",
+      "year": 1995,
+      "admissions": 267196,
+      "tmdb_id": 902,
+      "matched": "The City of Lost Children",
+      "confident": false
+    },
+    {
+      "icaa": "Corsarios del chip",
+      "title": "Corsarios Del Chip",
+      "year": 1995,
+      "admissions": 30183,
+      "tmdb_id": 312734,
+      "matched": "Corsarios del chip",
+      "confident": true
+    },
+    {
+      "icaa": "Cosas del querer II, Las",
+      "title": "Las Cosas Del Querer Ii",
+      "year": 1995,
+      "admissions": 120907,
+      "tmdb_id": null,
+      "matched": null,
+      "confident": false
+    },
+    {
+      "icaa": "Cosas que nunca te dije",
+      "title": "Cosas Que Nunca Te Dije",
+      "year": 1995,
+      "admissions": 237735,
+      "tmdb_id": 1604127,
+      "matched": "Things I Never Told You",
+      "confident": false
+    },
+    {
+      "icaa": "Costa Brava (Family Album)",
+      "title": "Costa Brava (Family Album)",
+      "year": 1995,
+      "admissions": 19595,
+      "tmdb_id": null,
+      "matched": null,
+      "confident": false
+    },
+    {
+      "icaa": "Día de la bestia, El",
+      "title": "El Día De La Bestia",
+      "year": 1995,
+      "admissions": 1419191,
+      "tmdb_id": 10722,
+      "matched": "The Day of the Beast",
+      "confident": true
+    },
+    {
+      "icaa": "Diario de un amor violado",
+      "title": "Diario De Un Amor Violado",
+      "year": 1995,
+      "admissions": 22995,
+      "tmdb_id": null,
+      "matched": null,
+      "confident": false
+    },
+    {
+      "icaa": "Dile a Laura que la quiero",
+      "title": "Dile A Laura Que La Quiero",
+      "year": 1995,
+      "admissions": 143772,
+      "tmdb_id": 274185,
+      "matched": "Dile a Laura Que La Quiero",
+      "confident": true
+    },
+    {
+      "icaa": "Efecto mariposa, El",
+      "title": "El Efecto Mariposa",
+      "year": 1995,
+      "admissions": 326933,
+      "tmdb_id": 201051,
+      "matched": "The Butterfly Effect",
+      "confident": true
+    },
+    {
+      "icaa": "Entre rojas",
+      "title": "Entre Rojas",
+      "year": 1995,
+      "admissions": 49358,
+      "tmdb_id": 186621,
+      "matched": "Women in Prison",
+      "confident": true
+    },
+    {
+      "icaa": "Escenas de una orgia en Formentera",
+      "title": "Escenas De Una Orgia En Formentera",
+      "year": 1995,
+      "admissions": 10575,
+      "tmdb_id": null,
+      "matched": null,
+      "confident": false
+    },
+    {
+      "icaa": "FLAMENCO (DE CARLOS SAURA)",
+      "title": "Flamenco (De Carlos Saura)",
+      "year": 1995,
+      "admissions": 112600,
+      "tmdb_id": 26824,
+      "matched": "Flamenco",
+      "confident": false
+    },
+    {
+      "icaa": "Flash-Back (El apartamento)",
+      "title": "Flash-Back (El Apartamento)",
+      "year": 1995,
+      "admissions": 50809,
+      "tmdb_id": 12531,
+      "matched": "The Apartment",
+      "confident": false
+    },
+    {
+      "icaa": "Flor de mi secreto, La",
+      "title": "La Flor De Mi Secreto",
+      "year": 1995,
+      "admissions": 981846,
+      "tmdb_id": 4307,
+      "matched": "The Flower of My Secret",
+      "confident": true
+    },
+    {
+      "icaa": "Gimlet",
+      "title": "Gimlet",
+      "year": 1995,
+      "admissions": 21667,
+      "tmdb_id": 108458,
+      "matched": "Gimlet",
+      "confident": true
+    },
+    {
+      "icaa": "Gran slalom",
+      "title": "Gran Slalom",
+      "year": 1995,
+      "admissions": 86009,
+      "tmdb_id": 110926,
+      "matched": "Gran Slalom",
+      "confident": true
+    },
+    {
+      "icaa": "Guantanamera",
+      "title": "Guantanamera",
+      "year": 1995,
+      "admissions": 781861,
+      "tmdb_id": 43775,
+      "matched": "Guantanamera",
+      "confident": true
+    },
+    {
+      "icaa": "Hermana ¿Pero qué has hecho?",
+      "title": "Hermana ¿Pero Qué Has Hecho?",
+      "year": 1995,
+      "admissions": 204775,
+      "tmdb_id": 117198,
+      "matched": "Hermana, ¿pero qué has hecho?",
+      "confident": true
+    },
+    {
+      "icaa": "Hermana, La",
+      "title": "La Hermana",
+      "year": 1995,
+      "admissions": 125,
+      "tmdb_id": 479894,
+      "matched": "The Sister-in-Law",
+      "confident": false
+    },
+    {
+      "icaa": "Hijos del viento, Los",
+      "title": "Los Hijos Del Viento",
+      "year": 1995,
+      "admissions": 1268,
+      "tmdb_id": 166486,
+      "matched": "Children of the Wind",
+      "confident": true
+    },
+    {
+      "icaa": "Hola ¿Estás sola?",
+      "title": "Hola ¿Estás Sola?",
+      "year": 1995,
+      "admissions": 300964,
+      "tmdb_id": 2538,
+      "matched": "Hi, Are You Alone?",
+      "confident": true
+    },
+    {
+      "icaa": "Hotel y domicilio",
+      "title": "Hotel Y Domicilio",
+      "year": 1995,
+      "admissions": 77071,
+      "tmdb_id": 186964,
+      "matched": "Hotel y domicilio",
+      "confident": true
+    },
+    {
+      "icaa": "Ley de la frontera, La",
+      "title": "La Ley De La Frontera",
+      "year": 1995,
+      "admissions": 172030,
+      "tmdb_id": 423175,
+      "matched": "The Frontier Law",
+      "confident": true
+    },
+    {
+      "icaa": "Leyenda de Balthasar El Castrado, La",
+      "title": "La Leyenda De Balthasar El Castrado",
+      "year": 1995,
+      "admissions": 44666,
+      "tmdb_id": 581801,
+      "matched": "La leyenda de Balthasar el Castrado",
+      "confident": true
+    },
+    {
+      "icaa": "Matías, juez de línea",
+      "title": "Matías, Juez De Línea",
+      "year": 1995,
+      "admissions": 162314,
+      "tmdb_id": 38088,
+      "matched": "Matías, juez de línea",
+      "confident": true
+    },
+    {
+      "icaa": "Mi nombre es sombra",
+      "title": "Mi Nombre Es Sombra",
+      "year": 1995,
+      "admissions": 153220,
+      "tmdb_id": 259038,
+      "matched": "My Name Is Shadow",
+      "confident": true
+    },
+    {
+      "icaa": "Muere, mi vida",
+      "title": "Muere, Mi Vida",
+      "year": 1995,
+      "admissions": 30394,
+      "tmdb_id": 351835,
+      "matched": "Muere, mi vida",
+      "confident": true
+    },
+    {
+      "icaa": "Nadie hablará de nosotras cuando hayamos muerto",
+      "title": "Nadie Hablará De Nosotras Cuando Hayamos Muerto",
+      "year": 1995,
+      "admissions": 408318,
+      "tmdb_id": 74840,
+      "matched": "Nobody Will Speak of Us When We're Dead",
+      "confident": true
+    },
+    {
+      "icaa": "Necesidades",
+      "title": "Necesidades",
+      "year": 1995,
+      "admissions": 3906,
+      "tmdb_id": 1371292,
+      "matched": "Necesidades Innecesarias",
+      "confident": false
+    },
+    {
+      "icaa": "Niño invisible, El",
+      "title": "El Niño Invisible",
+      "year": 1995,
+      "admissions": 216815,
+      "tmdb_id": 186623,
+      "matched": "El niño invisible",
+      "confident": true
+    },
+    {
+      "icaa": "Palace",
+      "title": "Palace",
+      "year": 1995,
+      "admissions": 138651,
+      "tmdb_id": 75762,
+      "matched": "Palace",
+      "confident": true
+    },
+    {
+      "icaa": "Palomo cojo, El",
+      "title": "El Palomo Cojo",
+      "year": 1995,
+      "admissions": 83471,
+      "tmdb_id": 303791,
+      "matched": "The Lame Pigeon",
+      "confident": true
+    },
+    {
+      "icaa": "Pareja de tres",
+      "title": "Pareja De Tres",
+      "year": 1995,
+      "admissions": 42471,
+      "tmdb_id": 14306,
+      "matched": "Marley & Me",
+      "confident": false
+    },
+    {
+      "icaa": "Pasajero clandestino, El",
+      "title": "El Pasajero Clandestino",
+      "year": 1995,
+      "admissions": 17885,
+      "tmdb_id": 365277,
+      "matched": "El pasajero clandestino",
+      "confident": true
+    },
+    {
+      "icaa": "Pasajes",
+      "title": "Pasajes",
+      "year": 1995,
+      "admissions": 49067,
+      "tmdb_id": 388067,
+      "matched": "Pasajes",
+      "confident": true
+    },
+    {
+      "icaa": "Perro del hortelano, El",
+      "title": "El Perro Del Hortelano",
+      "year": 1995,
+      "admissions": 975731,
+      "tmdb_id": 41005,
+      "matched": "The Dog in the Manger",
+      "confident": true
+    },
+    {
+      "icaa": "Puede ser divertido",
+      "title": "Puede Ser Divertido",
+      "year": 1995,
+      "admissions": 57947,
+      "tmdb_id": 33836,
+      "matched": "Puede ser divertido",
+      "confident": true
+    },
+    {
+      "icaa": "Puro veneno",
+      "title": "Puro Veneno",
+      "year": 1995,
+      "admissions": 777,
+      "tmdb_id": 758629,
+      "matched": "Puro veneno",
+      "confident": true
+    },
+    {
+      "icaa": "Razones sentimentales",
+      "title": "Razones Sentimentales",
+      "year": 1995,
+      "admissions": 65993,
+      "tmdb_id": 576394,
+      "matched": "Razones sentimentales",
+      "confident": true
+    },
+    {
+      "icaa": "Refugio, El",
+      "title": "El Refugio",
+      "year": 1995,
+      "admissions": 9482,
+      "tmdb_id": 1651606,
+      "matched": "The Shelter",
+      "confident": false
+    },
+    {
+      "icaa": "Rey del río, El",
+      "title": "El Rey Del Río",
+      "year": 1995,
+      "admissions": 108686,
+      "tmdb_id": 249877,
+      "matched": "King of the River",
+      "confident": true
+    },
+    {
+      "icaa": "Sal de la vida, La",
+      "title": "La Sal De La Vida",
+      "year": 1995,
+      "admissions": 71994,
+      "tmdb_id": 99925,
+      "matched": "La sal de la vida",
+      "confident": true
+    },
+    {
+      "icaa": "Salto al vacío",
+      "title": "Salto Al Vacío",
+      "year": 1995,
+      "admissions": 105512,
+      "tmdb_id": 673893,
+      "matched": "Salto al vacío",
+      "confident": true
+    },
+    {
+      "icaa": "Seductor, El",
+      "title": "El Seductor",
+      "year": 1995,
+      "admissions": 61043,
+      "tmdb_id": 92607,
+      "matched": "The Seducer",
+      "confident": true
+    },
+    {
+      "icaa": "SEÑALES DE FUEGO (SINAIS DE FOGO)",
+      "title": "Señales De Fuego (Sinais De Fogo)",
+      "year": 1995,
+      "admissions": 128,
+      "tmdb_id": null,
+      "matched": null,
+      "confident": false
+    },
+    {
+      "icaa": "Techo del mundo, El",
+      "title": "El Techo Del Mundo",
+      "year": 1995,
+      "admissions": 10650,
+      "tmdb_id": 427984,
+      "matched": "El techo del mundo",
+      "confident": true
+    },
+    {
+      "icaa": "Tengo una casa",
+      "title": "Tengo Una Casa",
+      "year": 1995,
+      "admissions": 71598,
+      "tmdb_id": 256031,
+      "matched": "Tengo una casa",
+      "confident": true
+    },
+    {
+      "icaa": "Tesis",
+      "title": "Tesis",
+      "year": 1995,
+      "admissions": 855713,
+      "tmdb_id": 9299,
+      "matched": "Thesis",
+      "confident": true
+    },
+    {
+      "icaa": "Tierra y libertad",
+      "title": "Tierra Y Libertad",
+      "year": 1995,
+      "admissions": 441645,
+      "tmdb_id": 38884,
+      "matched": "Land and Freedom",
+      "confident": false
+    },
+    {
+      "icaa": "Tres días de libertad",
+      "title": "Tres Días De Libertad",
+      "year": 1995,
+      "admissions": 26066,
+      "tmdb_id": 297049,
+      "matched": "Tres días de libertad",
+      "confident": true
+    },
+    {
+      "icaa": "Trinidad y Bambino (Tal para cual)",
+      "title": "Trinidad Y Bambino (Tal Para Cual)",
+      "year": 1995,
+      "admissions": 6409,
+      "tmdb_id": null,
+      "matched": null,
+      "confident": false
+    },
+    {
+      "icaa": "Two much",
+      "title": "Two Much",
+      "year": 1995,
+      "admissions": 2141868,
+      "tmdb_id": 46029,
+      "matched": "Two Much",
+      "confident": true
+    },
+    {
+      "icaa": "Zapico",
+      "title": "Zapico",
+      "year": 1995,
+      "admissions": 579,
+      "tmdb_id": 619389,
+      "matched": "Zapico",
+      "confident": true
+    }
+  ]
+}
