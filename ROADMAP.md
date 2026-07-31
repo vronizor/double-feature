@@ -159,9 +159,35 @@ matcher's:
 - A residue of real misses: *Besos y Abrazos*, *Costa Brava (Family Album)* —
   small Spanish films TMDB does not carry at all.
 
-And the coverage question is separate from the matching one: **61% of Spanish
-features have no admissions figure in the catalogue**, so even a perfect matcher
-yields a list of roughly a third of them.
+**The missing figures are not a coverage gap — they are the inclusion rule.**
+Checked directly, because "the catalogue only records admissions for the
+successful ones" would have been a reasonable worry and would have biased the
+list badly. It is the opposite. The 116 films without a figure are mostly not
+films:
+
+```
+12 CURSOS PARA LA UNIVERSIDAD: CURSO DE MATEMATICAS   (×5, near-duplicate ids)
+A LA CLASICA DOMA Y COMPETICION, CAMPEONATO DE ESPAÑA
+AGUA AZUCARILLOS Y AGUARDIENTE (VERSION JOSE LUIS MORENO)
+```
+
+University course recordings, dressage championships, TV zarzuela versions.
+`Metraje=LA` means feature LENGTH, not theatrical feature, so the catalogue
+carries anything long enough that was ever classified. Those never had a
+theatrical run, so they have no admissions.
+
+And the recorded figures go down to **125 admissions**, with eight films under
+5,000. So a missing figure never means "too small to record" — it means "never
+released in cinemas", which is exactly the cut a box-office list wants. ICAA is
+applying its own inclusion rule, the same way the French per-year pages do.
+
+That makes 73 the honest denominator, and the 71.2% a real matcher problem on
+real films rather than an artefact.
+
+> **But ICAA applies no THRESHOLD, unlike France.** A film with 125 admissions
+> is on this list. France needed no floor of our own because each page already
+> carried one; here there is none, so one has to be chosen — or the list opens
+> with films nobody saw.
 
 **Match-rate floor, declared before the build rather than after** (per the
 guard rails above): if confident title+year matching lands below **90%**, the
