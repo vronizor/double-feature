@@ -60,6 +60,20 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
     It reaches the register too: 1994 yields *Ace Ventura*, *Dumb and Dumber*
     and *The Mask*.
 
+    > **⚠️ It is NOT the same metric as France, and the list must not pretend
+    > otherwise.** France ranks by magnitude — tickets sold, 30–80 films a year.
+    > This is a membership test on peak position: did the film top the chart for
+    > at least one weekend, 8–43 films a year, unranked. A film that sat at #2
+    > for ten weeks behind a juggernaut is **excluded** despite outselling most
+    > of the year, while a film that won one quiet January weekend is **in**.
+    > 1965 yields eight films because *The Sound of Music* held #1 for months.
+    >
+    > **So name it for what it measures** — "US box-office #1s", not
+    > "Box-office USA" — and say in the note that membership means topping the
+    > chart, not selling the most tickets. It still carries the `box-office`
+    > tag, so it groups with France and Spain in the picker; what it must not do
+    > is imply their metric.
+
     > Traps, found by inspection: the column order shifts (1946 leads with
     > `Week ending`, later years with `#`), so **parse by header**; `rowspan`
     > carries multi-week runs and a naive row reader drops them; 1946 has
