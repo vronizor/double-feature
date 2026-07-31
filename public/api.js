@@ -100,6 +100,10 @@ export const api = {
   createVibe: (vibe) => request('/api/vibes', { method: 'POST', body: vibe }),
   updateVibe: (id, patch) => request(`/api/vibes/${id}`, { method: 'PATCH', body: patch }),
   deleteVibe: (id) => request(`/api/vibes/${id}`, { method: 'DELETE' }),
+  // Parametric vibes: search for the thing being picked, then hand it back.
+  searchPerson: (q) => request(`/api/tmdb/person?q=${encodeURIComponent(q)}`),
+  applyVibeParameter: (id, value) =>
+    request(`/api/vibes/${id}/parameter`, { method: 'POST', body: { value } }),
   results: (slug) => request(`/api/sessions/${slug}/results`),
   history: () => request('/api/sessions'),
 };

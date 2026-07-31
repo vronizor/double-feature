@@ -5,6 +5,7 @@
  */
 import {
   h,
+  clear,
   posterUrl,
   toast,
   formatRating,
@@ -300,7 +301,71 @@ export function renderTagFilter(vocabulary, active, onChange) {
   );
 }
 
-export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
+/**
+ * The parameter picker for a parametric vibe — "director night, but who?".
+ *
+ * A panel rather than a prompt() because the answer is a CHOICE, not a string:
+ * three people share a surname and only one of them directs. Search returns
+ * people who direct first, and each row says what they are known for, so the
+ * pick is made on evidence rather than on a name that might be anyone.
+ *
+ * Deliberately not a chip that applies on click like the others: applying this
+ * one means a TMDB round trip and a rewritten list, so it asks first.
+ */
+function renderParamPicker(vibe, { onChosen, onCancel }) {
+  const results = h('div', { class: 'param-results' });
+  const input = h('input', {
+    type: 'search',
+    placeholder: `${vibe.param.label ?? 'Name'}…`,
+    autocomplete: 'off',
+  });
+
+  let seq = 0;
+  const search = async () => {
+    const query = input.value.trim();
+    const mine = (seq += 1);
+    if (query.length < 2) return clear(results);
+    let found = [];
+    try {
+      ({ results: found } = await api.searchPerson(query));
+    } catch (error) {
+      clear(results).append(h('div', { class: 'faint error' }, error.message));
+      return;
+    }
+    // Keystrokes race: a slow early request must not overwrite a later one.
+    if (mine !== seq) return;
+
+    clear(results).append(
+      ...(found.length === 0
+        ? [h('div', { class: 'faint' }, 'Nobody by that name.')]
+        : found.map((person) =>
+            h(
+              'button',
+              { class: 'param-result', onClick: () => onChosen(person) },
+              h('span', { class: 'param-result-name' }, person.name),
+              h(
+                'span',
+                { class: 'faint' },
+                person.directs ? 'Director' : 'Known for acting',
+                person.known_for.length ? ` · ${person.known_for.join(', ')}` : '',
+              ),
+            ),
+          )),
+    );
+  };
+
+  input.addEventListener('input', search);
+  return h(
+    'div',
+    { class: 'param-picker card' },
+    h('div', { class: 'row' }, h('div', { class: 'field-label' }, `Whose films?`), h('span', { class: 'spacer' }),
+      h('button', { class: 'btn-sm', onClick: onCancel }, 'Cancel')),
+    input,
+    results,
+  );
+}
+
+export function renderVibeChips(vibes, { onApply, onSave, onDelete, onParam }) {
   return h(
     'div',
     {},
@@ -318,15 +383,21 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
             {
               class: 'chip chip--vibe',
               dataset: { state: active ? 'include' : 'off' },
-              title: vibe.tags.length
-                ? `Tagged: ${vibe.tags.join(', ')}`
-                : `${vibe.resolved_lists.length} list(s)`,
+              title: vibe.param
+                ? `Pick a ${vibe.param.label ?? 'value'} for this one`
+                : vibe.tags.length
+                  ? `Tagged: ${vibe.tags.join(', ')}`
+                  : `${vibe.resolved_lists.length} list(s)`,
               onClick: () => {
+                // A parametric vibe cannot be applied by clicking it — it has
+                // no answer yet. The ▾ says so before the click rather than
+                // after, which is why it is part of the label.
+                if (vibe.param) return onParam(vibe);
                 applyVibe(vibe);
                 onApply();
               },
             },
-            vibe.name,
+            vibe.param ? `${vibe.name} ▾` : vibe.name,
           ),
           // The remove affordance only appears on the active chip, so the row
           // stays a row of choices rather than a row of choices-and-buttons.
@@ -357,6 +428,9 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
     ),
   );
 }
+
+export { renderParamPicker };
+
 
 /**
  * The "show awards" switch. A display preference, so it persists in

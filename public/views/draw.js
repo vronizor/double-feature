@@ -6,13 +6,14 @@ import {
   renderListPicker,
   renderTopN,
   renderVibeChips,
+  renderParamPicker,
   renderTagFilter,
   renderAwardsToggle,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
 import { poolState } from '../pool-state.js';
-import { currentAsVibe } from '../vibes.js';
+import { applyVibe, currentAsVibe } from '../vibes.js';
 
 const MIN_DRAW_SIZE = 1;
 const MAX_DRAW_SIZE = 10;
@@ -314,7 +315,47 @@ export async function renderDraw(container) {
         },
         onSave: saveCurrentAsVibe,
         onDelete: removeVibe,
+        onParam: (vibe) => {
+          // Toggle: clicking the chip again closes the picker rather than
+          // leaving a panel the only way out of is choosing someone.
+          state.paramVibe = state.paramVibe?.id === vibe.id ? null : vibe;
+          paint();
+        },
       }),
+      state.paramVibe
+        ? renderParamPicker(state.paramVibe, {
+            onCancel: () => {
+              state.paramVibe = null;
+              paint();
+            },
+            onChosen: async (person) => {
+              const vibe = state.paramVibe;
+              state.paramVibe = null;
+              paint();
+              try {
+                const { vibe: resolved, applied } = await api.applyVibeParameter(vibe.id, {
+                  id: person.id,
+                  name: person.name,
+                });
+                if (applied.count === 0) {
+                  toast(`No directed films found for ${person.name}`, 'error');
+                  return;
+                }
+                // Replace the cached vibe so the chip reads as active and the
+                // next apply uses the list it now points at.
+                state.vibes = state.vibes.map((v) => (v.id === resolved.id ? resolved : v));
+                applyVibe(resolved);
+                state.poolSetupOpen = true;
+                toast(`${applied.name} — ${applied.count} films`);
+                refreshCount();
+                refreshFacets();
+                paint();
+              } catch (error) {
+                toast(error.message, 'error');
+              }
+            },
+          })
+        : null,
       poolSetup(),
       h(
         'div',

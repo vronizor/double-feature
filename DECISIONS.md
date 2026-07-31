@@ -233,9 +233,11 @@ ceremony years was wrong for two of three editions.
 
 ## 6. Process
 
-- **Version numbering.** MAJOR is the roadmap version; MINOR is a decision
-  round, bumped once per session in which decisions were actually settled. A
-  session that settles nothing does not bump it.
+- **Version numbering.** MAJOR is the roadmap version; **MINOR is the number of
+  chunks landed in it** — a chunk being one finished, verified piece of work,
+  usually one commit. So v4.12 means twelve pieces of work have landed in v4,
+  which is countable from the log rather than a judgement call. It replaces
+  "decision rounds", which nobody could count the same way twice.
 - **A status of "ready" must not end in a question.** Three items were once
   marked ready while their own sections each ended with an open question. A
   state that overstates readiness is worse than no state, because the gap is

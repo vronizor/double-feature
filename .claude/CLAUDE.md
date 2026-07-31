@@ -22,7 +22,12 @@ next one. So the report is not a courtesy — it is the handoff. Three
 formats, two rules. Nothing else: no sprints, points, velocity or
 burndown, and no daily cadence. The unit is a session, not a day.
 
-**Open a session with this, before doing any work.** Five lines, so a
+Three units, and they are not the same thing. A **turn** is one prompt and
+one reply. A **chunk** is one finished, verified piece of work — usually a
+commit — and may take several turns. A **session** is the whole
+conversation, until the context is gone.
+
+**Open a session with this, before doing any work.** Four lines, so a
 wrong plan can be redirected in one reply rather than after an hour.
 
 ```
@@ -32,9 +37,8 @@ TODAY    <what I intend to pick up>
 NEEDS    <decisions blocking today, by id — or "nothing to start">
 ```
 
-**Checkpoint after each finished chunk.** Three lines, so progress is
-visible without stopping to write an essay, and surprises surface when
-found rather than at the end.
+**Mid-chunk, checkpoint lightly.** A turn that makes progress without
+finishing anything says so in a few lines and moves on. No ceremony.
 
 ```
 ✅ <what landed> — <how it was verified>
@@ -50,7 +54,10 @@ longer be made cleanly: changes from different themes land in the same file
 and cannot be separated without hunk-level staging. One session reached 35
 files across six unrelated themes, and `browse.js` alone carried four of them.
 
-**Close a session with four sections, always in this order.**
+**Close every CHUNK with four sections, always in this order** — and bump
+the MINOR version in the same commit. A chunk is the unit that gets a real
+report, because it is the unit that actually delivers something. A session
+needs no closing ritual beyond the last chunk's report.
 
 - **LANDED** — what is done *and how it was verified*. One line each.
   A line with no verification is a claim, not a result. Write
@@ -66,6 +73,10 @@ files across six unrelated themes, and `browse.js` alone carried four of them.
   the user's; blocked means it cannot. Usually empty.
 - **NEXT** — what happens if the user says nothing, so silence is a
   valid answer.
+
+**NEEDS YOUR CALL is never omitted.** If nothing is owed it says "none".
+An empty section is information; a missing one is a question the user has
+to think to ask, and they should not have to.
 
 Three working rules:
 

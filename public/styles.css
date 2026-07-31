@@ -471,3 +471,17 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   text-align: center; padding: 44px 20px; color: var(--text-dim);
   border: 1px dashed var(--border-strong); border-radius: var(--radius);
 }
+
+/* --- Parametric vibe picker ---------------------------------------------- */
+
+/* Sits directly under the chip row it belongs to, inside the Draw card, so the
+   answer appears where the question was asked rather than in a modal that
+   hides the pool it is about to change. */
+.param-picker { margin-top: 10px; background: var(--bg-sunken); display: grid; gap: 8px; }
+.param-results { display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
+.param-result {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  text-align: left; padding: 7px 10px; background: none; border-color: transparent;
+}
+.param-result:hover { background: var(--bg-raised); border-color: var(--border); }
+.param-result-name { font-weight: 560; }
