@@ -219,6 +219,13 @@ ceremony years was wrong for two of three editions.
   Every other list resolves by TMDB id or Wikidata QID specifically to avoid it.
   Anything not confidently matched goes to `needs_review`; below a 90% match
   rate the list is not seeded.
+- **A co-production counts as national cinema for every country that made it.**
+  Not a tolerance — the main case. Measured: Italy is **53** films as a sole
+  producer and **498** counting co-productions, and the excluded 445 include
+  *8½*, *La Dolce Vita*, *Cinema Paradiso* and *Le Trou*. A sole-producer rule
+  would have deleted most of the Italian canon from Italian night. The clause
+  therefore matches whole entries in `movies.countries` and a film belongs to
+  each of its countries.
 - **National cinema night is one parametric vibe, not a list per country** —
   director night needs the same `▾` chip regardless, so it is built once and
   serves both, plus actor's night in v5.
