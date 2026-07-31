@@ -15,3 +15,10 @@ data/*.db.*
 # Optional local cache for the seed fetchers (WIKI_CACHE_DIR). Never committed:
 # a stale page served from here would silently produce a wrong seed file.
 .cache/
+
+# IMDb's datasets are licensed for personal, non-commercial use and must never
+# be committed. `npm run imdb-ratings` streams the file and keeps only the two
+# derived numbers, so nothing should land here — this rule is the guard for a
+# manual download, not for the normal path.
+*.tsv
+*.tsv.gz

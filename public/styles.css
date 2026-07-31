@@ -485,3 +485,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 .param-result:hover { background: var(--bg-raised); border-color: var(--border); }
 .param-result-name { font-weight: 560; }
+
+/* IMDb's score sits beside TMDB's, dimmer: it is a second opinion, not a
+   competing headline. */
+.movie-rating--imdb { color: var(--text-faint); }

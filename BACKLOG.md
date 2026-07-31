@@ -64,6 +64,15 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   label tweak. Note the data itself is right and should not be touched; what
   changes is which of two known true facts gets displayed. *(From field notes.)*
 
+- **Abbreviate country and language chips.** "United States of America" is a
+  badge wider than the row it sits in. ISO alpha-3 (USA, FRA, JPN) for
+  countries and the same treatment for languages. Cosmetic, but the country
+  chips only just arrived and are the widest thing in the Filters card.
+  Note `movies.countries` stores full names, so this is a display map rather
+  than a data change — and the map has to be complete, because a country that
+  falls through to its full name would be the widest chip again. *(From field
+  notes.)*
+
 - **Cannes Grand Jury Prize as a second Cannes list.** Today only the Palme
   d'Or is carried. The Grand Prix is the runner-up award and reaches a
   different set of films. Same Wikidata `P166` route as the Palme, so it is a

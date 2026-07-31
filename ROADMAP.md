@@ -18,10 +18,11 @@ themselves.
 | Item | State | Where it stands |
 |---|---|---|
 | Box office — Spain (ICAA) | ⏳ ready | Enumeration exists (an undocumented `Ano` filter), fuzzy matching accepted here and nowhere else, 90% match floor declared — see §1 |
-| Alternative ratings — IMDb | ⏳ ready | `title.ratings.tsv.gz` joins exactly on `imdb_id`. Needs a column, a backfill, and the licence rule: never commit the dataset — see §2 |
+| Alternative ratings — IMDb | ✅ landed | 3,819 of 3,824 films carry an id; 3,808 matched a rating. Shown beside the TMDB score above a 1,000-vote floor. `npm run imdb-ratings` re-syncs |
 | Alternative ratings — Letterboxd | ⏳ ready | **Research, not a build.** Their terms decide it. Writing down the answer *is* the deliverable; any build is v5 |
 | National cinema night | ⏳ ready | One parametric vibe. **Decided: filter cached `movies.countries` for v4**, rather than discovering new films — see §3 |
 | Director night | 🔨 doing | The person half has landed (`searchPerson`, `getDirectorCredits`, two routes). Remaining: the `▾` chip, and the slot list — see §3 |
+| A slot list needs a visible label | ⏳ ready | Explore shows a director's filmography with **no clue whose it is** — confirmed in real use. The list carries the name ("Director night — Robert Eggers"); the views just never surface it. See §5 |
 | `seed.mjs` keyed on `tmdb_id` | ⏳ ready | Additive: key on `tmdb_id` when the entry has one, fall back to `raw_title + raw_year`. Needs the same change in `backfill-list-fields.mjs` |
 | `includeWatched` default | 🗣 open | README says exclude, the UI ships include. Inert until something is actually marked watched |
 | LICENSE, and seed-list provenance | 🗣 open | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag. Consciously accepted for now — see `docs/evidence/publication-audit.md` |
@@ -177,6 +178,25 @@ than a list sitting in the picker. That interaction is the part worth getting
 right, because **actor's night in v5 is the same shape with `job` swapped** — if
 director night is built as a one-off rather than as "a credit-filtered person
 list", v5 rewrites it.
+
+---
+
+### 5. A slot list needs to say whose it is
+
+Found in real use, not by reading: applying **Director night ▾ → Robert Eggers**
+correctly put his ten films in the pool, and Explore then showed ten films with
+nothing anywhere saying *why*. It looks like the library changed under you.
+
+The name already exists — the slot list is called "Director night — Robert
+Eggers" — so this is a display gap, not a data one. Two places need it:
+
+- **Explore**, which shows the films but never names the selection behind them.
+- **The chip**, which reads "Director night ▾" whether or not a director is
+  chosen. It should read back the current value once there is one.
+
+Worth doing in v4 because it is the difference between a feature that works and
+one a person can tell is working. The slot list is deliberately hidden from the
+picker, which is exactly why nothing else surfaces its name.
 
 ---
 

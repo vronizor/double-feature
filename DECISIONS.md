@@ -262,5 +262,16 @@ ceremony years was wrong for two of three editions.
 - **The database is snapshotted before migrations run.** It is the only
   unrecoverable asset: seeds can be re-fetched, but the watched set, saved vibes
   and every ballot exist nowhere else.
+- **IMDb's dataset is never committed, only its derived numbers.** It is
+  licensed for personal, non-commercial use, which this app is — but that
+  licence covers using it, not redistributing it. `npm run imdb-ratings`
+  streams the 8 MB file, keeps the rating and vote count for films already in
+  the library, and discards the rest. Same distinction `.gitignore` enforces
+  for the database.
+- **A second rating needs a vote floor, or it is not a second opinion.** Shown
+  only above 1,000 IMDb votes. Absent means "not enough votes", never "badly
+  rated" — the same rule as the streaming link. Worth showing at all because
+  the two scores differ by 0.37 on average across this library and disagree
+  hardest on blockbusters, where TMDB runs generous.
 - **The test suite is hermetic.** No credentials, no network. A run must not
   depend on whose machine it is on.

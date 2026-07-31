@@ -4,7 +4,7 @@ import { basename, dirname, join } from 'node:path';
 
 import { config } from './config.js';
 
-const SCHEMA = `
+export const SCHEMA = `
 -- category groups lists in the picker ('canon', 'awards', 'family', ...) so
 -- that selecting "all the awards lists" is one action rather than five. It is
 -- deliberately a display grouping, not a taxonomy: a list may honestly belong
@@ -91,6 +91,16 @@ CREATE TABLE IF NOT EXISTS movies (
   overview          TEXT,
   original_language TEXT,
   vote_average      REAL,
+  -- IMDb's id (tt0047478), which TMDB returns in the detail response. Kept
+  -- because it is the ONLY exact join to IMDb's ratings dataset -- no title
+  -- matching anywhere. NULL is legitimate and common for shorts and for the
+  -- handful of TV-sourced entries.
+  imdb_id           TEXT,
+  -- IMDb's own score and vote count, refreshed from their public dataset.
+  -- Stored as derived numbers only: the dataset itself is licensed for
+  -- personal, non-commercial use and MUST NOT be committed to this repo.
+  imdb_rating       REAL,
+  imdb_votes        INTEGER,
   countries         TEXT,
   languages         TEXT,
   trailer_key       TEXT,
@@ -326,6 +336,16 @@ export function migrate(target) {
   ensureColumn(target, 'movies', 'original_title', 'TEXT');
   ensureColumn(target, 'movies', 'media_type', `TEXT NOT NULL DEFAULT 'movie' CHECK (media_type IN ('movie', 'tv'))`);
   ensureColumn(target, 'movies', 'is_manual', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(target, 'movies', 'imdb_id', 'TEXT');
+  ensureColumn(target, 'movies', 'imdb_rating', 'REAL');
+  ensureColumn(target, 'movies', 'imdb_votes', 'INTEGER');
+  // Created HERE and not in SCHEMA, and the distinction is load-bearing.
+  // SCHEMA is exec'd before migrate() runs, and CREATE TABLE IF NOT EXISTS
+  // does nothing to a table that already exists -- so an index over a column
+  // that migrate() has not added yet fails, and the app cannot boot on any
+  // database that predates the column. Fresh installs never see it, which is
+  // exactly what makes it easy to ship.
+  target.exec('CREATE INDEX IF NOT EXISTS movies_imdb ON movies(imdb_id)');
   ensureColumn(target, 'lists', 'source', 'TEXT');
   ensureColumn(target, 'lists', 'source_url', 'TEXT');
   ensureColumn(target, 'lists', 'category', 'TEXT');

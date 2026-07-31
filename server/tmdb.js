@@ -212,6 +212,9 @@ export function tvToMovie(data) {
     overview: data.overview || null,
     original_language: data.original_language ?? null,
     vote_average: typeof data.vote_average === 'number' ? data.vote_average : null,
+    // Carried through so the IMDb ratings join has an exact key. Absent for
+    // some shorts, which is fine -- those simply never get a second score.
+    imdb_id: data.imdb_id || null,
     countries: (data.production_countries ?? []).map((c) => c.name).join(', ') || null,
     languages: (data.spoken_languages ?? []).map((l) => l.english_name || l.name).join(', ') || null,
     trailer_key: pickTrailer(data.videos?.results),
@@ -362,6 +365,9 @@ export function toMovie(data) {
     overview: data.overview || null,
     original_language: data.original_language ?? null,
     vote_average: typeof data.vote_average === 'number' ? data.vote_average : null,
+    // The exact key for the IMDb ratings join -- no title matching anywhere.
+    // NULL is legitimate: some shorts simply have no IMDb entry.
+    imdb_id: data.imdb_id || null,
     // `original_language` (a single code) stays as the filterable field;
     // `languages` is the full spoken-language list, for display only.
     countries: (data.production_countries ?? []).map((c) => c.name).join(', ') || null,

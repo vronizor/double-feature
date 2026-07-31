@@ -22,6 +22,8 @@ and nothing bigger than a fix is actioned without asking first.
 Trimmed each session; git keeps the history.
 
 **2026-07-31**
+- No visual clue whose filmography Explore is showing → `ROADMAP.md` §5, **v4**
+- Country/language chips too wide, use ISO abbreviations → `BACKLOG.md`, v5
 - TMDB 50797 award year → `BACKLOG.md`, v5. **You were right about the Oscars**
   and the spot checks say it does not generalise: the same change would break
   the César. Needs the honoured year scraped, not derived. Data unchanged.

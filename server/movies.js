@@ -16,8 +16,8 @@ export function upsertMovie(db, movie) {
   db.prepare(
     `INSERT INTO movies
        (tmdb_id, media_type, title, original_title, year, poster_path, director, runtime, overview,
-        original_language, vote_average, countries, languages, trailer_key, refreshed_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        original_language, vote_average, imdb_id, countries, languages, trailer_key, refreshed_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
      ON CONFLICT(tmdb_id) DO UPDATE SET
        media_type        = excluded.media_type,
        title             = excluded.title,
@@ -27,6 +27,9 @@ export function upsertMovie(db, movie) {
        director          = excluded.director,
        runtime           = excluded.runtime,
        overview          = excluded.overview,
+       -- Never overwrite a known id with NULL: a partial payload would
+       -- silently unlink the film from its IMDb rating.
+       imdb_id           = COALESCE(excluded.imdb_id, movies.imdb_id),
        original_language = excluded.original_language,
        vote_average      = excluded.vote_average,
        countries         = excluded.countries,
@@ -45,6 +48,7 @@ export function upsertMovie(db, movie) {
     movie.overview ?? null,
     movie.original_language ?? null,
     movie.vote_average ?? null,
+    movie.imdb_id ?? null,
     movie.countries ?? null,
     movie.languages ?? null,
     movie.trailer_key ?? null,

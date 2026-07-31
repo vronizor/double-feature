@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 
-import { migrate } from '../server/db.js';
+import { migrate, SCHEMA } from '../server/db.js';
 
 /**
  * The upgrade path, which is the one path that had no coverage at all.
@@ -37,6 +37,10 @@ function oldShapedDb() {
       tmdb_id      INTEGER PRIMARY KEY,
       title        TEXT    NOT NULL,
       year         INTEGER,
+      -- Present since v1, so every real database has it. Omitting it made the
+      -- fixture older than any database that has ever existed, and SCHEMA's
+      -- index over it failed for a reason no user could hit.
+      original_language TEXT,
       refreshed_at TEXT    NOT NULL DEFAULT (datetime('now')),
       watched      INTEGER NOT NULL DEFAULT 0,
       watched_at   TEXT
@@ -218,4 +222,26 @@ test('a National cinema vibe the user has pinned lists onto is kept', () => {
     rows(db, "SELECT COUNT(*) AS n FROM vibes WHERE name = 'National cinema'")[0].n,
     1,
   );
+});
+
+test('an old-shaped database survives the REAL boot sequence, not just migrate()', () => {
+  const db = oldShapedDb();
+
+  // getDb() execs SCHEMA and THEN migrates, and that order matters. CREATE
+  // TABLE IF NOT EXISTS does nothing to a table that already exists, so
+  // anything in SCHEMA that depends on a column migrate() has not added yet
+  // -- an index, a view, a trigger -- throws, and the app cannot boot on any
+  // database older than that column. A fresh install never sees it.
+  //
+  // This is not hypothetical: an index on movies(imdb_id) was written into
+  // SCHEMA and broke every existing database while passing every test,
+  // because the tests called migrate() on its own.
+  assert.doesNotThrow(() => {
+    db.exec(SCHEMA);
+    migrate(db);
+  });
+
+  assert.ok(columns(db, 'movies').includes('imdb_id'));
+  assert.ok(columns(db, 'movies').includes('imdb_rating'));
+  assert.equal(db.prepare('SELECT watched FROM movies WHERE tmdb_id = 346').get().watched, 1);
 });

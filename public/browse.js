@@ -9,6 +9,7 @@ import {
   posterUrl,
   toast,
   formatRating,
+  formatImdb,
   openMovieModal,
   originalTitleLine,
   awardLabel,
@@ -786,6 +787,13 @@ export function movieCard(movie, { extraAction } = {}) {
         { class: 'movie-meta' },
         [movie.year, movie.director].filter(Boolean).join(' · '),
         rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
+        formatImdb(movie)
+          ? h(
+              'span',
+              { class: 'movie-rating movie-rating--imdb', title: `${movie.imdb_votes.toLocaleString()} IMDb votes` },
+              ` · IMDb ${formatImdb(movie)}`,
+            )
+          : null,
       ),
       h(
         'div',
