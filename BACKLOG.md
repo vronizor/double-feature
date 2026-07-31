@@ -32,6 +32,33 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   Spain, IMDb and two dynamic-list fixes. See `ROADMAP.md` §6.2, which keeps the
   full reasoning.
 
+  **Sourcing answered 2026-07-31.** Three findings, one of which dissolves the
+  blocker:
+
+  - **The US has no COUNTED admissions.** Every "tickets sold" figure for the
+    US is derived — gross divided by that year's average ticket price. France
+    and Spain both count actual tickets. So a US admissions column would be an
+    estimate wearing the same name as two columns of measured data, which is
+    worse than not having it.
+  - **Per-year Wikipedia pages exist and are the France shape.** `List of
+    American films of <year>` and `<year> in film` carry a highest-grossing
+    table with wikilinked titles, verified back to 1955. Link → QID → TMDB id,
+    so **no fuzzy matching** — unlike Spain. Roughly top 10 per year against
+    France's 30–80 rows, so a thinner list.
+  - **⚠️ The unit changes mid-series, and silently.** 1955's figures are
+    domestic **RENTALS** — the distributor's share, roughly half of gross —
+    while modern years are **gross**. The switch happened gradually through the
+    1970s–80s with no clean date. Mixing them makes older films look half as
+    successful as they were, and nothing about the numbers says which is which.
+
+  > **The dollars-vs-admissions objection dissolves under the rule this project
+  > already uses.** France's decision was "rank within the year, do not store
+  > the figure", because `list_movies` has no column for it and nothing displays
+  > it. Apply that here and the rentals-versus-gross problem disappears too:
+  > ranking only ever happens *within* one year, where the unit is consistent,
+  > and no cross-decade comparison is ever made. What was blocking this item was
+  > a question that the existing rule had already answered.
+
 - **Award badges should show the year each award is NATURALLY labelled by —
   which is not the same rule for every award.** Raised from field notes:
   *Burnt by the Sun* renders "Oscar Intl. 1995" while Wikipedia and ordinary

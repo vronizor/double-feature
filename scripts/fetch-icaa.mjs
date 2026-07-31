@@ -55,11 +55,11 @@ let cookie = '';
  * What is at risk is nil — a public catalogue, no credentials sent, and the
  * output is eyeballed before anything is seeded.
  */
-function icaaGet(path, extraHeaders = {}) {
+function icaaOnce(path, extraHeaders, timeoutMs) {
   return new Promise((resolve, reject) => {
     const req = httpsRequest(
       BASE + path,
-      { rejectUnauthorized: false, headers: extraHeaders },
+      { rejectUnauthorized: false, headers: extraHeaders, timeout: timeoutMs },
       (res) => {
         let body = '';
         res.setEncoding('utf8');
@@ -67,9 +67,41 @@ function icaaGet(path, extraHeaders = {}) {
         res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body }));
       },
     );
+    req.on('timeout', () => req.destroy(new Error('ETIMEDOUT')));
     req.on('error', reject);
     req.end();
   });
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * One dropped connection must not cost the whole run.
+ *
+ * This is a slow public server and the full build is ~16,000 requests, so a
+ * timeout somewhere is not a risk, it is a certainty — the first attempt at
+ * this build died on `read ETIMEDOUT` at 1959 and threw away the fourteen
+ * years before it. The France fetcher has had retry and a per-year alarm from
+ * the start; this had neither.
+ *
+ * Backoff is generous rather than aggressive: if the server is struggling,
+ * hammering it is both rude and counter-productive.
+ */
+async function icaaGet(path, extraHeaders = {}, { retries = 4 } = {}) {
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      const response = await icaaOnce(path, extraHeaders, 30_000);
+      // 5xx is worth retrying; 4xx is not — it will say the same thing again.
+      if (response.status >= 500) throw new Error(`HTTP ${response.status}`);
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt === retries) break;
+      await sleep(2000 * 2 ** attempt);
+    }
+  }
+  throw new Error(`${path} failed after ${retries + 1} attempts: ${lastError.message}`);
 }
 
 /** Establishes the Spanish locale, which is what makes box office visible. */
@@ -251,11 +283,20 @@ async function main() {
   await openSession();
 
   const films = [];
+  const failedYears = [];
   for (const year of years) {
-    const listed = await enumerateYear(year);
-    films.push(...listed);
-    console.log(`${year}: ${listed.length} Spanish features`);
+    try {
+      const listed = await enumerateYear(year);
+      films.push(...listed);
+      console.log(`${year}: ${listed.length} Spanish features`);
+    } catch (error) {
+      // Loud, named, and survivable — the same rule the France fetcher uses.
+      // Losing one year to a bad afternoon must not lose the other 81.
+      failedYears.push(year);
+      console.log(`${year}: FAILED — ${error.message}`);
+    }
   }
+  if (failedYears.length) console.log(`\n⚠️  years that failed entirely: ${failedYears.join(', ')}`);
   console.log(`\n${films.length} films listed, fetching admissions…`);
 
   const withAdmissions = await inBatches(films, async (film) => ({
@@ -308,33 +349,81 @@ async function main() {
     console.log(`  ${year}: ${cell.ok}/${cell.n} (${((cell.ok / cell.n) * 100).toFixed(0)}%)`);
   }
 
-  const out = join(ROOT, 'seeds', `icaa-${years[0]}-${years[years.length - 1]}.probe.json`);
+  // EVERY top-20 film goes in the seed file, not only the ones that matched.
+  // An unmatched entry carries no tmdb_id, so seed.mjs resolves it at seed
+  // time and files it as needs_review with its candidates — the reconciliation
+  // screen on the Lists tab already exists for exactly this.
+  //
+  // Dropping them would be silent and would bias the list in the worst
+  // possible direction: the films that fail to match are disproportionately
+  // the ones with awkward or ambiguous titles, and they earned their place by
+  // ticket sales regardless of how hard they are to identify.
+  const kept = resolved.slice().sort((a, b) => a.year - b.year || a.rank - b.rank);
+  const perYearOut = new Map();
+  const entries = kept.map((film) => {
+    const n = (perYearOut.get(film.year) ?? 0) + 1;
+    perYearOut.set(film.year, n);
+    return {
+      title: film.title,
+      year: film.year,
+      // Only when confident. A guessed id is worse than no id: no id means the
+      // reconciliation screen asks, an id means nobody ever looks again.
+      ...(film.best?.confident ? { tmdb_id: film.best.candidate.id } : {}),
+      rank: n,
+    };
+  });
+
+  // Dedupe only among entries that HAVE an id — two unmatched rows are not
+  // known to be the same film, and collapsing them would decide that silently.
+  const seen = new Set();
+  const deduped = entries.filter((e) =>
+    e.tmdb_id === undefined ? true : seen.has(e.tmdb_id) ? false : seen.add(e.tmdb_id),
+  );
+  const unresolved = deduped.filter((e) => e.tmdb_id === undefined).length;
+
+  if (rate < 90) {
+    console.log('\nBelow the declared floor - writing a probe file, not a seed.');
+    const probe = join(ROOT, 'seeds', `icaa-${years[0]}-${years.at(-1)}.probe.json`);
+    await writeFile(probe, JSON.stringify({ years, rate, entries }, null, 2));
+    console.log(`wrote ${probe}`);
+    return;
+  }
+
+  const out = join(ROOT, 'seeds', 'box-office-spain.json');
+  const note =
+    'Spanish feature films by admissions, top 20 of each year. The ICAA is the ' +
+    'Spanish film institute own register: official, and admissions rather than ' +
+    'revenue. Unlike the French per-year pages it applies no threshold of its ' +
+    'own, so the top-20 cut is ours - without it the list opens with films that ' +
+    'sold a few hundred tickets. A film with no admissions figure was never ' +
+    'released in cinemas: the catalogue also carries course recordings and ' +
+    'televised zarzuela at feature length. This is the only list here resolved ' +
+    'by TITLE rather than by id or QID; the sampled confident-match rate was ' +
+    rate + '% against a declared floor of 90%. Entries with no tmdb_id did not ' +
+    'match confidently and are left for the reconciliation screen on the Lists ' +
+    'tab rather than dropped or guessed.';
   await writeFile(
     out,
     JSON.stringify(
       {
-        years,
-        perYear: Object.fromEntries([...byYear].map(([y, c]) => [y, c])),
-        listed: films.length,
-        withAdmissions: ranked.length,
-        confident: confident.length,
-        rate: Number(rate),
-        sample: resolved.slice(0, 400).map((film) => ({
-          icaa: film.rawTitle,
-          title: film.title,
-          year: film.year,
-          admissions: film.admissions,
-          tmdb_id: film.best?.candidate.id ?? null,
-          matched: film.best?.candidate.title ?? null,
-          rank: film.rank,
-          confident: Boolean(film.best?.confident),
-        })),
+        name: 'Box-office España',
+        tags: ['box-office'],
+        category: 'box-office',
+        source: 'ICAA Catalogo de Peliculas - espectadores, top 20 per year',
+        source_url: 'https://sede.mcu.gob.es/CatalogoICAA',
+        note,
+        fetched_at: new Date().toISOString().slice(0, 10),
+        count: deduped.length,
+        entries: deduped,
       },
       null,
       2,
     ),
   );
-  console.log(`wrote ${out}`);
+  console.log(
+    `\nwrote ${out} - ${deduped.length} films, ${unresolved} awaiting review ` +
+      `(${entries.length - deduped.length} duplicate ids dropped)`,
+  );
 }
 
 // Only as a script. Importing this file for `icaaTitle` must not start a
