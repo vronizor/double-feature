@@ -114,11 +114,12 @@ export function selectionLabel(lists) {
 }
 
 export function renderListPicker(lists, openGroups, onChange, { vocabulary = [], tagFilter = null } = {}) {
-  // Slot lists are rewritten under you by a parametric vibe and are not
-  // something anyone curates, so they never appear as a checkbox. They ARE
-  // returned by the API, so every other view can still name them — which is
-  // what was missing when Explore showed a filmography anonymously.
-  lists = lists.filter((list) => !list.hidden);
+  // A slot list is hidden while it is not in play — it belongs to a
+  // parametric vibe and is not something anyone curates. But hiding one that
+  // IS selected makes the picker lie: every checkbox unticked while films are
+  // on screen, which reads as the app ignoring you. So it appears exactly when
+  // it is doing something.
+  lists = lists.filter((list) => !list.hidden || poolState.isSelected(list.id));
   if (lists.length === 0) {
     return h(
       'div',
@@ -466,9 +467,16 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete, onParam }) {
                 onApply();
               },
             },
-            // A parametric chip that still reads "Director night" after you
-            // chose someone is hiding the only thing you changed.
-            vibe.param ? `${vibe.slot?.value ?? vibe.name} ▾` : vibe.name,
+            // Reads back the value only while this vibe is actually applied.
+            // A chip showing "Robert Eggers" when nothing is selected is
+            // claiming a pool that is not in play — the state says Custom and
+            // the chip says otherwise. The label stays in front of the value
+            // so it is clear WHAT was chosen, not just who.
+            vibe.param
+              ? active && vibe.slot?.value
+                ? `${vibe.param.label ?? 'Value'}: ${vibe.slot.value} ▾`
+                : `${vibe.name} ▾`
+              : vibe.name,
           ),
           // The remove affordance only appears on the active chip, so the row
           // stays a row of choices rather than a row of choices-and-buttons.
