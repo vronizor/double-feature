@@ -163,6 +163,17 @@ does not match `double-feature.db.pre-v2` or the pre-migration snapshots, and
 those hold real ballots and voter names. It is the single highest-consequence
 line in that file.
 
+**TMDB's search index covers every title a film has, but its RESPONSE does
+not.** The index matches the English title, the original title, and every
+per-country release title — verified: *Shichinin no samurai*,
+*La Cité des enfants perdus* and *La ciudad de los niños perdidos* all return
+the right film. But the payload carries only `title` and `original_title`, so a
+match made against an alternative title comes back looking like a mismatch and
+any exact-title check rejects it. **Ask in the language you are matching in**
+(`language=es-ES`) and `title` becomes that release title. This was worth
+11.9 points on the ICAA match rate — from 80.0% to 91.9% — after the failure
+had already been written down as an unfixable limit.
+
 **The ICAA catalogue serves box-office data only in the Spanish locale.** The
 English pages render the same film without *Recaudación* or *Espectadores* and
 without any tab where they would be. Nothing fails; the data is simply absent,

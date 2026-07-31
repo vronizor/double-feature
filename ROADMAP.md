@@ -142,7 +142,18 @@ Two consequences for the build:
 Rough cost: ~3,000 listing requests across ~75 years, plus one detail page per
 Spanish film for the *espectadores* figure. Comparable to the France build.
 
-**Probe result, 1995 (2026-07-31): 71.2%, below the floor.** 189 Spanish
+**Probe result: 91.9% across eight sampled years — the floor is cleared.**
+Sampled one year per decade rather than one contiguous decade, because coverage
+is not uniform in time and an average would have hidden it: the intermediate
+80.0% run had a 1965 at 60%. The final run holds 85–100% per year.
+
+```
+first probe                                71.2%
++ year window, parentheticals, top-20      80.0%   (60–95% per year)
++ language=es-ES                           91.9%   (85–100% per year)
+```
+
+**What the earlier 71.2% run found, kept because the diagnosis mattered:** 189 Spanish
 features listed, **73 carry an admissions figure and 116 do not**, and 52 of
 those 73 matched confidently. Two separate problems, and only one is the
 matcher's:
@@ -152,10 +163,12 @@ matcher's:
   noise.
 - **Parentheticals** — `Flamenco (De Carlos Saura)`, `Flash-Back (El
   Apartamento)` — are ICAA disambiguators, not part of the title.
-- **Genuinely different titles across languages.** *La Ciudad de los Niños
-  Perdidos* is on TMDB as *La Cité des enfants perdus*: a French co-production
-  whose Spanish release title matches neither `title` nor `original_title`. No
-  normaliser fixes that one.
+- ~~**Genuinely different titles across languages.**~~ **Wrong — this was the
+  biggest cause and it was ours.** TMDB returned *La Ciudad de los Niños
+  Perdidos* as the single top hit; its search indexes per-country release
+  titles. The response only carries `title` and `original_title`, so the match
+  looked like a mismatch. Searching with `language=es-ES` makes `title` the
+  Spanish release title. Worth 11.9 points on its own.
 - A residue of real misses: *Besos y Abrazos*, *Costa Brava (Family Album)* —
   small Spanish films TMDB does not carry at all.
 

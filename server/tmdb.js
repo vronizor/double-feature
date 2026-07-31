@@ -139,12 +139,26 @@ export function scoreCandidate(query, candidate) {
   return { score, confident, titleExact, yearDelta, candidateYear };
 }
 
-export async function searchMovie({ title, year }) {
+/**
+ * `language` changes which title comes BACK, never what is searched.
+ *
+ * TMDB's index covers a film's English title, its original title, and every
+ * per-country release title it has — verified: "Shichinin no samurai",
+ * "La Cité des enfants perdus" and "La ciudad de los niños perdidos" all
+ * return the right film. So the search was never the problem.
+ *
+ * The problem is the response: it carries only `title` and `original_title`,
+ * so a match made against an alternative title comes back looking like a
+ * mismatch, and any exact-title check rejects it. Asking in the caller's own
+ * language makes `title` the release title in that language, and the check
+ * succeeds without a second request for alternative_titles.
+ */
+export async function searchMovie({ title, year, language = 'en-US' }) {
   const withYear = await request('/search/movie', {
     query: title,
     year,
     include_adult: false,
-    language: 'en-US',
+    language,
   });
   let results = withYear?.results ?? [];
 
@@ -153,7 +167,7 @@ export async function searchMovie({ title, year }) {
     const withoutYear = await request('/search/movie', {
       query: title,
       include_adult: false,
-      language: 'en-US',
+      language,
     });
     results = withoutYear?.results ?? [];
   }

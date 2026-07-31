@@ -182,7 +182,12 @@ async function inBatches(items, worker) {
 async function resolve(film) {
   const title = icaaTitle(film.rawTitle);
   const query = searchTitle(title);
-  const results = await searchMovie({ title: query, year: film.year });
+  // Asked in Spanish so `title` comes back as the Spanish release title.
+  // Without it, a film TMDB found perfectly well via its ES alternative title
+  // returns as its English one and fails the exact-title check — which is what
+  // "La Ciudad de los Niños Perdidos" was doing while TMDB returned it as the
+  // single top hit.
+  const results = await searchMovie({ title: query, year: film.year, language: 'es-ES' });
 
   let best = null;
   for (const candidate of results) {
