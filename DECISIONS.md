@@ -117,6 +117,24 @@ and the offset is not constant — the 1st BAFTAs were held in 1949 and honoured
 1947 releases. The article gives the winner; Wikidata's ceremony item gives the
 date.
 
+**A self-closing `<ref name="x" />` breaks the naive wikitext strip.**
+`s/<ref[^>]*>.*?<\/ref>//s` treats the self-closing tag as an opener and eats
+everything up to the next real `</ref>`, which can be most of the page. Observed
+consuming an entire 250-row table and reporting two rows. This repo parses
+wikitext in several fetchers.
+
+**`robots.txt` and a site's terms can disagree, in both directions.** The
+Numbers' robots.txt does not restrict you while its terms forbid systematic
+copying; Letterboxd's robots.txt permits film pages while its terms forbid all
+scraping. Reading robots.txt alone gives the wrong answer for both. Read the
+terms.
+
+**The Wikimedia pageviews API resolves nothing for you.** A redirect returns
+HTTP 200 with a full but wrong series — two orders of magnitude out — and a
+disambiguation page does the same. Key pageviews on a **QID sitelink**, never
+on a title. Series are also truncated by article renames, so compare rates,
+not totals.
+
 **`grep` treats `scripts/seed.mjs` as binary**, because its progress bar uses
 box-drawing characters — so `grep -rn` finds *nothing* there and silently drops
 the matches in a pipeline. **Use `grep -a` when sweeping this repo.** This nearly

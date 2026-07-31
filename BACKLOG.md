@@ -40,16 +40,33 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
     and Spain both count actual tickets. So a US admissions column would be an
     estimate wearing the same name as two columns of measured data, which is
     worse than not having it.
-  - **Per-year Wikipedia pages exist and are the France shape.** `List of
-    American films of <year>` and `<year> in film` carry a highest-grossing
-    table with wikilinked titles, verified back to 1955. Link → QID → TMDB id,
-    so **no fuzzy matching** — unlike Spain. Roughly top 10 per year against
-    France's 30–80 rows, so a thinner list.
-  - **⚠️ The unit changes mid-series, and silently.** 1955's figures are
-    domestic **RENTALS** — the distributor's share, roughly half of gross —
-    while modern years are **gross**. The switch happened gradually through the
-    1970s–80s with no clean date. Mixing them makes older films look half as
-    successful as they were, and nothing about the numbers says which is which.
+  - **⚠️ `<year> in film` changes units THREE times and says nothing.**
+    1950–1975 is domestic **rentals** (the distributor's share, ~40–50% of
+    gross); 1980–1987 is domestic **gross**; and **1988 onward is WORLDWIDE
+    gross** — so the modern half is not a US list at all. The flip is exactly
+    between 1987 and 1988. A single parameterised fetcher over this family
+    would concatenate three incompatible things into one list. Ten rows a year,
+    against France's 30–80.
+  - **✅ The source to use: `List of <year> box office number-one films in the
+    United States`.** Verified: exists **1946–2026 with no gaps**, ~50 weekly
+    rows per year, 8–43 distinct films, titles wikilinked → QID → TMDB, so **no
+    fuzzy matching**. CC BY-SA, so derived data may be committed.
+
+    Its real advantage is that **"was #1 for at least one weekend" is a rank,
+    not an amount** — so ticket-price inflation, rentals-versus-gross and
+    dollars-versus-admissions all stop mattering at once. It answers the
+    question admissions were wanted for, without needing admissions.
+
+    It reaches the register too: 1994 yields *Ace Ventura*, *Dumb and Dumber*
+    and *The Mask*.
+
+    > Traps, found by inspection: the column order shifts (1946 leads with
+    > `Week ending`, later years with `#`), so **parse by header**; `rowspan`
+    > carries multi-week runs and a naive row reader drops them; 1946 has
+    > literal `TBD` rows; **2020 has 30 weeks, not 52** — COVID, a real value
+    > that would trip a France-style shrink guard, so whitelist it; and the
+    > mid-1960s are genuinely thin (1965 gives 8 films, because *The Sound of
+    > Music* held #1 for months).
 
   > **The dollars-vs-admissions objection dissolves under the rule this project
   > already uses.** France's decision was "rank within the year, do not store
@@ -169,11 +186,52 @@ to something unobtainable is how a roadmap stops being believed.
   no obvious data source, and that is the whole problem — which is why it sits
   here rather than in a version.
 
-- **Letterboxd ratings.** v4 still owes the research: are they obtainable at
-  all, and do their terms permit it? Historically no public API and believed
-  invite-only. **Recording the answer is the deliverable**, either way — a
-  build is only worth scheduling once the answer is yes, which is why this is
-  unscheduled rather than assigned to a version.
+  **Researched 2026-07-31: no dedicated source exists, and three plausible ones
+  fail on inspection.** Pageview *seasonality* detects calendar ritual rather
+  than cultness — *Home Alone* scores 10.6 and *Die Hard* 6.3, but *The Big
+  Lebowski* scores 1.14 and *Office Space* 1.11, below *Twister*. Wikipedia's
+  `List of cult films` is real and substantial (2,754 films, CC BY-SA) and
+  contains **none** of *Le père Noël est une ordure*, *Les Bronzés font du
+  ski*, *La Cité de la peur* or *Les Tontons flingueurs* — the same anglophone
+  skew already measured on vote counts, failing the exact case the feature
+  exists for. Home-video sales are not public anywhere. TV audiences appear in
+  fr.wikipedia prose with no numbers.
+
+  **What does work, and needs no new source:** fr.wikipedia pageviews (CC0,
+  free, no key) divided by admissions from the `Box-office France` pages the
+  app already parses. Measured over 59 French films with ≥1M admissions across
+  1979, 1982, 1988 and 1994, it ranks *Le père Noël est une ordure* **first**,
+  then *Les Bronzés font du ski*, *La Cité de la peur* and *La vie est un long
+  fleuve tranquille* — four of the top five are the target register, and
+  ordinary blockbusters sit 3–5× lower.
+
+  Not yet trustworthy: *La Reine Margot* is a false positive at rank 5 (the
+  article draws traffic for the historical queen), *Le Gendarme et les
+  Extraterrestres* a false negative at the bottom (its fame flows to the series
+  article), and n=59 across four years of one country is suggestive rather than
+  validated. **Validate against a labelled set of 30–50 films before this
+  becomes a version item.**
+
+- **Letterboxd ratings — ❌ CLOSED, answered 2026-07-31.** Not "no API today";
+  an explicit, current, published refusal, plus a terms clause forbidding the
+  fallback. Both checked live.
+
+  Their API beta page states access is not granted *"for data-analysis,
+  visualization or recommendation projects, for LLM or GPT-related use, for
+  private or personal projects"* — three of which describe this app exactly.
+  `api.letterboxd.com` returns 401, the docs 403.
+
+  Their Terms of Use forbid *"any robot, spider, scraper, deep-link, or other
+  automated data gathering or extraction tool"*. Note `robots.txt` would have
+  given the wrong answer: it permits `/film/<slug>/` pages. The prohibition is
+  in the terms, not in robots.txt.
+
+  The only machine-readable thing offered is a per-member RSS diary — one
+  person's own ratings, carrying a handy `tmdb:movieId`, but not the community
+  average, so it cannot serve "alternative ratings" at all.
+
+  **This does not become yes without Letterboxd changing policy.** The v4
+  research debt is discharged; the item is closed rather than parked.
 
 - **Household memory.** The app picks a winner and then learns nothing —
   `watched` is only ever set by hand, so nothing accumulates between nights.
