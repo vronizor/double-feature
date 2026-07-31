@@ -65,7 +65,14 @@ export function createApp() {
 
   // SPA entry points. Listed explicitly rather than with a catch-all so that a
   // bad /api path still 404s as JSON instead of silently returning the app HTML.
-  const index = (req, res) => res.sendFile(join(ROOT, 'public', 'index.html'));
+  //
+  // The `root` option is load-bearing, not tidiness. send() applies its
+  // dotfiles rule to the path RELATIVE to root, and with no root it explodes
+  // the whole absolute path into segments instead — so a single dot-directory
+  // anywhere above the app, like /home/pi/.local/share, made every guest see a
+  // blank 404 while the host screen and QR code looked perfect. express.static
+  // above was never affected, because it has always had a root.
+  const index = (req, res) => res.sendFile('index.html', { root: join(ROOT, 'public') });
   app.get('/', index);
   app.get('/vote/:slug', index);
 

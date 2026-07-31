@@ -1,6 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 
 import { config } from './config.js';
 
@@ -305,7 +305,7 @@ function renameKindToOrigin(target) {
   }
 }
 
-function migrate(target) {
+export function migrate(target) {
   // First, because everything below queries the table it renames.
   renameKindToOrigin(target);
   ensureColumn(target, 'movies', 'vote_average', 'REAL');
@@ -484,6 +484,51 @@ export function inTransaction(target, work) {
   }
 }
 
+const KEEP_SNAPSHOTS = 3;
+
+/**
+ * Snapshots the database immediately before migrations run.
+ *
+ * This is the only unrecoverable asset in the project. Seed lists can be
+ * re-fetched and TMDB metadata re-downloaded, but the watched set, the vibes
+ * someone saved, and every ballot ever cast exist here and nowhere else — and
+ * `migrate()` runs automatically on every boot, unattended, and now contains
+ * ALTER TABLE ... RENAME COLUMN and DELETE FROM. Until this function existed
+ * the only protection was a line in CLAUDE.md asking a human to remember, which
+ * a `git pull` followed by a restart was never going to honour.
+ *
+ * VACUUM INTO rather than a file copy: it takes a consistent snapshot of a live
+ * WAL database, which `cp` does not — copying the main file alone can miss
+ * committed transactions still sitting in the -wal.
+ *
+ * Deliberately non-fatal. A household app that refuses to start because a disk
+ * is full is worse than one that starts and says so loudly; the alarm is the
+ * point, not the veto.
+ */
+function snapshotBeforeMigrate(target, path, log = console.warn) {
+  const dir = dirname(path);
+  const prefix = `${basename(path)}.bak-`;
+  try {
+    target.exec(`VACUUM INTO '${join(dir, prefix + Date.now()).replace(/'/g, "''")}'`);
+  } catch (error) {
+    log(`[db] could not snapshot before migrating: ${error.message}`);
+    return;
+  }
+
+  // Keep the last few and drop the rest. Three is enough to survive "the
+  // migration was wrong and nobody noticed until the next restart", which is
+  // the realistic failure, without turning a 3 MB database into a disk hog.
+  try {
+    const snapshots = readdirSync(dir)
+      .filter((name) => name.startsWith(prefix))
+      .map((name) => join(dir, name))
+      .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
+    for (const stale of snapshots.slice(KEEP_SNAPSHOTS)) unlinkSync(stale);
+  } catch (error) {
+    log(`[db] could not prune old snapshots: ${error.message}`);
+  }
+}
+
 let db;
 
 export function getDb() {
@@ -493,13 +538,28 @@ export function getDb() {
   db = new DatabaseSync(config.dbPath);
   db.exec('PRAGMA journal_mode = WAL');
   db.exec('PRAGMA foreign_keys = ON');
+
+  // Asked before SCHEMA runs, because SCHEMA's CREATE TABLE IF NOT EXISTS
+  // would otherwise make a brand-new database look established. A fresh
+  // install has nothing to lose and should not litter the data directory with
+  // snapshots of an empty file.
+  const established =
+    db
+      .prepare("SELECT COUNT(*) AS n FROM sqlite_master WHERE type = 'table' AND name = 'lists'")
+      .get().n > 0;
+
   db.exec(SCHEMA);
+  if (established) snapshotBeforeMigrate(db, config.dbPath);
   migrate(db);
   ensureBuiltinVibes(db);
-  db.prepare(
-    `INSERT INTO meta (key, value) VALUES ('schema_version', '1')
-     ON CONFLICT(key) DO NOTHING`,
-  ).run();
+
+  // `schema_version` used to be written here and was read by nothing — never
+  // gated a migration, never compared against anything. A version marker that
+  // no code consults is worse than none, because the next person reads it as a
+  // safety net and assumes upgrades are guarded. What actually guards them is
+  // that each migration inspects the shape it is about to change and is
+  // idempotent, which test/migrate.test.js now holds to. Any row already
+  // written is left alone rather than deleted; it is inert either way.
   return db;
 }
 
