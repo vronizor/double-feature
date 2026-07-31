@@ -618,7 +618,11 @@ function rangeInputs(filters, key, unit, bounds, onChange) {
  *                     (repaint NOT expected — just re-fetch a count/page)
  *   onClear()       — "Clear filters" was clicked
  */
-export function renderFilterPanel(filters, facets, { onChipChange, onValueChange, onClear }) {
+export function renderFilterPanel(
+  filters,
+  facets,
+  { onChipChange, onValueChange, onClear, lists = null, onTopNChange = null },
+) {
   return h(
     'div',
     { class: 'card stack' },
@@ -637,6 +641,23 @@ export function renderFilterPanel(filters, facets, { onChipChange, onValueChange
         {},
         h('div', { class: 'field-label' }, 'Genres'),
         chipToggleGroup(facets.genres, filters.genres, (g) => g.id, (g) => g.name, onChipChange),
+      ),
+      h(
+        'div',
+        {},
+        // Countries behave exactly like languages here: a fixed vocabulary of
+        // the commonest, as toggle chips. The long tail is deliberately not
+        // offered -- 96 countries as chips is not a control, it is a wall.
+        h('div', { class: 'field-label' }, 'Country'),
+        // The real object, never a copy: chipToggleGroup mutates include and
+        // exclude in place, so a synthesised group would swallow every click.
+        chipToggleGroup(
+          facets.countries ?? [],
+          filters.countries,
+          (c) => c.country,
+          (c) => c.country,
+          onChipChange,
+        ),
       ),
       h(
         'div',
@@ -677,6 +698,12 @@ export function renderFilterPanel(filters, facets, { onChipChange, onValueChange
             onValueChange,
           ),
         ),
+        // Top-N lives here rather than up beside the list picker. It is not a
+        // property of a film the way genre is -- it is a cut through the
+        // selection -- but that distinction is the app's, not the host's, and
+        // up there nobody found it. Findability wins; it still only renders
+        // when a selected list actually carries ranks.
+        lists && onTopNChange ? renderTopN(lists, onTopNChange) : null,
       ),
     ),
     h(

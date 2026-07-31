@@ -29,7 +29,7 @@ export const emptyFilters = () => ({
   // the one place the filter shape is stated, and "Clear filters" clearing the
   // country should be a consequence of the shape rather than an accident of
   // what happens to be listed.
-  countries: { include: [] },
+  countries: { include: [], exclude: [] },
   year: { min: null, max: null },
   runtime: { min: null, max: null },
   includeWatched: true,
@@ -143,10 +143,13 @@ export const poolState = {
   },
 
   clearFilters() {
-    // Only the filters. The list selection and the Top-N cut are not filters
-    // and are not touched — which no longer needs explaining, because they are
-    // not in the object being replaced.
+    // The list selection is not a filter and is untouched. Top-N IS reset,
+    // even though it lives beside `lists` in the API rather than inside
+    // `filters` -- because it is now rendered in the Filters card, and a
+    // "Clear filters" button that visibly leaves a control set is lying about
+    // what it did. Placement decides the expectation, not the data shape.
     state.setup.filters = emptyFilters();
+    state.setup.topN = null;
     state.vibe = null;
   },
 

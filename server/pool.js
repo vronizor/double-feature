@@ -83,7 +83,10 @@ export function normalizeFilters(raw = {}) {
     },
     // Production countries, as TMDB's full names rather than codes, because
     // that is what movies.countries caches: "France, Italy".
-    countries: { include: asStringList(raw.countries?.include) },
+    countries: {
+      include: asStringList(raw.countries?.include),
+      exclude: asStringList(raw.countries?.exclude),
+    },
     year: { min: asInt(raw.year?.min), max: asInt(raw.year?.max) },
     runtime: { min: asInt(raw.runtime?.min), max: asInt(raw.runtime?.max) },
     includeWatched: Boolean(raw.includeWatched),
@@ -167,12 +170,22 @@ export function buildPoolQuery(setup, exclude = []) {
   // ANY of the chosen countries matches, matching the genre include semantics —
   // a co-production counts as both of its countries, which is the honest
   // reading of "Japanese night" for a film Japan made with France.
+  const countryTest = (name) => `(', ' || m.countries || ', ') LIKE ('%, ' || ? || ', %')`;
   if (f.countries.include.length) {
-    const test = f.countries.include
-      .map(() => `(', ' || m.countries || ', ') LIKE ('%, ' || ? || ', %')`)
-      .join(' OR ');
-    clauses.push(`m.countries IS NOT NULL AND (${test})`);
+    clauses.push(
+      `m.countries IS NOT NULL AND (${f.countries.include.map(countryTest).join(' OR ')})`,
+    );
     params.push(...f.countries.include);
+  }
+  // Exclude exists because the chips cycle include -> exclude -> off, the same
+  // as genres and languages. A chip state the server ignored would be a
+  // control that silently does nothing. A film with no country recorded is NOT
+  // excluded: absent means unknown, not "not from there".
+  if (f.countries.exclude.length) {
+    clauses.push(
+      `(m.countries IS NULL OR NOT (${f.countries.exclude.map(countryTest).join(' OR ')}))`,
+    );
+    params.push(...f.countries.exclude);
   }
 
   // Not a filter preference (like "no horror") — a per-request "don't hand
@@ -363,7 +376,12 @@ export function poolFacets(db, lists = null) {
     )
     .get(...scopeParams);
 
-  return { genres, languages, ...bounds };
+  // Countries ride along with the other facets so the filter panel has one
+  // source for everything it renders. Library-wide rather than pool-scoped,
+  // deliberately: the country chips are a fixed vocabulary you pick FROM, and
+  // having options appear and vanish as you narrow would make the panel feel
+  // broken. Same reasoning as reporting the whole tag vocabulary.
+  return { genres, languages, countries: countryFacet(db).slice(0, 12), ...bounds };
 }
 
 const LANGUAGE_NAMES = new Intl.DisplayNames(['en'], { type: 'language' });

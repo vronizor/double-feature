@@ -3,7 +3,6 @@ import { api } from '../api.js';
 import {
   renderFilterPanel,
   renderListPicker,
-  renderTopN,
   renderAwardsToggle,
   movieCard,
 } from '../browse.js';
@@ -133,6 +132,8 @@ export async function renderExplore(container) {
   function filterPanel() {
     if (!state.facets) return null;
     return renderFilterPanel(poolState.filters, state.facets, {
+      lists: state.lists,
+      onTopNChange: () => loadPage({ reset: true }),
       onChipChange: () => {
         poolState.markCustom();
         loadPage({ reset: true });
@@ -250,7 +251,6 @@ export async function renderExplore(container) {
         ),
         listPicker(),
         searchBox(),
-        renderTopN(state.lists, () => loadPage({ reset: true })),
         filterPanel(),
         sortControl(),
         resultsGrid(),

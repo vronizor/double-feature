@@ -342,6 +342,37 @@ export function migrate(target) {
   migrateCategoriesToTags(target);
   renameCrowdPleasers(target);
   retagDynamicAsModern(target);
+  dropNationalCinemaVibe(target);
+}
+
+/**
+ * Removes the short-lived "National cinema" vibe.
+ *
+ * It shipped as a parametric vibe whose only action was to set a country
+ * filter -- which is now an ordinary control in the Filters card, so the vibe
+ * was a second way to do one thing, and the picker already has a documented
+ * problem with two controls that look alike. A vibe earns its place by doing
+ * something the filter panel cannot; this one did not.
+ *
+ * Needed as a migration because ensureBuiltinVibes only ever ADDS: removing the
+ * entry from BUILTIN_VIBES leaves the row behind on every database that has
+ * already booted. Guarded on is_builtin and on the vibe carrying no pinned
+ * lists, so a vibe the user has since made their own is never deleted.
+ *
+ * National cinema comes back as a vibe when it is backed by a discover query
+ * that ADDS films the library does not have -- see BACKLOG. That version does
+ * something a filter cannot, and it will reuse director night's slot list.
+ */
+function dropNationalCinemaVibe(target) {
+  const row = target
+    .prepare("SELECT id FROM vibes WHERE name = 'National cinema' AND is_builtin = 1")
+    .get();
+  if (!row) return;
+  const pinned = target
+    .prepare('SELECT COUNT(*) AS n FROM vibe_lists WHERE vibe_id = ?')
+    .get(row.id).n;
+  if (pinned > 0) return;
+  target.prepare('DELETE FROM vibes WHERE id = ?').run(row.id);
 }
 
 /**
@@ -448,9 +479,6 @@ const BUILTIN_VIBES = [
     position: 5,
     param: { kind: 'person', job: 'Director', label: 'Director' },
   },
-  // A country parameter resolves to a FILTER over films already cached, not to
-  // a list -- see parametric.js for why that is the feature and not a shortcut.
-  { name: 'National cinema', tags: [], position: 6, param: { kind: 'country', label: 'Country' } },
 ];
 
 /**

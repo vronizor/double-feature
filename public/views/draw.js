@@ -4,7 +4,6 @@ import { renderSessionPanel } from './session.js';
 import {
   renderFilterPanel,
   renderListPicker,
-  renderTopN,
   renderVibeChips,
   renderParamPicker,
   renderTagFilter,
@@ -221,7 +220,6 @@ export async function renderDraw(container) {
               },
               { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
             ),
-            renderTopN(state.lists, () => refreshCount()),
             state.facets ? filterPanel() : null,
           )
         : null,
@@ -273,6 +271,8 @@ export async function renderDraw(container) {
 
   function filterPanel() {
     return renderFilterPanel(poolState.filters, state.facets, {
+      lists: state.lists,
+      onTopNChange: () => refreshCount(),
       onChipChange: () => {
         poolState.markCustom();
         refreshCount();

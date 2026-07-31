@@ -572,3 +572,31 @@ test('no country filter leaves the pool alone', () => {
   const { where, params } = buildPoolQuery({ lists: [1], filters: {} });
   assert.equal(db.prepare(`SELECT COUNT(*) AS n FROM movies m WHERE ${where}`).get(...params).n, 2);
 });
+
+test('excluding a country drops it, but keeps films whose country is unknown', () => {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'L', 'seed', 1)`);
+  db.exec(`INSERT INTO movies (tmdb_id, title, countries) VALUES
+    (1, 'American',   'United States of America'),
+    (2, 'Co-pro',     'France, United States of America'),
+    (3, 'French',     'France'),
+    (4, 'Unknown',    NULL)`);
+  for (const id of [1, 2, 3, 4]) {
+    db.exec(`INSERT INTO list_movies (list_id, tmdb_id, raw_title, status)
+             VALUES (1, ${id}, 't', 'resolved')`);
+  }
+  const { where, params } = buildPoolQuery({
+    lists: [1],
+    filters: { countries: { exclude: ['United States of America'] } },
+  });
+  const titles = db
+    .prepare(`SELECT m.title FROM movies m WHERE ${where} ORDER BY m.tmdb_id`)
+    .all(...params)
+    .map((row) => row.title);
+
+  // The co-production goes too: it IS partly American, and "no American films"
+  // that still returns one would be a lie.
+  // "Unknown" stays: absent means unknown, never "not from there" — the same
+  // rule the streaming badge follows.
+  assert.deepEqual(titles, ['French', 'Unknown']);
+});

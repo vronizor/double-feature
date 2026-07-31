@@ -193,3 +193,29 @@ test('a rename already done is left alone rather than retried', () => {
     'the guard is both ways: it must not clobber a list the user made themselves',
   );
 });
+
+test('the National cinema vibe is removed, but not one the user made their own', () => {
+  const db = oldShapedDb();
+  db.exec(`INSERT INTO vibes (id, name, is_builtin, position) VALUES
+    (10, 'National cinema', 1, 6),
+    (11, 'Nordic noir',     0, 7)`);
+
+  migrate(db);
+  let names = rows(db, 'SELECT name FROM vibes ORDER BY id').map((r) => r.name);
+  assert.equal(names.includes('National cinema'), false, 'the built-in wrapper is gone');
+  assert.equal(names.includes('Nordic noir'), true, "a user's own vibe is untouched");
+});
+
+test('a National cinema vibe the user has pinned lists onto is kept', () => {
+  const db = oldShapedDb();
+  db.exec(`INSERT INTO vibes (id, name, is_builtin, position) VALUES (10, 'National cinema', 1, 6)`);
+  // Pinning a list onto it makes it theirs, whatever it is called. Deleting
+  // that would throw away work, so the guard checks for it.
+  db.exec(`INSERT INTO vibe_lists (vibe_id, list_id) VALUES (10, 1)`);
+
+  migrate(db);
+  assert.equal(
+    rows(db, "SELECT COUNT(*) AS n FROM vibes WHERE name = 'National cinema'")[0].n,
+    1,
+  );
+});
