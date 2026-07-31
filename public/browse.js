@@ -10,6 +10,7 @@ import {
   toast,
   formatRating,
   formatImdb,
+  keepNameTogether,
   openMovieModal,
   originalTitleLine,
   awardLabel,
@@ -821,7 +822,7 @@ export function movieCard(movie, { extraAction } = {}) {
       h(
         'div',
         { class: 'movie-meta' },
-        [movie.year, movie.director].filter(Boolean).join(' · '),
+        [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
         rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
         formatImdb(movie)
           ? h(

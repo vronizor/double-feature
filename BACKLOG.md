@@ -64,6 +64,13 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   label tweak. Note the data itself is right and should not be touched; what
   changes is which of two known true facts gets displayed. *(From field notes.)*
 
+- **One rating shown, the other on hover — with a toggle for which is
+  primary.** Currently both TMDB and IMDb sit on the card meta line, which is
+  two numbers competing for the same glance. Better: pick one in settings and
+  reveal the other on hover. The vote count should not be surfaced at all — it
+  exists to decide whether a rating is *shown*, not to be read. *(From field
+  notes.)*
+
 - **Abbreviate country and language chips.** "United States of America" is a
   badge wider than the row it sits in. ISO alpha-3 (USA, FRA, JPN) for
   countries and the same treatment for languages. Cosmetic, but the country

@@ -131,6 +131,28 @@ export const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many
 
 // TMDB returns 0 for an unrated film, which is worth hiding rather than
 // showing as a real (bad) score.
+/**
+ * Keeps a person's name on one line unless there is genuinely no room.
+ *
+ * The card's meta line is one string — "1954 · Akira Kurosawa · ★ 8.5" — and
+ * the rating spans after it are `white-space: nowrap`, so the browser breaks
+ * at the last space that fits and that space is usually the one inside the
+ * name. "Akira" ends up on one line and "Kurosawa" on the next while the row
+ * still has room.
+ *
+ * A non-breaking space rather than `white-space: nowrap` on purpose: nowrap
+ * cannot break at all, so a very long name would be cropped by the card's
+ * overflow:hidden. NBSP means "do not break here unless there is no
+ * alternative", and `overflow-wrap: break-word` still rescues the rare name
+ * wider than the card. Commas stay ordinary spaces, so a three-director credit
+ * still wraps between names.
+ */
+export const keepNameTogether = (value) =>
+  String(value ?? '')
+    .split(', ')
+    .map((name) => name.replace(/ /g, '\u00a0'))
+    .join(', ');
+
 export const formatRating = (voteAverage) =>
   typeof voteAverage === 'number' && voteAverage > 0 ? voteAverage.toFixed(1) : null;
 
@@ -333,7 +355,7 @@ export function openMovieModal(movie) {
         h(
           'div',
           { class: 'movie-meta' },
-          [movie.year, movie.director].filter(Boolean).join(' · '),
+          [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
           rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
           formatImdb(movie)
             ? h(

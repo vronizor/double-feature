@@ -1,4 +1,4 @@
-import { h, clear, posterUrl, toast, plural, formatRating, openMovieModal, originalTitleLine } from '../dom.js';
+import { h, clear, posterUrl, toast, plural, formatRating, keepNameTogether, openMovieModal, originalTitleLine } from '../dom.js';
 import { api } from '../api.js';
 import { toggleRank, rankOf, toBallot } from '../ranking.js';
 import { renderResults } from './session.js';
@@ -104,7 +104,7 @@ export async function renderVote(container, slug) {
         h(
           'div',
           { class: 'movie-meta' },
-          [movie.year, movie.director].filter(Boolean).join(' · '),
+          [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
           rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
         ),
         h(
