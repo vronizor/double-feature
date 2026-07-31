@@ -32,6 +32,26 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   Spain, IMDb and two dynamic-list fixes. See `ROADMAP.md` §6.2, which keeps the
   full reasoning.
 
+- **Cannes Grand Jury Prize as a second Cannes list.** Today only the Palme
+  d'Or is carried. The Grand Prix is the runner-up award and reaches a
+  different set of films. Same Wikidata `P166` route as the Palme, so it is a
+  fetcher parameter rather than new machinery. *(From field notes.)*
+
+- **The vibe delete button is too easy to hit.** The `✕` on an active vibe
+  chip reads as "clear this selection" and actually deletes the vibe. One
+  click, no confirmation on the affordance itself, and it sits where a
+  deselect control would. Proposed: drop the `✕` entirely, let clicking an
+  active chip deselect it, and move deletion somewhere deliberate — an "edit
+  vibes" affordance. *(From field notes.)*
+
+- **Do not auto-expand Pool setup when a vibe is applied.** Currently applying
+  a vibe opens the setup panel. **This reverses a deliberate choice**, recorded
+  in `views/draw.js`: the panel was opened so the host could see what the vibe
+  actually did rather than take a one-line summary on faith. The counter-case
+  is that it is noise every time, and someone who wants the detail can open it.
+  Whoever does this should update that comment rather than leave it
+  contradicting the code. *(From field notes.)*
+
 - **Cultness.** The axis that survives the reach-sorted list being dropped:
   films whose fame arrived *after* the cinema, through television and home
   video. *Le Père Noël est une ordure* is the canonical case — a modest

@@ -1,51 +1,30 @@
 # Field notes
 
-**Yours. Write badly and fast.** This is the inbox — a bug you saw on Friday, an
-idea in a queue, a thing that felt wrong. No format, no triage, no thinking about
-where it belongs. That is the point: a note you have to classify before writing
-is a note you do not write.
+**Yours. Write badly and fast.** Bugs seen, ideas, things that felt wrong. No
+format — a note you have to classify before writing is a note you do not write.
+Tag one `-> v5` if you already know where it goes; otherwise leave it bare and
+it gets triaged.
 
-Anything at all is fine:
-
-```
-- vote page felt slow on Ben's phone, maybe just wifi
-- would be nice to see how long since we watched something
-- the poster for Solaris is the wrong film
-- ??? can we do a "shortest film wins" tiebreak
-```
-
-## How it gets emptied
-
-**Read at the start of every session, before anything else.** Each entry is
-filed to wherever it actually belongs, and the destination is reported back:
-
-| The note is… | Goes to |
-|---|---|
-| A bug worth fixing now | Fixed this session, or `ROADMAP.md` if it needs a decision |
-| An idea for later | `BACKLOG.md` |
-| Something that settles a question | `DECISIONS.md` |
-| A trap — something that produced a wrong answer quietly | A comment beside the code, and `DECISIONS.md` §3 |
-| Not reproducible, or already handled | Answered in the report, and dropped |
-
-Filed entries move to **Filed** below with one line saying where they went, so
-you can see the note was understood rather than silently deleted. That section
-is trimmed each session — git keeps the history, and an inbox that grows
-forever is just another document to read.
-
-**A note is never actioned silently.** If an entry implies work bigger than a
-fix, it becomes a decision to put to you, not a thing that quietly joins the
-diff.
+Read and emptied at the start of every session. Each entry is filed to wherever
+it belongs and the destination is reported back — nothing is deleted silently,
+and nothing bigger than a fix is actioned without asking first.
 
 ---
 
 ## Inbox
 
-<!-- write here, one line each, no format needed -->
+
 
 ---
 
 ## Filed
 
-<!-- entries move here with their destination, and are trimmed each session -->
+Trimmed each session; git keeps the history.
 
-_(nothing filed yet)_
+**2026-07-31**
+- TMDB 50797 award year → **a decision, not a bug** — see the report. The data
+  matches the recorded rule; what is disputed is what the badge should say.
+- Cannes Grand Jury Prize → `BACKLOG.md`, v5
+- The vibe `✕` is too risky → `BACKLOG.md`, v5
+- Do not auto-expand Pool setup on a vibe → `BACKLOG.md`, v5, flagged as
+  reversing a decision recorded in `views/draw.js`
