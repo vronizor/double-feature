@@ -24,6 +24,12 @@
 export const emptyFilters = () => ({
   genres: { include: [], exclude: [] },
   languages: { include: [], exclude: [] },
+  // Production countries, by TMDB's full names. Declared here even though the
+  // only control that sets it today is the national-cinema chip: this object is
+  // the one place the filter shape is stated, and "Clear filters" clearing the
+  // country should be a consequence of the shape rather than an accident of
+  // what happens to be listed.
+  countries: { include: [] },
   year: { min: null, max: null },
   runtime: { min: null, max: null },
   includeWatched: true,
