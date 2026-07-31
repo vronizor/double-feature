@@ -22,7 +22,7 @@ themselves.
 | Alternative ratings — Letterboxd | ⏳ ready | **Research, not a build.** Their terms decide it. Writing down the answer *is* the deliverable; any build is v5 |
 | National cinema night | ⏳ ready | One parametric vibe. **Decided: filter cached `movies.countries` for v4**, rather than discovering new films — see §3 |
 | Director night | 🔨 doing | The person half has landed (`searchPerson`, `getDirectorCredits`, two routes). Remaining: the `▾` chip, and the slot list — see §3 |
-| A slot list needs a visible label | ⏳ ready | Explore shows a director's filmography with **no clue whose it is** — confirmed in real use. The list carries the name ("Director night — Robert Eggers"); the views just never surface it. See §5 |
+| A slot list needs a visible label | ✅ landed | Explore names the selection, and the chip reads back the chosen value ("Robert Eggers ▾") |
 | `seed.mjs` keyed on `tmdb_id` | ⏳ ready | Additive: key on `tmdb_id` when the entry has one, fall back to `raw_title + raw_year`. Needs the same change in `backfill-list-fields.mjs` |
 | `includeWatched` default | 🗣 open | README says exclude, the UI ships include. Inert until something is actually marked watched |
 | LICENSE, and seed-list provenance | 🗣 open | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag. Consciously accepted for now — see `docs/evidence/publication-audit.md` |

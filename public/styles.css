@@ -489,3 +489,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 /* IMDb's score sits beside TMDB's, dimmer: it is a second opinion, not a
    competing headline. */
 .movie-rating--imdb { color: var(--text-faint); }
+
+/* Names the selection behind the films on screen — without it, a filmography
+   looks like the library changed. */
+.selection-label { color: var(--text); font-weight: 560; }

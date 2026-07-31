@@ -92,7 +92,33 @@ export function setGroupOpen(openGroups, key, open) {
  * `openGroups` is a Set owned by the calling view, so which groups are expanded
  * survives that view's repaints.
  */
+/**
+ * Names the lists currently in play, for a view that shows films without
+ * showing the picker.
+ *
+ * It exists because of a real confusion: choosing a director put his ten films
+ * in the pool, Explore showed ten films, and nothing anywhere said whose they
+ * were. It read as the library having changed underneath you. A slot list
+ * already carries the answer in its name — "Director night — Robert Eggers" —
+ * and no view was surfacing it.
+ */
+export function selectionLabel(lists) {
+  const selected = lists.filter((list) => poolState.isSelected(list.id));
+  if (selected.length === 0 || selected.length === lists.length) return null;
+  // A slot list is the whole point of this label, so it wins when present:
+  // "Director night — Robert Eggers" says more than "3 lists".
+  const slot = selected.find((list) => list.hidden);
+  if (slot) return slot.name;
+  if (selected.length <= 2) return selected.map((list) => list.name).join(' + ');
+  return `${selected.length} lists`;
+}
+
 export function renderListPicker(lists, openGroups, onChange, { vocabulary = [], tagFilter = null } = {}) {
+  // Slot lists are rewritten under you by a parametric vibe and are not
+  // something anyone curates, so they never appear as a checkbox. They ARE
+  // returned by the API, so every other view can still name them — which is
+  // what was missing when Explore showed a filmography anonymously.
+  lists = lists.filter((list) => !list.hidden);
   if (lists.length === 0) {
     return h(
       'div',
@@ -440,7 +466,9 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete, onParam }) {
                 onApply();
               },
             },
-            vibe.param ? `${vibe.name} ▾` : vibe.name,
+            // A parametric chip that still reads "Director night" after you
+            // chose someone is hiding the only thing you changed.
+            vibe.param ? `${vibe.slot?.value ?? vibe.name} ▾` : vibe.name,
           ),
           // The remove affordance only appears on the active chip, so the row
           // stays a row of choices rather than a row of choices-and-buttons.

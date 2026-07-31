@@ -2,6 +2,7 @@ import { h, clear, plural, toast, preserveFocus } from '../dom.js';
 import { api } from '../api.js';
 import {
   renderFilterPanel,
+  selectionLabel,
   renderListPicker,
   renderAwardsToggle,
   movieCard,
@@ -177,6 +178,11 @@ export async function renderExplore(container) {
       h(
         'span',
         { class: 'pool-count muted' },
+        // Without this, choosing a director shows ten films and nothing says
+        // whose they are — it reads as the library having changed.
+        selectionLabel(state.lists)
+          ? h('span', { class: 'selection-label' }, selectionLabel(state.lists), ' · ')
+          : null,
         state.total === 0 && !state.loading
           ? 'No films match'
           : h('span', {}, h('strong', {}, String(state.total)), ` ${plural(state.total, 'film', 'films')} match`),

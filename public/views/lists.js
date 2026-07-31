@@ -20,7 +20,10 @@ export async function renderLists(container) {
 
   async function refresh() {
     const { lists } = await api.lists();
-    state.lists = lists;
+    // Slot lists belong to a parametric vibe and are rewritten under you.
+    // Showing one here would invite renaming or deleting something the vibe
+    // owns, and it is not a list anyone curated.
+    state.lists = lists.filter((list) => !list.hidden);
   }
 
   // --- Import ------------------------------------------------------------

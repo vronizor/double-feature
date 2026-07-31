@@ -76,11 +76,27 @@ function hydrate(db, vibe) {
       param = null;
     }
   }
+  // What this parametric vibe is currently set to, read off the slot list's
+  // own name rather than stored twice. Null until a value is chosen.
+  let slot = null;
+  if (param) {
+    const row = db
+      .prepare(
+        `SELECT l.id, l.name FROM vibe_lists vl JOIN lists l ON l.id = vl.list_id
+          WHERE vl.vibe_id = ? AND l.hidden = 1`,
+      )
+      .get(vibe.id);
+    if (row) {
+      const dash = row.name.indexOf('—');
+      slot = { list_id: row.id, name: row.name, value: dash === -1 ? null : row.name.slice(dash + 1).trim() };
+    }
+  }
   return {
     id: vibe.id,
     name: vibe.name,
     is_builtin: Boolean(vibe.is_builtin),
     param,
+    slot,
     position: vibe.position,
     tags: db.prepare('SELECT tag FROM vibe_tags WHERE vibe_id = ? ORDER BY tag').all(vibe.id).map((r) => r.tag),
     lists: db.prepare('SELECT list_id FROM vibe_lists WHERE vibe_id = ?').all(vibe.id).map((r) => r.list_id),

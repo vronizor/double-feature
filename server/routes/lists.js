@@ -42,13 +42,7 @@ router.get('/', (req, res) => {
               (SELECT group_concat(tag, ',') FROM (
                  SELECT tag FROM list_tags WHERE list_id = l.id ORDER BY tag
                ))                                                    AS tag_csv
-       FROM lists l
-        -- Slot lists belong to a parametric vibe and are rewritten under you;
-        -- they are not something anyone curates, so they stay out of the
-        -- picker. The vibe still selects one, and Explore still shows its
-        -- films, because selection carries list ids rather than reading this.
-        WHERE l.hidden = 0
-        ORDER BY l.origin DESC, l.name`,
+       FROM lists l ORDER BY l.origin DESC, l.name`,
     )
     .all()
     // Tags arrive as a delimited string from group_concat; the client wants an
