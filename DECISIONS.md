@@ -163,6 +163,11 @@ does not match `double-feature.db.pre-v2` or the pre-migration snapshots, and
 those hold real ballots and voter names. It is the single highest-consequence
 line in that file.
 
+**The ICAA catalogue serves box-office data only in the Spanish locale.** The
+English pages render the same film without *Recaudación* or *Espectadores* and
+without any tab where they would be. Nothing fails; the data is simply absent,
+which reads as the catalogue not having it. Set `es-es` before fetching.
+
 **Never type a TMDB id from memory.** A check of the box-office language rule
 used hand-guessed ids and gave the opposite answer, because *Le Dîner de cons*
 resolved to the US remake *Dinner for Schmucks*.
