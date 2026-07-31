@@ -17,7 +17,7 @@ themselves.
 
 | Item | State | Where it stands |
 |---|---|---|
-| Box office — Spain (ICAA) | ⏳ ready | Enumeration exists (an undocumented `Ano` filter), fuzzy matching accepted here and nowhere else, 90% match floor declared — see §1 |
+| Box office — Spain (ICAA) | 🗣 open | Enumeration exists (an undocumented `Ano` filter), fuzzy matching accepted here and nowhere else, 90% match floor declared — see §1 |
 | Alternative ratings — IMDb | ✅ landed | 3,819 of 3,824 films carry an id; 3,808 matched a rating. Shown beside the TMDB score above a 1,000-vote floor. `npm run imdb-ratings` re-syncs |
 | Alternative ratings — Letterboxd | ⏳ ready | **Research, not a build.** Their terms decide it. Writing down the answer *is* the deliverable; any build is v5 |
 | National cinema night | ⏳ ready | One parametric vibe. **Decided: filter cached `movies.countries` for v4**, rather than discovering new films — see §3 |
@@ -34,6 +34,46 @@ winners. **v6** — a design pass with Impeccable. Both in `BACKLOG.md`.
 ---
 
 ### 1. Box office — Spain, via the ICAA catalogue
+> **⚠️ Blocked, 2026-07-31: the admissions figures are not where this section
+> says they are.** Everything below about *enumeration* is now confirmed and
+> better than described — but the *espectadores* numbers, which are the entire
+> point of the list, could not be found anywhere in the Catálogo.
+>
+> What was checked, live:
+>
+> - The detail page (`/Peliculas/Detalle?Pelicula=18760`, *Viridiana*) is 57 KB
+>   and carries six tabs: artists, classification, technical data, companies,
+>   synopsis, technicians. **There is no box-office tab.** The figure
+>   1.039.120 quoted below does not appear in the HTML.
+> - The page offers a PDF ficha (`/Peliculas/GetPdf?Pelicula=…`). Its text is
+>   in a custom encoding and no admissions figure could be extracted; there is
+>   no evidence it contains one.
+>
+> So this section's "verified live: a detail page carrying *espectadores*,
+> *recaudación* and co-production percentages" was **not** verified for the
+> half that matters. The sample figures came from somewhere, and finding out
+> where is the first task if this is picked up — the likeliest candidate is a
+> different ICAA system, and `docs/evidence/national-box-office.md` already
+> rejected the ministry's Rentrak-sourced taquilla PDFs on licensing grounds.
+>
+> **Without admissions there is no list.** Enumeration alone yields ~11,000
+> Spanish feature films with no popularity signal, which is a catalogue and not
+> a movie night.
+
+**What enumeration actually costs, now measured.** `SoloEspana` is sent as
+**1 or 0**, not `true` — which is why an earlier probe found it did nothing —
+and `Metraje=LA` restricts to feature films. Together:
+
+```
+Ano=1994&SoloEspana=1&Metraje=LA   150 films   (from 1000 unfiltered)
+Ano=1961&SoloEspana=1&Metraje=LA   111
+Ano=2010&SoloEspana=1&Metraje=LA   294
+```
+
+~150/year, so ~525 listing requests covers 75 years. Cheap. It is the *detail*
+pages that are expensive — 57 KB and 2.3 s each, ~11,000 of them — and they do
+not carry the figure anyway.
+
 **Source: the ICAA *Catálogo de Películas*** (`sede.mcu.gob.es/CatalogoICAA`),
 the Spanish film institute's own register. Verified live: an unauthenticated
 JSON endpoint, `/Buscador/GetPeliculasPreview?T_general=<title>`, and a detail
