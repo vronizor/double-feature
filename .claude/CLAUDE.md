@@ -71,26 +71,26 @@ Three working rules:
 
 - **WIP limit of three.** More than three live threads is what makes a
   session sprawl. Everything else waits its turn as ⏳ ready in
-  `ROADMAP.md`'s current-version status table (§6 for v4).
+  `ROADMAP.md`'s status table.
 - **Commit at chunk boundaries, when asked.** See the 📦 line above.
 - **Findings are reported, not folded into the diff.** Something noticed
   mid-task goes in the report; it does not quietly join the work the
   user asked for.
 
-Decisions, once made, still get written where they already belong —
-inline in `ROADMAP.md`, measurements in `BACKLOG.md`, state in the
-current-version status table. The report adds no new files and no new bookkeeping.
+Decisions, once made, get written where they belong — see the routing
+rule below. The report itself adds no new files and no new bookkeeping.
 
 ## Project conventions
 
 - Verify against the real API and the real database rather than
   reasoning about what they probably contain. Several decisions
   here were reversed by measurement.
-- Record why, not just what — in comments, and in `ROADMAP.md` /
-  `BACKLOG.md` for anything deferred. Reversed decisions get
-  written down so they aren't re-proposed.
-- Keep the test suite green; new behaviour comes with tests.
-- Back up `data/*.db` before a migration.
+- Record why, not just what. Where it goes is decided by the routing
+  rule below, not by habit.
+- Keep the test suite green; new behaviour comes with tests. It is
+  hermetic — no credentials, no network — and must stay that way.
+- The database is snapshotted automatically before migrations run. Do
+  not rely on remembering; do not remove that guard.
 
 ## Traps that have already bitten
 
@@ -118,23 +118,49 @@ for (const m of ['pool-state.js','browse.js','vibes.js','app.js','views/draw.js'
 
 ## Where the context lives
 
-Read these before proposing anything; they exist so a cold session doesn't
-re-derive decisions or repeat rejected experiments.
+### Read these four, every session, before proposing anything
 
-- **`ROADMAP.md` §2** — reversals, recorded so they aren't re-proposed:
-  certification filtering is unsafe, streaming is a badge not a filter,
-  `with_crew` is unusable for director night.
-- **`ROADMAP.md` §4** — v2 is shipped, but the traps noted against each
-  item are still true of the code: `seed.mjs` matches lists by NAME,
-  `renderSessionPanel` is shared with the History tab, and `rank IS NULL`
-  must survive a top-N cut.
-- **`ROADMAP.md` §5** — v3 is shipped. §5.1–§5.3 hold the reasoning and the
-  traps, which stay true: the caption-vs-cell parse bug, the ceremony year that
-  is NOT the year printed in the article, and why streaming is a link.
-- **`ROADMAP.md` §6** — v4, the live status table. Start here.
-- **`ARCHITECTURE.md`** — how the whole app fits together, for someone who
-  directs it without writing it. A dated snapshot, not maintained; `ROADMAP.md`
-  and `BACKLOG.md` win where they disagree.
-- **`BACKLOG.md`** — measurement write-ups (popularity vs acclaim,
-  national popularity) that are the evidence behind the v3 items, plus a
-  `Dropped` section for things deliberately not done.
+Nothing else. They total roughly 600 lines by design, and that budget is
+the point — a session that reads 2,000 lines of prose before touching
+code has already spent its attention.
+
+- **`NOTES.md`** — the field-notes inbox. **Read it first and file it**
+  before starting anything: bugs seen and ideas jotted since last time.
+  Each entry goes to its destination and gets reported back; nothing is
+  actioned silently, and nothing is deleted without saying where it went.
+- **`ROADMAP.md`** — the live view. What is being worked on and what is
+  decided but unbuilt. Three states only.
+- **`DECISIONS.md`** — what has been settled and must not be
+  re-proposed: reversals, things deliberately not built, traps that
+  produce wrong answers without failing, settled vocabulary.
+- **This file** — how to work and how to report.
+
+### Read these only when you need them, and say that you did
+
+- **`docs/evidence/*.md`** — the long measurement write-ups behind the
+  decisions. Open one only when reopening that question.
+- **`HISTORY.md`** — shipped work and its reasoning. Open it to answer
+  "why is it like this", never to plan.
+- **`BACKLOG.md`** — v5, v6, unscheduled, and things deliberately dropped.
+- **`ARCHITECTURE.md`** — a plain-language tour for someone who directs
+  this without writing it. **A dated snapshot, deliberately not
+  maintained, and never part of startup reading.** Parts of it are known
+  to be stale. The code wins; `DECISIONS.md` wins for decisions.
+
+### The routing rule — where a new piece of writing goes
+
+Ask one question: **"When will this stop being true?"**
+
+| Answer | Goes |
+|---|---|
+| Never | `DECISIONS.md` — the statement. Long working goes to `docs/evidence/` |
+| When the code changes | **A comment beside that code. Never a document.** |
+| When the work is done | `ROADMAP.md` |
+| It already has | `HISTORY.md`, or delete it |
+
+**No `file:line` references, no counts, and no descriptions of current
+code behaviour in any startup document.** A full inventory of these docs
+found 24 stale claims, and **19 were counts or file pointers** — while
+not one recorded decision had gone stale. That asymmetry is the whole
+reason for the split. If a fact about the code is worth writing down, it
+belongs where whoever changes that code will see it.

@@ -7,6 +7,13 @@ pipelines and data modelling, and explains the web-specific machinery instead.
 Numbers in this document are real, measured against `data/double-feature.db`
 on 2026-07-30.
 
+> **Not startup reading, on purpose.** This is a plain-language tour for
+> someone who directs this project without writing it, and a public-facing
+> description of what it is. It is a dated snapshot and is deliberately NOT
+> kept in step with the code — expect counts and file references in it to be
+> out of date. `DECISIONS.md` wins for decisions, `ROADMAP.md` for what is
+> being built, and the code wins for what the code does.
+
 > **This is a snapshot, not a living document.** Written 2026-07-30, against
 > commit `93bf402`. Nothing keeps it in step with the code — unlike
 > `ROADMAP.md` and `BACKLOG.md`, which are updated as decisions land and are
