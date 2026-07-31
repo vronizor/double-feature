@@ -519,3 +519,56 @@ test('the award filter shows up in the session summary', () => {
   const summary = describePoolSetup(db, { filters: { awardWinners: true } }, ['Canon']);
   assert.match(summary, /award winners/);
 });
+
+// --- National cinema night: the country filter ----------------------------
+
+test('a country filter matches whole entries, never substrings', () => {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'L', 'seed', 1)`);
+  db.exec(`INSERT INTO movies (tmdb_id, title, year, countries) VALUES
+    (1, 'Solo Japanese',   1954, 'Japan'),
+    (2, 'Co-production',   1988, 'France, Japan'),
+    (3, 'Papua New Guinea',1990, 'Papua New Guinea'),
+    (4, 'Northern Irish',  2000, 'Northern Ireland'),
+    (5, 'No country',      1970, NULL)`);
+  for (const id of [1, 2, 3, 4, 5]) {
+    db.exec(`INSERT INTO list_movies (list_id, tmdb_id, raw_title, status)
+             VALUES (1, ${id}, 't', 'resolved')`);
+  }
+
+  const titles = (country) => {
+    const { where, params } = buildPoolQuery({
+      lists: [1],
+      filters: { countries: { include: [country] } },
+    });
+    return db
+      .prepare(`SELECT m.title FROM movies m WHERE ${where} ORDER BY m.tmdb_id`)
+      .all(...params)
+      .map((row) => row.title);
+  };
+
+  // A co-production is honestly Japanese as well as French, so both nights
+  // reach it.
+  assert.deepEqual(titles('Japan'), ['Solo Japanese', 'Co-production']);
+  assert.deepEqual(titles('France'), ['Co-production']);
+
+  // The trap this clause exists for: "Guinea" is a substring of "Papua New
+  // Guinea" and "Ireland" of "Northern Ireland". A LIKE '%name%' would return
+  // them and nothing would look wrong.
+  assert.deepEqual(titles('Guinea'), []);
+  assert.deepEqual(titles('Ireland'), []);
+  assert.deepEqual(titles('Papua New Guinea'), ['Papua New Guinea']);
+
+  // A film with no country recorded is absent rather than treated as matching.
+  assert.equal(titles('Japan').includes('No country'), false);
+});
+
+test('no country filter leaves the pool alone', () => {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'L', 'seed', 1)`);
+  db.exec(`INSERT INTO movies (tmdb_id, title, countries) VALUES (1, 'A', NULL), (2, 'B', 'Japan')`);
+  db.exec(`INSERT INTO list_movies (list_id, tmdb_id, raw_title, status) VALUES
+    (1, 1, 't', 'resolved'), (1, 2, 't', 'resolved')`);
+  const { where, params } = buildPoolQuery({ lists: [1], filters: {} });
+  assert.equal(db.prepare(`SELECT COUNT(*) AS n FROM movies m WHERE ${where}`).get(...params).n, 2);
+});

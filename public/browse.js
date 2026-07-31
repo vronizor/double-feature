@@ -320,10 +320,47 @@ function renderParamPicker(vibe, { onChosen, onCancel }) {
     autocomplete: 'off',
   });
 
+  // A country parameter searches the LIBRARY, not TMDB: the vocabulary is
+  // whatever the cached films actually come from, so it is fetched once and
+  // filtered in memory. Offering a country nothing was made in, and then
+  // drawing nothing, would be worse than not offering it.
+  let vocabulary = null;
+  const isCountry = vibe.param.kind === 'country';
+
   let seq = 0;
   const search = async () => {
     const query = input.value.trim();
     const mine = (seq += 1);
+
+    if (isCountry) {
+      if (vocabulary === null) {
+        try {
+          ({ countries: vocabulary } = await api.poolCountries());
+        } catch (error) {
+          clear(results).append(h('div', { class: 'faint error' }, error.message));
+          return;
+        }
+      }
+      if (mine !== seq) return;
+      const needle = query.toLowerCase();
+      const matches = vocabulary
+        .filter((entry) => entry.country.toLowerCase().includes(needle))
+        .slice(0, 12);
+      clear(results).append(
+        ...(matches.length === 0
+          ? [h('div', { class: 'faint' }, 'No films from anywhere by that name.')]
+          : matches.map((entry) =>
+              h(
+                'button',
+                { class: 'param-result', onClick: () => onChosen({ name: entry.country }) },
+                h('span', { class: 'param-result-name' }, entry.country),
+                h('span', { class: 'faint' }, `${entry.count} films in your library`),
+              ),
+            )),
+      );
+      return;
+    }
+
     if (query.length < 2) return clear(results);
     let found = [];
     try {
@@ -355,10 +392,15 @@ function renderParamPicker(vibe, { onChosen, onCancel }) {
   };
 
   input.addEventListener('input', search);
+  // A country list is short and closed, so show all of it immediately rather
+  // than making the host guess what is in there. A person search cannot.
+  if (isCountry) search();
   return h(
     'div',
     { class: 'param-picker card' },
-    h('div', { class: 'row' }, h('div', { class: 'field-label' }, `Whose films?`), h('span', { class: 'spacer' }),
+    h('div', { class: 'row' },
+      h('div', { class: 'field-label' }, isCountry ? 'Films from where?' : 'Whose films?'),
+      h('span', { class: 'spacer' }),
       h('button', { class: 'btn-sm', onClick: onCancel }, 'Cancel')),
     input,
     results,

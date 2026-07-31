@@ -338,13 +338,26 @@ export async function renderDraw(container) {
                   name: person.name,
                 });
                 if (applied.count === 0) {
-                  toast(`No directed films found for ${person.name}`, 'error');
+                  toast(`Nothing found for ${person.name}`, 'error');
                   return;
                 }
                 // Replace the cached vibe so the chip reads as active and the
                 // next apply uses the list it now points at.
                 state.vibes = state.vibes.map((v) => (v.id === resolved.id ? resolved : v));
-                applyVibe(resolved);
+
+                if (applied.kind === 'filter') {
+                  // A country NARROWS what is already selected rather than
+                  // replacing it — "Japanese films, from my lists". Every other
+                  // vibe replaces the setup wholesale; this one cannot, or
+                  // "Japanese night" would silently also change which lists are
+                  // in play and the count would move for two reasons at once.
+                  poolState.applyVibe(resolved.id, {
+                    ...poolState.setup,
+                    filters: { ...poolState.filters, ...applied.filters },
+                  });
+                } else {
+                  applyVibe(resolved);
+                }
                 state.poolSetupOpen = true;
                 toast(`${applied.name} — ${applied.count} films`);
                 refreshCount();

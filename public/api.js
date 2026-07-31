@@ -102,6 +102,7 @@ export const api = {
   deleteVibe: (id) => request(`/api/vibes/${id}`, { method: 'DELETE' }),
   // Parametric vibes: search for the thing being picked, then hand it back.
   searchPerson: (q) => request(`/api/tmdb/person?q=${encodeURIComponent(q)}`),
+  poolCountries: () => request('/api/pool/countries'),
   applyVibeParameter: (id, value) =>
     request(`/api/vibes/${id}/parameter`, { method: 'POST', body: { value } }),
   results: (slug) => request(`/api/sessions/${slug}/results`),

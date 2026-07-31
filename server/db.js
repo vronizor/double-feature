@@ -448,6 +448,9 @@ const BUILTIN_VIBES = [
     position: 5,
     param: { kind: 'person', job: 'Director', label: 'Director' },
   },
+  // A country parameter resolves to a FILTER over films already cached, not to
+  // a list -- see parametric.js for why that is the feature and not a shortcut.
+  { name: 'National cinema', tags: [], position: 6, param: { kind: 'country', label: 'Country' } },
 ];
 
 /**

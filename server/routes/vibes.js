@@ -51,12 +51,22 @@ router.post('/vibes/:id/parameter', async (req, res) => {
   if (!vibe) return res.status(404).json({ error: 'No such vibe' });
   if (!vibe.param) return res.status(400).json({ error: `"${vibe.name}" takes no parameter` });
 
+  // What a value must carry depends on the kind of parameter -- a person needs
+  // an id, a country is only a name -- so validation belongs with the code that
+  // knows the kind, not here. This route only checks that something was sent.
   const value = req.body?.value;
-  if (!value?.id || !value?.name) {
-    return res.status(400).json({ error: 'A parameter needs an id and a name' });
+  if (!value || typeof value !== 'object') {
+    return res.status(400).json({ error: 'A parameter needs a value' });
   }
 
-  const applied = await applyParameter(db, vibe, value);
+  let applied;
+  try {
+    applied = await applyParameter(db, vibe, value);
+  } catch (error) {
+    // A bad value is the caller's fault, not a server fault: "No films from
+    // Narnia" should read as a 400 with the reason, not a 500.
+    return res.status(400).json({ error: error.message });
+  }
   res.json({ vibe: getVibe(db, vibe.id), applied });
 });
 

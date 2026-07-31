@@ -28,6 +28,7 @@
 import { getMovie, getDirectorCredits, getPerson } from './tmdb.js';
 import { upsertMovie } from './movies.js';
 import { inTransaction } from './db.js';
+import { countryFacet } from './pool.js';
 
 /**
  * The canonical name for a value, looked up rather than taken on trust.
@@ -100,11 +101,36 @@ function slotList(db, vibe) {
  */
 export async function applyParameter(db, vibe, value) {
   if (!vibe.param) throw new Error(`"${vibe.name}" is not a parametric vibe`);
+
+  // A country parameter is a FILTER, not a list, and that is the whole design.
+  // movies.countries is already cached, so "Japanese night" narrows the pool
+  // the host already curated rather than fetching films the library has never
+  // seen. Nothing is written: the vibe hands back a filter and the client
+  // applies it, exactly as any other vibe's filters are applied.
+  //
+  // The discover route (with_origin_country) would ADD unseen films instead.
+  // That is a genuinely different feature -- a way to explore Japanese cinema
+  // rather than to draw from your own shelf -- and it is not this one.
+  if (vibe.param.kind === 'country') {
+    const country = String(value?.name ?? '').trim();
+    if (!country) throw new Error('A country parameter needs a name');
+    const known = countryFacet(db).find((entry) => entry.country === country);
+    if (!known) throw new Error(`No films from ${country} in the library`);
+    return {
+      kind: 'filter',
+      filters: { countries: { include: [country] } },
+      count: known.count,
+      // The vibe's own name, not the parameter label: "Country night — Japan"
+      // reads like a category, "National cinema — Japan" like an answer.
+      name: `${vibe.name} — ${country}`,
+    };
+  }
+
   if (!value?.id || !value?.name) throw new Error('A parameter needs an id and a name');
 
   const named = { ...value, name: await canonicalName(value) };
   const films = await filmsFor(vibe.param, named);
-  if (films.length === 0) return { list_id: null, count: 0, name: slotName(vibe.param, named) };
+  if (films.length === 0) return { kind: 'list', list_id: null, count: 0, name: slotName(vibe.param, named) };
 
   const ids = films.map((film) => film.id);
   const cached = new Set(
@@ -154,5 +180,5 @@ export async function applyParameter(db, vibe, value) {
     );
   });
 
-  return { list_id: list.id, count, name };
+  return { kind: 'list', list_id: list.id, count, name };
 }
