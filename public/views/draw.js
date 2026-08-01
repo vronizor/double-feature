@@ -8,6 +8,7 @@ import {
   renderParamPicker,
   renderTagFilter,
   renderAwardsToggle,
+  renderRatingToggle,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -919,6 +920,7 @@ export async function renderDraw(container) {
           h('h2', {}, `Your lineup${lineup.movies.length ? ` (${lineup.movies.length})` : ''}`),
           h('span', { class: 'spacer' }),
           renderAwardsToggle(paint),
+          renderRatingToggle(paint),
         ),
         lineupGrid(),
       ),

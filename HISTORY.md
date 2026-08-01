@@ -1269,3 +1269,42 @@ is one click away.
 
 The comment that carried the original reasoning was rewritten in place rather
 than deleted, so the next reader finds out it was tried and why it lost.
+
+### 8.3 One rating leads, the other goes to hover
+
+Both scores sat on the same line — `★ 6.9 · IMDb 7.3` — which asks the reader
+to arbitrate between two authorities before they can read a film's score at
+all. Two numbers competing for one glance means neither gets it.
+
+So the preference **orders** the two rather than selecting one, and that
+distinction is the whole design. Selecting would blank the line on the ~27% of
+this library with no IMDb score; ordering falls through to whichever exists. A
+film with both leads with your choice and carries the other on hover; a film
+with one shows that one and offers no hover, which is the same rule the
+streaming link already follows — absent means "not enough votes", never "badly
+rated".
+
+**The vote count is gone from the display.** It hung off the IMDb score alone,
+which made the two read as different *kinds* of number, and it answered a
+question nobody asks while choosing a film. The vote floor still does the job
+it was added for, silently.
+
+Two things fell out of doing it once instead of three times. The rating markup
+was duplicated across the card, the detail overlay and the vote screen — and
+the vote screen had quietly never shown IMDb at all, so guests ranking films
+saw a different number from the host who drew them. Sharing one helper settled
+that as a side effect. The decision half is a pure function, so it is tested
+without a DOM; the node half is a one-liner around it.
+
+### 8.4 Country chips say USA, not United States of America
+
+A display map with a fall-through, not a translation of the data: the filter
+still keys on the full name, `movies.countries` still stores it, and the full
+name is on hover.
+
+**Deliberately not ISO codes for everything**, which is what the roadmap row
+literally asked for. A row reading `FR · US · IT · GB · DE · JP · BE · ES` is
+uniformly compact and uniformly unreadable — "CH" and "SE" are guesses for most
+people, and "France" was never the problem. Only the names that actually
+overflow are shortened, in the form people say rather than the form a standard
+prescribes. Seven entries cover it, and anything unlisted renders as itself.

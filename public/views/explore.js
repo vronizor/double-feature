@@ -5,6 +5,7 @@ import {
   selectionLabel,
   renderListPicker,
   renderAwardsToggle,
+  renderRatingToggle,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -174,6 +175,7 @@ export async function renderExplore(container) {
         ),
       ),
       renderAwardsToggle(paint),
+      renderRatingToggle(paint),
       h('span', { class: 'spacer' }),
       h(
         'span',

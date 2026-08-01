@@ -21,8 +21,6 @@ themselves.
 | Cannes Grand Prix | ⏳ ready | A second Cannes list beside the Palme. Same Wikidata `P166` route, so a fetcher parameter rather than new machinery |
 | Actor's night | ⏳ ready | Director night with `job` swapped. The `▾` chip, the slot list and `applyParameter` all already take a `param.job` |
 | Award badge years | ⏳ ready | Show the year each award is naturally labelled by. Needs the honoured year **scraped** from the ceremony article, never derived — see `BACKLOG.md` |
-| One rating primary, other on hover | ⏳ ready | Two scores on one line compete for the same glance. Pick one in settings, reveal the other on hover, and drop the vote count from display entirely |
-| ISO abbreviations for chips | ⏳ ready | "United States of America" is wider than the row it sits in. Display map only — `movies.countries` keeps full names |
 | `includeWatched` default | 🗣 open | README says exclude, the UI ships include. Inert until something is actually marked watched |
 | LICENSE, and seed-list provenance | 🗣 open | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag — see `docs/evidence/publication-audit.md` |
 

@@ -8,8 +8,8 @@ import {
   clear,
   posterUrl,
   toast,
-  formatRating,
-  formatImdb,
+  ratingLine,
+  countryLabel,
   keepNameTogether,
   openMovieModal,
   originalTitleLine,
@@ -572,6 +572,34 @@ export function renderAwardsToggle(onChange) {
 }
 
 /**
+ * Which score leads on a card. The other one moves to hover.
+ *
+ * A toggle rather than a settings screen: there are exactly two values, this
+ * app has no settings screen, and adding one for a single binary choice would
+ * be more machinery than the choice deserves. It sits beside the Awards
+ * toggle because they are the same kind of thing — how films are displayed,
+ * persisted in localStorage, applying everywhere at once.
+ */
+export function renderRatingToggle(onChange) {
+  const imdbFirst = prefs.primaryRating === 'imdb';
+  return h(
+    'button',
+    {
+      class: 'chip',
+      dataset: { state: 'off' },
+      title: imdbFirst
+        ? 'Showing IMDb first — click to lead with TMDB'
+        : 'Showing TMDB first — click to lead with IMDb',
+      onClick: () => {
+        prefs.set('primaryRating', imdbFirst ? 'tmdb' : 'imdb');
+        onChange();
+      },
+    },
+    imdbFirst ? 'IMDb first' : '★ TMDB first',
+  );
+}
+
+/**
  * "Top N of each ranked list" — rendered only when a selected list actually
  * carries ranks. Showing it against Criterion or Ghibli would be meaningless,
  * since an unranked list is deliberately unaffected by the cut.
@@ -618,7 +646,7 @@ export function renderTopN(lists, onChange) {
  * filter state is mutated in place — the caller decides what that means
  * (re-fetch a count, re-fetch a page of results, repaint, etc).
  */
-function chipToggleGroup(items, group, getKey, getLabel, onChange) {
+function chipToggleGroup(items, group, getKey, getLabel, onChange, getTitle = null) {
   return h(
     'div',
     { class: 'chips' },
@@ -633,7 +661,12 @@ function chipToggleGroup(items, group, getKey, getLabel, onChange) {
         {
           class: 'chip',
           dataset: { state: chipState },
-          title: 'Click to include, again to exclude, again to clear',
+          // The full name leads when the label is an abbreviation — a chip
+          // reading "USA" should say what it stands for before it explains
+          // how clicking works.
+          title: getTitle
+            ? `${getTitle(item)} — click to include, again to exclude, again to clear`
+            : 'Click to include, again to exclude, again to clear',
           onClick: () => {
             if (chipState === 'off') group.include.push(key);
             else if (chipState === 'include') {
@@ -727,12 +760,16 @@ export function renderFilterPanel(
         h('div', { class: 'field-label' }, 'Country'),
         // The real object, never a copy: chipToggleGroup mutates include and
         // exclude in place, so a synthesised group would swallow every click.
+        // Label is shortened, key is not: the filter still sends the full
+        // name, which is what movies.countries stores and what the pool query
+        // matches on. Full name on hover, so nothing is actually hidden.
         chipToggleGroup(
           facets.countries ?? [],
           filters.countries,
           (c) => c.country,
-          (c) => c.country,
+          (c) => countryLabel(c.country),
           onChipChange,
+          (c) => c.country,
         ),
       ),
       h(
@@ -823,7 +860,6 @@ export function renderFilterPanel(
  */
 export function movieCard(movie, { extraAction } = {}) {
   const poster = posterUrl(movie.poster_path);
-  const rating = formatRating(movie.vote_average);
   const awards = prefs.showAwards ? (movie.awards ?? []) : [];
 
   return h(
@@ -861,14 +897,7 @@ export function movieCard(movie, { extraAction } = {}) {
         'div',
         { class: 'movie-meta' },
         [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
-        rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
-        formatImdb(movie)
-          ? h(
-              'span',
-              { class: 'movie-rating movie-rating--imdb', title: `${movie.imdb_votes.toLocaleString()} IMDb votes` },
-              ` · IMDb ${formatImdb(movie)}`,
-            )
-          : null,
+        ratingLine(movie),
       ),
       h(
         'div',
