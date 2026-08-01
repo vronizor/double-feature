@@ -180,6 +180,39 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   source the way Spain needed the ICAA. Survey incomplete — headers and annual
   tables were not reached before the agent running it stalled.
 
+- **Box-office France ranks globally; Box-office España ranks per year.**
+  Found 2026-08-01 by checking the data rather than the doc, and they disagree.
+  France is 1,390 rows with 1,390 distinct ranks and a single rank=1
+  (*Bienvenue chez les Ch'tis*, the biggest French film of all time). Spain is
+  76 rows with rank=1, one per year, max rank 20.
+
+  **`HISTORY.md` §5.3 records the France decision as per-year** — *"the figure
+  is used to order films within their year and written as `rank`… so 'the top
+  20 of 1982' works with no new UI"*. That is not what was built, and "the top
+  20 of 1982" does not work: Top-N=20 returns the twenty biggest French films
+  ever, from twenty different years.
+
+  Two consequences:
+
+  - **The same Top-N control means opposite things on two lists carrying the
+    same tag.** Top-N=10 gives France's ten biggest films ever and Spain's top
+    ten of *every* year — 760 films.
+  - **It undoes the reason France was built from per-year pages at all.** That
+    source was chosen over the all-time page *for era balance*; a global rank
+    with a Top-N cut reproduces the all-time page's recency skew exactly.
+
+  **Cheap to fix, contrary to first appearance.** Re-ranking looks impossible
+  because the admissions figures were deliberately not stored — but a global
+  rank already preserves the correct relative order *within* each year, so
+  per-year rank is a dense re-numbering of existing ranks grouped by year. No
+  re-fetch, no new data.
+
+  > Worth deciding at the same time whether **both** ranks are wanted. A global
+  > rank genuinely answers "the 100 biggest French films ever", which a per-year
+  > rank cannot; a per-year rank answers "the top 5 of each year", which a
+  > global one cannot. They are different questions and `list_movies` has room
+  > for only one. Per-year is the one the feature was designed around.
+
 - **Cannes Grand Jury Prize as a second Cannes list.** Today only the Palme
   d'Or is carried. The Grand Prix is the runner-up award and reaches a
   different set of films. Same Wikidata `P166` route as the Palme, so it is a
