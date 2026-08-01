@@ -315,6 +315,17 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
+- **A Box-office vibe.** *(From field notes, 2026-08-01.)* One chip selecting
+  the box-office lists, the way Awards selects the award lists. Deferred rather
+  than done because it is worth one chip only once there is more than one such
+  list to gather: France and Spain are seeded, the US is a live v5 item, and the
+  vibe is more useful built on top of the finished set than added now and
+  edited twice.
+
+- **Building a rank onto parametric lists.** *(From field notes, 2026-08-01.)*
+  v5 answers only whether it is possible — see `ROADMAP.md`. The build lands
+  here if the answer is yes.
+
 - **Let the reconciliation screen reach ALREADY-RESOLVED entries, not only
   those under review.** Today it lists `needs_review` rows. A row that matched
   *confidently but wrongly* is `resolved`, so it never appears there and nobody

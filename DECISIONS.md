@@ -89,6 +89,20 @@ series either. See [national box office](docs/evidence/national-box-office.md).
   call is gated on a semaphore of 8.
 - **The QR image re-request** — measured 2ms and 1.6KB per poll. Below the bar.
   Revisit only if someone actually sees a flicker.
+- **A DDD re-architecture, and the `server/sessions.js` extraction that was its
+  last survivor.** Both assessed and dropped 2026-08-01. The DDD case rests on a
+  codebase too large to hold at once; this backend is not one, and changes here
+  are vertical — schema to query to route to view to test — so layering
+  lengthens the path rather than shortening it. Of the traps recorded in §3,
+  exactly one has a DDD shape. The narrower extraction failed on its own terms:
+  only a quarter of the SQL in that route file sits in the functions that would
+  move, the rest is interleaved with request parsing, and `fail(message, status)`
+  is the file's error currency — so the extracted module either speaks HTTP or
+  grows an error taxonomy, which is the layer being avoided. The deciding fact
+  is that nothing goes wrong today: that route file has been touched four times
+  in the project's life, almost all of it the initial write, while the list
+  fetchers absorb every version's work. **Cut seams where the changes are, and
+  they are not here.**
 
 ---
 
