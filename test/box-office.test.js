@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseBoxOfficePage, parseAdmissions, parseUsBoxOfficePage } from '../scripts/fetch-seed-lists.mjs';
+import {
+  parseBoxOfficePage,
+  parseAdmissions,
+  parseUsBoxOfficePage,
+  parseYearInFilmPage,
+} from '../scripts/fetch-seed-lists.mjs';
 
 // Each fixture is the real markup shape from a specific era of the corpus, cut
 // down to two rows. The variants were found by surveying all 82 pages rather
@@ -355,4 +360,67 @@ test('the linked page name is kept apart from the display title', () => {
   const rows = parseUsBoxOfficePage(IN_YEAR);
   assert.equal(rows[1].page, 'Ghost (1990 film)');
   assert.equal(rows[1].title, 'Ghost');
+});
+
+// --- The gap-year fallback -------------------------------------------------
+//
+// Markup copied from the real `1977 in film` and `1975 in film` articles. Note
+// the rank cell is itself a header cell there, which is why a header row is
+// recognised by having at least TWO of them rather than one.
+
+const IN_FILM_US = `
+==Highest-grossing films (U.S.)==
+{{see also|List of 1977 box office number-one films in the United States}}
+The top ten 1977 released films by box office gross in North America are as follows:
+{| class="wikitable sortable" style="margin:auto; margin:auto;"
+|+ Highest-grossing films of 1977
+|-
+! Rank!! Title !! Distributor !! Box-office gross 
+|-
+! style="text-align:center;"| 1
+| ''[[Star Wars (film)|Star Wars]]''
+| [[20th Century Fox]]
+| $307,263,857
+|-
+! style="text-align:center;"| 2
+| ''[[Smokey and the Bandit]]''
+| [[Universal Pictures|Universal]]
+| $126,737,428
+|}
+`;
+
+const IN_FILM_WORLDWIDE = `
+==Worldwide gross==
+The following table lists known worldwide gross figures for several high-grossing films that originally released in 1975.
+{| class="wikitable sortable" style="margin:auto; margin:auto;"
+|-
+! Title !! Admissions !! Revenue !! Country
+|-
+| ''[[Jaws (film)|Jaws]]'' || 128,078,818 || $476,512,065 || United States
+|}
+`;
+
+test('the fallback takes a section that claims the United States', () => {
+  const rows = parseYearInFilmPage(IN_FILM_US);
+  assert.deepEqual(rows.map((r) => r.title), ['Star Wars', 'Smokey and the Bandit']);
+  assert.deepEqual(rows.map((r) => r.rank), [1, 2]);
+  assert.equal(rows[0].page, 'Star Wars (film)', 'identity resolves through the page name');
+});
+
+test('a worldwide table is refused by the rule, not by a hardcoded year', () => {
+  // 1975's only chart is worldwide. Refusing it here is what keeps the list
+  // meaning one thing; the year is left empty and the seed note says why.
+  assert.deepEqual(parseYearInFilmPage(IN_FILM_WORLDWIDE), []);
+});
+
+test('both spellings of the fallback money column are read', () => {
+  // 1946, 1948 and 1976 say "Domestic rentals"; 1977 says "Box-office gross".
+  const rentals = IN_FILM_US
+    .replace('Box-office gross', 'Domestic rentals')
+    .replace('Highest-grossing films (U.S.)', 'Top-grossing films (U.S.)');
+  assert.equal(parseYearInFilmPage(rentals).length, 2);
+});
+
+test('the fallback ignores a US section that carries no usable table', () => {
+  assert.deepEqual(parseYearInFilmPage('==Highest-grossing films (U.S.)==\nProse only.\n'), []);
 });

@@ -1076,6 +1076,74 @@ async function fetchBoxOfficeFrance(meta) {
 }
 
 /**
+ * The fallback for years whose number-one page carries no annual chart.
+ *
+ * `<year> in film` was rejected as the MAIN source for a stated reason: its
+ * tables switch to worldwide gross in 1988, so the modern half is not a US
+ * list at all. That objection does not reach the years that need it — every
+ * gap is 1979 or earlier — and the pages label the measure in the heading, so
+ * this can be checked rather than assumed.
+ *
+ * **The section name must claim the United States.** 1946 and 1948 say
+ * "Top-grossing films (U.S.)", 1976 and 1977 "Highest-grossing films (U.S.)".
+ * 1975's only chart is headed "Worldwide gross" and is therefore refused by
+ * the same rule that accepts the others, rather than by a hardcoded exception
+ * — which is the point: the rule is what keeps the list meaning one thing, and
+ * a rule you can state is one a later reader can check.
+ */
+export function parseYearInFilmPage(wikitext) {
+  let section = '';
+  for (const part of wikitext.split(/\n(?==+[^=\n]+=+\s*$)/m)) {
+    const heading = /^(=+)\s*(.+?)\s*\1\s*$/m.exec(part);
+    if (heading) section = heading[2].toLowerCase().trim();
+    // Nothing else will do. "Worldwide gross" is a different measurement
+    // wearing a similar name, and mixing it in would put two meanings under
+    // one rank column.
+    if (!section.includes('(u.s.)')) continue;
+
+    for (const table of part.split(/\n\{\|/).slice(1)) {
+      const body = table.split(/\n\|\}/)[0];
+      let columns = null;
+      const rows = [];
+
+      for (const chunk of body.split(/\n\|-+[^\n]*/)) {
+        const cells = splitRowCells(chunk);
+        if (cells.length === 0) continue;
+        const text = cells.map((cell) => cell.text);
+
+        if (cells.filter((cell) => cell.isHeader).length >= 2) {
+          const candidate = {};
+          text.forEach((raw, index) => {
+            const cell = usHeaderCell(raw);
+            if (!cell) return;
+            if (candidate.title === undefined && US_TITLE_COLUMNS.includes(cell)) {
+              candidate.title = index;
+            }
+            if (candidate.money === undefined && US_FALLBACK_MONEY_COLUMNS.includes(cell)) {
+              candidate.money = index;
+            }
+          });
+          if (candidate.title !== undefined && candidate.money !== undefined) columns = candidate;
+          continue;
+        }
+        if (!columns) continue;
+
+        const link = FILM_LINK.exec(text[columns.title] ?? '');
+        if (!link) continue;
+        rows.push({ page: link[1].trim(), title: (link[2] ?? link[1]).trim() });
+      }
+
+      if (columns && rows.length) return rows.map((row, index) => ({ ...row, rank: index + 1 }));
+    }
+  }
+  return [];
+}
+
+// Read off the four pages that need it: 1946 and 1948 and 1976 say "Domestic
+// rentals", 1977 says "Box-office gross".
+const US_FALLBACK_MONEY_COLUMNS = ['domestic rentals', 'box-office gross', 'domestic gross', 'rental'];
+
+/**
  * The Box-office US list: what America actually turned out for, year by year.
  *
  * No language or country cut, unlike France. This list exists to answer "was
@@ -1105,6 +1173,16 @@ async function fetchBoxOfficeUS(meta) {
         `List of ${year} box office number-one films in the United States`,
       );
       if (wikitext) rows = parseUsBoxOfficePage(wikitext);
+      // The number-one page is the source; `<year> in film` is consulted only
+      // where it has nothing, so no year can be served by both and the primary
+      // source is never silently overridden.
+      if (rows.length === 0) {
+        const fallback = await fetchWikitext('en', `${year} in film`);
+        if (fallback) {
+          rows = parseYearInFilmPage(fallback);
+          if (rows.length) console.log(`\n  ℹ️  ${year}: no annual chart — used "${year} in film" (${rows.length} films)`);
+        }
+      }
     } catch (error) {
       if (error instanceof RateLimited) throw error;
       console.log(`\n  ⚠️  ${year}: ${error.message} — skipped`);
@@ -1122,7 +1200,9 @@ async function fetchBoxOfficeUS(meta) {
   // Six years genuinely have no annual table, so a zero there is expected and
   // must not be reported as a fault. Anything ELSE at zero means the layout
   // moved, which is worth saying out loud.
-  const KNOWN_EMPTY = new Set([1946, 1948, 1975, 1976, 1977, 1979]);
+  // What neither source covers. 1975's only chart is worldwide, and 1979 has
+  // no box-office section at all — see the seed note.
+  const KNOWN_EMPTY = new Set([1975, 1979]);
   const unexpectedlyEmpty = perYear.filter((e) => e.count === 0 && !KNOWN_EMPTY.has(e.year));
   if (unexpectedlyEmpty.length) {
     console.log(
@@ -1432,7 +1512,10 @@ const SOURCES = [
           'film earned DURING the year rather than films released in it). Ranked within the ' +
           'year only: the source gives rentals before about 1980 and domestic gross after, and ' +
           'neither is inflation-adjusted, so an all-time ranking would measure ticket prices. ' +
-          '1946, 1948 and 1975-1979 have no annual table on Wikipedia.',
+          'Years whose number-one page carries no annual chart fall back to the US-domestic table on ' +
+          '"<year> in film", which is checked for a section naming the United States — so 1975, whose ' +
+          'only chart is worldwide, is refused rather than quietly mixed in. 1975 and 1979 are therefore ' +
+          'absent from this list: no Jaws, no Alien.',
       }),
   },
   {

@@ -7,9 +7,9 @@
   "category": "box-office",
   "source": "en.wikipedia \"List of <year> box office number-one films in the United States\", 1946-2026, annual chart only, resolved to TMDB ids via Wikidata",
   "source_url": "https://en.wikipedia.org/wiki/List_of_2019_box_office_number-one_films_in_the_United_States",
-  "note": "The annual release-year chart, never the weekly number-ones (which would exclude a film that sat at #2 all year) and never the Calendar Gross table (which ranks what a film earned DURING the year rather than films released in it). Ranked within the year only: the source gives rentals before about 1980 and domestic gross after, and neither is inflation-adjusted, so an all-time ranking would measure ticket prices. 1946, 1948 and 1975-1979 have no annual table on Wikipedia.",
+  "note": "The annual release-year chart, never the weekly number-ones (which would exclude a film that sat at #2 all year) and never the Calendar Gross table (which ranks what a film earned DURING the year rather than films released in it). Ranked within the year only: the source gives rentals before about 1980 and domestic gross after, and neither is inflation-adjusted, so an all-time ranking would measure ticket prices. Years whose number-one page carries no annual chart fall back to the US-domestic table on \"<year> in film\", which is checked for a section naming the United States — so 1975, whose only chart is worldwide, is refused rather than quietly mixed in. 1975 and 1979 are therefore absent from this list: no Jaws, no Alien.",
   "fetched_at": "2026-08-01",
-  "count": 784,
+  "count": 818,
   "entries": [
     {
       "title": "Gone with the Wind",
@@ -24,10 +24,64 @@
       "rank": 9
     },
     {
+      "title": "Saratoga Trunk",
+      "year": 1945,
+      "tmdb_id": 46563,
+      "rank": 5
+    },
+    {
       "title": "Duel in the Sun",
       "year": 1946,
       "tmdb_id": 32275,
       "rank": 1
+    },
+    {
+      "title": "The Best Years of Our Lives",
+      "year": 1946,
+      "tmdb_id": 887,
+      "rank": 2
+    },
+    {
+      "title": "The Jolson Story",
+      "year": 1946,
+      "tmdb_id": 31206,
+      "rank": 3
+    },
+    {
+      "title": "Blue Skies",
+      "year": 1946,
+      "tmdb_id": 53446,
+      "rank": 4
+    },
+    {
+      "title": "The Razor's Edge",
+      "year": 1946,
+      "tmdb_id": 56135,
+      "rank": 6
+    },
+    {
+      "title": "Night and Day",
+      "year": 1946,
+      "tmdb_id": 43485,
+      "rank": 7
+    },
+    {
+      "title": "Notorious",
+      "year": 1946,
+      "tmdb_id": 303,
+      "rank": 8
+    },
+    {
+      "title": "The Yearling",
+      "year": 1946,
+      "tmdb_id": 19049,
+      "rank": 9
+    },
+    {
+      "title": "Till the Clouds Roll By",
+      "year": 1946,
+      "tmdb_id": 18700,
+      "rank": 10
     },
     {
       "title": "Forever Amber",
@@ -84,10 +138,40 @@
       "rank": 10
     },
     {
+      "title": "The Red Shoes",
+      "year": 1948,
+      "tmdb_id": 19542,
+      "rank": 1
+    },
+    {
+      "title": "Red River",
+      "year": 1948,
+      "tmdb_id": 3089,
+      "rank": 2
+    },
+    {
+      "title": "The Paleface",
+      "year": 1948,
+      "tmdb_id": 17804,
+      "rank": 3
+    },
+    {
+      "title": "Johnny Belinda",
+      "year": 1948,
+      "tmdb_id": 62000,
+      "rank": 4
+    },
+    {
       "title": "The Snake Pit",
       "year": 1948,
       "tmdb_id": 62694,
       "rank": 4
+    },
+    {
+      "title": "Easter Parade",
+      "year": 1948,
+      "tmdb_id": 29380,
+      "rank": 5
     },
     {
       "title": "Joan of Arc",
@@ -96,10 +180,34 @@
       "rank": 5
     },
     {
+      "title": "The Three Musketeers",
+      "year": 1948,
+      "tmdb_id": 41609,
+      "rank": 6
+    },
+    {
+      "title": "The Emperor Waltz",
+      "year": 1948,
+      "tmdb_id": 38804,
+      "rank": 8
+    },
+    {
+      "title": "Homecoming",
+      "year": 1948,
+      "tmdb_id": 102026,
+      "rank": 9
+    },
+    {
       "title": "Words and Music",
       "year": 1948,
       "tmdb_id": 43458,
       "rank": 9
+    },
+    {
+      "title": "Sitting Pretty",
+      "year": 1948,
+      "tmdb_id": 76211,
+      "rank": 10
     },
     {
       "title": "Little Women",
@@ -1842,6 +1950,72 @@
       "rank": 22
     },
     {
+      "title": "Rocky",
+      "year": 1976,
+      "tmdb_id": 1366,
+      "rank": 1
+    },
+    {
+      "title": "A Star Is Born",
+      "year": 1976,
+      "tmdb_id": 19610,
+      "rank": 2
+    },
+    {
+      "title": "King Kong",
+      "year": 1976,
+      "tmdb_id": 10730,
+      "rank": 3
+    },
+    {
+      "title": "Silver Streak",
+      "year": 1976,
+      "tmdb_id": 11558,
+      "rank": 4
+    },
+    {
+      "title": "All the President's Men",
+      "year": 1976,
+      "tmdb_id": 891,
+      "rank": 5
+    },
+    {
+      "title": "The Omen",
+      "year": 1976,
+      "tmdb_id": 794,
+      "rank": 6
+    },
+    {
+      "title": "The Bad News Bears",
+      "year": 1976,
+      "tmdb_id": 23479,
+      "rank": 7
+    },
+    {
+      "title": "The Enforcer",
+      "year": 1976,
+      "tmdb_id": 10649,
+      "rank": 8
+    },
+    {
+      "title": "Midway",
+      "year": 1976,
+      "tmdb_id": 11422,
+      "rank": 10
+    },
+    {
+      "title": "Star Wars: Episode IV – A New Hope",
+      "year": 1977,
+      "tmdb_id": 11,
+      "rank": 1
+    },
+    {
+      "title": "Smokey and the Bandit",
+      "year": 1977,
+      "tmdb_id": 11006,
+      "rank": 2
+    },
+    {
       "title": "Saturday Night Fever",
       "year": 1977,
       "tmdb_id": 11009,
@@ -1857,13 +2031,43 @@
       "title": "The Goodbye Girl",
       "year": 1977,
       "tmdb_id": 14741,
+      "rank": 5
+    },
+    {
+      "title": "A Bridge Too Far",
+      "year": 1977,
+      "tmdb_id": 5902,
+      "rank": 6
+    },
+    {
+      "title": "The Deep",
+      "year": 1977,
+      "tmdb_id": 20416,
       "rank": 7
     },
     {
-      "title": "Star Wars: Episode IV – A New Hope",
+      "title": "The Spy Who Loved Me",
       "year": 1977,
-      "tmdb_id": 11,
+      "tmdb_id": 691,
       "rank": 8
+    },
+    {
+      "title": "In Search of Noah's Ark",
+      "year": 1977,
+      "tmdb_id": 86587,
+      "rank": 9
+    },
+    {
+      "title": "Oh, God!",
+      "year": 1977,
+      "tmdb_id": 24032,
+      "rank": 9
+    },
+    {
+      "title": "Annie Hall",
+      "year": 1977,
+      "tmdb_id": 703,
+      "rank": 10
     },
     {
       "title": "Grease",
