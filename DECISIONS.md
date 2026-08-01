@@ -274,6 +274,17 @@ ceremony years was wrong for two of three editions.
 
 ## 6. Process
 
+- **A guard sits downstream of the number it checks.** A match-rate floor
+  cannot see that the films it matched are the wrong ones; a per-year row-count
+  alarm cannot see that every row is the same 24 films. Every real failure in
+  v4 was found by a count that did not add up — 81 rank-1 rows against 82
+  years, 1,450 films where 1,570 were expected — and none by a threshold.
+  **Inspect values, not just volumes.**
+- **An unmatched entry is recoverable; a wrongly matched one is not.** The
+  reconciliation screen shows only rows that failed to match, so a confident
+  wrong match is `resolved`, invisible and permanent. The match rate therefore
+  guards the recoverable failure while nothing guards the other. Measure the
+  false-positive rate separately, by inspecting pairs.
 - **Version numbering.** MAJOR is the roadmap version; **MINOR is the number of
   chunks landed in it** — a chunk being one finished, verified piece of work,
   usually one commit. So v4.12 means twelve pieces of work have landed in v4,

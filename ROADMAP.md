@@ -13,330 +13,77 @@ themselves.
 | ⏳ **ready** | Decided. Anyone can pick it up from what is written here **without asking another question** — if a row is ⏳ and its section ends in a question, the row is lying |
 | 🔨 **doing** | In progress right now. Three at most |
 
-## v4
+## v5
 
 | Item | State | Where it stands |
 |---|---|---|
-| Box office — Spain (ICAA) | 👀 seed built | Enumeration exists (an undocumented `Ano` filter), fuzzy matching accepted here and nowhere else, 90% match floor declared — see §1 |
-| Alternative ratings — IMDb | ✅ landed | 3,819 of 3,824 films carry an id; 3,808 matched a rating. Shown beside the TMDB score above a 1,000-vote floor. `npm run imdb-ratings` re-syncs |
-| Alternative ratings — Letterboxd | ⏳ ready | **Research, not a build.** Their terms decide it. Writing down the answer *is* the deliverable; a build is unscheduled until that answer is yes |
-| National cinema night | ⏳ ready | One parametric vibe. **Decided: filter cached `movies.countries` for v4**, rather than discovering new films — see §3 |
-| Director night | 🔨 doing | The person half has landed (`searchPerson`, `getDirectorCredits`, two routes). Remaining: the `▾` chip, and the slot list — see §3 |
-| A slot list needs a visible label | ✅ landed | Explore names the selection, and the chip reads back the chosen value ("Robert Eggers ▾") |
-| `seed.mjs` keyed on `tmdb_id` | ✅ landed | Additive key in both scripts, and the predicate is now exported and tested — the first thing in `seed.mjs` that could be |
+| Box office — United States | ⏳ ready | **Source found and verified.** `List of <year> box office number-one films in the United States`: 1946–2026 no gaps, and the SAME pages carry an annual top-N table — `Rental` 1950–1978, `Domestic gross` 1981–2026, domestic throughout. Wikilinked, so no fuzzy matching — see §1 |
+| Cannes Grand Prix | ⏳ ready | A second Cannes list beside the Palme. Same Wikidata `P166` route, so a fetcher parameter rather than new machinery |
+| Actor's night | ⏳ ready | Director night with `job` swapped. The `▾` chip, the slot list and `applyParameter` all already take a `param.job` |
+| Award badge years | ⏳ ready | Show the year each award is naturally labelled by. Needs the honoured year **scraped** from the ceremony article, never derived — see `BACKLOG.md` |
+| One rating primary, other on hover | ⏳ ready | Two scores on one line compete for the same glance. Pick one in settings, reveal the other on hover, and drop the vote count from display entirely |
+| ISO abbreviations for chips | ⏳ ready | "United States of America" is wider than the row it sits in. Display map only — `movies.countries` keeps full names |
+| The vibe `✕` is too easy to hit | ⏳ ready | It reads as "clear this selection" and deletes the vibe. Clicking an active chip should deselect; deletion moves somewhere deliberate |
+| Do not auto-expand Pool setup | ⏳ ready | **Reverses a decision recorded in `views/draw.js`** — update that comment rather than leaving it contradicting the code |
 | `includeWatched` default | 🗣 open | README says exclude, the UI ships include. Inert until something is actually marked watched |
-| LICENSE, and seed-list provenance | 🗣 open | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag. Consciously accepted for now — see `docs/evidence/publication-audit.md` |
+| LICENSE, and seed-list provenance | 🗣 open | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag — see `docs/evidence/publication-audit.md` |
 
-Deferred, so they are not re-proposed early: **v5** — US box office, cultness,
-actor's night, a Letterboxd build, household memory, nominees as well as
-winners. **v6** — a design pass with Impeccable. Both in `BACKLOG.md`.
-
----
-
-### 1. Box office — Spain, via the ICAA catalogue
-> **The admissions figures are only served in the SPANISH locale.** The English
-> pages omit the box-office block entirely — no *Recaudación*, no
-> *Espectadores*, and no tab where they would go. Nothing 404s and nothing looks
-> wrong; the film's page simply renders without the one thing this list needs.
->
-> Set the locale first (`GET /CatalogoICAA/es-es?q=true`, keeping the cookie)
-> and the detail page carries:
->
-> ```
-> Recaudación: 682.612,05 €   Espectadores: 1.039.120   Nacionalidad: España
-> ```
->
-> Verified against both figures quoted below: *Viridiana* 1.039.120 and
-> *Los Otros* 6.411.003, exactly. **Cost is the real constraint** — a detail
-> page is 57 KB and takes 2.4–7.0 s, and there are ~11,000 of them.
-
-**What enumeration actually costs, now measured.** `SoloEspana` is sent as
-**1 or 0**, not `true` — which is why an earlier probe found it did nothing —
-and `Metraje=LA` restricts to feature films. Together:
-
-```
-Ano=1994&SoloEspana=1&Metraje=LA   150 films   (from 1000 unfiltered)
-Ano=1961&SoloEspana=1&Metraje=LA   111
-Ano=2010&SoloEspana=1&Metraje=LA   294
-```
-
-~150/year, so ~525 listing requests covers 75 years. Cheap. It is the *detail*
-pages that are expensive — 57 KB and 2.3 s each, ~11,000 of them — and they do
-not carry the figure anyway.
-
-**Source: the ICAA *Catálogo de Películas*** (`sede.mcu.gob.es/CatalogoICAA`),
-the Spanish film institute's own register. Verified live: an unauthenticated
-JSON endpoint, `/Buscador/GetPeliculasPreview?T_general=<title>`, and a detail
-page carrying *espectadores*, *recaudación* and co-production percentages.
-
-```
-1952  BIENVENIDO MISTER MARSHALL      26.204 espectadores
-1961  VIRIDIANA                    1.039.120
-1984  SANTOS INOCENTES, LOS        2.033.935
-2000  OTROS, LOS                   6.411.003
-2022  AS BESTAS                    1.112.098
-```
-
-Seventy years deep, official, and admissions rather than revenue — better data
-than Wikipedia would have given. Rejected alternatives are in `docs/evidence/national-box-office.md`:
-es.wikipedia has no per-year series, the ministry's other per-year files are
-Rentrak-sourced PDFs covering only 2016–2025, and Wikidata has 26 films total.
-
-**Decided: fuzzy title matching is accepted for this list, and only this list.**
-That is a real departure — every other list resolves through a TMDB id or a
-Wikidata QID precisely to avoid title matching. ICAA has neither, and stores
-titles article-last and upper-cased (`VERDUGO, EL`, `OTROS, LOS`). So this needs
-a normaliser that undoes that convention before matching, and it will be the
-first place in the codebase where identity is a guess.
-
-Given that, the guard rails matter more than usual:
-
-- **Match on title + year, never title alone.** `normalizeTitle` in
-  `server/tmdb.js` already folds accents, punctuation and leading articles, and
-  `scoreCandidate` already encodes "confident" as an exact title match within a
-  year. Reuse them rather than writing a second matcher.
-- **Anything not confidently matched goes to `needs_review`**, exactly as an
-  imported custom list does. The reconciliation screen already exists. Do not
-  silently drop and do not silently guess.
-- **Report the match rate.** If it comes in materially below the 98–100% the
-  QID route achieves, that is a finding worth acting on, not a number to bury.
-
-**Settled 2026-07-30: enumeration exists. The Wikipedia fallback is not needed.**
-
-`GetPeliculasPreview` is only the type-ahead — a 3-character minimum, capped
-results, and the wrong tool for this. The page's own search JS calls a different
-endpoint, and its guard clause explicitly permits an **empty** `T_General` as
-long as any one filter is set:
-
-```
-sortOrder, T_General, Metraje, Calificacion, Ano, Ano_Calificacion,
-Paiscopro, Pais, Titulo, Director, productora, distribuidora,
-Interprete, Fotografia, Guionista, Musica, SoloEspana, SoloVideo, SoloPorno
-```
-
-`Ano` is the axis this section said did not exist. Probed live:
-
-```
-GET /CatalogoICAA/?Ano=1994   42 pages x 24 = ~1,000 titles
-GET /CatalogoICAA/?Ano=1961   22 pages
-```
-
-> **The trap, and it is the silent kind.** Plain
-> `GET /CatalogoICAA/?Ano=1994&page=2` returns **HTTP 200 carrying page 1
-> again** — pages 1, 2 and 3 came back with identical id sets. Pagination is only
-> honoured with a session cookie *and* `X-Requested-With: XMLHttpRequest`; with
-> both, the same three pages intersect at zero. A fetcher written the obvious way
-> would collect the same 24 films 42 times, deduplicate to 24, and report
-> success. Nothing throws, nothing 404s, and the per-year row count would look
-> merely small rather than wrong — exactly the wrong-number failure mode `DECISIONS.md` §3 exists to prevent.
-
-Two consequences for the build:
-
-- **`SoloEspana=true` does nothing over the query string** (42 pages either way),
-  so "Spanish films only" cannot come from the listing filter. The preview JSON
-  carries an `EsCineEspanol` flag per film; that is the cut to use.
-- **The listing is everything classified in Spain that year, foreign films
-  included** — ~1,000 for 1994. So this enumerates the catalogue, and the
-  Spanish-cinema filter happens after.
-
-Rough cost: ~3,000 listing requests across ~75 years, plus one detail page per
-Spanish film for the *espectadores* figure. Comparable to the France build.
-
-**Built 2026-08-01: 1,567 films, 1945–2026, 93.4% confidently matched.**
-Four matching rounds, each fixing a diagnosed cause rather than tuning a
-threshold:
-
-```
-first probe                                71.2%
-+ year window, parentheticals, top-20      80.0%
-+ language=es-ES                           91.9%  (sampled years)
-full 82-year range                         89.9%  → floor REFUSED the seed
-+ gap-fill after silent fetch failures     90.0%  → passed by one film
-+ numerals, superscripts, prefixes, no year filter   93.4%
-```
-
-The 90.0% pass is the one worth remembering: it cleared the floor while
-*8 Apellidos Vascos* — the biggest Spanish film ever made — sat unmatched, along
-with *Volver*, *Torrente 4* and two other #1s of their year. A number can pass a
-test the thing it describes would fail. The last round was run because the
-**unmatched list** looked wrong, not because the rate did.
-
-Four causes, each verified against TMDB before being fixed:
-
-- **The year was used as a search FILTER.** ICAA records the classification
-  year, so `Volver` under 2005 returned unrelated films while the real one is
-  dated 2006 — and `searchMovie`'s existing "retry without a year" fallback
-  never fired, because it triggers on zero results, not on wrong ones. The year
-  is now a tolerance applied after the search, never a filter.
-- **Spanish spells numbers out.** `8 Apellidos Vascos` and `Ocho apellidos
-  vascos` share no comparable token.
-- **Superscripts vanish in normalisation.** `[REC]²` became `rec`, losing the
-  sequel number entirely and no longer matching `Rec 2`.
-- **TMDB appends subtitles the Spanish release never had** — `Torrente 4:
-  Lethal crisis`, `Padre no hay más que uno 4: Campanas de boda`. A prefix match
-  at a word boundary, minimum six characters, so `Rec` cannot swallow `Rec 2`.
-
-**103 entries carry no `tmdb_id` and go to `needs_review`** with their
-candidates, exactly as an imported custom list does — the list is complete, and
-the match rate is a work queue rather than a loss.
-
-**Probe result: 91.9% across eight sampled years — the floor is cleared.**
-Sampled one year per decade rather than one contiguous decade, because coverage
-is not uniform in time and an average would have hidden it: the intermediate
-80.0% run had a 1965 at 60%. The final run holds 85–100% per year.
-
-```
-first probe                                71.2%
-+ year window, parentheticals, top-20      80.0%   (60–95% per year)
-+ language=es-ES                           91.9%   (85–100% per year)
-```
-
-**What the earlier 71.2% run found, kept because the diagnosis mattered:** 189 Spanish
-features listed, **73 carry an admissions figure and 116 do not**, and 52 of
-those 73 matched confidently. Two separate problems, and only one is the
-matcher's:
-
-- **ICAA's year is the classification year, not the release year**, so
-  `scoreCandidate`'s ±1 window rejects correct matches. This is systematic, not
-  noise.
-- **Parentheticals** — `Flamenco (De Carlos Saura)`, `Flash-Back (El
-  Apartamento)` — are ICAA disambiguators, not part of the title.
-- ~~**Genuinely different titles across languages.**~~ **Wrong — this was the
-  biggest cause and it was ours.** TMDB returned *La Ciudad de los Niños
-  Perdidos* as the single top hit; its search indexes per-country release
-  titles. The response only carries `title` and `original_title`, so the match
-  looked like a mismatch. Searching with `language=es-ES` makes `title` the
-  Spanish release title. Worth 11.9 points on its own.
-- A residue of real misses: *Besos y Abrazos*, *Costa Brava (Family Album)* —
-  small Spanish films TMDB does not carry at all.
-
-**The missing figures are not a coverage gap — they are the inclusion rule.**
-Checked directly, because "the catalogue only records admissions for the
-successful ones" would have been a reasonable worry and would have biased the
-list badly. It is the opposite. The 116 films without a figure are mostly not
-films:
-
-```
-12 CURSOS PARA LA UNIVERSIDAD: CURSO DE MATEMATICAS   (×5, near-duplicate ids)
-A LA CLASICA DOMA Y COMPETICION, CAMPEONATO DE ESPAÑA
-AGUA AZUCARILLOS Y AGUARDIENTE (VERSION JOSE LUIS MORENO)
-```
-
-University course recordings, dressage championships, TV zarzuela versions.
-`Metraje=LA` means feature LENGTH, not theatrical feature, so the catalogue
-carries anything long enough that was ever classified. Those never had a
-theatrical run, so they have no admissions.
-
-And the recorded figures go down to **125 admissions**, with eight films under
-5,000. So a missing figure never means "too small to record" — it means "never
-released in cinemas", which is exactly the cut a box-office list wants. ICAA is
-applying its own inclusion rule, the same way the French per-year pages do.
-
-That makes 73 the honest denominator, and the 71.2% a real matcher problem on
-real films rather than an artefact.
-
-> **But ICAA applies no THRESHOLD, unlike France.** A film with 125 admissions
-> is on this list. France needed no floor of our own because each page already
-> carried one; here there is none, so one has to be chosen — or the list opens
-> with films nobody saw.
-
-**Match-rate floor, declared before the build rather than after** (per the
-guard rails above): if confident title+year matching lands below **90%**, the
-list is not seeded and the shortfall is investigated. The France route achieved
-98–100% through QIDs; a materially worse number means the normaliser is wrong,
-not that Spanish cinema is harder. And per `DECISIONS.md` §3, a rate is not
-evidence — eyeball actual matched pairs, because 97% tells you nothing about
-whether *Viridiana* matched the right film.
+Deferred, so they are not re-proposed early: **v6** — a design pass with
+Impeccable, and letting the reconciliation screen reach already-resolved
+entries. **Unscheduled** — cultness, Letterboxd, household memory, nominees as
+well as winners, and box office beyond France/Spain/US. All in `BACKLOG.md`.
 
 ---
 
-### 2. Alternative ratings — IMDb now, Letterboxd only researched
-**IMDb, build it.** `title.ratings.tsv.gz` is ~8 MB, covers every title, is
-refreshed daily, and joins **exactly** on `imdb_id` — which TMDB already returns
-in the detail response, so there is no matching problem at all. Needs an
-`imdb_id` column on `movies`, a backfill, and display beside the TMDB score.
+### 1. Box office — United States
 
-> **Licence rule, non-negotiable:** the dataset is licensed for personal and
-> non-commercial use, which fits this app — but it **must not be committed to
-> the repo**. Fetch it at setup or refresh time and store only the derived
-> numbers. This is the same distinction the `.gitignore` already enforces for
-> `data/*.db`.
+**Source:** `List of <year> box office number-one films in the United States`
+(en.wikipedia). Verified 2026-08-01: **1946–2026 with no gaps**, and each page
+carries two usable tables.
 
-**Letterboxd: research only, do not build.** Historically no public API, believed
-invite-only. **Their terms are the deciding factor and must be read before any
-design** — do not assume scraping is acceptable. Any build is v5. Recording the
-outcome of the research, either way, is the deliverable here.
+```
+weekly #1s     every year, ~50 rows        a membership test, no gaps anywhere
+annual top-N   Rank | Title | Distributor | Rental          1950-1978
+               Rank | Title | Distributor | Domestic gross   1981-2026
+               absent in 1946 and 1975
+```
 
-SensCritique stays **closed**: verified 403 to scripted requests, same as
-criterion.com.
+**Take the annual table where it exists** — it is France's shape, ranked by
+magnitude — and note the gaps. Titles are wikilinked, so identity goes
+link → QID → TMDB id through the pipeline the award and France fetchers already
+use. **No fuzzy matching**, unlike Spain.
 
----
+**The unit changes and it does not matter.** Rentals are the distributor's
+share, roughly half of gross, and the switch is around 1980. Ranking happens
+only *within* a year, where the unit is consistent — France's own rule, and
+applying it here dissolves the objection rather than working around it.
 
-### 3. National cinema night, and director night
-Both are query-backed. The two dynamic-list gaps they depended on have landed —
-rank is now written from discover order and the reconcile runs in a transaction
-(`HISTORY.md` §6.4).
+> **Do not use `<year> in film`.** Those tables switch to **worldwide gross in
+> 1988**, so the modern half is not a US list at all. That is a change of what
+> is measured, not of units, and no ranking rule rescues it.
 
-**National cinema night.** Already established as nearly free:
-`movies.countries` is cached, and TMDB's `with_origin_country` works for a
-dynamic list.
+**Name it for what it measures.** The weekly-#1s shape, if used, is a
+membership test: a film that sat at #2 for ten weeks is excluded while one that
+won a quiet January weekend is in. The annual table does not have that problem.
 
-**Decided 2026-07-30: one parametric vibe, not one list per country.** The
-alternative — a fixed, tagged list per country, groupable in the picker — is
-simpler in isolation and reuses machinery that already exists. It loses on two
-counts. It reintroduces the list-proliferation risk `BACKLOG.md` flags, at the
-worst possible scale, since there is no natural stopping point between five
-countries and fifty. And **director night needs the `▾` chip regardless**, so
-the parametric shape is being built either way; choosing lists here means
-building both interactions and maintaining them in parallel. One chip shape,
-three callers — national cinema night, director night, and actor's night in v5.
-
-> The related question, **"what is a *kind* of list?"**, is settled — the word
-> was retired rather than defined (`DECISIONS.md` §4).
-> The short version: a per-country dynamic list is not a third kind, it is a
-> second query-backed list, and nothing new needs naming.
-
-**Director night.** Resolve the person,
-then `/person/{id}/movie_credits` filtered to `job=Director`. **Never
-`with_crew`** — measured, it returns 112 films for Kurosawa including 1936
-comedies where he was an assistant director, because it matches any crew role.
-
-Parametric, so it needs the `▾` chip: a value chosen at selection time rather
-than a list sitting in the picker. That interaction is the part worth getting
-right, because **actor's night in v5 is the same shape with `job` swapped** — if
-director night is built as a one-off rather than as "a credit-filtered person
-list", v5 rewrites it.
+**There are no US admissions, and there never will be.** Every public "tickets
+sold" figure is gross ÷ average ticket price, including NATO's own and the
+MPA's. Counted data exists inside Comscore and EntTelligence as a private
+settlement asset and is never published per title. France and Spain publish
+admissions because a state mandate compels it; the US chose private
+measurement. See `BACKLOG.md`.
 
 ---
 
-### 5. A slot list needs to say whose it is
+### 2. Traps carried into v5
 
-Found in real use, not by reading: applying **Director night ▾ → Robert Eggers**
-correctly put his ten films in the pool, and Explore then showed ten films with
-nothing anywhere saying *why*. It looks like the library changed under you.
+Read `DECISIONS.md` §3 first. The two that bit hardest in v4 and will bite
+again:
 
-The name already exists — the slot list is called "Director night — Robert
-Eggers" — so this is a display gap, not a data one. Two places need it:
-
-- **Explore**, which shows the films but never names the selection behind them.
-- **The chip**, which reads "Director night ▾" whether or not a director is
-  chosen. It should read back the current value once there is one.
-
-Worth doing in v4 because it is the difference between a feature that works and
-one a person can tell is working. The slot list is deliberately hidden from the
-picker, which is exactly why nothing else surfaces its name.
-
----
-
-### 4. Theme night — unblocked, not scheduled
-
-Parametric like director night, keyword-based. Verified working:
-`with_keywords=<christmas>` returns 306 films including *It's a Wonderful Life*,
-*Klaus* and *The Apartment*. Keyword ids must be resolved via `/search/keyword`
-first — you cannot query by string.
-
-> Caveat: keywords are crowd-sourced and loose. The christmas query also returns
-> *The Hunt* (2012), a Danish drama that merely contains a Christmas scene. Fine
-> for inspiration, wrong for a strict promise.
-
-Needs the same `▾` chip as director night, so it costs little once that lands.
+- **A source can answer successfully with less than it has.** Locale-gated
+  data, pagination that re-serves page 1, an export with the right MIME type
+  and no data in it. Check that a 200 carries what it should.
+- **A guard sits downstream of the number it checks.** A match-rate floor
+  cannot see that the matched films are the wrong ones. Inspect values, not
+  just volumes — every real failure in v4 was found by a count that did not add
+  up, never by a threshold.

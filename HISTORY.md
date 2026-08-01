@@ -1162,3 +1162,60 @@ const index = (req, res) => res.sendFile('index.html', { root: join(ROOT, 'publi
 ---
 
 ---
+
+---
+
+## 7. v4 — done
+
+Shipped 2026-08-01, 41 chunks. Kept for the reasoning and the traps.
+
+**Features.** Box-office España from the ICAA register (1,567 films, 1945–2026).
+IMDb ratings beside TMDB's, joined exactly on `imdb_id`. Director night as the
+first parametric vibe, with a `▾` chip and a reusable slot list. Country as a
+pool filter. Both a per-year and an overall rank on every box-office list.
+
+**Fixes.** The guest vote route 404ing under any dotted install path. The
+`dynamic` tag doing two jobs at once. `materialiseList` never writing rank at
+all. `seed.mjs` keyed on `tmdb_id`. `lists.kind` renamed to `lists.origin`.
+
+**Protections.** The database is snapshotted before migrations run. The upgrade
+path has tests. The test suite is hermetic — no credentials, no network.
+
+**Process.** The knowledge base split by durability: startup reading fell from
+2,062 lines to 668. `NOTES.md` became the inbox. Reports moved from
+session-end to chunk-end.
+
+### 7.1 The lesson v4 actually taught
+
+Every serious problem this version hit had the same shape: **a source or a
+routine that answered successfully with less than it had.** None failed. None
+threw. Each produced a plausible number that a guard then approved.
+
+```
+ICAA served box office only in the Spanish locale — English pages, HTTP 200, no figures
+ICAA pagination re-served page 1 without a session cookie AND an XHR header
+TMDB's response omits the alternative title that produced the match
+Lumiere's XLSX export returns metadata, correct MIME type, zero admissions
+A per-film catch turned fetch failures into "no admissions", deleting six years
+recordEntry dropped rank on unresolved rows — 98 of 1,567
+```
+
+The match-rate floor is the sharpest case. It correctly refused a seed at
+89.9%, then passed at exactly 90.0% — on a list where *8 Apellidos Vascos*, the
+biggest Spanish film ever made, was unmatched along with three other #1s of
+their year. **A number can pass a test the thing it describes would fail.** The
+round that fixed it was run because the *unmatched list* looked wrong, not
+because the rate did.
+
+Every one of these was caught by a count that did not add up — 81 rank-1 rows
+against 82 years, 24 films in every year, 1,450 films where 1,570 were
+expected — and only because someone looked. Volume guards and rate guards sit
+downstream of the failure; they cannot see a wrong answer that arrives in the
+right shape.
+
+> **The asymmetry worth carrying into v5.** An unmatched entry is visible and
+> fixable — it sits in a reconciliation queue. A *wrongly* matched entry is
+> `resolved`, invisible, and permanent, because that screen only shows rows
+> that failed. So the match rate guards the recoverable failure while nothing
+> guards the unrecoverable one. Measured false-positive rate on the Spanish
+> list was about 3–4% before the language preference; it is unmeasured after.
