@@ -6,7 +6,7 @@
   "category": "box-office",
   "source": "ICAA Catalogo de Peliculas - espectadores, top 20 per year",
   "source_url": "https://sede.mcu.gob.es/CatalogoICAA",
-  "note": "Spanish feature films by admissions, top 20 of each year. The ICAA is the Spanish film institute own register: official, and admissions rather than revenue. Unlike the French per-year pages it applies no threshold of its own, so the top-20 cut is ours - without it the list opens with films that sold a few hundred tickets. A film with no admissions figure was never released in cinemas: the catalogue also carries course recordings and televised zarzuela at feature length. This is the only list here resolved by TITLE rather than by id or QID; the sampled confident-match rate was 93.4% against a declared floor of 90%. Entries with no tmdb_id did not match confidently and are left for the reconciliation screen on the Lists tab rather than dropped or guessed.",
+  "note": "Spanish feature films by admissions, top 20 of each year. The ICAA is the Spanish film institute own register: official, and admissions rather than revenue. Unlike the French per-year pages it applies no threshold of its own, so the top-20 cut is ours - without it the list opens with films that sold a few hundred tickets. A film with no admissions figure was never released in cinemas: the catalogue also carries course recordings and televised zarzuela at feature length. This is the only list here resolved by TITLE rather than by id or QID; the sampled confident-match rate was 93.5% against a declared floor of 90%. Entries with no tmdb_id did not match confidently and are left for the reconciliation screen on the Lists tab rather than dropped or guessed.",
   "fetched_at": "2026-08-01",
   "count": 1567,
   "entries": [
@@ -4621,7 +4621,7 @@
     {
       "title": "A Contratiempo",
       "year": 1981,
-      "tmdb_id": 33214,
+      "tmdb_id": 442331,
       "rank": 20,
       "overall_rank": 819
     },
@@ -4822,7 +4822,7 @@
     {
       "title": "Carmen",
       "year": 1983,
-      "tmdb_id": 21193,
+      "tmdb_id": 111322,
       "rank": 9,
       "overall_rank": 726
     },
@@ -9232,7 +9232,7 @@
     {
       "title": "Regresión",
       "year": 2015,
-      "tmdb_id": 241257,
+      "tmdb_id": 1352993,
       "rank": 5,
       "overall_rank": 228
     },
@@ -9274,7 +9274,7 @@
     {
       "title": "Un Día Perfecto",
       "year": 2015,
-      "tmdb_id": 321751,
+      "tmdb_id": 355946,
       "rank": 11,
       "overall_rank": 830
     },
@@ -9463,7 +9463,7 @@
     {
       "title": "Toro",
       "year": 2016,
-      "tmdb_id": 427674,
+      "tmdb_id": 364615,
       "rank": 18,
       "overall_rank": 873
     },
@@ -10491,6 +10491,7 @@
     {
       "title": "Wolfgang",
       "year": 2024,
+      "tmdb_id": 1306284,
       "rank": 5,
       "overall_rank": 598
     },
@@ -10539,7 +10540,7 @@
     {
       "title": "Tierra De Nadie",
       "year": 2024,
-      "tmdb_id": 979275,
+      "tmdb_id": 1305273,
       "rank": 12,
       "overall_rank": 982
     },
@@ -10560,7 +10561,7 @@
     {
       "title": "Marco",
       "year": 2024,
-      "tmdb_id": 1186350,
+      "tmdb_id": 1319933,
       "rank": 15,
       "overall_rank": 1037
     },

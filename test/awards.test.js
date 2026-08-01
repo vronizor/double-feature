@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createTestDb } from '../server/db.js';
-import { awardsByTmdbId } from '../server/movies.js';
+import { awardsByTmdbId, recordEntry } from '../server/movies.js';
 import { awardLabel, shortAwardName } from '../public/dom.js';
 
 function seed() {
@@ -167,4 +167,27 @@ test('the short name travels from the list row to the award payload', () => {
   assert.equal(awardLabel(award), 'Delluc 2019');
   // Without the stored value it would have string-mangled to "Prix Louis-Delluc".
   assert.equal(awardLabel({ ...award, short_name: null }), 'Prix Louis-Delluc 2019');
+});
+
+test('an unresolved entry keeps its rank, so reconciling it later restores a ranked film', () => {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'Box-office Test', 'seed', 1)`);
+
+  // needs_review and unmatched rows used to be inserted without a rank at all.
+  // These are precisely the rows a human fixes by hand later, so a film
+  // reconciled on the Lists tab came back rankless and silently vanished from
+  // every Top-N cut — "the top 10 of 1946" quietly becoming nine films.
+  recordEntry(db, {
+    listId: 1,
+    rawTitle: 'Costa Brava',
+    rawYear: 1946,
+    rank: 1,
+    overallRank: 900,
+    result: { status: 'unmatched', movie: null, candidates: [] },
+  });
+
+  const row = db.prepare('SELECT rank, overall_rank, status FROM list_movies WHERE list_id = 1').get();
+  assert.equal(row.status, 'unmatched');
+  assert.equal(row.rank, 1, 'the per-year rank survives');
+  assert.equal(row.overall_rank, 900, 'the overall rank survives too');
 });

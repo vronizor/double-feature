@@ -126,13 +126,21 @@ export function recordEntry(db, { listId, rawTitle, rawYear, rank, overallRank, 
     return { status: 'resolved', tmdb_id: result.movie.tmdb_id };
   }
 
+  // Rank is carried here too, and that is not cosmetic. These are exactly the
+  // rows a human will reconcile later, and a row fixed on the Lists tab that
+  // came back with rank = NULL would silently drop out of every Top-N cut --
+  // "the top 10 of 1946" would quietly become nine films, with nothing saying
+  // why. The seed file knew the rank; the insert simply was not carrying it.
   db.prepare(
-    `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status, candidates_json)
-     VALUES (?, NULL, ?, ?, ?, ?)`,
+    `INSERT INTO list_movies
+       (list_id, tmdb_id, raw_title, raw_year, rank, overall_rank, status, candidates_json)
+     VALUES (?, NULL, ?, ?, ?, ?, ?, ?)`,
   ).run(
     listId,
     rawTitle,
     rawYear ?? null,
+    cleanRank,
+    cleanOverall,
     result.status,
     result.candidates?.length ? JSON.stringify(result.candidates) : null,
   );

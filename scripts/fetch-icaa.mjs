@@ -244,7 +244,30 @@ async function resolve(film) {
       titlesMatch(query, candidate.title) ||
       titlesMatch(query, candidate.original_title ?? '');
     const confident = titleOk && withinYear;
-    if (!best || scored.score > best.scored.score) best = { candidate, scored, confident };
+
+    // Every film on this list is by definition Spanish cinema, so when two
+    // candidates are otherwise equally good the Spanish-language one wins.
+    //
+    // A PREFERENCE and never a filter: some of the biggest Spanish films are
+    // shot in English -- Los Otros, Lo Imposible, Two Much -- and filtering on
+    // language would throw exactly those away.
+    //
+    // It exists because a short generic title matches a foreign film of the
+    // same year and nothing catches it: "Marco" (2024) resolved to a Malayalam
+    // action film with an identical title and identical year, and "Tierra de
+    // Nadie" to the American thriller Mob Land, which carries no Spanish title
+    // at all. Both were scored CONFIDENT, and a wrong confident match is
+    // invisible afterwards -- the reconciliation screen only shows rows that
+    // failed to match.
+    const spanish = SPANISH_LANGUAGES.has(candidate.original_language) ? 1 : 0;
+    const rankKey = [confident ? 1 : 0, spanish, scored.score];
+    const better =
+      !best ||
+      rankKey[0] > best.rankKey[0] ||
+      (rankKey[0] === best.rankKey[0] &&
+        (rankKey[1] > best.rankKey[1] ||
+          (rankKey[1] === best.rankKey[1] && rankKey[2] > best.rankKey[2])));
+    if (better) best = { candidate, scored, confident, rankKey };
   }
   return { ...film, title, best };
 }
@@ -275,6 +298,12 @@ export function searchTitle(title) {
  * is the only reason it is in the comparison at all.
  */
 const YEAR_TOLERANCE = 2;
+
+/**
+ * The languages a Spanish film is actually made in. Catalan, Galician and
+ * Basque are Spain's other official languages, not foreign ones.
+ */
+const SPANISH_LANGUAGES = new Set(['es', 'ca', 'gl', 'eu']);
 
 /**
  * Spanish spells small numbers out where the catalogue writes digits, so
