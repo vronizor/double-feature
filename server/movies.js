@@ -100,13 +100,14 @@ export function createManualMovie(db, { title, year }) {
  * Attaches one raw list entry to a list, storing the outcome of resolution.
  * Unresolved entries are kept (not dropped) so they show up for manual review.
  */
-export function recordEntry(db, { listId, rawTitle, rawYear, rank, awardYear, result }) {
+export function recordEntry(db, { listId, rawTitle, rawYear, rank, overallRank, awardYear, result }) {
   // Per-membership facts from the seed file. These MUST be written here: the
   // seeder skips entries that already landed, so anything not persisted on the
   // first insert would never be filled in by a re-run. A fresh install used to
   // end up with rank = NULL everywhere, which silently removed the Top-N
   // control entirely (it only renders for lists whose ranked_count > 0).
   const cleanRank = Number.isInteger(rank) ? rank : null;
+  const cleanOverall = Number.isInteger(overallRank) ? overallRank : null;
   const cleanAwardYear = Number.isInteger(awardYear) ? awardYear : null;
 
   if (result.status === 'resolved') {
@@ -118,9 +119,9 @@ export function recordEntry(db, { listId, rawTitle, rawYear, rank, awardYear, re
     if (existing) return { status: 'duplicate', tmdb_id: result.movie.tmdb_id };
 
     db.prepare(
-      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, rank, award_year, status)
-       VALUES (?, ?, ?, ?, ?, ?, 'resolved')`,
-    ).run(listId, result.movie.tmdb_id, rawTitle, rawYear ?? null, cleanRank, cleanAwardYear);
+      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, rank, overall_rank, award_year, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'resolved')`,
+    ).run(listId, result.movie.tmdb_id, rawTitle, rawYear ?? null, cleanRank, cleanOverall, cleanAwardYear);
 
     return { status: 'resolved', tmdb_id: result.movie.tmdb_id };
   }

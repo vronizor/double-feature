@@ -140,7 +140,15 @@ CREATE TABLE IF NOT EXISTS list_movies (
   tmdb_id         INTEGER          REFERENCES movies(tmdb_id) ON DELETE SET NULL,
   raw_title       TEXT    NOT NULL,
   raw_year        INTEGER,
+  -- The film's position WITHIN ITS YEAR on this list, which is what Top-N cuts
+  -- on: "the top 5 of each year" is era-balanced, "the top 100 overall" is not.
   rank            INTEGER,
+  -- The film's position across the WHOLE list, ignoring year. Answers "the
+  -- hundred biggest French films ever", which a per-year rank cannot express,
+  -- just as per-year answers "the top five of each year", which this cannot.
+  -- Both are stored because deriving either from the other needs the
+  -- underlying figure, and that is deliberately not kept.
+  overall_rank    INTEGER,
   -- The ceremony year, for award lists. Stored rather than derived from the
   -- release year because the offset differs per award: Cannes awards a film in
   -- its own release year, while the Oscars and the national awards run in the
@@ -359,10 +367,55 @@ export function migrate(target) {
   // landed, so rows seeded before this column existed would stay NULL forever.
   ensureColumn(target, 'list_movies', 'rank', 'INTEGER');
   ensureColumn(target, 'list_movies', 'award_year', 'INTEGER');
+  ensureColumn(target, 'list_movies', 'overall_rank', 'INTEGER');
+  splitBoxOfficeRanks(target);
   migrateCategoriesToTags(target);
   renameCrowdPleasers(target);
   retagDynamicAsModern(target);
   dropNationalCinemaVibe(target);
+}
+
+/**
+ * Box-office France stored a GLOBAL rank where the recorded decision said
+ * per-year; Box-office Espana stores per-year. So the same Top-N control meant
+ * "the ten biggest French films ever" on one list and "the top ten of every
+ * year" on the other, with nothing announcing which.
+ *
+ * Per-year wins for `rank`, because that is what Top-N cuts on and what keeps a
+ * list era-balanced -- the reason per-year sources were chosen over the
+ * all-time pages at all. The global ordering moves to `overall_rank` rather
+ * than being thrown away: it answers a question per-year cannot.
+ *
+ * No re-fetch, even though admissions were never stored: a global rank already
+ * carries the correct RELATIVE order within each year, so per-year rank is a
+ * dense renumbering of it grouped by year.
+ */
+function splitBoxOfficeRanks(target) {
+  const lists = target
+    .prepare(
+      `SELECT id FROM lists WHERE name LIKE 'Box-office%'
+        AND EXISTS (SELECT 1 FROM list_movies WHERE list_id = lists.id AND rank IS NOT NULL)
+        AND NOT EXISTS (SELECT 1 FROM list_movies WHERE list_id = lists.id AND overall_rank IS NOT NULL)`,
+    )
+    .all();
+
+  for (const list of lists) {
+    const rows = target
+      .prepare(
+        'SELECT id, rank, raw_year FROM list_movies WHERE list_id = ? AND rank IS NOT NULL ORDER BY rank',
+      )
+      .all(list.id);
+    // If a rank repeats across rows the list is already per-year, and only
+    // overall_rank needs filling.
+    const perYearAlready = new Set(rows.map((r) => r.rank)).size < rows.length;
+    const setBoth = target.prepare('UPDATE list_movies SET rank = ?, overall_rank = ? WHERE id = ?');
+    const seen = new Map();
+    rows.forEach((row, i) => {
+      const n = (seen.get(row.raw_year) ?? 0) + 1;
+      seen.set(row.raw_year, n);
+      setBoth.run(perYearAlready ? row.rank : n, perYearAlready ? i + 1 : row.rank, row.id);
+    });
+  }
 }
 
 /**

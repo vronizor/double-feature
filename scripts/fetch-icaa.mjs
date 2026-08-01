@@ -352,6 +352,14 @@ async function main() {
     list.sort((a, b) => b.admissions - a.admissions);
     list.slice(0, TOP_N).forEach((film, i) => ranked.push({ ...film, rank: i + 1 }));
   }
+  // Both ranks are stored, because they answer different questions and neither
+  // can be derived from the other once the admissions figure is discarded.
+  // `rank` is the position within the year, which is what Top-N cuts on and
+  // what keeps the list era-balanced. `overall_rank` orders the whole list by
+  // admissions, which answers "the biggest Spanish films ever" — a question
+  // per-year ranking cannot express.
+  ranked.sort((a, b) => b.admissions - a.admissions);
+  ranked.forEach((film, i) => { film.overallRank = i + 1; });
   console.log(`top ${TOP_N} per year -> ${ranked.length} films to resolve`);
 
   console.log('\nresolving against TMDB…');
@@ -397,6 +405,7 @@ async function main() {
       // reconciliation screen asks, an id means nobody ever looks again.
       ...(film.best?.confident ? { tmdb_id: film.best.candidate.id } : {}),
       rank: n,
+      overall_rank: film.overallRank ?? null,
     };
   });
 
