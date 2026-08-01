@@ -249,6 +249,13 @@ async function wikipediaApi(lang, params, attempt = 0) {
  */
 const cacheDir = () => process.env.SEED_CACHE_DIR?.trim() || null;
 
+// Politeness between article requests. It lives HERE rather than in the
+// per-year loops that used to carry it, because those slept whether or not a
+// request had actually happened — so a fully cached re-run of an 81-year
+// source still took three minutes to read 81 files off a local disk. Throttle
+// the thing being throttled, not the loop around it.
+const WIKI_THROTTLE_MS = 1500;
+
 /** One page's raw wikitext, optionally served from the cache. */
 async function fetchWikitext(lang, title) {
   const dir = cacheDir() ? join(cacheDir(), 'wiki') : null;
@@ -276,6 +283,7 @@ async function fetchWikitext(lang, title) {
     await mkdir(dir, { recursive: true });
     await writeFile(cacheFile, wikitext);
   }
+  await sleep(WIKI_THROTTLE_MS);
   return wikitext;
 }
 
@@ -377,8 +385,48 @@ export async function fetchCategoryMembers(lang, category) {
  * so the normalised/redirected names are mapped back before returning.
  * 50 titles per request is the API limit.
  */
+/**
+ * A small JSON cache for the identity steps, on the same switch as the rest.
+ *
+ * The wikitext cache already spares the 81 article downloads, but iterating on
+ * a PARSER re-resolves every title through Wikipedia and Wikidata each run —
+ * which is the slow half, and the half that made re-running a fetcher an
+ * afternoon rather than a coffee. A page title's QID and a QID's TMDB id are
+ * both effectively immutable, so unlike the language cache these need no
+ * expiry: the whole point of resolving through identifiers is that they do not
+ * drift the way titles do.
+ */
+async function readJsonCache(name) {
+  const dir = cacheDir();
+  if (!dir) return null;
+  try {
+    return JSON.parse(await readFile(join(dir, name), 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
+async function writeJsonCache(name, data) {
+  const dir = cacheDir();
+  if (!dir) return;
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, name), JSON.stringify(data));
+}
+
 export async function titlesToQidMap(lang, titles) {
+  const cacheName = `wikidata-qid-${lang}.json`;
+  const cached = await readJsonCache(cacheName);
   const byTitle = new Map();
+  if (cached) {
+    for (const title of titles) {
+      if (cached[title] !== undefined) byTitle.set(title, cached[title]);
+    }
+    titles = titles.filter((title) => cached[title] === undefined);
+    if (byTitle.size) {
+      console.log(`\n  ${byTitle.size} qid(s) from cache, ${titles.length} to resolve`);
+    }
+  }
+
   for (let i = 0; i < titles.length; i += 50) {
     const data = await wikipediaApi(lang, {
       action: 'query',
@@ -399,6 +447,15 @@ export async function titlesToQidMap(lang, titles) {
     }
     await sleep(400);
   }
+
+  if (cached) {
+    // Store the misses too, as null. A title that resolves to nothing is a
+    // redirect to a non-item or a page Wikidata has never linked, and asking
+    // again next run costs the same round trip for the same answer.
+    for (const title of titles) cached[title] = byTitle.get(title) ?? null;
+    await writeJsonCache(cacheName, cached);
+  }
+  for (const [title, qid] of byTitle) if (qid === null) byTitle.delete(title);
   return byTitle;
 }
 
@@ -787,6 +844,131 @@ export function parseBoxOfficePage(wikitext) {
   return films;
 }
 
+// --- Box office, United States --------------------------------------------
+//
+// en.wikipedia keeps one "List of <year> box office number-one films in the
+// United States" per year. Every page carries a WEEKLY number-one table, which
+// is not what this list wants: a film that sat at #2 for ten weeks is excluded
+// while one that won a quiet January weekend is in. What it wants is the
+// annual table, which most pages also carry.
+//
+// Surveyed across all 81 pages rather than guessed, and the survey disagreed
+// with the plan in two ways worth knowing.
+//
+// FIRST, there are usually TWO annual tables and they measure different
+// things:
+//
+//   Calendar Gross    what a film earned DURING that calendar year, whenever
+//                     it came out. Carries Actor(s)/Director(s) columns.
+//   In-Year Release   films RELEASED that year, by domestic gross.
+//
+// A December release earns most of its money in January, so the two rank
+// differently and neither is wrong — they answer different questions. This
+// list takes the release-year table, because that is the rule Box-office
+// France already follows and a list has to mean one thing. Calendar Gross is
+// rejected by name.
+//
+// SECOND, the gaps are wider than recorded: 1946, 1948, 1975, 1976, 1977 and
+// 1979 carry no annual table at all, only the weekly one. Six years, not the
+// two the roadmap listed. Verified by reading those pages, not inferred from a
+// parser returning nothing.
+//
+// Older pages (through the 1970s) use neither section name and simply say
+// "Highest-grossing films". 1969 and 1970 put TWO tables under that heading —
+// a 25-row gross chart and the 10-row Variety rental chart — so the section
+// name alone cannot choose, and the money column breaks the tie.
+const US_BOX_OFFICE_FIRST_YEAR = 1946;
+
+// Case genuinely varies across the corpus ("In-Year Release" 41 times,
+// "In-year release" 4), so these are compared lowercased.
+const US_SECTION_REJECT = ['calendar gross'];
+const US_SECTION_ACCEPT = ['in-year release', 'highest-grossing films', 'highest grossing films'];
+
+// Preference order, best first, and every value here was read off the corpus
+// rather than guessed — the first attempt matched only "gross" and "rental"
+// and silently lost 1968-1974, whose pages write the unit into the header as
+// "Gross ($)" and "Rental ($)".
+//
+// The order carries a decision as well as a spelling. 1969 and 1970 offer both
+// a 25-row "Gross ($)" chart and the 10-row Variety "Rental ($)" one; rental
+// ranks higher here so those years take the same chart as the rest of that
+// era, rather than switching measure for two years in the middle of it.
+const US_MONEY_COLUMNS = ['domestic gross', 'rental', 'rental ($)', 'gross ($)', 'gross'];
+
+const US_TITLE_COLUMNS = ['title', 'film'];
+
+// One page writes `!| Domestic gross`, leaving a pipe on the front of the cell
+// once the row is split. Everything else is handled by normalizeHeaderCell.
+const usHeaderCell = (raw) => normalizeHeaderCell(raw).replace(/^[|\s]+/, '');
+
+/**
+ * The annual chart from one US year page, or [] when the page has none.
+ *
+ * Returns rows in page order carrying the page's own rank, because the rank is
+ * the only figure this list keeps: the money itself is deliberately discarded.
+ * Rentals are a distributor's share and grosses are a box-office take, and the
+ * two swap over around 1980 — so the numbers are not comparable across the
+ * corpus even before inflation. Position within a year is, because within one
+ * year one unit is in use.
+ */
+export function parseUsBoxOfficePage(wikitext) {
+  const candidates = [];
+  let section = '';
+
+  // Walk the page in order so each table knows the heading above it.
+  const parts = wikitext.split(/\n(?==+[^=\n]+=+\s*$)/m);
+  for (const part of parts) {
+    const heading = /^(=+)\s*(.+?)\s*\1\s*$/m.exec(part);
+    if (heading) section = heading[2].toLowerCase().trim();
+    if (US_SECTION_REJECT.includes(section)) continue;
+    if (!US_SECTION_ACCEPT.includes(section)) continue;
+
+    for (const table of part.split(/\n\{\|/).slice(1)) {
+      const body = table.split(/\n\|\}/)[0];
+      let columns = null;
+      const rows = [];
+
+      for (const chunk of body.split(/\n\|-+[^\n]*/)) {
+        const cells = splitRowCells(chunk);
+        if (cells.length === 0) continue;
+        const text = cells.map((cell) => cell.text);
+
+        if (cells.filter((cell) => cell.isHeader).length >= 2) {
+          const candidate = {};
+          text.forEach((raw, index) => {
+            const cell = usHeaderCell(raw);
+            if (!cell) return;
+            if (candidate.title === undefined && US_TITLE_COLUMNS.includes(cell)) {
+              candidate.title = index;
+            }
+            // Exact match, and the earliest-listed synonym wins, so a table
+            // carrying both "gross" and "domestic gross" is scored on the
+            // better one rather than on whichever column came first.
+            const money = US_MONEY_COLUMNS.indexOf(cell);
+            if (money !== -1 && (candidate.money === undefined || money < candidate.money)) {
+              candidate.money = money;
+            }
+          });
+          if (candidate.title !== undefined && candidate.money !== undefined) columns = candidate;
+          continue;
+        }
+        if (!columns) continue;
+
+        const link = FILM_LINK.exec(text[columns.title] ?? '');
+        if (!link) continue;
+        rows.push({ page: link[1].trim(), title: (link[2] ?? link[1]).trim() });
+      }
+
+      if (columns && rows.length) candidates.push({ money: columns.money, rows });
+    }
+  }
+
+  if (candidates.length === 0) return [];
+  // Lowest money index wins: domestic gross, then rental, then bare gross.
+  candidates.sort((a, b) => a.money - b.money);
+  return candidates[0].rows.map((row, index) => ({ ...row, rank: index + 1 }));
+}
+
 /**
  * The Box-office France list: francophone films that French audiences actually
  * went to see, ranked by admissions.
@@ -828,7 +1010,6 @@ async function fetchBoxOfficeFrance(meta) {
       const previous = best.get(row.page);
       if (!previous || row.admissions > previous.admissions) best.set(row.page, { ...row, year });
     }
-    await sleep(1500);
   }
 
   // A year that parses to far fewer rows than its neighbours means the page
@@ -891,6 +1072,92 @@ async function fetchBoxOfficeFrance(meta) {
     delete entry.admissions;
   });
 
+  return { tags: ['box-office'], category: 'box-office', ...meta, entries };
+}
+
+/**
+ * The Box-office US list: what America actually turned out for, year by year.
+ *
+ * No language or country cut, unlike France. This list exists to answer "was
+ * this film big in America", and a Hollywood blockbuster is the most honest
+ * possible answer to that — filtering it out would leave the axis measuring
+ * something else entirely.
+ *
+ * **`overall_rank` is deliberately not written, and that is a departure from
+ * France and Spain.** Both of those rank on ADMISSIONS, which count people and
+ * are therefore comparable across eighty years. This source has only money:
+ * rentals until about 1980 and domestic gross after, neither adjusted for
+ * inflation. An overall rank would sort 2019 above 1975 for reasons that have
+ * nothing to do with how many people went, and would do it invisibly, under a
+ * column name that promises otherwise. Ranking within the year is the whole of
+ * what the data supports, so it is the whole of what gets stored — the Top-N
+ * control reads `rank`, which means "the top five of each year" still works.
+ */
+async function fetchBoxOfficeUS(meta) {
+  const perYear = [];
+  const best = new Map();
+
+  for (let year = US_BOX_OFFICE_FIRST_YEAR; year <= THIS_YEAR; year += 1) {
+    let rows = [];
+    try {
+      const wikitext = await fetchWikitext(
+        'en',
+        `List of ${year} box office number-one films in the United States`,
+      );
+      if (wikitext) rows = parseUsBoxOfficePage(wikitext);
+    } catch (error) {
+      if (error instanceof RateLimited) throw error;
+      console.log(`\n  ⚠️  ${year}: ${error.message} — skipped`);
+    }
+    perYear.push({ year, count: rows.length });
+
+    for (const row of rows) {
+      // A re-release charts again in a later year. Keep the better showing,
+      // matching France — the same film should not appear twice.
+      const previous = best.get(row.page);
+      if (!previous || row.rank < previous.rank) best.set(row.page, { ...row, year });
+    }
+  }
+
+  // Six years genuinely have no annual table, so a zero there is expected and
+  // must not be reported as a fault. Anything ELSE at zero means the layout
+  // moved, which is worth saying out loud.
+  const KNOWN_EMPTY = new Set([1946, 1948, 1975, 1976, 1977, 1979]);
+  const unexpectedlyEmpty = perYear.filter((e) => e.count === 0 && !KNOWN_EMPTY.has(e.year));
+  if (unexpectedlyEmpty.length) {
+    console.log(
+      `\n  ⚠️  ${unexpectedlyEmpty.length} year(s) parsed to nothing and were expected to have a ` +
+        `table: ${unexpectedlyEmpty.map((e) => e.year).join(' ')}`,
+    );
+  }
+  const missing = [...KNOWN_EMPTY].filter((year) =>
+    perYear.some((e) => e.year === year && e.count > 0),
+  );
+  if (missing.length) {
+    // The guard is downstream of what it checks unless it can also notice the
+    // good news: a year gaining a table means the note above is now wrong.
+    console.log(`\n  ℹ️  ${missing.join(' ')} now HAS an annual table — update KNOWN_EMPTY.`);
+  }
+
+  const pages = [...best.keys()];
+  const qidByTitle = await titlesToQidMap('en', pages);
+  const films = await qidsToFilms([...new Set(qidByTitle.values())]);
+  const byQid = new Map(films.map((film) => [film.qid, film]));
+
+  const entries = [];
+  for (const page of pages) {
+    const film = byQid.get(qidByTitle.get(page));
+    if (!film?.tmdb_id) continue;
+    const row = best.get(page);
+    entries.push({
+      title: film.title ?? row.title,
+      year: film.year ?? row.year,
+      tmdb_id: film.tmdb_id,
+      rank: row.rank,
+    });
+  }
+
+  entries.sort((a, b) => (a.year ?? 0) - (b.year ?? 0) || a.rank - b.rank);
   return { tags: ['box-office'], category: 'box-office', ...meta, entries };
 }
 
@@ -1142,6 +1409,30 @@ const SOURCES = [
         source: 'Wikidata — award received (P166), Palme d’Or (Q179808)',
         source_url: 'https://en.wikipedia.org/wiki/Palme_d%27Or',
         note: 'The most redundant of the award lists against a canon-heavy library (58% already present) — included for the axis rather than the additions.',
+      }),
+  },
+  {
+    label: 'Box-office US',
+    // 81 pages, one request each — as slow as the France source. Run it alone:
+    // `npm run fetch-seeds -- box-office`.
+    minCount: 500,
+    run: () =>
+      fetchBoxOfficeUS({
+        slug: 'box-office-us',
+        name: 'Box-office US',
+        short_name: 'Box-office US',
+        source:
+          'en.wikipedia "List of <year> box office number-one films in the United States", ' +
+          '1946-2026, annual chart only, resolved to TMDB ids via Wikidata',
+        source_url:
+          'https://en.wikipedia.org/wiki/List_of_2019_box_office_number-one_films_in_the_United_States',
+        note:
+          'The annual release-year chart, never the weekly number-ones (which would exclude a ' +
+          'film that sat at #2 all year) and never the Calendar Gross table (which ranks what a ' +
+          'film earned DURING the year rather than films released in it). Ranked within the ' +
+          'year only: the source gives rentals before about 1980 and domestic gross after, and ' +
+          'neither is inflation-adjusted, so an all-time ranking would measure ticket prices. ' +
+          '1946, 1948 and 1975-1979 have no annual table on Wikipedia.',
       }),
   },
   {
