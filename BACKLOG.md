@@ -315,6 +315,26 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
+- **Let the reconciliation screen reach ALREADY-RESOLVED entries, not only
+  those under review.** Today it lists `needs_review` rows. A row that matched
+  *confidently but wrongly* is `resolved`, so it never appears there and nobody
+  ever looks at it again.
+
+  That makes the two failure modes asymmetric in a way the guards do not
+  reflect: an unmatched entry sits in a visible queue and can be fixed, while a
+  wrong match is invisible and permanent. The match-rate floor guards the
+  recoverable failure; nothing guards the unrecoverable one.
+
+  Concretely, in the Spanish list as seeded: **Marco (2024)** resolved to the
+  Malayalam action film of the same name and year, and **Tierra de Nadie** to
+  the American thriller *Mob Land* — both `resolved`, both unreachable from any
+  screen. Measured false-positive rate about 3–4% on a 57-pair inspection.
+
+  Wanted: browse a list's resolved entries, see what each matched to, and
+  re-open one for correction. Cheap in principle — `list_movies` already stores
+  `candidates_json`, and the screen already knows how to re-resolve a row.
+  *(Raised by the owner while inspecting the Spain seed.)*
+
 - **Run Impeccable over the UI** (`https://impeccable.style/`). A design tool
   for AI-generated interfaces — "the missing design vocabulary for agents" —
   offering a command set (`/polish`, `/distill`, `/typeset`) and a detector of
