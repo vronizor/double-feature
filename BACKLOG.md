@@ -159,6 +159,27 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   falls through to its full name would be the widest chip again. *(From field
   notes.)*
 
+- **Box office for other countries — partially surveyed, 2026-08-01.** The
+  en.wikipedia `List of <year> box office number-one films in <country>` family
+  exists well beyond the US, but **almost all of it is shallow**:
+
+  ```
+  Australia 1990-2025 (35y)   Japan (28y)        Mexico 2001-2026 (24y, gappy)
+  South Korea 2006-2026       Turkey 2005-2025   Romania 2008-2026
+  Spain 2007-2025             Italy (~20y, gappy)  Brazil (15y)
+  Argentina · Chile · Colombia · Belgium · Taipei · Philippines · Canada — thin
+  ```
+
+  **That shallowness is disqualifying on its own terms.** France reaches 1945
+  and Spain 1945 via ICAA; a list starting in 2006 would be exactly the recency
+  skew that made the all-time French page the wrong source in the first place.
+  These are era-unbalanced by construction.
+
+  So the honest reading is that the per-year Wikipedia route is good for
+  **France and the US only**, and any further country needs its own national
+  source the way Spain needed the ICAA. Survey incomplete — headers and annual
+  tables were not reached before the agent running it stalled.
+
 - **Cannes Grand Jury Prize as a second Cannes list.** Today only the Palme
   d'Or is carried. The Grand Prix is the runner-up award and reaches a
   different set of films. Same Wikidata `P166` route as the Palme, so it is a

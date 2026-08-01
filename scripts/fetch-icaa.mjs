@@ -299,15 +299,42 @@ async function main() {
   if (failedYears.length) console.log(`\n⚠️  years that failed entirely: ${failedYears.join(', ')}`);
   console.log(`\n${films.length} films listed, fetching admissions…`);
 
-  const withAdmissions = await inBatches(films, async (film) => ({
-    ...film,
-    ...(await admissionsFor(film.id).catch(() => ({ admissions: null, revenue: null }))),
-  }));
+  // Failures are COUNTED, never swallowed. They used to be caught per film and
+  // turned into "no admissions figure", which is indistinguishable from a film
+  // that genuinely never reached cinemas -- so a network outage during this
+  // phase silently deleted whole years. Films are processed in year order, so
+  // an outage maps to contiguous missing years, and the run still reported
+  // zero failures and a match rate above the floor. Six years of the 1960s
+  // went missing exactly that way.
+  const fetchErrors = [];
+  const withAdmissions = await inBatches(films, async (film) => {
+    try {
+      return { ...film, ...(await admissionsFor(film.id)) };
+    } catch (error) {
+      fetchErrors.push({ film, message: error.message });
+      // `undefined` rather than null: null means "the catalogue has no figure",
+      // which is a real answer. This is the absence of an answer, and the two
+      // must not look alike.
+      return { ...film, admissions: undefined, revenue: null };
+    }
+  });
+
+  if (fetchErrors.length) {
+    const byYear = new Map();
+    for (const e of fetchErrors) byYear.set(e.film.year, (byYear.get(e.film.year) ?? 0) + 1);
+    console.log(`\n⚠️  ${fetchErrors.length} detail pages FAILED to fetch, by year:`);
+    for (const [year, n] of [...byYear].sort((a, b) => a[0] - b[0])) {
+      console.log(`     ${year}: ${n}`);
+    }
+    console.log('   Re-run to fill these — cached pages are skipped, so it is cheap.');
+  }
 
   // A film with no figure was never released in cinemas — the catalogue carries
   // course recordings and televised zarzuela at feature LENGTH, and those are
   // what lack admissions. So this is ICAA's own inclusion rule, not a gap.
-  const released = withAdmissions.filter((film) => film.admissions !== null && film.admissions > 0);
+  const released = withAdmissions.filter(
+    (film) => film.admissions !== null && film.admissions !== undefined && film.admissions > 0,
+  );
   console.log(`\n${released.length} were released in cinemas, ${films.length - released.length} were not`);
 
   // Top N per year, because unlike the French pages ICAA applies no threshold
