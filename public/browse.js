@@ -341,7 +341,7 @@ export function renderTagFilter(vocabulary, active, onChange) {
  * Deliberately not a chip that applies on click like the others: applying this
  * one means a TMDB round trip and a rewritten list, so it asks first.
  */
-function renderParamPicker(vibe, { onChosen, onCancel }) {
+function renderParamPicker(vibe, { onChosen, onCancel, onClear = null }) {
   const results = h('div', { class: 'param-results' });
   const input = h('input', {
     type: 'search',
@@ -430,13 +430,36 @@ function renderParamPicker(vibe, { onChosen, onCancel }) {
     h('div', { class: 'row' },
       h('div', { class: 'field-label' }, isCountry ? 'Films from where?' : 'Whose films?'),
       h('span', { class: 'spacer' }),
+      // Clear only exists while this vibe is the one in play. An active
+      // parametric chip keeps opening the picker rather than deselecting —
+      // the ▾ promises a chooser — so without this it would be the one kind of
+      // vibe with no way back out.
+      onClear ? h('button', { class: 'btn-sm', onClick: onClear }, 'Clear') : null,
       h('button', { class: 'btn-sm', onClick: onCancel }, 'Cancel')),
     input,
     results,
   );
 }
 
-export function renderVibeChips(vibes, { onApply, onSave, onDelete, onParam }) {
+/**
+ * The "Tonight is…" row.
+ *
+ * Two meanings used to collide on one control. A ✕ sat against the ACTIVE
+ * chip and deleted the vibe outright — but the only thing a ✕ beside an active
+ * selection plausibly says is "clear this selection", so its obvious reading
+ * was "deselect" and its real effect was "destroy". Reported from real use as
+ * a button too risky to sit there, and that is exactly right: the cost of
+ * misreading it was losing a saved vibe.
+ *
+ * So the two are separated. Clicking an active chip deselects it — the reading
+ * the ✕ was wrongly offering, now attached to something that means it. Delete
+ * moves behind an explicit Edit mode, where destroying a vibe is the only
+ * thing on offer and cannot be hit while reaching for something else.
+ */
+export function renderVibeChips(
+  vibes,
+  { onApply, onDeselect, onSave, onDelete, onParam, editing = false, onToggleEdit },
+) {
   return h(
     'div',
     {},
@@ -452,18 +475,28 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete, onParam }) {
           h(
             'button',
             {
-              class: 'chip chip--vibe',
-              dataset: { state: active ? 'include' : 'off' },
-              title: vibe.param
-                ? `Pick a ${vibe.param.label ?? 'value'} for this one`
-                : vibe.tags.length
-                  ? `Tagged: ${vibe.tags.join(', ')}`
-                  : `${vibe.resolved_lists.length} list(s)`,
+              class: `chip chip--vibe${editing ? ' chip--deleting' : ''}`,
+              dataset: { state: active && !editing ? 'include' : 'off' },
+              title: editing
+                ? `Delete the "${vibe.name}" vibe`
+                : active && !vibe.param
+                  ? 'Click again to deselect'
+                  : vibe.param
+                    ? `Pick a ${vibe.param.label ?? 'value'} for this one`
+                    : vibe.tags.length
+                      ? `Tagged: ${vibe.tags.join(', ')}`
+                      : `${vibe.resolved_lists.length} list(s)`,
               onClick: () => {
+                // In Edit mode a chip does one thing only. Applying a vibe you
+                // meant to delete is recoverable; the reverse is not.
+                if (editing) return onDelete(vibe);
                 // A parametric vibe cannot be applied by clicking it — it has
                 // no answer yet. The ▾ says so before the click rather than
-                // after, which is why it is part of the label.
+                // after, which is why it is part of the label. It keeps opening
+                // the picker even when active, because that is what the ▾
+                // promises; the picker carries its own Clear.
                 if (vibe.param) return onParam(vibe);
+                if (active) return onDeselect();
                 applyVibe(vibe);
                 onApply();
               },
@@ -479,32 +512,37 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete, onParam }) {
                 : `${vibe.name} ▾`
               : vibe.name,
           ),
-          // The remove affordance only appears on the active chip, so the row
-          // stays a row of choices rather than a row of choices-and-buttons.
-          active
-            ? h(
-                'button',
-                {
-                  class: 'vibe-remove',
-                  title: `Delete the "${vibe.name}" vibe`,
-                  onClick: () => onDelete(vibe),
-                },
-                '✕',
-              )
-            : null,
         );
       }),
       // Saving the CURRENT setup is the only creation path: you tune lists and
       // filters until the pool looks right, then keep it. A blank form would
-      // ask you to imagine the result instead of seeing it.
-      h(
-        'button',
-        { class: 'chip chip--vibe chip--save', title: 'Save the current lists and filters as a new vibe', onClick: onSave },
-        '+ Save current…',
-      ),
-      poolState.vibe === null
-        ? h('span', { class: 'faint', style: 'align-self:center' }, 'Custom')
+      // ask you to imagine the result instead of seeing it. Hidden in Edit
+      // mode, which is about removing vibes, not adding one.
+      editing
+        ? null
+        : h(
+            'button',
+            { class: 'chip chip--vibe chip--save', title: 'Save the current lists and filters as a new vibe', onClick: onSave },
+            '+ Save current…',
+          ),
+      // No vibes, nothing to edit — the toggle would open a mode with no
+      // subject.
+      vibes.length
+        ? h(
+            'button',
+            {
+              class: 'vibe-edit',
+              title: editing ? 'Stop editing' : 'Delete a vibe',
+              onClick: onToggleEdit,
+            },
+            editing ? 'Done' : 'Edit',
+          )
         : null,
+      editing
+        ? h('span', { class: 'faint', style: 'align-self:center' }, 'Pick one to delete')
+        : poolState.vibe === null
+          ? h('span', { class: 'faint', style: 'align-self:center' }, 'Custom')
+          : null,
     ),
   );
 }

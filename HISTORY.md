@@ -1219,3 +1219,53 @@ right shape.
 > that failed. So the match rate guards the recoverable failure while nothing
 > guards the unrecoverable one. Measured false-positive rate on the Spanish
 > list was about 3–4% before the language preference; it is unmeasured after.
+
+---
+
+## 8. v5
+
+### 8.1 The vibe row: deselect, and delete somewhere deliberate
+
+A ✕ sat against the active vibe chip and deleted the vibe. Reported from real
+use as a button too risky to sit there, and that reading is correct: beside an
+active selection, the only thing a ✕ plausibly announces is "clear this
+selection". Its obvious meaning and its real effect were different, and the
+price of the confusion was a saved vibe destroyed by someone reaching to
+unselect one.
+
+The two meanings are now separate controls. Clicking an active chip deselects
+it — the reading the ✕ was falsely offering, attached to something that means
+it. Deletion moved behind an Edit toggle, where every chip is a delete button
+at once, because a single dangerous chip sitting in a row of ordinary ones
+would be the same trap rebuilt.
+
+**Deselecting had to undo the vibe, not just drop its label.** Dropping the
+label is one line and wrong: the row would go quiet while the pool that vibe
+built stayed in play, leaving a Custom pool nobody customised. It returns to
+the app default instead — the lists the Lists tab marks active, no filters, no
+top-N — so there is one "no vibe" state rather than one per vibe you happened
+to leave from.
+
+Two consequences that were not obvious going in:
+
+- **Deleting a vibe no longer always means deleting the active one.** The old ✕
+  only rendered on the active chip, so clearing the vibe label on delete was
+  unconditional and correct. Edit mode can delete any chip, so that had to be
+  gated — otherwise deleting an unused vibe would silently un-label the one
+  still applied.
+- **A parametric vibe cannot use click-to-deselect.** Its chip carries a ▾ and
+  promises a chooser, so clicking it must keep opening the picker. Without
+  something else it would have become the one kind of vibe with no way out, so
+  the picker carries its own Clear whenever that vibe is the one in play.
+
+### 8.2 Applying a vibe no longer unfolds Pool setup
+
+**A reversal.** It opened the panel on the reasoning that a vibe changes the
+whole pool, so the host should see what it did rather than take a summary on
+faith. Use disagreed: the point of a vibe is not having to look, and unfolding
+the panel every time buried the Draw button under a control surface nobody
+asked for. The count under the button already reports the change, and the panel
+is one click away.
+
+The comment that carried the original reasoning was rewritten in place rather
+than deleted, so the next reader finds out it was tried and why it lost.

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { poolState, emptyFilters } from '../public/pool-state.js';
-import { applyVibe } from '../public/vibes.js';
+import { applyVibe, clearVibe } from '../public/vibes.js';
 
 // `pool-state.js` and `vibes.js` touch no DOM, so they import straight into
 // node — no stub needed, unlike the view modules.
@@ -51,6 +51,67 @@ test('a preset carrying a range is not rewritten by typing in the range input', 
 
   applyVibe(vibe);
   assert.equal(poolState.filters.year.min, 1970);
+});
+
+// --- Deselecting -----------------------------------------------------------
+//
+// Clicking an active chip now deselects it. That has to UNDO the vibe, not
+// merely drop its label: the old ✕ next to the active chip looked like it
+// meant "clear this selection" and actually deleted the vibe, and the fix is
+// only a fix if the thing that replaces it does what the ✕ appeared to offer.
+
+const allLists = [
+  { id: 1, is_active: true },
+  { id: 2, is_active: false },
+  { id: 3, is_active: true },
+];
+
+test('deselecting returns the pool to the lists marked active by default', () => {
+  applyVibe({ id: 4, name: 'Family', filters: {}, resolved_lists: [2, 7, 8] });
+  clearVibe(allLists);
+
+  assert.deepEqual(poolState.selectedLists(), [1, 3]);
+  assert.equal(poolState.vibe, null, 'the chip row must read Custom afterwards');
+});
+
+test('deselecting clears the filters and the top-N the vibe brought with it', () => {
+  applyVibe({
+    id: 9,
+    name: 'Seventies',
+    filters: { year: { min: 1970, max: 1979 }, topN: 100 },
+    resolved_lists: [1],
+  });
+  assert.equal(poolState.setup.topN, 100, 'guard: the vibe really did set a cut');
+
+  clearVibe(allLists);
+
+  assert.deepEqual(poolState.filters, emptyFilters(), 'a vibe’s filters must not outlive it');
+  assert.equal(poolState.setup.topN, null);
+});
+
+test('deselecting twice lands in the same place as deselecting once', () => {
+  // There is one "no vibe" state, not one per vibe you happened to leave from.
+  applyVibe({ id: 4, name: 'Family', filters: { year: { min: 2000, max: null } }, resolved_lists: [2] });
+  clearVibe(allLists);
+  const once = structuredClone(poolState.setup);
+
+  applyVibe({ id: 9, name: 'Seventies', filters: { runtime: { min: null, max: 100 } }, resolved_lists: [1, 2, 3] });
+  clearVibe(allLists);
+
+  assert.deepEqual(poolState.setup, once);
+});
+
+test('deselecting does not alias the caller’s list array', () => {
+  // Same hazard applyVibe already guards: the setup must own its arrays, or a
+  // later chip click edits the caller's data.
+  clearVibe(allLists);
+  poolState.setSelected(2, true);
+
+  assert.deepEqual(
+    allLists.filter((list) => list.is_active).map((list) => list.id),
+    [1, 3],
+    'the lists passed in were mutated',
+  );
 });
 
 test('a preset still replaces pool setup wholesale rather than merging into it', () => {

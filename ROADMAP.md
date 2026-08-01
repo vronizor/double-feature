@@ -23,8 +23,6 @@ themselves.
 | Award badge years | ⏳ ready | Show the year each award is naturally labelled by. Needs the honoured year **scraped** from the ceremony article, never derived — see `BACKLOG.md` |
 | One rating primary, other on hover | ⏳ ready | Two scores on one line compete for the same glance. Pick one in settings, reveal the other on hover, and drop the vote count from display entirely |
 | ISO abbreviations for chips | ⏳ ready | "United States of America" is wider than the row it sits in. Display map only — `movies.countries` keeps full names |
-| The vibe `✕` is too easy to hit | ⏳ ready | It reads as "clear this selection" and deletes the vibe. Clicking an active chip should deselect; deletion moves somewhere deliberate |
-| Do not auto-expand Pool setup | ⏳ ready | **Reverses a decision recorded in `views/draw.js`** — update that comment rather than leaving it contradicting the code |
 | `includeWatched` default | 🗣 open | README says exclude, the UI ships include. Inert until something is actually marked watched |
 | LICENSE, and seed-list provenance | 🗣 open | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag — see `docs/evidence/publication-audit.md` |
 
