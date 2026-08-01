@@ -17,7 +17,7 @@ themselves.
 
 | Item | State | Where it stands |
 |---|---|---|
-| Box office — Spain (ICAA) | ⏳ ready | Enumeration exists (an undocumented `Ano` filter), fuzzy matching accepted here and nowhere else, 90% match floor declared — see §1 |
+| Box office — Spain (ICAA) | 👀 seed built | Enumeration exists (an undocumented `Ano` filter), fuzzy matching accepted here and nowhere else, 90% match floor declared — see §1 |
 | Alternative ratings — IMDb | ✅ landed | 3,819 of 3,824 films carry an id; 3,808 matched a rating. Shown beside the TMDB score above a 1,000-vote floor. `npm run imdb-ratings` re-syncs |
 | Alternative ratings — Letterboxd | ⏳ ready | **Research, not a build.** Their terms decide it. Writing down the answer *is* the deliverable; a build is unscheduled until that answer is yes |
 | National cinema night | ⏳ ready | One parametric vibe. **Decided: filter cached `movies.countries` for v4**, rather than discovering new films — see §3 |
@@ -141,6 +141,44 @@ Two consequences for the build:
 
 Rough cost: ~3,000 listing requests across ~75 years, plus one detail page per
 Spanish film for the *espectadores* figure. Comparable to the France build.
+
+**Built 2026-08-01: 1,567 films, 1945–2026, 93.4% confidently matched.**
+Four matching rounds, each fixing a diagnosed cause rather than tuning a
+threshold:
+
+```
+first probe                                71.2%
++ year window, parentheticals, top-20      80.0%
++ language=es-ES                           91.9%  (sampled years)
+full 82-year range                         89.9%  → floor REFUSED the seed
++ gap-fill after silent fetch failures     90.0%  → passed by one film
++ numerals, superscripts, prefixes, no year filter   93.4%
+```
+
+The 90.0% pass is the one worth remembering: it cleared the floor while
+*8 Apellidos Vascos* — the biggest Spanish film ever made — sat unmatched, along
+with *Volver*, *Torrente 4* and two other #1s of their year. A number can pass a
+test the thing it describes would fail. The last round was run because the
+**unmatched list** looked wrong, not because the rate did.
+
+Four causes, each verified against TMDB before being fixed:
+
+- **The year was used as a search FILTER.** ICAA records the classification
+  year, so `Volver` under 2005 returned unrelated films while the real one is
+  dated 2006 — and `searchMovie`'s existing "retry without a year" fallback
+  never fired, because it triggers on zero results, not on wrong ones. The year
+  is now a tolerance applied after the search, never a filter.
+- **Spanish spells numbers out.** `8 Apellidos Vascos` and `Ocho apellidos
+  vascos` share no comparable token.
+- **Superscripts vanish in normalisation.** `[REC]²` became `rec`, losing the
+  sequel number entirely and no longer matching `Rec 2`.
+- **TMDB appends subtitles the Spanish release never had** — `Torrente 4:
+  Lethal crisis`, `Padre no hay más que uno 4: Campanas de boda`. A prefix match
+  at a word boundary, minimum six characters, so `Rec` cannot swallow `Rec 2`.
+
+**103 entries carry no `tmdb_id` and go to `needs_review`** with their
+candidates, exactly as an imported custom list does — the list is complete, and
+the match rate is a work queue rather than a loss.
 
 **Probe result: 91.9% across eight sampled years — the floor is cleared.**
 Sampled one year per decade rather than one contiguous decade, because coverage

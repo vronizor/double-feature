@@ -219,7 +219,13 @@ async function resolve(film) {
   // returns as its English one and fails the exact-title check — which is what
   // "La Ciudad de los Niños Perdidos" was doing while TMDB returned it as the
   // single top hit.
-  const results = await searchMovie({ title: query, year: film.year, language: 'es-ES' });
+  // Searched WITHOUT the year on purpose. ICAA records the classification year,
+  // so passing it narrows TMDB to the wrong twelve months: `Volver` under 2005
+  // returns unrelated films while the real one is dated 2006, and the "retry
+  // without a year" fallback never fires because it only triggers on ZERO
+  // results, not on wrong ones. The year still disambiguates -- it is applied
+  // below as a tolerance rather than as a filter.
+  const results = await searchMovie({ title: query, language: 'es-ES' });
 
   let best = null;
   for (const candidate of results) {
@@ -233,7 +239,11 @@ async function resolve(film) {
       scored.candidateYear === null
         ? false
         : Math.abs(scored.candidateYear - film.year) <= YEAR_TOLERANCE;
-    const confident = scored.titleExact && withinYear;
+    const titleOk =
+      scored.titleExact ||
+      titlesMatch(query, candidate.title) ||
+      titlesMatch(query, candidate.original_title ?? '');
+    const confident = titleOk && withinYear;
     if (!best || scored.score > best.scored.score) best = { candidate, scored, confident };
   }
   return { ...film, title, best };
@@ -265,6 +275,59 @@ export function searchTitle(title) {
  * is the only reason it is in the comparison at all.
  */
 const YEAR_TOLERANCE = 2;
+
+/**
+ * Spanish spells small numbers out where the catalogue writes digits, so
+ * "8 Apellidos Vascos" and TMDB's "Ocho apellidos vascos" are the same film
+ * and share not one comparable token. Only 1-20 plus the round hundreds are
+ * worth carrying: past that, films use digits on both sides.
+ */
+const NUMBER_WORDS = {
+  1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco', 6: 'seis', 7: 'siete',
+  8: 'ocho', 9: 'nueve', 10: 'diez', 11: 'once', 12: 'doce', 13: 'trece',
+  14: 'catorce', 15: 'quince', 16: 'dieciseis', 17: 'diecisiete',
+  18: 'dieciocho', 19: 'diecinueve', 20: 'veinte', 100: 'cien', 1000: 'mil',
+};
+
+/**
+ * Every way the same title can be written, for comparison only.
+ *
+ * Superscripts first: `[REC]²` normalises to "rec" because ² is not in the
+ * a-z0-9 range `normalizeTitle` keeps, so the sequel number vanishes entirely
+ * and it stops matching "Rec 2".
+ */
+function titleVariants(title) {
+  const supers = { '\u00b2': '2', '\u00b3': '3', '\u00b9': '1' };
+  const base = String(title).replace(/[\u00b2\u00b3\u00b9]/g, (c) => supers[c]);
+  const out = new Set([base]);
+  // Digits to words and back, so either side of the comparison can be the one
+  // written differently.
+  out.add(base.replace(/\b(\d{1,4})\b/g, (m, d) => NUMBER_WORDS[Number(d)] ?? m));
+  for (const [n, word] of Object.entries(NUMBER_WORDS)) {
+    out.add(base.replace(new RegExp(`\\b${word}\\b`, 'gi'), n));
+  }
+  return [...out];
+}
+
+/**
+ * Whether two titles name the same film.
+ *
+ * Exact after normalisation, OR the candidate STARTS with the query at a word
+ * boundary — because TMDB routinely carries a subtitle the Spanish release did
+ * not: "Torrente 4" is listed as "Torrente 4: Lethal crisis", and "Padre no hay
+ * mas que uno 4" as "... 4: Campanas de boda". A prefix is only accepted from
+ * six characters up, so "Rec" cannot swallow "Rec 2".
+ */
+function titlesMatch(query, candidate) {
+  for (const q of titleVariants(query).map(normalizeTitle)) {
+    if (!q) continue;
+    for (const c of titleVariants(candidate).map(normalizeTitle)) {
+      if (q === c) return true;
+      if (q.length >= 6 && c.startsWith(q + ' ')) return true;
+    }
+  }
+  return false;
+}
 
 async function main() {
   // Years are given individually so a probe can SAMPLE across decades rather
