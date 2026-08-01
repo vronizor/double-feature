@@ -14,6 +14,11 @@ const DEFAULTS = {
   // Awards are shown by default: they're the interesting thing about a film
   // that a poster can't tell you, and 21% of the library has one.
   showAwards: true,
+  // Which score leads on a card, the other going to hover. TMDB by default
+  // because it is the one every film in the library has — IMDb's is absent
+  // below the vote floor, and a default that is sometimes missing would make
+  // the setting look broken rather than empty.
+  primaryRating: 'tmdb',
 };
 
 function load() {
@@ -32,6 +37,13 @@ const state = load();
 export const prefs = {
   get showAwards() {
     return state.showAwards;
+  },
+
+  get primaryRating() {
+    // Anything unrecognised reads as TMDB rather than blanking every rating on
+    // the page — this comes back from localStorage, which older versions of
+    // this app wrote without the key at all.
+    return state.primaryRating === 'imdb' ? 'imdb' : 'tmdb';
   },
 
   set(key, value) {

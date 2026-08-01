@@ -213,14 +213,22 @@ label { display: block; }
 .chip--vibe { font-size: 0.88rem; padding: 6px 14px; }
 .chip--save { border-style: dashed; color: var(--text-dim); }
 
-/* The delete affordance is tucked against its chip and only rendered for the
-   active one, so the row stays a row of choices. */
 .vibe-chip-wrap { display: inline-flex; align-items: center; gap: 2px; }
-.vibe-remove {
-  background: none; border: none; padding: 2px 5px; cursor: pointer; line-height: 1;
-  color: var(--text-faint); font-size: 0.78rem;
+
+/* Deletion lives in an explicit Edit mode rather than on a ✕ beside the active
+   chip, where it read as "clear this selection". In that mode every chip is a
+   delete button, so the whole row is coloured as one — a single chip styled as
+   dangerous inside a row of ordinary ones would be the same trap again. */
+.vibe-edit {
+  background: none; border: none; padding: 2px 8px; cursor: pointer; line-height: 1;
+  color: var(--text-faint); font-size: 0.78rem; text-decoration: underline; align-self: center;
 }
-.vibe-remove:hover { color: var(--danger); }
+.vibe-edit:hover { color: var(--text); }
+.chip--deleting {
+  border-color: var(--danger); color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+}
+.chip--deleting:hover { background: color-mix(in srgb, var(--danger) 28%, transparent); }
 
 .range { display: flex; align-items: center; gap: 8px; }
 .range input { width: 100%; }
@@ -488,7 +496,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* IMDb's score sits beside TMDB's, dimmer: it is a second opinion, not a
    competing headline. */
-.movie-rating--imdb { color: var(--text-faint); }
 
 /* Names the selection behind the films on screen — without it, a filmography
    looks like the library changed. */

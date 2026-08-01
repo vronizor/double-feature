@@ -315,6 +315,17 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
+- **A Box-office vibe.** *(From field notes, 2026-08-01.)* One chip selecting
+  the box-office lists, the way Awards selects the award lists. Deferred rather
+  than done because it is worth one chip only once there is more than one such
+  list to gather: France and Spain are seeded, the US is a live v5 item, and the
+  vibe is more useful built on top of the finished set than added now and
+  edited twice.
+
+- **Building a rank onto parametric lists.** *(From field notes, 2026-08-01.)*
+  v5 answers only whether it is possible — see `ROADMAP.md`. The build lands
+  here if the answer is yes.
+
 - **Let the reconciliation screen reach ALREADY-RESOLVED entries, not only
   those under review.** Today it lists `needs_review` rows. A row that matched
   *confidently but wrongly* is `resolved`, so it never appears there and nobody
@@ -325,10 +336,17 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   wrong match is invisible and permanent. The match-rate floor guards the
   recoverable failure; nothing guards the unrecoverable one.
 
-  Concretely, in the Spanish list as seeded: **Marco (2024)** resolved to the
-  Malayalam action film of the same name and year, and **Tierra de Nadie** to
-  the American thriller *Mob Land* — both `resolved`, both unreachable from any
-  screen. Measured false-positive rate about 3–4% on a 57-pair inspection.
+  > **The two examples this item used to cite are FIXED and must not be quoted
+  > as live.** *Marco* (2024) resolving to the Malayalam film of identical
+  > title and year, and *Tierra de Nadie* to *Mob Land*, were both corrected by
+  > the Spanish-language candidate preference at the end of v4 — verified
+  > against the database 2026-08-01: they now resolve to *Marco* (`es`) and
+  > *Barren Land* (Spain/Mexico). Left here because the paragraph misled a
+  > later session into reporting them as live defects. **The problem is real;
+  > those instances are not.** The measured false-positive rate of about 3–4%
+  > on a 57-pair inspection was taken *before* that fix and is unmeasured
+  > after — which is itself the argument for this item, since nothing would
+  > tell you if it had got worse.
 
   Wanted: browse a list's resolved entries, see what each matched to, and
   re-open one for correction. Cheap in principle — `list_movies` already stores

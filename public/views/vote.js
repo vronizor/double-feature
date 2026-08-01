@@ -1,4 +1,4 @@
-import { h, clear, posterUrl, toast, plural, formatRating, keepNameTogether, openMovieModal, originalTitleLine } from '../dom.js';
+import { h, clear, posterUrl, toast, plural, ratingLine, keepNameTogether, openMovieModal, originalTitleLine } from '../dom.js';
 import { api } from '../api.js';
 import { toggleRank, rankOf, toBallot } from '../ranking.js';
 import { renderResults } from './session.js';
@@ -68,7 +68,6 @@ export async function renderVote(container, slug) {
   function movieCard(movie) {
     const rank = rankOf(state.ranked, movie.tmdb_id);
     const poster = posterUrl(movie.poster_path);
-    const rating = formatRating(movie.vote_average);
 
     return h(
       'article',
@@ -105,7 +104,10 @@ export async function renderVote(container, slug) {
           'div',
           { class: 'movie-meta' },
           [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
-          rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
+          // The vote screen used to show TMDB's score and nothing else, so
+          // guests ranking films saw a different number from the host who drew
+          // them. Sharing the helper settles that as a side effect.
+          ratingLine(movie),
         ),
         h(
           'div',

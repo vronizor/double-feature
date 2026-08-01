@@ -8,11 +8,12 @@ import {
   renderParamPicker,
   renderTagFilter,
   renderAwardsToggle,
+  renderRatingToggle,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
 import { poolState } from '../pool-state.js';
-import { applyVibe, currentAsVibe } from '../vibes.js';
+import { applyVibe, clearVibe, currentAsVibe } from '../vibes.js';
 
 const MIN_DRAW_SIZE = 1;
 const MAX_DRAW_SIZE = 10;
@@ -52,6 +53,11 @@ export async function renderDraw(container) {
     tagFilter: null,
     vocabulary: [],
     vibes: [],
+    // Edit mode for the vibe row: chips delete instead of applying. Presentation
+    // state, and deliberately not sticky — it resets on every mount, because a
+    // destructive mode you left switched on last time is one you have forgotten
+    // about by the time you come back.
+    editingVibes: false,
     size: 2,
     searchResults: [],
     anonymous: false,
@@ -261,7 +267,16 @@ export async function renderDraw(container) {
       state.vibes = vibes;
       // The pool it produced stays exactly as it is — deleting the shortcut
       // shouldn't silently change what you're about to draw from.
-      poolState.markCustom();
+      //
+      // Gated on it being the ACTIVE vibe, which it no longer always is: the
+      // old ✕ was rendered only on the active chip, so an ungated markCustom()
+      // was correct then. Edit mode can delete any chip, and dropping the label
+      // off a vibe that is still applied would report a Custom pool that nobody
+      // customised.
+      if (poolState.vibe === vibe.id) poolState.markCustom();
+      // Nothing left to edit — hold the host in a mode whose subject is gone
+      // and the only way out is a Done button beside an empty row.
+      if (vibes.length === 0) state.editingVibes = false;
       toast(`Deleted "${vibe.name}"`, 'ok');
       paint();
     } catch (error) {
@@ -305,16 +320,35 @@ export async function renderDraw(container) {
       // next door is deliberately untouched by them.
       renderVibeChips(state.vibes, {
         onApply: () => {
-          // Applying a vibe changes the whole pool, so the setup panel opens
-          // to show what it actually did rather than leaving the host to take
-          // a one-line summary on faith.
-          state.poolSetupOpen = true;
+          // Deliberately does NOT open Pool setup.
+          //
+          // It used to, on the reasoning that applying a vibe changes the whole
+          // pool so the host should see what it did rather than take a one-line
+          // summary on faith. Reversed from use: the whole point of a vibe is
+          // not having to look, and unfolding the panel every time buries the
+          // Draw button under a control surface nobody asked for. The count
+          // under the button already says what changed, and Pool setup is one
+          // click away for anyone who does want the detail.
+          refreshCount();
+          refreshFacets();
+          paint();
+        },
+        onDeselect: () => {
+          clearVibe(state.lists);
           refreshCount();
           refreshFacets();
           paint();
         },
         onSave: saveCurrentAsVibe,
         onDelete: removeVibe,
+        editing: state.editingVibes,
+        onToggleEdit: () => {
+          state.editingVibes = !state.editingVibes;
+          // Close any open picker: it belongs to the applying half of the row,
+          // and leaving it up under a row that now deletes is a mixed message.
+          state.paramVibe = null;
+          paint();
+        },
         onParam: (vibe) => {
           // Toggle: clicking the chip again closes the picker rather than
           // leaving a panel the only way out of is choosing someone.
@@ -328,6 +362,18 @@ export async function renderDraw(container) {
               state.paramVibe = null;
               paint();
             },
+            // Only offered when this vibe is the one actually in play, so
+            // "Clear" always has something to clear.
+            onClear:
+              poolState.vibe === state.paramVibe.id
+                ? () => {
+                    state.paramVibe = null;
+                    clearVibe(state.lists);
+                    refreshCount();
+                    refreshFacets();
+                    paint();
+                  }
+                : null,
             onChosen: async (person) => {
               const vibe = state.paramVibe;
               state.paramVibe = null;
@@ -358,7 +404,9 @@ export async function renderDraw(container) {
                 } else {
                   applyVibe(resolved);
                 }
-                state.poolSetupOpen = true;
+                // Same reversal as onApply above: no auto-expand. This path
+                // says even more without it — the toast names the value that
+                // was chosen and how many films it found.
                 toast(`${applied.name} — ${applied.count} films`);
                 refreshCount();
                 refreshFacets();
@@ -872,6 +920,7 @@ export async function renderDraw(container) {
           h('h2', {}, `Your lineup${lineup.movies.length ? ` (${lineup.movies.length})` : ''}`),
           h('span', { class: 'spacer' }),
           renderAwardsToggle(paint),
+          renderRatingToggle(paint),
         ),
         lineupGrid(),
       ),

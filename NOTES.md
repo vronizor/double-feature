@@ -25,3 +25,10 @@ _Six notes filed 2026-07-31 and cleared: one fixed in v4 (director names
 splitting across lines), one answered as a decision rather than a bug (award
 badge years — the data was right, the label is disputed), and four scheduled to
 v5. Nothing outstanding._
+
+_Four notes filed 2026-08-01 and cleared. Three to `ROADMAP.md` v5: whether a
+parametric list can be ranked (investigation only — the build is v6), "Custom"
+looking like a chip you can press, and the dangling `·` left behind when a
+director's name wraps. One to `BACKLOG.md` v6: a Box-office vibe, held until
+the US list exists so the chip is built once over the finished set rather than
+edited twice. Nothing outstanding._

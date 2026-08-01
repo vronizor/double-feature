@@ -36,6 +36,27 @@ export function applyVibe(vibe) {
 }
 
 /**
+ * Deselecting: the pool returns to the app's default — whatever the Lists tab
+ * marks active, with no filters and no top-N cut.
+ *
+ * Dropping the label alone would be cheaper and wrong. "Unselect" has to undo
+ * what selecting did, or the chip row goes quiet while the pool that vibe built
+ * stays in play, and the host is left looking at a Custom pool they did not
+ * build. The default is the same one a fresh load shows, so there is exactly
+ * one "no vibe" state rather than one per vibe you happened to deselect from.
+ *
+ * Takes the lists rather than reading them back, because `poolState.seedFrom`
+ * is a first-load-only guard and deliberately will not run twice.
+ */
+export function clearVibe(lists) {
+  poolState.applyVibe(null, {
+    lists: lists.filter((list) => list.is_active).map((list) => list.id),
+    topN: null,
+    filters: emptyFilters(),
+  });
+}
+
+/**
  * The payload for saving the current pool setup as a new vibe.
  *
  * Deliberately saves the CONCRETE list selection rather than trying to infer

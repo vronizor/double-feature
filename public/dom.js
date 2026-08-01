@@ -1,5 +1,10 @@
 /** Tiny DOM helpers — no framework, no build step. */
 
+// The only import this module has, and it stays that way: prefs.js imports
+// nothing, so there is no cycle to create. `ratingLine` needs it because which
+// score leads is a stored preference, not a property of the film.
+import { prefs } from './prefs.js';
+
 export function h(tag, props = {}, ...children) {
   const el = document.createElement(tag);
   for (const [key, value] of Object.entries(props ?? {})) {
@@ -179,6 +184,87 @@ export const formatImdb = (movie) =>
     ? movie.imdb_rating.toFixed(1)
     : null;
 
+const RATING_SOURCES = {
+  tmdb: { name: 'TMDB', read: (movie) => formatRating(movie.vote_average), show: (value) => `★ ${value}` },
+  imdb: { name: 'IMDb', read: (movie) => formatImdb(movie), show: (value) => `IMDb ${value}` },
+};
+
+/**
+ * The rating, as ONE number.
+ *
+ * Both scores used to sit on the same line — "★ 6.9 · IMDb 7.3" — which asks
+ * the reader to arbitrate between two authorities before they can read a
+ * film's score at all. Two numbers competing for the same glance means neither
+ * gets it. So one leads and the other is on hover, and WHICH one leads is a
+ * preference rather than a decision made here, because which source you trust
+ * is a taste and not a fact.
+ *
+ * **The vote count is gone from the display entirely.** It hung off the IMDb
+ * score alone, which made the two read as different kinds of number, and it
+ * answered a question nobody asks while picking a film. The vote FLOOR still
+ * does that job, silently, inside formatImdb — a score shown is a score with
+ * an audience behind it, and that is the whole point of the floor.
+ *
+ * Falls back to whichever score exists: preferring IMDb on a film that has no
+ * IMDb score should show TMDB's, not nothing. So the preference orders the two
+ * rather than selecting one.
+ */
+export function chooseRating(movie, preferred = 'tmdb') {
+  const first = preferred === 'imdb' ? 'imdb' : 'tmdb';
+  const second = first === 'imdb' ? 'tmdb' : 'imdb';
+
+  // The preference ORDERS the two rather than selecting one, so a film with no
+  // IMDb score still shows TMDB's when IMDb leads.
+  const [lead, other] =
+    RATING_SOURCES[first].read(movie) !== null ? [first, second] : [second, first];
+
+  const shown = RATING_SOURCES[lead].read(movie);
+  if (shown === null) return null;
+  const hidden = RATING_SOURCES[other].read(movie);
+
+  return {
+    text: RATING_SOURCES[lead].show(shown),
+    // Null rather than an empty string when there is no second opinion: an
+    // empty tooltip is worse than none, and absent still means "not enough
+    // votes", never "badly rated".
+    title: hidden === null ? null : `${RATING_SOURCES[other].name} ${hidden}`,
+  };
+}
+
+/** The node. `chooseRating` holds the decision, so it can be tested without a DOM. */
+export function ratingLine(movie) {
+  const chosen = chooseRating(movie, prefs.primaryRating);
+  if (!chosen) return null;
+  return h('span', { class: 'movie-rating', title: chosen.title }, ` · ${chosen.text}`);
+}
+
+/**
+ * Shorter names for the country chips, and only for the chips.
+ *
+ * "United States of America" is wider than the row it sits in. This is a
+ * display map with a fall-through, NOT a translation of the data: the filter
+ * still keys on the full name, movies.countries still stores it, and anything
+ * missing from this map renders as itself.
+ *
+ * Deliberately not ISO codes for everything. A row reading FR · US · IT · GB ·
+ * DE · JP · BE · ES · SE · CA · CH · MX is uniformly compact and uniformly
+ * unreadable — "CH" and "SE" are guesses for most people, while "France" was
+ * never the problem. Only the names that actually overflow get shortened, in
+ * the form people say out loud rather than the form a standard prescribes.
+ * The full name stays on hover.
+ */
+const COUNTRY_SHORT = {
+  'United States of America': 'USA',
+  'United Kingdom': 'UK',
+  'Soviet Union': 'USSR',
+  'United Arab Emirates': 'UAE',
+  'South Korea': 'S. Korea',
+  'Czech Republic': 'Czechia',
+  'New Zealand': 'NZ',
+};
+
+export const countryLabel = (name) => COUNTRY_SHORT[name] ?? name;
+
 // TV-sourced entries (e.g. Histoire(s) du cinéma, catalogued on TMDB as a TV
 // series) are stored keyed by the negation of their real TMDB id — see the
 // schema comment on `movies` — so building the right public URL needs both
@@ -316,7 +402,6 @@ function trailerBlock(movie) {
  * Escape.
  */
 export function openMovieModal(movie) {
-  const rating = formatRating(movie.vote_average);
   const poster = posterUrl(movie.poster_path, 'w342');
 
   const onKeydown = (event) => {
@@ -356,14 +441,7 @@ export function openMovieModal(movie) {
           'div',
           { class: 'movie-meta' },
           [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
-          rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
-          formatImdb(movie)
-            ? h(
-                'span',
-                { class: 'movie-rating movie-rating--imdb', title: `${movie.imdb_votes.toLocaleString()} IMDb votes` },
-                ` · IMDb ${formatImdb(movie)}`,
-              )
-            : null,
+          ratingLine(movie),
         ),
         h(
           'div',
