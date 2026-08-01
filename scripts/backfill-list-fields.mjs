@@ -44,9 +44,17 @@ async function backfillList(db, file) {
   const list = db.prepare('SELECT id FROM lists WHERE name = ?').get(payload.name);
   if (!list) return { name: payload.name, missing: true };
 
-  // Same identity the seeder writes rows under. raw_year needs the IS NULL
-  // branch because `raw_year = NULL` is never true in SQL, so an entry with no
-  // year would silently match nothing.
+  // Same identity the seeder writes rows under, and it has to STAY the same:
+  // if the seeder keys on tmdb_id and this script does not, it silently stops
+  // finding the rows it exists to repair -- reporting "not found" for every
+  // entry whose title was ever corrected, with nothing failing.
+  //
+  // tmdb_id first when the entry has one, title+year as the fallback. raw_year
+  // needs the IS NULL branch because `raw_year = NULL` is never true in SQL,
+  // so an entry with no year would silently match nothing.
+  const byTmdbId = db.prepare(
+    'SELECT * FROM list_movies WHERE list_id = ? AND tmdb_id = ?',
+  );
   const withYear = db.prepare(
     'SELECT * FROM list_movies WHERE list_id = ? AND raw_title = ? AND raw_year = ?',
   );
@@ -59,9 +67,10 @@ async function backfillList(db, file) {
 
   for (const entry of entries) {
     const row =
-      entry.year === undefined || entry.year === null
+      (Number.isInteger(entry.tmdb_id) ? byTmdbId.get(list.id, entry.tmdb_id) : null) ??
+      (entry.year === undefined || entry.year === null
         ? withoutYear.get(list.id, entry.title)
-        : withYear.get(list.id, entry.title, entry.year);
+        : withYear.get(list.id, entry.title, entry.year));
 
     for (const field of present) {
       const value = entry[field.key];

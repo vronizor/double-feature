@@ -1,4 +1,4 @@
-import { h, clear, posterUrl, copyText, toast, formatDate, plural } from '../dom.js';
+import { h, clear, posterUrl, copyText, toast, formatDate, plural, keepNameTogether } from '../dom.js';
 import { api } from '../api.js';
 
 // A few seconds of lag is a non-issue at this scale, and polling is far less to
@@ -246,7 +246,7 @@ function compactCard(movie) {
       'div',
       { class: 'movie-body' },
       h('div', { class: 'movie-title' }, movie.title),
-      h('div', { class: 'movie-meta' }, [movie.year, movie.director].filter(Boolean).join(' · ')),
+      h('div', { class: 'movie-meta' }, [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · ')),
     ),
   );
 }

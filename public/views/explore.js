@@ -2,8 +2,8 @@ import { h, clear, plural, toast, preserveFocus } from '../dom.js';
 import { api } from '../api.js';
 import {
   renderFilterPanel,
+  selectionLabel,
   renderListPicker,
-  renderTopN,
   renderAwardsToggle,
   movieCard,
 } from '../browse.js';
@@ -133,6 +133,8 @@ export async function renderExplore(container) {
   function filterPanel() {
     if (!state.facets) return null;
     return renderFilterPanel(poolState.filters, state.facets, {
+      lists: state.lists,
+      onTopNChange: () => loadPage({ reset: true }),
       onChipChange: () => {
         poolState.markCustom();
         loadPage({ reset: true });
@@ -176,6 +178,11 @@ export async function renderExplore(container) {
       h(
         'span',
         { class: 'pool-count muted' },
+        // Without this, choosing a director shows ten films and nothing says
+        // whose they are — it reads as the library having changed.
+        selectionLabel(state.lists)
+          ? h('span', { class: 'selection-label' }, selectionLabel(state.lists), ' · ')
+          : null,
         state.total === 0 && !state.loading
           ? 'No films match'
           : h('span', {}, h('strong', {}, String(state.total)), ` ${plural(state.total, 'film', 'films')} match`),
@@ -250,7 +257,6 @@ export async function renderExplore(container) {
         ),
         listPicker(),
         searchBox(),
-        renderTopN(state.lists, () => loadPage({ reset: true })),
         filterPanel(),
         sortControl(),
         resultsGrid(),

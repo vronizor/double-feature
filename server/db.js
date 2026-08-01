@@ -1,10 +1,10 @@
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 
 import { config } from './config.js';
 
-const SCHEMA = `
+export const SCHEMA = `
 -- category groups lists in the picker ('canon', 'awards', 'family', ...) so
 -- that selecting "all the awards lists" is one action rather than five. It is
 -- deliberately a display grouping, not a taxonomy: a list may honestly belong
@@ -33,7 +33,12 @@ const SCHEMA = `
 CREATE TABLE IF NOT EXISTS lists (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   name            TEXT    NOT NULL UNIQUE,
-  kind            TEXT    NOT NULL CHECK (kind IN ('seed', 'custom')),
+  -- Where the list came from, and nothing else. It was called "kind" until
+  -- v4, which was a word doing too much: the roadmap used it for a second,
+  -- unrelated axis (curated / self-updating / a filter over metadata) that
+  -- turned out to need no column at all. Self-updating is query_json IS NOT
+  -- NULL, subject matter is list_tags, and a metadata filter was never a list.
+  origin          TEXT    NOT NULL CHECK (origin IN ('seed', 'custom')),
   category        TEXT,
   is_active       INTEGER NOT NULL DEFAULT 0,
   source          TEXT,
@@ -49,6 +54,11 @@ CREATE TABLE IF NOT EXISTS lists (
   -- NULL is fine and common: only award lists need one, and the UI falls back
   -- to stripping the qualifier off the full name.
   short_name      TEXT,
+  -- A slot list: rewritten wholesale each time a parametric vibe is given a
+  -- value, and kept out of the picker because it is not a list anyone curates.
+  -- It is an ordinary list in every other respect, which is the point -- the
+  -- draw, the filters, Top-N and publishing need no new code path to use it.
+  hidden          INTEGER NOT NULL DEFAULT 0,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -81,6 +91,16 @@ CREATE TABLE IF NOT EXISTS movies (
   overview          TEXT,
   original_language TEXT,
   vote_average      REAL,
+  -- IMDb's id (tt0047478), which TMDB returns in the detail response. Kept
+  -- because it is the ONLY exact join to IMDb's ratings dataset -- no title
+  -- matching anywhere. NULL is legitimate and common for shorts and for the
+  -- handful of TV-sourced entries.
+  imdb_id           TEXT,
+  -- IMDb's own score and vote count, refreshed from their public dataset.
+  -- Stored as derived numbers only: the dataset itself is licensed for
+  -- personal, non-commercial use and MUST NOT be committed to this repo.
+  imdb_rating       REAL,
+  imdb_votes        INTEGER,
   countries         TEXT,
   languages         TEXT,
   trailer_key       TEXT,
@@ -120,7 +140,15 @@ CREATE TABLE IF NOT EXISTS list_movies (
   tmdb_id         INTEGER          REFERENCES movies(tmdb_id) ON DELETE SET NULL,
   raw_title       TEXT    NOT NULL,
   raw_year        INTEGER,
+  -- The film's position WITHIN ITS YEAR on this list, which is what Top-N cuts
+  -- on: "the top 5 of each year" is era-balanced, "the top 100 overall" is not.
   rank            INTEGER,
+  -- The film's position across the WHOLE list, ignoring year. Answers "the
+  -- hundred biggest French films ever", which a per-year rank cannot express,
+  -- just as per-year answers "the top five of each year", which this cannot.
+  -- Both are stored because deriving either from the other needs the
+  -- underlying figure, and that is deliberately not kept.
+  overall_rank    INTEGER,
   -- The ceremony year, for award lists. Stored rather than derived from the
   -- release year because the offset differs per award: Cannes awards a film in
   -- its own release year, while the Oscars and the national awards run in the
@@ -200,10 +228,16 @@ CREATE INDEX IF NOT EXISTS list_tags_tag ON list_tags(tag);
 -- Built-ins are seeded with is_builtin = 1 but are otherwise ordinary rows:
 -- editable and deletable like any other, so there is one mechanism rather than
 -- two kinds of vibe to explain.
+-- param_json, when set, makes this a PARAMETRIC vibe: it needs a value chosen
+-- at selection time rather than resolving to a fixed set of lists. Shape is
+-- {kind, job, label} -- kind says what is being picked ('person'), job narrows
+-- the credit ('Director'), label names the control. Stored rather than
+-- hardcoded so actor's night is a row and not a second interaction.
 CREATE TABLE IF NOT EXISTS vibes (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   name         TEXT    NOT NULL UNIQUE,
   is_builtin   INTEGER NOT NULL DEFAULT 0,
+  param_json   TEXT,
   filters_json TEXT,
   position     INTEGER NOT NULL DEFAULT 0,
   created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
@@ -236,6 +270,17 @@ CREATE TABLE IF NOT EXISTS meta (
  * The tag vocabulary. Fixed on purpose — adding one is a deliberate edit here
  * rather than a side effect of a typo in a text field. Order is display order
  * in the picker.
+ *
+ * Every tag names a FAMILY — what a list is about — and never a mechanism.
+ * That distinction is why 'dynamic' was replaced by 'modern' (ROADMAP §6.4):
+ * it was doing two jobs at once, "this list updates itself" and "this list
+ * belongs to the modern-classics family", and the Modern Classics vibe
+ * resolves on it. With one query-backed list those two meanings coincided
+ * harmlessly. The second one — national cinema night — would have been swept
+ * into a vibe about recent acclaim purely for being self-updating.
+ *
+ * The mechanism half needs no tag at all: query_json IS NOT NULL already
+ * answers it, exactly, and is what findDynamicLists has always used.
  */
 export const TAGS = [
   'canon',
@@ -246,7 +291,7 @@ export const TAGS = [
   'comedy',
   'collection',
   'box-office',
-  'dynamic',
+  'modern',
 ];
 
 export const TAG_LABELS = {
@@ -258,7 +303,7 @@ export const TAG_LABELS = {
   comedy: 'Comedy',
   collection: 'Collections',
   'box-office': 'Box office',
-  dynamic: 'Auto-updating',
+  modern: 'Modern classics',
 };
 
 // `CREATE TABLE IF NOT EXISTS` covers fresh installs, but a column added to an
@@ -271,7 +316,27 @@ function ensureColumn(target, table, column, definition) {
   }
 }
 
-function migrate(target) {
+/**
+ * Renames lists.kind to lists.origin.
+ *
+ * CREATE TABLE IF NOT EXISTS never alters a table that already exists, so a
+ * database that has booted even once keeps the old column name and every query
+ * against origin fails. Guarded both ways so it runs exactly once and does
+ * nothing on a fresh install, where SCHEMA already created the column.
+ *
+ * Renaming rather than adding a column: the values are unchanged and the CHECK
+ * constraint moves with it, which ALTER TABLE RENAME COLUMN handles.
+ */
+function renameKindToOrigin(target) {
+  const columns = target.prepare('PRAGMA table_info(lists)').all().map((row) => row.name);
+  if (columns.includes('kind') && !columns.includes('origin')) {
+    target.exec('ALTER TABLE lists RENAME COLUMN kind TO origin');
+  }
+}
+
+export function migrate(target) {
+  // First, because everything below queries the table it renames.
+  renameKindToOrigin(target);
   ensureColumn(target, 'movies', 'vote_average', 'REAL');
   ensureColumn(target, 'movies', 'countries', 'TEXT');
   ensureColumn(target, 'movies', 'languages', 'TEXT');
@@ -279,19 +344,140 @@ function migrate(target) {
   ensureColumn(target, 'movies', 'original_title', 'TEXT');
   ensureColumn(target, 'movies', 'media_type', `TEXT NOT NULL DEFAULT 'movie' CHECK (media_type IN ('movie', 'tv'))`);
   ensureColumn(target, 'movies', 'is_manual', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(target, 'movies', 'imdb_id', 'TEXT');
+  ensureColumn(target, 'movies', 'imdb_rating', 'REAL');
+  ensureColumn(target, 'movies', 'imdb_votes', 'INTEGER');
+  // Created HERE and not in SCHEMA, and the distinction is load-bearing.
+  // SCHEMA is exec'd before migrate() runs, and CREATE TABLE IF NOT EXISTS
+  // does nothing to a table that already exists -- so an index over a column
+  // that migrate() has not added yet fails, and the app cannot boot on any
+  // database that predates the column. Fresh installs never see it, which is
+  // exactly what makes it easy to ship.
+  target.exec('CREATE INDEX IF NOT EXISTS movies_imdb ON movies(imdb_id)');
   ensureColumn(target, 'lists', 'source', 'TEXT');
   ensureColumn(target, 'lists', 'source_url', 'TEXT');
   ensureColumn(target, 'lists', 'category', 'TEXT');
   ensureColumn(target, 'lists', 'query_json', 'TEXT');
   ensureColumn(target, 'lists', 'materialised_at', 'TEXT');
   ensureColumn(target, 'lists', 'short_name', 'TEXT');
+  ensureColumn(target, 'lists', 'hidden', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(target, 'vibes', 'param_json', 'TEXT');
   // Populated from the seed files by scripts/backfill-ranks.mjs, NOT by a
   // re-run of the seeder: seed.mjs deliberately skips entries that already
   // landed, so rows seeded before this column existed would stay NULL forever.
   ensureColumn(target, 'list_movies', 'rank', 'INTEGER');
   ensureColumn(target, 'list_movies', 'award_year', 'INTEGER');
+  ensureColumn(target, 'list_movies', 'overall_rank', 'INTEGER');
+  splitBoxOfficeRanks(target);
   migrateCategoriesToTags(target);
   renameCrowdPleasers(target);
+  retagDynamicAsModern(target);
+  dropNationalCinemaVibe(target);
+}
+
+/**
+ * Box-office France stored a GLOBAL rank where the recorded decision said
+ * per-year; Box-office Espana stores per-year. So the same Top-N control meant
+ * "the ten biggest French films ever" on one list and "the top ten of every
+ * year" on the other, with nothing announcing which.
+ *
+ * Per-year wins for `rank`, because that is what Top-N cuts on and what keeps a
+ * list era-balanced -- the reason per-year sources were chosen over the
+ * all-time pages at all. The global ordering moves to `overall_rank` rather
+ * than being thrown away: it answers a question per-year cannot.
+ *
+ * No re-fetch, even though admissions were never stored: a global rank already
+ * carries the correct RELATIVE order within each year, so per-year rank is a
+ * dense renumbering of it grouped by year.
+ */
+function splitBoxOfficeRanks(target) {
+  const lists = target
+    .prepare(
+      `SELECT id FROM lists WHERE name LIKE 'Box-office%'
+        AND EXISTS (SELECT 1 FROM list_movies WHERE list_id = lists.id AND rank IS NOT NULL)
+        AND NOT EXISTS (SELECT 1 FROM list_movies WHERE list_id = lists.id AND overall_rank IS NOT NULL)`,
+    )
+    .all();
+
+  for (const list of lists) {
+    const rows = target
+      .prepare(
+        'SELECT id, rank, raw_year FROM list_movies WHERE list_id = ? AND rank IS NOT NULL ORDER BY rank',
+      )
+      .all(list.id);
+    // If a rank repeats across rows the list is already per-year, and only
+    // overall_rank needs filling.
+    const perYearAlready = new Set(rows.map((r) => r.rank)).size < rows.length;
+    const setBoth = target.prepare('UPDATE list_movies SET rank = ?, overall_rank = ? WHERE id = ?');
+    const seen = new Map();
+    rows.forEach((row, i) => {
+      const n = (seen.get(row.raw_year) ?? 0) + 1;
+      seen.set(row.raw_year, n);
+      setBoth.run(perYearAlready ? row.rank : n, perYearAlready ? i + 1 : row.rank, row.id);
+    });
+  }
+}
+
+/**
+ * Removes the short-lived "National cinema" vibe.
+ *
+ * It shipped as a parametric vibe whose only action was to set a country
+ * filter -- which is now an ordinary control in the Filters card, so the vibe
+ * was a second way to do one thing, and the picker already has a documented
+ * problem with two controls that look alike. A vibe earns its place by doing
+ * something the filter panel cannot; this one did not.
+ *
+ * Needed as a migration because ensureBuiltinVibes only ever ADDS: removing the
+ * entry from BUILTIN_VIBES leaves the row behind on every database that has
+ * already booted. Guarded on is_builtin and on the vibe carrying no pinned
+ * lists, so a vibe the user has since made their own is never deleted.
+ *
+ * National cinema comes back as a vibe when it is backed by a discover query
+ * that ADDS films the library does not have -- see BACKLOG. That version does
+ * something a filter cannot, and it will reuse director night's slot list.
+ */
+function dropNationalCinemaVibe(target) {
+  const row = target
+    .prepare("SELECT id FROM vibes WHERE name = 'National cinema' AND is_builtin = 1")
+    .get();
+  if (!row) return;
+  const pinned = target
+    .prepare('SELECT COUNT(*) AS n FROM vibe_lists WHERE vibe_id = ?')
+    .get(row.id).n;
+  if (pinned > 0) return;
+  target.prepare('DELETE FROM vibes WHERE id = ?').run(row.id);
+}
+
+/**
+ * Retags the 'dynamic' family tag as 'modern', on lists and on vibes alike.
+ *
+ * Needed as a migration and not just a seed-file edit for two separate
+ * reasons, either of which alone would be enough:
+ *
+ *   - ensureBuiltinVibes skips any vibe whose NAME already exists, so editing
+ *     BUILTIN_VIBES is a no-op on every database that has already booted once.
+ *     The Modern Classics vibe would keep resolving on a tag nothing carries
+ *     and would silently select no lists at all.
+ *   - seed.mjs replaces a seed list's tags from the JSON, but only when the
+ *     seeder is actually re-run, which is not part of a deploy.
+ *
+ * Idempotent: it matches on the old tag, so a second run finds nothing. Uses
+ * ON CONFLICT DO NOTHING because a row could in principle carry both tags.
+ */
+function retagDynamicAsModern(target) {
+  const moves = [
+    ['list_tags', 'list_id'],
+    ['vibe_tags', 'vibe_id'],
+  ];
+  for (const [table, owner] of moves) {
+    const rows = target.prepare(`SELECT ${owner} AS id FROM ${table} WHERE tag = 'dynamic'`).all();
+    if (rows.length === 0) continue;
+    const insert = target.prepare(
+      `INSERT INTO ${table} (${owner}, tag) VALUES (?, 'modern') ON CONFLICT DO NOTHING`,
+    );
+    for (const row of rows) insert.run(row.id);
+    target.exec(`DELETE FROM ${table} WHERE tag = 'dynamic'`);
+  }
 }
 
 /**
@@ -350,10 +536,22 @@ function migrateCategoriesToTags(target) {
 const BUILTIN_VIBES = [
   { name: 'Cinephile', tags: ['canon'], position: 1 },
   { name: 'Awards', tags: ['awards'], position: 2 },
-  { name: 'Modern Classics', tags: ['dynamic'], position: 3 },
+  // Resolves on a family tag, not on 'dynamic' — see the TAGS comment. Being
+  // tag-driven is still right: if a second recent-acclaim list is ever added
+  // it should join this vibe on its own. What it must not do is absorb every
+  // list that merely happens to be query-backed.
+  { name: 'Modern Classics', tags: ['modern'], position: 3 },
   // The one built-in carrying a filter as well as a selection — which is what
   // makes it a vibe rather than just a tag shortcut.
   { name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },
+  // The first parametric vibe. It resolves to nothing until a person is
+  // chosen, which is why it carries neither tags nor lists.
+  {
+    name: 'Director night',
+    tags: [],
+    position: 5,
+    param: { kind: 'person', job: 'Director', label: 'Director' },
+  },
 ];
 
 /**
@@ -378,14 +576,83 @@ export function ensureBuiltinVibes(target) {
       : null;
 
     const { lastInsertRowid } = target
-      .prepare('INSERT INTO vibes (name, is_builtin, filters_json, position) VALUES (?, 1, ?, ?)')
-      .run(vibe.name, filters, vibe.position);
+      .prepare(
+        'INSERT INTO vibes (name, is_builtin, param_json, filters_json, position) VALUES (?, 1, ?, ?, ?)',
+      )
+      .run(vibe.name, vibe.param ? JSON.stringify(vibe.param) : null, filters, vibe.position);
 
     for (const tag of vibe.tags) {
       target
         .prepare('INSERT INTO vibe_tags (vibe_id, tag) VALUES (?, ?)')
         .run(Number(lastInsertRowid), tag);
     }
+  }
+}
+
+/**
+ * Runs `work` as one unit, rolling back if it throws.
+ *
+ * Lived in vibes.js first, for the reason recorded there: without it, a create
+ * whose tag list was rejected left the vibe row behind with no tags — a vibe
+ * that resolved to nothing and that the user never successfully made. Observed,
+ * not hypothetical. Moved here when materialiseList needed the same guarantee.
+ *
+ * Does not nest. Nothing that runs inside one of these may open another.
+ */
+export function inTransaction(target, work) {
+  target.exec('BEGIN');
+  try {
+    const result = work();
+    target.exec('COMMIT');
+    return result;
+  } catch (error) {
+    target.exec('ROLLBACK');
+    throw error;
+  }
+}
+
+const KEEP_SNAPSHOTS = 3;
+
+/**
+ * Snapshots the database immediately before migrations run.
+ *
+ * This is the only unrecoverable asset in the project. Seed lists can be
+ * re-fetched and TMDB metadata re-downloaded, but the watched set, the vibes
+ * someone saved, and every ballot ever cast exist here and nowhere else — and
+ * `migrate()` runs automatically on every boot, unattended, and now contains
+ * ALTER TABLE ... RENAME COLUMN and DELETE FROM. Until this function existed
+ * the only protection was a line in CLAUDE.md asking a human to remember, which
+ * a `git pull` followed by a restart was never going to honour.
+ *
+ * VACUUM INTO rather than a file copy: it takes a consistent snapshot of a live
+ * WAL database, which `cp` does not — copying the main file alone can miss
+ * committed transactions still sitting in the -wal.
+ *
+ * Deliberately non-fatal. A household app that refuses to start because a disk
+ * is full is worse than one that starts and says so loudly; the alarm is the
+ * point, not the veto.
+ */
+function snapshotBeforeMigrate(target, path, log = console.warn) {
+  const dir = dirname(path);
+  const prefix = `${basename(path)}.bak-`;
+  try {
+    target.exec(`VACUUM INTO '${join(dir, prefix + Date.now()).replace(/'/g, "''")}'`);
+  } catch (error) {
+    log(`[db] could not snapshot before migrating: ${error.message}`);
+    return;
+  }
+
+  // Keep the last few and drop the rest. Three is enough to survive "the
+  // migration was wrong and nobody noticed until the next restart", which is
+  // the realistic failure, without turning a 3 MB database into a disk hog.
+  try {
+    const snapshots = readdirSync(dir)
+      .filter((name) => name.startsWith(prefix))
+      .map((name) => join(dir, name))
+      .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
+    for (const stale of snapshots.slice(KEEP_SNAPSHOTS)) unlinkSync(stale);
+  } catch (error) {
+    log(`[db] could not prune old snapshots: ${error.message}`);
   }
 }
 
@@ -398,13 +665,28 @@ export function getDb() {
   db = new DatabaseSync(config.dbPath);
   db.exec('PRAGMA journal_mode = WAL');
   db.exec('PRAGMA foreign_keys = ON');
+
+  // Asked before SCHEMA runs, because SCHEMA's CREATE TABLE IF NOT EXISTS
+  // would otherwise make a brand-new database look established. A fresh
+  // install has nothing to lose and should not litter the data directory with
+  // snapshots of an empty file.
+  const established =
+    db
+      .prepare("SELECT COUNT(*) AS n FROM sqlite_master WHERE type = 'table' AND name = 'lists'")
+      .get().n > 0;
+
   db.exec(SCHEMA);
+  if (established) snapshotBeforeMigrate(db, config.dbPath);
   migrate(db);
   ensureBuiltinVibes(db);
-  db.prepare(
-    `INSERT INTO meta (key, value) VALUES ('schema_version', '1')
-     ON CONFLICT(key) DO NOTHING`,
-  ).run();
+
+  // `schema_version` used to be written here and was read by nothing — never
+  // gated a migration, never compared against anything. A version marker that
+  // no code consults is worse than none, because the next person reads it as a
+  // safety net and assumes upgrades are guarded. What actually guards them is
+  // that each migration inspects the shape it is about to change and is
+  // idempotent, which test/migrate.test.js now holds to. Any row already
+  // written is left alone rather than deleted; it is inert either way.
   return db;
 }
 

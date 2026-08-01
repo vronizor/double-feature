@@ -2,14 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createTestDb } from '../server/db.js';
-import { awardsByTmdbId } from '../server/movies.js';
+import { awardsByTmdbId, recordEntry } from '../server/movies.js';
 import { awardLabel, shortAwardName } from '../public/dom.js';
 
 function seed() {
   const db = createTestDb();
   // Deliberately NO `category` on any of these: category is the legacy column
   // and nothing added after v2 sets it. Awards must resolve on the tag alone.
-  db.exec(`INSERT INTO lists (id, name, kind, is_active, short_name) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active, short_name) VALUES
     (1, 'Palme d’Or (Cannes)', 'seed', 1, 'Palme d’Or'),
     (2, 'Oscar — Best Picture', 'seed', 1, 'Oscar'),
     (3, 'BAFTA — Best Film', 'seed', 1, 'BAFTA'),
@@ -54,7 +54,7 @@ test('a list carrying the awards tag but no legacy category still badges', () =>
   // list added after that — tagged, but with category left NULL — produced no
   // badge at all, silently.
   const db = seed();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (5, 'Prix Louis-Delluc', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (5, 'Prix Louis-Delluc', 'seed', 1)`);
   db.exec(`INSERT INTO list_tags (list_id, tag) VALUES (5, 'awards')`);
   db.prepare(
     `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, award_year, status)
@@ -70,7 +70,7 @@ test('a list with the legacy awards category but no tag is NOT an award', () => 
   // carrying only the old column must not sneak back in through it.
   const db = seed();
   db.exec(
-    `INSERT INTO lists (id, name, kind, category, is_active) VALUES (6, 'Stale Category List', 'seed', 'awards', 1)`,
+    `INSERT INTO lists (id, name, origin, category, is_active) VALUES (6, 'Stale Category List', 'seed', 'awards', 1)`,
   );
   db.prepare(
     `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)
@@ -106,7 +106,7 @@ test('awardsByTmdbId tolerates an empty id list', () => {
 
 test('unresolved memberships never count as awards', () => {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, category, is_active)
+  db.exec(`INSERT INTO lists (id, name, origin, category, is_active)
            VALUES (1, 'Palme d’Or (Cannes)', 'seed', 'awards', 1)`);
   db.prepare('INSERT INTO movies (tmdb_id, title, year) VALUES (7, ?, 2000)').run('Pending');
   db.prepare(
@@ -154,7 +154,7 @@ test('the short name travels from the list row to the award payload', () => {
   // The end-to-end point of moving this out of the frontend: a list added to
   // the database with a short name gets it rendered, with no code change.
   const db = seed();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active, short_name)
+  db.exec(`INSERT INTO lists (id, name, origin, is_active, short_name)
            VALUES (7, 'Prix Louis-Delluc (France)', 'seed', 1, 'Delluc')`);
   db.exec(`INSERT INTO list_tags (list_id, tag) VALUES (7, 'awards')`);
   db.prepare(
@@ -167,4 +167,27 @@ test('the short name travels from the list row to the award payload', () => {
   assert.equal(awardLabel(award), 'Delluc 2019');
   // Without the stored value it would have string-mangled to "Prix Louis-Delluc".
   assert.equal(awardLabel({ ...award, short_name: null }), 'Prix Louis-Delluc 2019');
+});
+
+test('an unresolved entry keeps its rank, so reconciling it later restores a ranked film', () => {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'Box-office Test', 'seed', 1)`);
+
+  // needs_review and unmatched rows used to be inserted without a rank at all.
+  // These are precisely the rows a human fixes by hand later, so a film
+  // reconciled on the Lists tab came back rankless and silently vanished from
+  // every Top-N cut — "the top 10 of 1946" quietly becoming nine films.
+  recordEntry(db, {
+    listId: 1,
+    rawTitle: 'Costa Brava',
+    rawYear: 1946,
+    rank: 1,
+    overallRank: 900,
+    result: { status: 'unmatched', movie: null, candidates: [] },
+  });
+
+  const row = db.prepare('SELECT rank, overall_rank, status FROM list_movies WHERE list_id = 1').get();
+  assert.equal(row.status, 'unmatched');
+  assert.equal(row.rank, 1, 'the per-year rank survives');
+  assert.equal(row.overall_rank, 900, 'the overall rank survives too');
 });

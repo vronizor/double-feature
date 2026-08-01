@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { getDb } from '../db.js';
-import { searchMovie, scoreCandidate } from '../tmdb.js';
+import { searchMovie, scoreCandidate, searchPerson, getDirectorCredits } from '../tmdb.js';
 
 const router = Router();
 
@@ -54,6 +54,48 @@ router.get('/search', async (req, res) => {
         };
       })
       .sort((a, b) => b.score - a.score),
+  });
+});
+
+/**
+ * Person search, for director night's parameter picker.
+ *
+ * Returns nothing for a query shorter than two characters rather than asking
+ * TMDB — a one-letter search is a keystroke on the way somewhere, not a
+ * question, and answering it wastes a request per letter typed.
+ */
+router.get('/person', async (req, res) => {
+  const query = String(req.query.q ?? '').trim();
+  if (query.length < 2) return res.json({ results: [] });
+  res.json({ results: await searchPerson(query) });
+});
+
+/**
+ * A person's directed filmography, with a note of which are already cached.
+ *
+ * The cached count is what tells the caller how much of this night is free:
+ * films the library already holds need no TMDB detail call to enter the pool.
+ */
+router.get('/person/:id/directed', async (req, res) => {
+  const personId = Number(req.params.id);
+  if (!Number.isInteger(personId) || personId <= 0) {
+    return res.status(400).json({ error: 'A person id is required' });
+  }
+
+  const films = await getDirectorCredits(personId);
+  const ids = films.map((film) => film.id);
+  const cached = new Set();
+  if (ids.length) {
+    const rows = getDb()
+      .prepare(`SELECT tmdb_id FROM movies WHERE tmdb_id IN (${ids.map(() => '?').join(', ')})`)
+      .all(...ids);
+    for (const row of rows) cached.add(row.tmdb_id);
+  }
+
+  res.json({
+    films: films.map((film) => ({ ...film, cached: cached.has(film.id) })),
+    total: films.length,
+    cached_count: cached.size,
   });
 });
 

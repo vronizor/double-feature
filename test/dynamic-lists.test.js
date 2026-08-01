@@ -74,7 +74,7 @@ function stubTmdb(ids) {
 }
 
 function seedDynamicList(db) {
-  db.exec(`INSERT INTO lists (id, name, kind, category, is_active, query_json)
+  db.exec(`INSERT INTO lists (id, name, origin, category, is_active, query_json)
     VALUES (1, 'Crowd', 'seed', 'dynamic', 1,
             '{"kind":"discover","params":{"vote_count.gte":5000},"limit":10}')`);
   return db.prepare('SELECT * FROM lists WHERE id = 1').get();
@@ -89,7 +89,7 @@ const memberIds = (db) =>
 test('findDynamicLists only returns query-backed lists', () => {
   const db = createTestDb();
   seedDynamicList(db);
-  db.exec(`INSERT INTO lists (id, name, kind, category, is_active)
+  db.exec(`INSERT INTO lists (id, name, origin, category, is_active)
            VALUES (2, 'Static', 'seed', 'canon', 1)`);
   const found = findDynamicLists(db);
   assert.equal(found.length, 1);
@@ -170,7 +170,7 @@ test('an empty query result leaves the existing list alone', async () => {
 
 test('a list with no query materialises to nothing rather than throwing', async () => {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (1, 'Static', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'Static', 'seed', 1)`);
   const list = db.prepare('SELECT * FROM lists WHERE id = 1').get();
   assert.deepEqual(await materialiseList(db, list), { skipped: true });
 });

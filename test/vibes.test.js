@@ -13,7 +13,7 @@ import {
 
 function seed() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Criterion', 'seed', 1),
     (2, 'TSPDT', 'seed', 1),
     (3, 'Ghibli', 'seed', 1),
@@ -55,7 +55,7 @@ test('a tag-driven vibe picks up a newly tagged list without being edited', () =
   const vibe = createVibe(db, { name: 'Awards', tags: ['awards'] });
   assert.deepEqual(vibe.resolved_lists, [4]);
 
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (6, 'BAFTA', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (6, 'BAFTA', 'seed', 1)`);
   db.prepare('INSERT INTO list_tags (list_id, tag) VALUES (6, ?)').run('awards');
   assert.deepEqual(resolveVibe(db, vibe.id), [4, 6]);
 });
@@ -63,7 +63,7 @@ test('a tag-driven vibe picks up a newly tagged list without being edited', () =
 test('a pinned list does NOT drift when the library grows', () => {
   const db = seed();
   const vibe = createVibe(db, { name: 'Kids', lists: [3] });
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (7, 'Disney', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (7, 'Disney', 'seed', 1)`);
   db.prepare('INSERT INTO list_tags (list_id, tag) VALUES (7, ?)').run('family');
   assert.deepEqual(resolveVibe(db, vibe.id), [3], 'still exactly what was pinned');
 });
@@ -131,17 +131,17 @@ test('built-in vibes are seeded once and never re-added after deletion', () => {
   const db = seed();
   ensureBuiltinVibes(db);
   const first = allVibes(db).map((v) => v.name).sort();
-  assert.deepEqual(first, ['Awards', 'Cinephile', 'Family', 'Modern Classics']);
+  assert.deepEqual(first, ['Awards', 'Cinephile', 'Director night', 'Family', 'Modern Classics']);
 
   // Idempotent.
   ensureBuiltinVibes(db);
-  assert.equal(allVibes(db).length, 4);
+  assert.equal(allVibes(db).length, 5);
 
   // Built-ins are ordinary rows: deletable, and a delete sticks for as long as
   // the row is absent from THIS database.
   const family = allVibes(db).find((v) => v.name === 'Family');
   deleteVibe(db, family.id);
-  assert.equal(allVibes(db).length, 3);
+  assert.equal(allVibes(db).length, 4);
 });
 
 test('the Family built-in carries a filter, not just a list selection', () => {
@@ -157,4 +157,93 @@ test('a corrupt filters blob degrades to no filters instead of throwing', () => 
   const vibe = createVibe(db, { name: 'V', tags: ['canon'] });
   db.prepare('UPDATE vibes SET filters_json = ? WHERE id = ?').run('{not json', vibe.id);
   assert.equal(allVibes(db)[0].filters, null);
+});
+
+// --- Parametric vibes -----------------------------------------------------
+
+test('a parametric vibe carries its parameter and resolves to nothing until given one', () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+  const director = allVibes(db).find((v) => v.name === 'Director night');
+
+  assert.deepEqual(director.param, { kind: 'person', job: 'Director', label: 'Director' });
+  // No tags, no lists: until a person is chosen there is nothing to draw from,
+  // and it must not silently fall back to the whole library.
+  assert.deepEqual(director.resolved_lists, []);
+});
+
+test('an ordinary vibe has no parameter', () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+  assert.equal(allVibes(db).find((v) => v.name === 'Cinephile').param, null);
+});
+
+test('applying a parameter fills one slot list, and re-applying replaces it', async () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+  const vibe = allVibes(db).find((v) => v.name === 'Director night');
+
+  const realFetch = globalThis.fetch;
+  const credits = (films) => ({
+    ok: true,
+    status: 200,
+    json: async () => ({ crew: films.map((f) => ({ ...f, job: 'Director' })), cast: [] }),
+  });
+  globalThis.fetch = async (input) =>
+    String(input).includes('/movie_credits')
+      ? credits(kurosawa)
+      : { ok: true, status: 200, json: async () => ({ id: 1, title: 'x' }) };
+
+  let kurosawa = [
+    { id: 9001, title: 'Ikiru', release_date: '1952-10-09' },
+    { id: 9002, title: 'Ran', release_date: '1985-06-01' },
+  ];
+  // Both already cached, so no detail fetch is needed and the stub above is
+  // never asked for a movie.
+  db.exec(`INSERT INTO movies (tmdb_id, title, year) VALUES (9001,'Ikiru',1952), (9002,'Ran',1985)`);
+
+  const { applyParameter } = await import('../server/parametric.js');
+  const first = await applyParameter(db, vibe, { id: 5026, name: 'Akira Kurosawa' });
+
+  assert.equal(first.count, 2);
+  assert.equal(first.name, 'Director night — Akira Kurosawa');
+  assert.equal(
+    db.prepare('SELECT name FROM lists WHERE id = ?').get(first.list_id).name,
+    'Director night — Akira Kurosawa',
+  );
+  // Hidden, so it never appears in the picker.
+  assert.equal(db.prepare('SELECT hidden FROM lists WHERE id = ?').get(first.list_id).hidden, 1);
+  // And the vibe now resolves to it.
+  assert.deepEqual(allVibes(db).find((v) => v.id === vibe.id).resolved_lists, [first.list_id]);
+
+  // A second director REPLACES the first rather than accumulating: one slot
+  // list forever, not one per person ever chosen.
+  kurosawa = [{ id: 9003, title: 'Tokyo Story', release_date: '1953-11-03' }];
+  db.exec(`INSERT INTO movies (tmdb_id, title, year) VALUES (9003,'Tokyo Story',1953)`);
+  const second = await applyParameter(db, vibe, { id: 5027, name: 'Yasujiro Ozu' });
+
+  assert.equal(second.list_id, first.list_id, 'the same slot list is reused');
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM lists WHERE hidden = 1').get().n, 1);
+  assert.deepEqual(
+    db.prepare('SELECT tmdb_id FROM list_movies WHERE list_id = ?').all(second.list_id)
+      .map((r) => r.tmdb_id),
+    [9003],
+  );
+  assert.equal(
+    db.prepare('SELECT name FROM lists WHERE id = ?').get(second.list_id).name,
+    'Director night — Yasujiro Ozu',
+  );
+
+  globalThis.fetch = realFetch;
+});
+
+test('a vibe that takes no parameter refuses one', async () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+  const { applyParameter } = await import('../server/parametric.js');
+  const cinephile = allVibes(db).find((v) => v.name === 'Cinephile');
+  await assert.rejects(
+    () => applyParameter(db, cinephile, { id: 1, name: 'Someone' }),
+    /not a parametric vibe/,
+  );
 });

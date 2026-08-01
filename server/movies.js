@@ -16,8 +16,8 @@ export function upsertMovie(db, movie) {
   db.prepare(
     `INSERT INTO movies
        (tmdb_id, media_type, title, original_title, year, poster_path, director, runtime, overview,
-        original_language, vote_average, countries, languages, trailer_key, refreshed_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        original_language, vote_average, imdb_id, countries, languages, trailer_key, refreshed_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
      ON CONFLICT(tmdb_id) DO UPDATE SET
        media_type        = excluded.media_type,
        title             = excluded.title,
@@ -27,6 +27,9 @@ export function upsertMovie(db, movie) {
        director          = excluded.director,
        runtime           = excluded.runtime,
        overview          = excluded.overview,
+       -- Never overwrite a known id with NULL: a partial payload would
+       -- silently unlink the film from its IMDb rating.
+       imdb_id           = COALESCE(excluded.imdb_id, movies.imdb_id),
        original_language = excluded.original_language,
        vote_average      = excluded.vote_average,
        countries         = excluded.countries,
@@ -45,6 +48,7 @@ export function upsertMovie(db, movie) {
     movie.overview ?? null,
     movie.original_language ?? null,
     movie.vote_average ?? null,
+    movie.imdb_id ?? null,
     movie.countries ?? null,
     movie.languages ?? null,
     movie.trailer_key ?? null,
@@ -96,13 +100,14 @@ export function createManualMovie(db, { title, year }) {
  * Attaches one raw list entry to a list, storing the outcome of resolution.
  * Unresolved entries are kept (not dropped) so they show up for manual review.
  */
-export function recordEntry(db, { listId, rawTitle, rawYear, rank, awardYear, result }) {
+export function recordEntry(db, { listId, rawTitle, rawYear, rank, overallRank, awardYear, result }) {
   // Per-membership facts from the seed file. These MUST be written here: the
   // seeder skips entries that already landed, so anything not persisted on the
   // first insert would never be filled in by a re-run. A fresh install used to
   // end up with rank = NULL everywhere, which silently removed the Top-N
   // control entirely (it only renders for lists whose ranked_count > 0).
   const cleanRank = Number.isInteger(rank) ? rank : null;
+  const cleanOverall = Number.isInteger(overallRank) ? overallRank : null;
   const cleanAwardYear = Number.isInteger(awardYear) ? awardYear : null;
 
   if (result.status === 'resolved') {
@@ -114,20 +119,28 @@ export function recordEntry(db, { listId, rawTitle, rawYear, rank, awardYear, re
     if (existing) return { status: 'duplicate', tmdb_id: result.movie.tmdb_id };
 
     db.prepare(
-      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, rank, award_year, status)
-       VALUES (?, ?, ?, ?, ?, ?, 'resolved')`,
-    ).run(listId, result.movie.tmdb_id, rawTitle, rawYear ?? null, cleanRank, cleanAwardYear);
+      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, rank, overall_rank, award_year, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'resolved')`,
+    ).run(listId, result.movie.tmdb_id, rawTitle, rawYear ?? null, cleanRank, cleanOverall, cleanAwardYear);
 
     return { status: 'resolved', tmdb_id: result.movie.tmdb_id };
   }
 
+  // Rank is carried here too, and that is not cosmetic. These are exactly the
+  // rows a human will reconcile later, and a row fixed on the Lists tab that
+  // came back with rank = NULL would silently drop out of every Top-N cut --
+  // "the top 10 of 1946" would quietly become nine films, with nothing saying
+  // why. The seed file knew the rank; the insert simply was not carrying it.
   db.prepare(
-    `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status, candidates_json)
-     VALUES (?, NULL, ?, ?, ?, ?)`,
+    `INSERT INTO list_movies
+       (list_id, tmdb_id, raw_title, raw_year, rank, overall_rank, status, candidates_json)
+     VALUES (?, NULL, ?, ?, ?, ?, ?, ?)`,
   ).run(
     listId,
     rawTitle,
     rawYear ?? null,
+    cleanRank,
+    cleanOverall,
     result.status,
     result.candidates?.length ? JSON.stringify(result.candidates) : null,
   );

@@ -17,7 +17,7 @@ const GENRES = { drama: 18, horror: 27, scifi: 878, comedy: 35 };
 
 function seed() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Active', 'seed', 1),
     (2, 'Inactive', 'seed', 0)`);
   for (const [id, name] of Object.entries(GENRES)) {
@@ -74,7 +74,7 @@ test('explicit null bounds behave exactly like omitted ones', () => {
 
 test('a film on two lists is counted once', () => {
   const db = seed();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES (3, 'Overlap', 'seed', 1)`);
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (3, 'Overlap', 'seed', 1)`);
   db.prepare(
     `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)
      VALUES (3, 1, 'Old Drama', 1955, 'resolved')`,
@@ -304,7 +304,7 @@ test('exclude tolerates non-numeric junk instead of breaking the query', () => {
  */
 function seedRanked() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Ranked', 'seed', 1),
     (2, 'Unranked', 'seed', 0)`);
 
@@ -460,7 +460,7 @@ test('a selection nested under filters is ignored rather than quietly honoured',
 
 function seedWithAwards() {
   const db = createTestDb();
-  db.exec(`INSERT INTO lists (id, name, kind, is_active) VALUES
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Canon', 'seed', 1),
     (2, 'Palme d’Or (Cannes)', 'seed', 1),
     (3, 'Stale Category Award', 'seed', 1)`);
@@ -518,4 +518,85 @@ test('the award filter shows up in the session summary', () => {
   const db = seedWithAwards();
   const summary = describePoolSetup(db, { filters: { awardWinners: true } }, ['Canon']);
   assert.match(summary, /award winners/);
+});
+
+// --- National cinema night: the country filter ----------------------------
+
+test('a country filter matches whole entries, never substrings', () => {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'L', 'seed', 1)`);
+  db.exec(`INSERT INTO movies (tmdb_id, title, year, countries) VALUES
+    (1, 'Solo Japanese',   1954, 'Japan'),
+    (2, 'Co-production',   1988, 'France, Japan'),
+    (3, 'Papua New Guinea',1990, 'Papua New Guinea'),
+    (4, 'Northern Irish',  2000, 'Northern Ireland'),
+    (5, 'No country',      1970, NULL)`);
+  for (const id of [1, 2, 3, 4, 5]) {
+    db.exec(`INSERT INTO list_movies (list_id, tmdb_id, raw_title, status)
+             VALUES (1, ${id}, 't', 'resolved')`);
+  }
+
+  const titles = (country) => {
+    const { where, params } = buildPoolQuery({
+      lists: [1],
+      filters: { countries: { include: [country] } },
+    });
+    return db
+      .prepare(`SELECT m.title FROM movies m WHERE ${where} ORDER BY m.tmdb_id`)
+      .all(...params)
+      .map((row) => row.title);
+  };
+
+  // A co-production is honestly Japanese as well as French, so both nights
+  // reach it.
+  assert.deepEqual(titles('Japan'), ['Solo Japanese', 'Co-production']);
+  assert.deepEqual(titles('France'), ['Co-production']);
+
+  // The trap this clause exists for: "Guinea" is a substring of "Papua New
+  // Guinea" and "Ireland" of "Northern Ireland". A LIKE '%name%' would return
+  // them and nothing would look wrong.
+  assert.deepEqual(titles('Guinea'), []);
+  assert.deepEqual(titles('Ireland'), []);
+  assert.deepEqual(titles('Papua New Guinea'), ['Papua New Guinea']);
+
+  // A film with no country recorded is absent rather than treated as matching.
+  assert.equal(titles('Japan').includes('No country'), false);
+});
+
+test('no country filter leaves the pool alone', () => {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'L', 'seed', 1)`);
+  db.exec(`INSERT INTO movies (tmdb_id, title, countries) VALUES (1, 'A', NULL), (2, 'B', 'Japan')`);
+  db.exec(`INSERT INTO list_movies (list_id, tmdb_id, raw_title, status) VALUES
+    (1, 1, 't', 'resolved'), (1, 2, 't', 'resolved')`);
+  const { where, params } = buildPoolQuery({ lists: [1], filters: {} });
+  assert.equal(db.prepare(`SELECT COUNT(*) AS n FROM movies m WHERE ${where}`).get(...params).n, 2);
+});
+
+test('excluding a country drops it, but keeps films whose country is unknown', () => {
+  const db = createTestDb();
+  db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES (1, 'L', 'seed', 1)`);
+  db.exec(`INSERT INTO movies (tmdb_id, title, countries) VALUES
+    (1, 'American',   'United States of America'),
+    (2, 'Co-pro',     'France, United States of America'),
+    (3, 'French',     'France'),
+    (4, 'Unknown',    NULL)`);
+  for (const id of [1, 2, 3, 4]) {
+    db.exec(`INSERT INTO list_movies (list_id, tmdb_id, raw_title, status)
+             VALUES (1, ${id}, 't', 'resolved')`);
+  }
+  const { where, params } = buildPoolQuery({
+    lists: [1],
+    filters: { countries: { exclude: ['United States of America'] } },
+  });
+  const titles = db
+    .prepare(`SELECT m.title FROM movies m WHERE ${where} ORDER BY m.tmdb_id`)
+    .all(...params)
+    .map((row) => row.title);
+
+  // The co-production goes too: it IS partly American, and "no American films"
+  // that still returns one would be a lie.
+  // "Unknown" stays: absent means unknown, never "not from there" — the same
+  // rule the streaming badge follows.
+  assert.deepEqual(titles, ['French', 'Unknown']);
 });

@@ -5,9 +5,12 @@
  */
 import {
   h,
+  clear,
   posterUrl,
   toast,
   formatRating,
+  formatImdb,
+  keepNameTogether,
   openMovieModal,
   originalTitleLine,
   awardLabel,
@@ -90,7 +93,34 @@ export function setGroupOpen(openGroups, key, open) {
  * `openGroups` is a Set owned by the calling view, so which groups are expanded
  * survives that view's repaints.
  */
+/**
+ * Names the lists currently in play, for a view that shows films without
+ * showing the picker.
+ *
+ * It exists because of a real confusion: choosing a director put his ten films
+ * in the pool, Explore showed ten films, and nothing anywhere said whose they
+ * were. It read as the library having changed underneath you. A slot list
+ * already carries the answer in its name — "Director night — Robert Eggers" —
+ * and no view was surfacing it.
+ */
+export function selectionLabel(lists) {
+  const selected = lists.filter((list) => poolState.isSelected(list.id));
+  if (selected.length === 0 || selected.length === lists.length) return null;
+  // A slot list is the whole point of this label, so it wins when present:
+  // "Director night — Robert Eggers" says more than "3 lists".
+  const slot = selected.find((list) => list.hidden);
+  if (slot) return slot.name;
+  if (selected.length <= 2) return selected.map((list) => list.name).join(' + ');
+  return `${selected.length} lists`;
+}
+
 export function renderListPicker(lists, openGroups, onChange, { vocabulary = [], tagFilter = null } = {}) {
+  // A slot list is hidden while it is not in play — it belongs to a
+  // parametric vibe and is not something anyone curates. But hiding one that
+  // IS selected makes the picker lie: every checkbox unticked while films are
+  // on screen, which reads as the app ignoring you. So it appears exactly when
+  // it is doing something.
+  lists = lists.filter((list) => !list.hidden || poolState.isSelected(list.id));
   if (lists.length === 0) {
     return h(
       'div',
@@ -300,7 +330,113 @@ export function renderTagFilter(vocabulary, active, onChange) {
   );
 }
 
-export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
+/**
+ * The parameter picker for a parametric vibe — "director night, but who?".
+ *
+ * A panel rather than a prompt() because the answer is a CHOICE, not a string:
+ * three people share a surname and only one of them directs. Search returns
+ * people who direct first, and each row says what they are known for, so the
+ * pick is made on evidence rather than on a name that might be anyone.
+ *
+ * Deliberately not a chip that applies on click like the others: applying this
+ * one means a TMDB round trip and a rewritten list, so it asks first.
+ */
+function renderParamPicker(vibe, { onChosen, onCancel }) {
+  const results = h('div', { class: 'param-results' });
+  const input = h('input', {
+    type: 'search',
+    placeholder: `${vibe.param.label ?? 'Name'}…`,
+    autocomplete: 'off',
+  });
+
+  // A country parameter searches the LIBRARY, not TMDB: the vocabulary is
+  // whatever the cached films actually come from, so it is fetched once and
+  // filtered in memory. Offering a country nothing was made in, and then
+  // drawing nothing, would be worse than not offering it.
+  let vocabulary = null;
+  const isCountry = vibe.param.kind === 'country';
+
+  let seq = 0;
+  const search = async () => {
+    const query = input.value.trim();
+    const mine = (seq += 1);
+
+    if (isCountry) {
+      if (vocabulary === null) {
+        try {
+          ({ countries: vocabulary } = await api.poolCountries());
+        } catch (error) {
+          clear(results).append(h('div', { class: 'faint error' }, error.message));
+          return;
+        }
+      }
+      if (mine !== seq) return;
+      const needle = query.toLowerCase();
+      const matches = vocabulary
+        .filter((entry) => entry.country.toLowerCase().includes(needle))
+        .slice(0, 12);
+      clear(results).append(
+        ...(matches.length === 0
+          ? [h('div', { class: 'faint' }, 'No films from anywhere by that name.')]
+          : matches.map((entry) =>
+              h(
+                'button',
+                { class: 'param-result', onClick: () => onChosen({ name: entry.country }) },
+                h('span', { class: 'param-result-name' }, entry.country),
+                h('span', { class: 'faint' }, `${entry.count} films in your library`),
+              ),
+            )),
+      );
+      return;
+    }
+
+    if (query.length < 2) return clear(results);
+    let found = [];
+    try {
+      ({ results: found } = await api.searchPerson(query));
+    } catch (error) {
+      clear(results).append(h('div', { class: 'faint error' }, error.message));
+      return;
+    }
+    // Keystrokes race: a slow early request must not overwrite a later one.
+    if (mine !== seq) return;
+
+    clear(results).append(
+      ...(found.length === 0
+        ? [h('div', { class: 'faint' }, 'Nobody by that name.')]
+        : found.map((person) =>
+            h(
+              'button',
+              { class: 'param-result', onClick: () => onChosen(person) },
+              h('span', { class: 'param-result-name' }, person.name),
+              h(
+                'span',
+                { class: 'faint' },
+                person.directs ? 'Director' : 'Known for acting',
+                person.known_for.length ? ` · ${person.known_for.join(', ')}` : '',
+              ),
+            ),
+          )),
+    );
+  };
+
+  input.addEventListener('input', search);
+  // A country list is short and closed, so show all of it immediately rather
+  // than making the host guess what is in there. A person search cannot.
+  if (isCountry) search();
+  return h(
+    'div',
+    { class: 'param-picker card' },
+    h('div', { class: 'row' },
+      h('div', { class: 'field-label' }, isCountry ? 'Films from where?' : 'Whose films?'),
+      h('span', { class: 'spacer' }),
+      h('button', { class: 'btn-sm', onClick: onCancel }, 'Cancel')),
+    input,
+    results,
+  );
+}
+
+export function renderVibeChips(vibes, { onApply, onSave, onDelete, onParam }) {
   return h(
     'div',
     {},
@@ -318,15 +454,30 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
             {
               class: 'chip chip--vibe',
               dataset: { state: active ? 'include' : 'off' },
-              title: vibe.tags.length
-                ? `Tagged: ${vibe.tags.join(', ')}`
-                : `${vibe.resolved_lists.length} list(s)`,
+              title: vibe.param
+                ? `Pick a ${vibe.param.label ?? 'value'} for this one`
+                : vibe.tags.length
+                  ? `Tagged: ${vibe.tags.join(', ')}`
+                  : `${vibe.resolved_lists.length} list(s)`,
               onClick: () => {
+                // A parametric vibe cannot be applied by clicking it — it has
+                // no answer yet. The ▾ says so before the click rather than
+                // after, which is why it is part of the label.
+                if (vibe.param) return onParam(vibe);
                 applyVibe(vibe);
                 onApply();
               },
             },
-            vibe.name,
+            // Reads back the value only while this vibe is actually applied.
+            // A chip showing "Robert Eggers" when nothing is selected is
+            // claiming a pool that is not in play — the state says Custom and
+            // the chip says otherwise. The label stays in front of the value
+            // so it is clear WHAT was chosen, not just who.
+            vibe.param
+              ? active && vibe.slot?.value
+                ? `${vibe.param.label ?? 'Value'}: ${vibe.slot.value} ▾`
+                : `${vibe.name} ▾`
+              : vibe.name,
           ),
           // The remove affordance only appears on the active chip, so the row
           // stays a row of choices rather than a row of choices-and-buttons.
@@ -357,6 +508,9 @@ export function renderVibeChips(vibes, { onApply, onSave, onDelete }) {
     ),
   );
 }
+
+export { renderParamPicker };
+
 
 /**
  * The "show awards" switch. A display preference, so it persists in
@@ -502,7 +656,11 @@ function rangeInputs(filters, key, unit, bounds, onChange) {
  *                     (repaint NOT expected — just re-fetch a count/page)
  *   onClear()       — "Clear filters" was clicked
  */
-export function renderFilterPanel(filters, facets, { onChipChange, onValueChange, onClear }) {
+export function renderFilterPanel(
+  filters,
+  facets,
+  { onChipChange, onValueChange, onClear, lists = null, onTopNChange = null },
+) {
   return h(
     'div',
     { class: 'card stack' },
@@ -521,6 +679,23 @@ export function renderFilterPanel(filters, facets, { onChipChange, onValueChange
         {},
         h('div', { class: 'field-label' }, 'Genres'),
         chipToggleGroup(facets.genres, filters.genres, (g) => g.id, (g) => g.name, onChipChange),
+      ),
+      h(
+        'div',
+        {},
+        // Countries behave exactly like languages here: a fixed vocabulary of
+        // the commonest, as toggle chips. The long tail is deliberately not
+        // offered -- 96 countries as chips is not a control, it is a wall.
+        h('div', { class: 'field-label' }, 'Country'),
+        // The real object, never a copy: chipToggleGroup mutates include and
+        // exclude in place, so a synthesised group would swallow every click.
+        chipToggleGroup(
+          facets.countries ?? [],
+          filters.countries,
+          (c) => c.country,
+          (c) => c.country,
+          onChipChange,
+        ),
       ),
       h(
         'div',
@@ -561,6 +736,12 @@ export function renderFilterPanel(filters, facets, { onChipChange, onValueChange
             onValueChange,
           ),
         ),
+        // Top-N lives here rather than up beside the list picker. It is not a
+        // property of a film the way genre is -- it is a cut through the
+        // selection -- but that distinction is the app's, not the host's, and
+        // up there nobody found it. Findability wins; it still only renders
+        // when a selected list actually carries ranks.
+        lists && onTopNChange ? renderTopN(lists, onTopNChange) : null,
       ),
     ),
     h(
@@ -641,8 +822,15 @@ export function movieCard(movie, { extraAction } = {}) {
       h(
         'div',
         { class: 'movie-meta' },
-        [movie.year, movie.director].filter(Boolean).join(' · '),
+        [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
         rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
+        formatImdb(movie)
+          ? h(
+              'span',
+              { class: 'movie-rating movie-rating--imdb', title: `${movie.imdb_votes.toLocaleString()} IMDb votes` },
+              ` · IMDb ${formatImdb(movie)}`,
+            )
+          : null,
       ),
       h(
         'div',

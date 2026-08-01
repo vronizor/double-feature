@@ -16,7 +16,9 @@
  * extras pinned on.
  */
 
-import { TAGS } from './db.js';
+// inTransaction lives in db.js because materialiseList needs it too — the
+// reason it exists at all is recorded there.
+import { TAGS, inTransaction } from './db.js';
 
 const clean = (value) => String(value ?? '').trim();
 
@@ -64,10 +66,37 @@ function hydrate(db, vibe) {
       filters = null;
     }
   }
+  let param = null;
+  if (vibe.param_json) {
+    try {
+      param = JSON.parse(vibe.param_json);
+    } catch {
+      // Same reasoning as filters: a corrupt blob degrades the vibe to an
+      // ordinary one rather than taking the tab down.
+      param = null;
+    }
+  }
+  // What this parametric vibe is currently set to, read off the slot list's
+  // own name rather than stored twice. Null until a value is chosen.
+  let slot = null;
+  if (param) {
+    const row = db
+      .prepare(
+        `SELECT l.id, l.name FROM vibe_lists vl JOIN lists l ON l.id = vl.list_id
+          WHERE vl.vibe_id = ? AND l.hidden = 1`,
+      )
+      .get(vibe.id);
+    if (row) {
+      const dash = row.name.indexOf('—');
+      slot = { list_id: row.id, name: row.name, value: dash === -1 ? null : row.name.slice(dash + 1).trim() };
+    }
+  }
   return {
     id: vibe.id,
     name: vibe.name,
     is_builtin: Boolean(vibe.is_builtin),
+    param,
+    slot,
     position: vibe.position,
     tags: db.prepare('SELECT tag FROM vibe_tags WHERE vibe_id = ? ORDER BY tag').all(vibe.id).map((r) => r.tag),
     lists: db.prepare('SELECT list_id FROM vibe_lists WHERE vibe_id = ?').all(vibe.id).map((r) => r.list_id),
@@ -112,25 +141,6 @@ function writeMembership(db, vibeId, { tags, lists }) {
       db.prepare('INSERT INTO vibe_lists (vibe_id, list_id) VALUES (?, ?) ON CONFLICT DO NOTHING')
         .run(vibeId, listId);
     }
-  }
-}
-
-/**
- * Writes that touch several tables run in a transaction.
- *
- * Without one, a create whose tag list is rejected leaves the vibe row behind
- * with no tags — a vibe that resolves to nothing and that the user never
- * successfully made. Observed, not hypothetical.
- */
-function inTransaction(db, work) {
-  db.exec('BEGIN');
-  try {
-    const result = work();
-    db.exec('COMMIT');
-    return result;
-  } catch (error) {
-    db.exec('ROLLBACK');
-    throw error;
   }
 }
 

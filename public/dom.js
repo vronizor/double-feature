@@ -131,8 +131,53 @@ export const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many
 
 // TMDB returns 0 for an unrated film, which is worth hiding rather than
 // showing as a real (bad) score.
+/**
+ * Keeps a person's name on one line unless there is genuinely no room.
+ *
+ * The card's meta line is one string — "1954 · Akira Kurosawa · ★ 8.5" — and
+ * the rating spans after it are `white-space: nowrap`, so the browser breaks
+ * at the last space that fits and that space is usually the one inside the
+ * name. "Akira" ends up on one line and "Kurosawa" on the next while the row
+ * still has room.
+ *
+ * A non-breaking space rather than `white-space: nowrap` on purpose: nowrap
+ * cannot break at all, so a very long name would be cropped by the card's
+ * overflow:hidden. NBSP means "do not break here unless there is no
+ * alternative", and `overflow-wrap: break-word` still rescues the rare name
+ * wider than the card. Commas stay ordinary spaces, so a three-director credit
+ * still wraps between names.
+ */
+export const keepNameTogether = (value) =>
+  String(value ?? '')
+    .split(', ')
+    .map((name) => name.replace(/ /g, '\u00a0'))
+    .join(', ');
+
 export const formatRating = (voteAverage) =>
   typeof voteAverage === 'number' && voteAverage > 0 ? voteAverage.toFixed(1) : null;
+
+/**
+ * IMDb's score, shown only when enough people voted to mean something.
+ *
+ * The floor is the same argument that put a vote floor on the Modern Classics
+ * query: below it, a rating measures a handful of strangers rather than an
+ * audience, and two numbers side by side implies both are comparable. Absent
+ * means "not enough votes", never "badly rated" — the same rule the streaming
+ * link follows.
+ *
+ * Worth having beside TMDB's rather than instead of it: measured across this
+ * library the two differ by 0.37 on average, and they disagree hardest on
+ * blockbusters, where TMDB runs generous. Godzilla vs. Kong is TMDB 7.5 and
+ * IMDb 6.3 across 269,000 votes.
+ */
+export const IMDB_VOTE_FLOOR = 1000;
+
+export const formatImdb = (movie) =>
+  typeof movie?.imdb_rating === 'number' &&
+  movie.imdb_rating > 0 &&
+  (movie.imdb_votes ?? 0) >= IMDB_VOTE_FLOOR
+    ? movie.imdb_rating.toFixed(1)
+    : null;
 
 // TV-sourced entries (e.g. Histoire(s) du cinéma, catalogued on TMDB as a TV
 // series) are stored keyed by the negation of their real TMDB id — see the
@@ -310,8 +355,15 @@ export function openMovieModal(movie) {
         h(
           'div',
           { class: 'movie-meta' },
-          [movie.year, movie.director].filter(Boolean).join(' · '),
+          [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
           rating ? h('span', { class: 'movie-rating' }, ` · ★ ${rating}`) : null,
+          formatImdb(movie)
+            ? h(
+                'span',
+                { class: 'movie-rating movie-rating--imdb', title: `${movie.imdb_votes.toLocaleString()} IMDb votes` },
+                ` · IMDb ${formatImdb(movie)}`,
+              )
+            : null,
         ),
         h(
           'div',

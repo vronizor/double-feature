@@ -7,8 +7,16 @@ pipelines and data modelling, and explains the web-specific machinery instead.
 Numbers in this document are real, measured against `data/double-feature.db`
 on 2026-07-30.
 
-> **This is a snapshot, not a living document.** Written 2026-07-30, against
-> commit `93bf402`. Nothing keeps it in step with the code — unlike
+> **Not startup reading, on purpose.** This is a plain-language tour for
+> someone who directs this project without writing it, and a public-facing
+> description of what it is. It is a dated snapshot and is deliberately NOT
+> kept in step with the code — expect counts and file references in it to be
+> out of date. `DECISIONS.md` wins for decisions, `ROADMAP.md` for what is
+> being built, and the code wins for what the code does.
+
+> **This is a snapshot, not a living document.** Numbers refreshed 2026-07-31
+> against the real database at the close of v4. Originally written 2026-07-30
+> against commit `93bf402`. Nothing keeps it in step with the code — unlike
 > `ROADMAP.md` and `BACKLOG.md`, which are updated as decisions land and are
 > the authority when they disagree with this file. Re-generating it is cheap;
 > quietly trusting a stale copy is not. If you are reading this long after that
@@ -133,7 +141,7 @@ back but a reload.
 | `scripts/` | Offline ETL. Run by hand, never by the server | `fetch-seed-lists.mjs`, `seed.mjs` |
 | `seeds/` | The extracted lists, committed as JSON. The output of `fetch-seed-lists.mjs`, the input to `seed.mjs` | any file — they share one shape |
 | `test/` | `node:test` suites, run with `npm test` | `pool.test.js`, `api.test.js` |
-| `data/` | The SQLite file (2.3 MB) plus its WAL. Gitignored, bind-mounted in Docker | — |
+| `data/` | The SQLite file (4.0 MB) plus its WAL and pre-migration snapshots. Gitignored, bind-mounted in Docker | — |
 | `.cache/` | Raw Wikipedia wikitext saved by the fetcher so re-running the parser costs no network | — |
 
 **What actually matters vs what's plumbing:**
@@ -181,7 +189,8 @@ erDiagram
     lists {
         int  id PK
         text name UK
-        text kind "seed or custom"
+        text origin "seed or custom"
+        int hidden "1 for a parametric vibe's slot list"
         int  is_active "opens-by-default"
         text query_json "dynamic lists only"
         text materialised_at
@@ -229,16 +238,16 @@ Current contents:
 
 | Table | Rows | Note |
 |---|---:|---|
-| `movies` | 2,460 | 2 manual, 1 stored as a TV series |
+| `movies` | 3,828 | 2 manual, 1 stored as a TV series; 3,823 carry an `imdb_id` and 3,808 an IMDb rating |
 | `lists` | 16 | all seed lists, all active |
-| `list_movies` | 3,609 | 3,496 resolved, 94 need review, 19 unmatched |
+| `list_movies` | 5,001 | 2,774 carry a rank |
 | `movie_genres` | 5,461 | across 19 genres |
-| `list_tags` | 24 | 16 lists carrying 1–3 tags each |
+| `list_tags` | — | 17 visible lists carrying 1–3 tags each |
 | `vibes` | 4 | the four built-ins |
 | `sessions` / `ballots` | 4 / 5 | test data |
 
-The draw pool — distinct films across active lists — is **2,455**. Note that
-`list_movies` has 3,609 rows against 2,460 films: **727 films appear on more
+The draw pool — distinct films across active lists — is **3,731**. Note that
+`list_movies` has 5,001 rows against 3,828 films: **many films appear on more
 than one list** (471 on two, 206 on three, 44 on four, 5 on five, one on
 seven). That fan-out is the whole reason the next section matters.
 
@@ -281,7 +290,7 @@ belongs in `list_movies`. The consequence is the important bit: **`rank IS NULL`
 means "this list isn't ranked", not "ranked last"**, so the Top-N filter has to
 read `(rank IS NULL OR rank <= ?)`. Getting that wrong would make "draw from the
 top 100" silently delete Criterion, Ghibli and every award list from the pool
-rather than narrowing the two ranked ones. Only 1,264 of 3,609 memberships
+rather than narrowing the ranked ones. Only 2,774 of 5,001 memberships
 carry a rank.
 
 **`award_year` is stored, not derived.** Tempting to compute it from the release
@@ -342,7 +351,7 @@ flowchart LR
 judgement call), and an `entries` array of `{title, year, tmdb_id?, rank?,
 award_year?}`. It is **the extracted layer, not the loaded one** — it has no
 ids of its own, no resolution status, and is checked into git precisely so a
-normal install never touches Wikipedia or the BFI's website. 17 files;
+normal install never touches Wikipedia or the BFI's website. 18 files;
 1,251 entries for Criterion, 1,000 for TSPDT, 1,390 for the un-seeded
 box-office list.
 
@@ -356,7 +365,7 @@ database has 16 lists, not 17. It's written but not yet loaded
 
 ### 4.4 The two scripts
 
-**`scripts/fetch-seed-lists.mjs`** (1,199 lines — the largest file in the
+**`scripts/fetch-seed-lists.mjs`** (1,346 lines — the largest file in the
 project) is the extract stage. Each list gets its own function because each
 source is genuinely different, and the README documents why every one is
 sourced where it is. The recurring pattern is Wikidata SPARQL: for the
@@ -400,7 +409,9 @@ Two properties of `seed.mjs` are worth knowing because they bite:
 ### 4.5 Dynamic lists
 
 One list, *Modern Classics (last 10 years)*, has no fixed membership. Its
-`lists.query_json` holds `{kind: 'discover', params: {...}, limit: 120}` and
+`lists.query_json` holds `{kind: 'discover', params: {...}, limit: 120}` — note
+that `kind` here is the QUERY's kind, deliberately unrelated to the column once
+called `lists.kind` and now `lists.origin` — and
 the membership is re-derived from TMDB's `/discover` endpoint.
 
 The key decision: **the result is materialised into `list_movies` like any
@@ -466,7 +477,7 @@ under a stubbed DOM after touching them.
 
 ### Routing and teardown
 
-`app.js` is 76 lines and does two things. It reads `location.hash` to decide
+`app.js` is 90 lines and does two things. It reads `location.hash` to decide
 which of the four host tabs to render, and it checks `location.pathname` for
 `/vote/<slug>` to render the guest screen instead. Each view is a function that
 receives an empty `<div>` and fills it.
@@ -482,13 +493,13 @@ a JSON 404 instead of silently returning the app's HTML.
 
 | File | Screen | What it does |
 |---|---|---|
-| `views/draw.js` (836 lines) | **Lineup** | The main host screen. Pool setup, vibe chips, filters, draw/replace, TMDB search, manual entry, publish |
+| `views/draw.js` (891 lines) | **Lineup** | The main host screen. Pool setup, vibe chips, filters, draw/replace, TMDB search, manual entry, publish |
 | `views/explore.js` | **Explore** | Browse the whole library — same filters and cards, but sorted and paginated instead of a random sample |
 | `views/lists.js` (664) | **Lists** | Create lists, import by paste/upload, reconcile unmatched entries, set `is_active` and tags |
 | `views/history.js` | **History** | Every published vote, newest first |
 | `views/session.js` | *(shared)* | The host's live panel — QR code, tally, close/cancel — **and** the results screen. Reused read-only by History |
 | `views/vote.js` | **Guest** | The phone screen: tap to rank, name, submit |
-| `browse.js` (680) | *(shared)* | Filter panel, list picker, tag chips, movie card — shared by Draw and Explore so a change is made once |
+| `browse.js` (882) | *(shared)* | Filter panel, list picker, tag chips, movie card — shared by Draw and Explore so a change is made once |
 
 `views/session.js` being shared between the host and History is a known trap:
 it takes an `onClosed` callback that resets the lineup, and **only the caller
@@ -554,6 +565,61 @@ widen to the entire library at the exact moment the user asked for nothing.
 skipping the clause.
 
 ---
+
+## 5b. What v4 added
+
+Four things that change how the pieces above fit together, rather than adding
+to them.
+
+### A parametric vibe, and its slot list
+
+Most vibes are a saved selection: these lists, those filters. **Director night
+is a question** — "whose films?" — whose answer is a different set of films
+every time.
+
+The problem is that everything downstream of the draw works one way: films that
+are on the lists you ticked. There is no path into the pool that is not a list.
+So rather than teach four places (the query, the facet counts, the match
+counter, the published summary) a second way to be in the pool, a parametric
+vibe **owns one list and rewrites it**. Pick Kurosawa and it holds his 32 films;
+pick Ozu and it holds his 54. One row per parametric vibe, forever.
+
+`vibes.param_json` marks a vibe as parametric and says what it asks for
+(`{kind: 'person', job: 'Director'}`). `lists.hidden` marks the slot list, which
+is filtered out of the picker and the Lists tab — but only while it is *not*
+selected, because a picker showing every box unticked while films are on screen
+is lying about what is in play.
+
+Two costs, both taken deliberately: you cannot have two directors at once, and
+the list's contents change under you. Published sessions are unaffected, because
+publishing copies films into `session_movies` rather than referencing the list.
+
+### Country as a filter, not a list
+
+"Japanese night" narrows the shelf you already curated rather than fetching
+films the library has never seen — `movies.countries` is already cached, so it
+costs nothing. The clause matches whole comma-separated entries, because
+`LIKE '%Guinea%'` also matches Papua New Guinea. **A co-production counts for
+every country that made it**: Italy is 53 films as a sole producer and 498
+counting co-productions, and the difference includes *8½* and *La Dolce Vita*.
+
+### A second opinion on ratings
+
+`movies.imdb_id` comes from TMDB's own detail response, so the join to IMDb's
+public ratings dataset is exact — no title matching. `npm run imdb-ratings`
+streams the 8 MB file, keeps the rating and vote count for films already held,
+and discards the rest: the dataset is licensed for use but **must never be
+committed**. Shown only above 1,000 votes, because below that a rating measures
+a handful of strangers.
+
+### The database is snapshotted before migrations
+
+`migrate()` runs unattended on every boot and now contains `ALTER TABLE …
+RENAME COLUMN` and `DELETE FROM`. The database is the only unrecoverable thing
+here — seeds can be re-fetched, but the watched set, saved vibes and every
+ballot exist nowhere else. `VACUUM INTO` takes a consistent snapshot of a live
+WAL database (a file copy does not), three are kept, and a fresh install makes
+none.
 
 ## 6. The voting mechanism
 

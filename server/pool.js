@@ -81,6 +81,12 @@ export function normalizeFilters(raw = {}) {
       include: asStringList(raw.languages?.include),
       exclude: asStringList(raw.languages?.exclude),
     },
+    // Production countries, as TMDB's full names rather than codes, because
+    // that is what movies.countries caches: "France, Italy".
+    countries: {
+      include: asStringList(raw.countries?.include),
+      exclude: asStringList(raw.countries?.exclude),
+    },
     year: { min: asInt(raw.year?.min), max: asInt(raw.year?.max) },
     runtime: { min: asInt(raw.runtime?.min), max: asInt(raw.runtime?.max) },
     includeWatched: Boolean(raw.includeWatched),
@@ -147,6 +153,39 @@ export function buildPoolQuery(setup, exclude = []) {
     );
     params.push(...scopeParams);
     if (cut) params.push(topN);
+  }
+
+  // --- Production country -------------------------------------------------
+  //
+  // movies.countries is a comma-separated list of full names, so a naive
+  // LIKE '%France%' would be wrong in both directions: it matches nothing
+  // useful that exact matching misses, and it DOES match a country whose name
+  // contains another's. "China" is inside "Republic of China", "Guinea" is
+  // inside "Papua New Guinea", "Ireland" is inside "Northern Ireland".
+  //
+  // Wrapping both sides in the separator makes it an exact element test:
+  // ", France, Italy, " LIKE "%, France, %" is true, while
+  // ", Papua New Guinea, " LIKE "%, Guinea, %" is false.
+  //
+  // ANY of the chosen countries matches, matching the genre include semantics —
+  // a co-production counts as both of its countries, which is the honest
+  // reading of "Japanese night" for a film Japan made with France.
+  const countryTest = (name) => `(', ' || m.countries || ', ') LIKE ('%, ' || ? || ', %')`;
+  if (f.countries.include.length) {
+    clauses.push(
+      `m.countries IS NOT NULL AND (${f.countries.include.map(countryTest).join(' OR ')})`,
+    );
+    params.push(...f.countries.include);
+  }
+  // Exclude exists because the chips cycle include -> exclude -> off, the same
+  // as genres and languages. A chip state the server ignored would be a
+  // control that silently does nothing. A film with no country recorded is NOT
+  // excluded: absent means unknown, not "not from there".
+  if (f.countries.exclude.length) {
+    clauses.push(
+      `(m.countries IS NULL OR NOT (${f.countries.exclude.map(countryTest).join(' OR ')}))`,
+    );
+    params.push(...f.countries.exclude);
   }
 
   // Not a filter preference (like "no horror") — a per-request "don't hand
@@ -337,7 +376,12 @@ export function poolFacets(db, lists = null) {
     )
     .get(...scopeParams);
 
-  return { genres, languages, ...bounds };
+  // Countries ride along with the other facets so the filter panel has one
+  // source for everything it renders. Library-wide rather than pool-scoped,
+  // deliberately: the country chips are a fixed vocabulary you pick FROM, and
+  // having options appear and vanish as you narrow would make the panel feel
+  // broken. Same reasoning as reporting the whole tag vocabulary.
+  return { genres, languages, countries: countryFacet(db).slice(0, 12), ...bounds };
 }
 
 const LANGUAGE_NAMES = new Intl.DisplayNames(['en'], { type: 'language' });
@@ -392,4 +436,33 @@ export function describePoolSetup(db, setup, selectedListNames) {
   if (f.search) parts.push(`"${f.search}"`);
 
   return parts.join(' · ') || null;
+}
+
+/**
+ * Every production country in the library, with how many films carry it.
+ *
+ * Derived rather than stored: `movies.countries` is already cached, so the
+ * vocabulary for "national cinema night" is a GROUP BY away and can never drift
+ * from what is actually drawable. A country nobody's films come from simply
+ * does not appear, which is the right behaviour for a picker — offering
+ * "Iceland" and then drawing nothing would be worse than not offering it.
+ *
+ * Splitting a comma-separated column in SQL needs a recursive CTE; doing it in
+ * JS over ~3,700 short strings is simpler to read and finishes in under a
+ * millisecond, which is the whole budget this needs.
+ */
+export function countryFacet(db) {
+  const rows = db.prepare('SELECT countries FROM movies WHERE countries IS NOT NULL').all();
+  const counts = new Map();
+  for (const row of rows) {
+    // A co-production counts once for each of its countries — the same film is
+    // honestly Japanese and French, and both nights should reach it.
+    for (const name of String(row.countries).split(',')) {
+      const country = name.trim();
+      if (country) counts.set(country, (counts.get(country) ?? 0) + 1);
+    }
+  }
+  return [...counts]
+    .map(([country, count]) => ({ country, count }))
+    .sort((a, b) => b.count - a.count || a.country.localeCompare(b.country));
 }

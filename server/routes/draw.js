@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { getDb } from '../db.js';
-import { drawFromPool, queryPool, poolCount, poolFacets, languageName, POOL_SORT_KEYS } from '../pool.js';
+import { drawFromPool, queryPool, poolCount, poolFacets, languageName, POOL_SORT_KEYS , countryFacet } from '../pool.js';
 import { hydrateMovies } from '../movies.js';
 
 const router = Router();
@@ -108,6 +108,11 @@ router.post('/pool/movies', (req, res) => {
     limit,
     offset,
   });
+});
+
+/** The country vocabulary for national cinema night, derived from the library. */
+router.get('/pool/countries', (req, res) => {
+  res.json({ countries: countryFacet(getDb()) });
 });
 
 export default router;
