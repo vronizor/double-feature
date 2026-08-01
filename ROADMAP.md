@@ -18,8 +18,6 @@ themselves.
 | Item | State | Where it stands |
 |---|---|---|
 | Box office — United States | ⏳ ready | **Source found and verified.** `List of <year> box office number-one films in the United States`: 1946–2026 no gaps, and the SAME pages carry an annual top-N table — `Rental` 1950–1978, `Domestic gross` 1981–2026, domestic throughout. Wikilinked, so no fuzzy matching — see §1 |
-| Cannes Grand Prix | ⏳ ready | A second Cannes list beside the Palme. Same Wikidata `P166` route, so a fetcher parameter rather than new machinery |
-| Actor's night | ⏳ ready | Director night with `job` swapped. The `▾` chip, the slot list and `applyParameter` all already take a `param.job` |
 | Can a parametric list be ranked? | ⏳ ready | **Investigation only, no build.** Director night materialises a slot list; whether it can carry a rank at all is the question. Build, if it turns out to be possible, is v6 |
 | "Custom" reads as a chip you can press | ⏳ ready | It is a status readout — "no vibe; you built this pool by hand" — sitting in a row where everything else is a control. It is not clickable and should not look like it might be |
 | A dangling `·` when the director wraps | ⏳ ready | The meta line breaks as `1994 ·` / `Krzysztof Kieślowski`, leaving a separator at the end of the line. Caused by the v4 fix that made names unbreakable — the name no longer splits, so the whole name moves and the separator is stranded |

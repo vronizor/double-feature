@@ -1308,3 +1308,51 @@ uniformly compact and uniformly unreadable — "CH" and "SE" are guesses for mos
 people, and "France" was never the problem. Only the names that actually
 overflow are shortened, in the form people say rather than the form a standard
 prescribes. Seven entries cover it, and anything unlisted renders as itself.
+
+### 8.5 Cannes Grand Prix — a second bite at Cannes
+
+Configuration, as the roadmap promised: a QID, a slug, and the same `P166`
+route every other Wikidata award uses. 63 films, **100% carrying a TMDB id**,
+so no matching problem at all.
+
+**The QID was settled by counting films, not by reading names**, which the
+`Golden Bear` note already warned is necessary — a label search for "Grand
+Prix" returns a 1982 video game first, and three other festivals award a grand
+prix of their own. Q844804 is the one that returns 63 films.
+
+Worth having, and measurably so: **only one of the 63 also holds a Palme
+d'Or**, so this is 62 films the Cannes axis could not previously reach. That is
+the opposite of the Palme's own note, which records 58% redundancy against a
+canon-heavy library and admits it was included for the axis rather than the
+additions.
+
+**The name is historically overloaded and the list reflects it.** Before 1955,
+and again in the 1960s, the top prize at Cannes was itself called the Grand
+Prix — which is why *The Third Man* (1949) is the oldest entry. An old row here
+means "top prize of its year", not "runner-up", and the seed note says so.
+
+### 8.6 Actor's night — not director night with the job swapped
+
+The roadmap said this was director night with `job` swapped, and that the chip,
+the slot list and `applyParameter` all already took a `param.job`. The plumbing
+half was right. The TMDB half was wrong, and it would have shipped an empty
+night.
+
+**Acting is not a crew job.** It lives in the `cast` array, and `job ===
+'Acting'` matches **zero** crew entries — measured live, where Toshiro Mifune
+returns 167 cast credits against 13 crew ones, and those thirteen are producer
+credits plus a single directing one. Swapping the string in the existing crew
+filter returns nothing at all: no error, no films, just a night that quietly
+does not exist. So the job now selects a *function* rather than a filter value.
+
+**The billing cut is the `with_crew` argument at the other end of the credits.**
+`with_crew` was rejected for directors because it counted any crew role and
+returned Kurosawa as an assistant director on other people's films. The cast
+array fails identically in the opposite direction: Mifune is billed 127th in
+*Port Arthur*, which is not a Mifune film in any sense a viewer would mean. Top
+ten billing is the honest reading of "their film".
+
+Ten is loose on purpose rather than tuned. Measured across four actors it keeps
+83–97% of a filmography, and `order` was present on **every** credit, so the
+rule loses nothing to missing data. Mifune resolves to 150 films of 167, which
+is exactly what the measurement predicted before the code existed.

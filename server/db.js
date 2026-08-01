@@ -552,6 +552,15 @@ const BUILTIN_VIBES = [
     position: 5,
     param: { kind: 'person', job: 'Director', label: 'Director' },
   },
+  // Same shape, different half of the credits — acting is not a crew job, so
+  // the job here selects a different TMDB read rather than a different filter
+  // over the same one. See getActingCredits in tmdb.js.
+  {
+    name: "Actor's night",
+    tags: [],
+    position: 6,
+    param: { kind: 'person', job: 'Acting', label: 'Actor' },
+  },
 ];
 
 /**

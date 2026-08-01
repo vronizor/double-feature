@@ -131,17 +131,24 @@ test('built-in vibes are seeded once and never re-added after deletion', () => {
   const db = seed();
   ensureBuiltinVibes(db);
   const first = allVibes(db).map((v) => v.name).sort();
-  assert.deepEqual(first, ['Awards', 'Cinephile', 'Director night', 'Family', 'Modern Classics']);
+  assert.deepEqual(first, [
+    "Actor's night",
+    'Awards',
+    'Cinephile',
+    'Director night',
+    'Family',
+    'Modern Classics',
+  ]);
 
   // Idempotent.
   ensureBuiltinVibes(db);
-  assert.equal(allVibes(db).length, 5);
+  assert.equal(allVibes(db).length, 6);
 
   // Built-ins are ordinary rows: deletable, and a delete sticks for as long as
   // the row is absent from THIS database.
   const family = allVibes(db).find((v) => v.name === 'Family');
   deleteVibe(db, family.id);
-  assert.equal(allVibes(db).length, 4);
+  assert.equal(allVibes(db).length, 5);
 });
 
 test('the Family built-in carries a filter, not just a list selection', () => {
