@@ -315,6 +315,22 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
+- **Where the database lives — decide before the Pi.** It sits at
+  `~/double-feature-data/double-feature.db`, reached by `DB_PATH`, because
+  parallel worktrees each got their own empty `data/` and real state landed in
+  whichever tree was last run. Merging per chunk removed that cause, so the
+  outside-the-repo path is now belt-and-braces rather than load-bearing, and
+  moving it back to `./data/` is a file move plus four lines of `.env`.
+
+  Two things must stay true whichever way it goes. The database is **never
+  committed** — it carries guests' names against their ballots in a public
+  repo, and the IMDb-derived numbers are licensed for use and not
+  redistribution. And on the Pi, `DB_PATH` must be **unset**: `docker-compose`
+  bind-mounts `./data:/app/data` and passes `.env` into the container, so an
+  absolute macOS path would send the container looking for a directory it does
+  not have. *(Raised by the owner 2026-08-01: "we might swap it back in before
+  sending to the pi".)*
+
 - **A Box-office vibe.** *(From field notes, 2026-08-01.)* One chip selecting
   the box-office lists, the way Awards selects the award lists. Deferred rather
   than done because it is worth one chip only once there is more than one such

@@ -1145,6 +1145,27 @@ const SOURCES = [
       }),
   },
   {
+    label: 'Cannes Grand Prix',
+    minCount: 50,
+    run: () =>
+      fetchWikidataAward('Q844804', {
+        slug: 'award-cannes-grand-prix',
+        short_name: 'Grand Prix',
+        name: 'Grand Prix (Cannes)',
+        tags: ['awards', 'festivals'],
+        source: 'Wikidata — award received (P166), Cannes Film Festival Grand Prix (Q844804)',
+        source_url: 'https://en.wikipedia.org/wiki/Grand_Prix_(Cannes_Film_Festival)',
+        note:
+          'The runner-up to the Palme d’Or, and a second bite at Cannes for films the ' +
+          'Palme list cannot reach. Q844804 verified by counting films rather than by ' +
+          'name: a label search for "Grand Prix" returns a 1982 video game first, and ' +
+          'three other festivals also award a "grand prix". The name is historically ' +
+          'overloaded — before 1955 and again in the 1960s the top prize at Cannes was ' +
+          'itself called the Grand Prix — so treat an old entry here as "top prize of ' +
+          'its year", not as a runner-up.',
+      }),
+  },
+  {
     label: 'Golden Lion',
     run: () =>
       fetchWikidataAward('Q209459', {

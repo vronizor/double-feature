@@ -25,7 +25,7 @@
  * is the exact problem that ruled out one list per country.
  */
 
-import { getMovie, getDirectorCredits, getPerson } from './tmdb.js';
+import { getMovie, getDirectorCredits, getActingCredits, getPerson } from './tmdb.js';
 import { upsertMovie } from './movies.js';
 import { inTransaction } from './db.js';
 import { countryFacet } from './pool.js';
@@ -49,14 +49,21 @@ async function canonicalName(value) {
   }
 }
 
+// Both read /person/{id}/movie_credits, but from different halves of it —
+// directing is a crew job, acting is not a job at all. See getActingCredits.
+const CREDITS_BY_JOB = {
+  Director: getDirectorCredits,
+  Acting: getActingCredits,
+};
+
 /** The films a parametric vibe resolves to, for each kind of parameter. */
 async function filmsFor(param, value) {
   if (param?.kind !== 'person') throw new Error(`unsupported parameter kind: ${param?.kind}`);
-  // job=Director via /person/{id}/movie_credits, never discover's with_crew —
-  // that matches any crew role and returns assistant-director credits on other
-  // people's films. See DECISIONS.md section 1.
-  if (param.job !== 'Director') throw new Error(`unsupported job: ${param.job}`);
-  return getDirectorCredits(value.id);
+  // Never discover's with_crew — it matches any crew role and returns
+  // assistant-director credits on other people's films. See DECISIONS.md §1.
+  const credits = CREDITS_BY_JOB[param.job];
+  if (!credits) throw new Error(`unsupported job: ${param.job}`);
+  return credits(value.id);
 }
 
 /** The name a slot list wears while it holds this value. */
