@@ -32,6 +32,27 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   Spain, IMDb and two dynamic-list fixes. See `ROADMAP.md` §6.2, which keeps the
   full reasoning.
 
+  **US counted admissions: CLOSED, 2026-08-01.** There is no public, per-film,
+  counted US admissions source, at any year, under any licence. Counted data
+  *does* exist — Comscore Swift and EntTelligence measure actual ticket
+  issuance — but it is a private settlement asset sold to studios, never
+  published at title level. Every public "US tickets sold" figure without
+  exception is gross ÷ average ticket price, including NATO's own and the MPA
+  THEME reports, whose chart sources its attendance line to *"NATO (Ticket
+  Price), BLS (Consumer Price Index)"*. Lumiere has no US market. The
+  structural reason: France and Spain publish admissions because a state
+  mandate compels it; the US chose private measurement instead.
+
+  > **And admissions would be a worse cross-era measure than it looks, even if
+  > it existed.** US admissions ran ~4 billion a year in the 1940s against a
+  > population of 140M, peaked at 1.58bn in 2002, and are ~780M in 2025 — while
+  > population grew ~20%. A raw count therefore measures **how central cinema
+  > was to the culture in the release year**, not how popular the film was. Any
+  > cross-era use needs normalising per capita, at which point it becomes a
+  > share-of-audience metric and the counted-versus-estimated distinction
+  > largely stops mattering. This is the same reason ranking happens within a
+  > year and never across.
+
   **Sourcing answered 2026-07-31.** Three findings, one of which dissolves the
   blocker:
 
@@ -158,6 +179,61 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   than a data change — and the map has to be complete, because a country that
   falls through to its full name would be the widest chip again. *(From field
   notes.)*
+
+- **Lumiere (European Audiovisual Observatory) — ~34 countries in one source.**
+  Verified live 2026-08-01. `lumiere.obs.coe.int/movie/{id}` returns a
+  `Market | Distributor | Release date | 1996 | … | 2025` table: per film, **per
+  country, per year**, counted admissions sourced from the same statutory
+  national tallies France's CNC and Spain's ICAA publish. *Parasite* returns 31
+  markets — DE 1,077,773, GB 1,632,625, CZ 64,639. Plain `curl`, no account, no
+  session, no locale trick.
+
+  **One integration replaces a dozen national ones**, which is what Spain's
+  15,000-page crawl argues for. Search is `POST /search` by title; there is no
+  release-country filter.
+
+  > **⚠️ The XLSX export is a decoy — verified.** `/movie/{id}/export` returns
+  > HTTP 200, a genuine 11 KB spreadsheet, correct MIME type, plausible
+  > filename — and **no admissions at all**. Its 136 strings are title,
+  > director, production year, producing countries and a few external ids. A
+  > pipeline trusting the file extension would ship a list with no data in it.
+  > **The admissions exist only in the HTML.**
+  >
+  > That same export is quietly useful for a different reason: it carries
+  > **IMDb and Wikidata ids per film**, which is the exact matching problem that
+  > made Spain expensive.
+
+  **Limits, all real.** Coverage is 1996–2025 only, so it cannot reach the
+  1945–1995 span France and Spain already have. **There is no US market** —
+  confirmed, so it does nothing for the US question. The licence grants
+  nothing: `/disclaimer` is a copyright notice and a liability waiver, and
+  production-country searches are capped at 200 results *"due to copyright
+  restrictions from our data providers"*. **So: fetch at runtime, commit
+  nothing** — the same rule as the IMDb dataset. And the figures are the
+  Observatory's own "minimum estimates": *Parasite* shows **SE 274** for
+  Sweden, which is not plausible, so per-country values need sanity-checking or
+  a market whitelist before display.
+
+  **Shape if built:** resolve films already in the library by title, parse the
+  market table at runtime, cache locally, keep the cache out of git. Thousands
+  of targeted fetches rather than a catalogue sweep.
+
+- **KOBIS / KOFIC (South Korea) — the one worthwhile addition beyond Lumiere.**
+  Korea sits outside Lumiere's footprint and its admissions are the most
+  rigorously counted of any source found: KOBIS is the national ticketing
+  reconciliation network, so `audiCnt` is actual ticket issuance rather than a
+  tally after the fact. REST/JSON, free key, 3,000 requests/day; the endpoint
+  answers live and returns a "key required" error unauthenticated. Unresolved:
+  earliest supported date, exact terms. It is daily box office, so a film's
+  total is accumulated across days rather than read off a lifetime table.
+
+- **Checked and unusable:** **Japan/Eiren** publishes national aggregates
+  1955–2025 and per-title figures in *yen*, not admissions. **BFI** publishes
+  GBP gross per film and admissions only in aggregate — take GB from Lumiere.
+  **Cinetel** (Italy) is a paid trade subscription. **FFA** (Germany) 404s at
+  the documented URL. **PISF** (Poland) does collect mandatory returns but its
+  box-office page timed out twice — unresolved rather than disproven, and
+  Lumiere covers PL anyway.
 
 - **Box office for other countries — partially surveyed, 2026-08-01.** The
   en.wikipedia `List of <year> box office number-one films in <country>` family
