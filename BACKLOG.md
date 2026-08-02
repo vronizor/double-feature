@@ -289,14 +289,38 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   Code skill, an npm CLI, a Chrome extension and a CI step.
 
   **Why v6 and not sooner.** It is a pass over the *presentation* of a UI whose
-  shape is still moving: v4 alone adds a parametric chip that does not exist
-  yet, and a picker that has to survive a second family of query-backed lists.
-  Polishing before those land means polishing twice. It also wants a stable
-  design system to respect, and this app's is a single hand-written
-  `styles.css`.
+  shape was still moving: v4 added a parametric chip that did not exist yet,
+  and a picker that had to survive a second family of query-backed lists.
+  Polishing before those land means polishing twice. That reason has now
+  expired — the shape has stopped moving.
+
+  > **The SECOND reason recorded here was wrong, checked 2026-08-02.** It said
+  > the tool wants a stable design system to respect and this app's is one
+  > hand-written stylesheet. Design-system awareness is optional: it activates
+  > only if a `DESIGN.md` or equivalent exists, and there is a flag to disable
+  > it. The detector assumes no framework and no tokens, ships its own static
+  > CSSOM rather than a browser, and resolves `:root` custom properties through
+  > the cascade — a hand-written stylesheet with CSS variables is its native
+  > input, not a hard case.
+
+  **The real obstacle is different and narrower: this app's DOM is built in
+  JavaScript.** `index.html` is a near-empty shell, and the detector picks its
+  engine by file extension — HTML gets the full cascade, a bare `.css` falls
+  back to regex. Pointed at this repo's source it would see an empty page and
+  give the stylesheet only regex treatment. Meaningful detection needs the
+  RENDERED page: either a headless-browser scan of the running app, which
+  means a Chromium download, or the browser extension against it by hand.
+
+  Two more things worth knowing before anyone spends a session on it. The tool
+  splits cleanly in half, and **only one half is safe here**: the detector is
+  report-only with per-rule ignores, while the command set (`/polish` and
+  friends) EDITS SOURCE on taste grounds — which collides head-on with this
+  project's rule that findings are reported rather than folded into the diff.
+  And the vendor's own documentation pitches it at creation rather than
+  retrofit, warning against expecting it to fix existing code.
 
   Worth stating plainly because it is not obvious: **this is a cosmetic pass,
-  not a feature**, and nothing in v4 or v5 depends on it.
+  not a feature**, and nothing in v4, v5 or v6 depends on it.
 
 ## Unscheduled
 

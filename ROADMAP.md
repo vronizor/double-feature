@@ -17,7 +17,7 @@ themselves.
 
 | Item | State | Where it stands |
 |---|---|---|
-| A design pass with Impeccable | 🗣 open | Not settled that it is wanted. `https://impeccable.style/` — a detector of 58 visual tells of machine-written UI, plus `/polish` and `/typeset` commands. See `BACKLOG.md` |
+| A design pass with Impeccable | 🗣 open | Researched 2026-08-02, and the answer changed the question. It is Apache-2.0, free, no account and no data leaves the machine; the detector is 47 inspectable JS rules, report-only, with per-rule ignores. **The recorded reason for deferring was wrong** — it assumes no design system and no framework. The real obstacle is that our DOM is built in JS, so a static scan sees an empty shell and only the RENDERED app is worth scanning. **The decision owed is whether to spend one session scanning the running app and hand-fixing what we agree with.** The `/polish` command set is a separate thing and is not wanted: it edits source on taste grounds. See `BACKLOG.md` |
 
 Deferred, so they are not re-proposed early: **Unscheduled** — cultness,
 household memory, nominees as well as winners, box office beyond
