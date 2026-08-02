@@ -181,8 +181,10 @@ collapses to one entry in the pool and can't be drawn twice. That also survives
 accents, alternate titles and "The" prefixes, which plain title matching would
 miss.
 
-Mark films **watched** to exclude them from future draws; a filter toggle allows
-rewatches.
+Mark films **watched** to keep a record of what you have seen. Draws include
+them by default — a household rewatches, and a film you loved is a perfectly
+good thing to draw again — and the Pool setup filter excludes them when you
+want something new.
 
 ## Where the seed lists come from
 

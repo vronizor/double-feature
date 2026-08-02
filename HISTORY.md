@@ -1536,3 +1536,52 @@ films were in the draw pool twice.
 Moved to `docs/evidence/`, where the rest of that measurement already lives.
 The loader now also refuses `*.probe.json`, because a convention about where to
 put a file is not a guard, and the directory listing is what actually decides.
+
+### 8.14 Closing v5
+
+Nine chunks. The box-office axis finished with the United States, Cannes gained
+its second list, actor's night joined director night, and five things reported
+from actually using the app were fixed — the vibe row, the ratings, the country
+chips, the card's meta line, and the award badge years.
+
+**What v5 taught, and it is one lesson in three costumes: the thing that looks
+like the work is often not the work.**
+
+*Actor's night* was filed as "director night with `job` swapped". The plumbing
+half was right and the data half was wrong — acting is not a crew job, and
+building it as written would have shipped an empty night with no error at all.
+
+*Award badge years* was filed as a scrape, a column, a migration and a
+backfill. It was a display transform, because v3 had already scraped the fact
+it needed. The item had been sized by a reversal in `DECISIONS.md` that rejects
+deriving an award year — from the *release* year, which is a different and
+genuinely unsafe operation. Two sentences that read alike, one filed as months
+of work.
+
+*Box-office US* was filed as one source with two documented gaps. It was two
+sources, six gaps, and — found only after shipping it once — two different
+definitions of what a year's chart means.
+
+In each case the plan was written by someone who had read the source and not
+yet touched it, which is the normal condition of a plan. What caught all three
+was the same habit: measure before building, and inspect the values rather than
+the counts.
+
+**The sharpest instance is the one that got past the first pass.** Box-office
+US shipped with calendar-year ranks before 1982 and release-year ranks after,
+and every check it had said fine: 784 films, all resolved, empty review queue,
+spot-checked #1s correct in every era. The list was wrong in a way no count
+could see, because both halves were individually right. It took a research pass
+asking what the numbers *meant* rather than whether they were there.
+
+> Carried into v6 as a third trap: **a source can answer with MORE than you
+> asked for, in a shape that fits.** When a page offers two tables, the question
+> is not which one parses.
+
+Two smaller things worth keeping. A research probe had been sitting in `seeds/`
+and was therefore an active 1,568-film list, because the directory is the only
+thing that decides — a convention about where to put a file is not a guard. And
+re-running a fetcher dropped from three minutes to sixteen seconds once the
+politeness sleep stopped firing for requests that were being served from cache.
+
+Version 6.0.0.
