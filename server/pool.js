@@ -401,6 +401,41 @@ export function languageName(code) {
 }
 
 /**
+ * Says what a Top-N cut did, not just what number was typed.
+ *
+ * The group a rank counts within differs per list: TSPDT ranks end to end, a
+ * box-office list ranks within each year, so one N means ten films on one and
+ * eight hundred on the other. The per-year kind has MORE THAN ONE row at rank
+ * 1 — a #1 for every year it covers — where an end-to-end ranking has exactly
+ * one. Repeated ranks anywhere is not the same test and is wrong: a poll with
+ * ties repeats positions all the way down and still has a single winner.
+ *
+ * Must stay in step with `topNLabel` in public/dom.js, which says the same
+ * thing live while the host is still building the pool. There is no module
+ * shared between the browser and the server to hold it, so the duplication is
+ * deliberate and small; the strings are the contract.
+ */
+function topNCut(db, setup, topN) {
+  const { lists } = normalizePoolSetup(setup);
+  const scope = lists === null ? 'l.is_active = 1' : `l.id IN (${lists.map(() => '?').join(', ')})`;
+  const rows = db
+    .prepare(
+      `SELECT SUM(lm.rank = 1) > 1 AS by_year
+         FROM lists l JOIN list_movies lm ON lm.list_id = l.id
+        WHERE ${scope}
+        GROUP BY l.id
+       HAVING COUNT(lm.rank) > 0`,
+    )
+    .all(...(lists ?? []));
+
+  const perYear = rows.filter((row) => row.by_year).length;
+  if (rows.length === 0) return `top ${topN} (no ranked lists)`;
+  if (perYear === 0) return `top ${topN}`;
+  if (perYear === rows.length) return `top ${topN} per year`;
+  return `top ${topN}, per year on some lists`;
+}
+
+/**
  * Short human-readable summary stored on the session for the results screen.
  *
  * Takes the whole pool setup, and the names for the ids in it. It used to take
@@ -430,7 +465,7 @@ export function describePoolSetup(db, setup, selectedListNames) {
   if (f.languages.exclude.length) parts.push(`no ${f.languages.exclude.map(languageName).join('/')}`);
   if (f.genres.include.length) parts.push(f.genres.include.map(nameFor).join('/'));
   if (f.genres.exclude.length) parts.push(`no ${f.genres.exclude.map(nameFor).join('/')}`);
-  if (topN !== null && topN > 0) parts.push(`top ${topN}`);
+  if (topN !== null && topN > 0) parts.push(topNCut(db, setup, topN));
   if (f.awardWinners) parts.push('award winners');
   if (f.includeWatched) parts.push('incl. watched');
   if (f.search) parts.push(`"${f.search}"`);

@@ -18,7 +18,6 @@ themselves.
 | Item | State | Where it stands |
 |---|---|---|
 | Rank a parametric list, by rating | ⏳ ready | Answered in v5: mechanism was never the blocker, and a slot list is wiped and rewritten on every apply so it has none of the stale-rank hazard. **Floor decided 2026-08-02: 1,000 IMDb votes**, matching the existing `IMDB_VOTE_FLOOR` rather than Modern Classics' 5,000, which would strip most pre-1960 work from a director's filmography |
-| Say what a Top-N cut actually did | ⏳ ready | Decided 2026-08-02. One control, one meaning — "the top N of each ranked group" — but the same N yields 10 films from TSPDT and ~820 from Box-office France, so the pool summary must say `top 10 per year` where the group is a year and `top 10` where it is the list. Label only; no second control, and `overall_rank` stays unread |
 | A design pass with Impeccable | 🗣 open | Not settled that it is wanted. `https://impeccable.style/` — a detector of 58 visual tells of machine-written UI, plus `/polish` and `/typeset` commands. See `BACKLOG.md` |
 
 Deferred, so they are not re-proposed early: **Unscheduled** — cultness,

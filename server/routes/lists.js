@@ -18,7 +18,9 @@ function listWithCounts(db, id) {
               (SELECT COUNT(*) FROM list_movies lm
                 WHERE lm.list_id = l.id AND lm.status <> 'resolved')    AS review_count,
               (SELECT COUNT(lm.rank) FROM list_movies lm
-                WHERE lm.list_id = l.id)                               AS ranked_count
+                WHERE lm.list_id = l.id)                               AS ranked_count,
+              (SELECT SUM(lm.rank = 1) > 1 FROM list_movies lm
+                WHERE lm.list_id = l.id)                               AS ranks_by_year
        FROM lists l WHERE l.id = ?`,
     )
     .get(id);
@@ -39,6 +41,19 @@ router.get('/', (req, res) => {
               -- is worth showing at all.
               (SELECT COUNT(lm.rank) FROM list_movies lm
                 WHERE lm.list_id = l.id)                             AS ranked_count,
+              -- Whether this list's rank is a position WITHIN A YEAR rather
+              -- than across the whole list. It decides what a Top-N cut means
+              -- here — "the top 5" or "the top 5 of every year" — which is a
+              -- difference of two orders of magnitude in the pool.
+              --
+              -- The tell is MORE THAN ONE row at rank 1: a per-year list has a
+              -- #1 for every year it covers, an end-to-end ranking has exactly
+              -- one. Repeated ranks anywhere is NOT the tell, and using it was
+              -- wrong: Sight and Sound is a poll with heavy ties, 264 ranked
+              -- rows across only 71 distinct positions, and it was read as
+              -- per-year. It has one #1, like every end-to-end list here.
+              (SELECT SUM(lm.rank = 1) > 1 FROM list_movies lm
+                WHERE lm.list_id = l.id)                             AS ranks_by_year,
               (SELECT group_concat(tag, ',') FROM (
                  SELECT tag FROM list_tags WHERE list_id = l.id ORDER BY tag
                ))                                                    AS tag_csv

@@ -282,6 +282,34 @@ export function matchDiffers(entry) {
   return !titleAgrees || !yearAgrees;
 }
 
+/**
+ * How to say what a Top-N cut did.
+ *
+ * One control, one meaning — "the top N of each ranked group" — but the group
+ * is whatever a list ranks within, and that is not the same thing on every
+ * list. Top-N=10 is ten films from TSPDT and about eight hundred from
+ * Box-office France, because the first ranks end to end and the second ranks
+ * within each year. The number alone therefore cannot tell you how big the
+ * pool became, and that is the honest complaint against it.
+ *
+ * So the label carries the group rather than a second control carrying the
+ * choice. `ranked` is how many selected lists have ranks at all, `perYear` how
+ * many of those rank within a year.
+ *
+ * Kept beside `describePoolSetup`'s copy in server/pool.js, which writes the
+ * same phrase onto a finished session. The two must agree; there is no shared
+ * module between the browser and the server to put it in.
+ */
+export function topNLabel(topN, { ranked, perYear }) {
+  if (!topN || topN <= 0) return null;
+  // No ranked list selected: the cut does nothing at all, and saying "top 5"
+  // would describe a narrowing that did not happen.
+  if (ranked === 0) return `top ${topN} (no ranked lists)`;
+  if (perYear === 0) return `top ${topN}`;
+  if (perYear === ranked) return `top ${topN} per year`;
+  return `top ${topN}, per year on some lists`;
+}
+
 export function metaLine(...parts) {
   return parts
     .flat()

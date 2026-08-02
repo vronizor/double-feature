@@ -1766,3 +1766,35 @@ and the test asserts the return rather than implying it cannot happen.
 > thing was written down confidently — the first was §9.1's invented rank.
 
 Version 6.5.0.
+
+### 9.5 A Top-N cut says which group it cut
+
+One control, one meaning — the top N of each ranked group — but the group is
+whatever a list ranks within, and that differs. Top-N=10 is ten films from
+TSPDT and about eight hundred from Box-office France. The number alone cannot
+tell you which happened, and that was the honest complaint against it.
+
+The fix is a label, not a second control. A second one was considered and
+rejected: on most of a selection one of the two would always be a no-op, which
+is the lookalike-controls trap already recorded in `DECISIONS.md`. So the pool
+summary now reads `top 5 per year` where the group is a year, `top 5` where it
+is the list, `top 5, per year on some lists` for a mixed selection, and
+`top 5 (no ranked lists)` where the cut did nothing at all — that last case
+mattering because "top 5" would otherwise describe a narrowing that never
+happened.
+
+> **The first detector was wrong, and the real library caught it.** It asked
+> whether ranks REPEAT, reasoning that a per-year list has a #1 for every year.
+> True, but so does any poll with ties: Sight and Sound has 264 ranked rows
+> across 71 distinct positions and was read as per-year. The right question is
+> how many rows sit at rank **1** — 82 for France, 81 for the US, exactly one
+> for Sight and Sound, TSPDT and Modern Classics. Measured across every ranked
+> list before the change went in, which is the only reason it was caught: the
+> tie-heavy list is the single counter-example in the library.
+
+The label is duplicated between `public/dom.js` and `server/pool.js` — the
+browser needs it live while the host builds a pool, the server needs it when
+writing a finished session's summary, and there is no module shared between
+them. The duplication is small, deliberate, and cross-referenced in both.
+
+Version 6.6.0.
