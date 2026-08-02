@@ -17,7 +17,7 @@ themselves.
 
 | Item | State | Where it stands |
 |---|---|---|
-| A design pass with Impeccable | 🗣 open | Researched 2026-08-02, and the answer changed the question. It is Apache-2.0, free, no account and no data leaves the machine; the detector is 47 inspectable JS rules, report-only, with per-rule ignores. **The recorded reason for deferring was wrong** — it assumes no design system and no framework. The real obstacle is that our DOM is built in JS, so a static scan sees an empty shell and only the RENDERED app is worth scanning. **The decision owed is whether to spend one session scanning the running app and hand-fixing what we agree with.** The `/polish` command set is a separate thing and is not wanted: it edits source on taste grounds. See `BACKLOG.md` |
+| A design pass with Impeccable | 🔨 doing | **Detector run 2026-08-02 against the live app.** Across three rendered states plus a control that proved the scanner worked, the whole UI produced ONE actionable finding — the modal carried both a 1px border and a 24px shadow, now fixed by dropping the border. `overused-font` is a false positive: our stack is the standard system one and only reaches Roboto under headless Chrome. It said **nothing** about the Pool setup panel's density, which is what prompted this. `/polish` is ruled out — no dry-run, and scoping is whole-file, which here is the entire stylesheet. **Now running `critique`, the read-only design-review half**, which is a skill rather than a CLI command |
 
 Deferred, so they are not re-proposed early: **Unscheduled** — cultness,
 household memory, nominees as well as winners, box office beyond
