@@ -41,7 +41,7 @@ function seed() {
 test('hydrateMovies reports every list a film resolves on, alphabetically', () => {
   const db = seed();
   const [movie] = hydrateMovies(db, [1]);
-  assert.equal(movie.lists, 'Criterion, Sight and Sound');
+  assert.deepEqual(movie.lists.map((l) => l.name), ['Criterion', 'Sight and Sound']);
 });
 
 test('list ordering is case-insensitive, not SQLite\'s default byte-wise order', () => {
@@ -61,19 +61,25 @@ test('list ordering is case-insensitive, not SQLite\'s default byte-wise order',
   ).run();
 
   const [movie] = hydrateMovies(db, [1]);
-  assert.equal(movie.lists, 'The Criterion Collection, TSPDT 1,000 Greatest Films');
+  assert.deepEqual(movie.lists.map((l) => l.name), [
+    'The Criterion Collection',
+    'TSPDT 1,000 Greatest Films',
+  ]);
 });
 
 test('hydrateMovies reports a single list plainly', () => {
   const db = seed();
   const [movie] = hydrateMovies(db, [2]);
-  assert.equal(movie.lists, 'Criterion');
+  assert.deepEqual(movie.lists.map((l) => l.name), ['Criterion']);
 });
 
 test('hydrateMovies only counts resolved list_movies rows', () => {
   const db = seed();
   const [movie] = hydrateMovies(db, [3]);
-  assert.equal(movie.lists, null);
+  // A film on nothing resolved is an EMPTY list of memberships, never a single
+  // null entry — json_group_array over no rows gives [], and the modal must not
+  // render a membership that does not exist.
+  assert.deepEqual(movie.lists, []);
 });
 
 test('hydrateMovies preserves request order and drops unknown ids', () => {

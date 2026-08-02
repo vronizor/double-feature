@@ -588,7 +588,32 @@ export function openMovieModal(movie) {
         // Doesn't matter for the draw itself (it's already deduplicated by
         // tmdb id by then), but is useful context when just browsing —
         // hence kept to the detail overlay rather than the compact card.
-        movie.lists ? h('div', { class: 'movie-meta faint' }, `On: ${movie.lists}`) : null,
+        movie.lists?.length
+          ? h(
+              'div',
+              { class: 'movie-meta faint movie-lists' },
+              h('span', {}, 'On:'),
+              ...movie.lists.map((entry) =>
+                h(
+                  'span',
+                  { class: 'movie-list' },
+                  entry.name,
+                  // The rank is the interesting half — being on Box-office
+                  // España says less than being its #3 of 1952 — and "of 1952"
+                  // is what tells you the position is within that year rather
+                  // than across the whole list. An unranked list (Criterion,
+                  // Ghibli) shows its name alone, as before.
+                  entry.rank
+                    ? h(
+                        'span',
+                        { class: 'movie-list-rank' },
+                        `#${entry.rank}${entry.by_year && entry.year ? ` of ${entry.year}` : ''}`,
+                      )
+                    : null,
+                ),
+              ),
+            )
+          : null,
         // Full award names here, one per line — the card has to abbreviate to
         // fit, this is where the whole fact belongs.
         movie.awards?.length

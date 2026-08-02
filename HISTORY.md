@@ -1798,3 +1798,40 @@ writing a finished session's summary, and there is no module shared between
 them. The duplication is small, deliberate, and cross-referenced in both.
 
 Version 6.6.0.
+
+### 9.6 The "On:" line says where the film placed
+
+`On: Box-office España` answered "is this film on anything" and stopped. The
+rank is the more interesting half, and it was already stored: *Judas* (1952) is
+not merely on the Spanish box-office list, it is **#1 of 1952**.
+
+```
+On: Box-office España #1 of 1952
+On: Sight & Sound Greatest Films (2022 critics’ poll) #20 · The Criterion
+    Collection · TSPDT 1,000 Greatest Films #10
+```
+
+Three shapes in one line, and the phrasing distinguishes them without a legend.
+`#1 of 1952` is a position within that year; `#20` with no year is a position
+across the whole list; a list with no ranks at all (Criterion, Ghibli) shows its
+name alone, exactly as before. The same `by_year` fact that decides what a
+Top-N cut means decides which phrasing a membership gets, so the two can never
+disagree.
+
+`movies.lists` changed from a comma-joined string to an array of memberships.
+Cheap, because it had exactly one consumer in the whole frontend — the modal
+line itself — so there was no reason to bolt a second field alongside it. Three
+server queries build it and they now share one SQL fragment rather than three
+near-copies that had already drifted in their column aliases.
+
+> `list_shape` is a CTE, not a correlated subquery. The per-list "does this rank
+> by year" aggregate is computed once per statement rather than once per
+> membership row of every hydrated film — which for a 200-film draw over a
+> 1,567-row list is the difference between one pass and several hundred.
+
+A film on nothing returns `[]` rather than `[null]`: `json_group_array` over no
+rows gives an empty array, but a LEFT JOIN that matched nothing would have
+produced a single null entry and the modal would have rendered a membership
+that does not exist. Asserted, because it is invisible until it is not.
+
+Version 6.7.0.

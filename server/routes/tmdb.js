@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { getDb } from '../db.js';
+import { LIST_SHAPE_CTE, listMembershipsSql, parseMemberships } from '../movies.js';
 import { searchMovie, scoreCandidate, searchPerson, getDirectorCredits } from '../tmdb.js';
 
 const router = Router();
@@ -11,19 +12,14 @@ function listsByTmdbId(db, tmdbIds) {
   const placeholders = tmdbIds.map(() => '?').join(', ');
   const rows = db
     .prepare(
-      `SELECT lm.tmdb_id, (
-         SELECT group_concat(name, ', ') FROM (
-           SELECT l.name FROM list_movies lm2 JOIN lists l ON l.id = lm2.list_id
-           WHERE lm2.tmdb_id = lm.tmdb_id AND lm2.status = 'resolved'
-           ORDER BY l.name COLLATE NOCASE
-         )
-       ) AS lists
+      `WITH ${LIST_SHAPE_CTE}
+       SELECT lm.tmdb_id, ${listMembershipsSql('lm.tmdb_id')} AS lists
        FROM list_movies lm
        WHERE lm.tmdb_id IN (${placeholders}) AND lm.status = 'resolved'
        GROUP BY lm.tmdb_id`,
     )
     .all(...tmdbIds);
-  return new Map(rows.map((row) => [row.tmdb_id, row.lists]));
+  return new Map(rows.map((row) => [row.tmdb_id, parseMemberships(row.lists)]));
 }
 
 /**

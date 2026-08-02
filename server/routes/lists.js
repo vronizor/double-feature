@@ -3,7 +3,13 @@ import { Router } from 'express';
 import { getDb } from '../db.js';
 import { parseImport } from '../parse.js';
 import { resolveEntry, getMovie, getTvShow, scoreCandidate } from '../tmdb.js';
-import { recordEntry, upsertMovie } from '../movies.js';
+import {
+  recordEntry,
+  upsertMovie,
+  LIST_SHAPE_CTE,
+  listMembershipsSql,
+  parseMemberships,
+} from '../movies.js';
 
 const router = Router();
 
@@ -263,18 +269,15 @@ router.get('/:id/entries', (req, res) => {
   const where = status === 'needs_review' ? `AND lm.status <> 'resolved'` : '';
   const rows = db
     .prepare(
-      `SELECT lm.id, lm.raw_title, lm.raw_year, lm.status, lm.candidates_json,
+      `WITH ${LIST_SHAPE_CTE}
+       SELECT lm.id, lm.raw_title, lm.raw_year, lm.status, lm.candidates_json,
               lm.tmdb_id, m.media_type, m.title, m.original_title, m.year, m.poster_path, m.director,
               m.runtime, m.overview, m.original_language, m.vote_average,
               m.countries, m.languages, m.trailer_key, m.watched,
               (SELECT group_concat(g.name, ', ')
                  FROM movie_genres mg JOIN genres g ON g.id = mg.genre_id
                 WHERE mg.tmdb_id = m.tmdb_id) AS genres,
-              (SELECT group_concat(name, ', ') FROM (
-                 SELECT l2.name FROM list_movies lm2 JOIN lists l2 ON l2.id = lm2.list_id
-                 WHERE lm2.tmdb_id = m.tmdb_id AND lm2.status = 'resolved'
-                 ORDER BY l2.name COLLATE NOCASE
-               )) AS lists
+              ${listMembershipsSql('m.tmdb_id')} AS lists
        FROM list_movies lm
        LEFT JOIN movies m ON m.tmdb_id = lm.tmdb_id
        WHERE lm.list_id = ? ${where}
@@ -294,6 +297,7 @@ router.get('/:id/entries', (req, res) => {
 
   const entries = rows.map(({ candidates_json: candidates, ...row }) => ({
     ...row,
+    lists: parseMemberships(row.lists),
     candidates: candidates ? JSON.parse(candidates) : [],
     // Only ever true on a resolved row: an unresolved one is already in the
     // queue, and marking it as well would say nothing.

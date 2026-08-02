@@ -195,27 +195,68 @@ export function awardsByTmdbId(db, tmdbIds) {
   return byId;
 }
 
+/**
+ * Which lists a film is on, and where it sits on each.
+ *
+ * Used to be a comma-joined string of names, which answered "is this film on
+ * anything" and stopped there. A rank is the more interesting half: being on
+ * Box-office España says less than being its **#3 of 1952**.
+ *
+ * Carries `by_year` per membership rather than letting the client guess, for
+ * the same reason the Top-N label does — the rank means a different thing on a
+ * per-year list than on an end-to-end one, and "#3" alone cannot say which.
+ * The tell is more than one row at rank 1; see the note in routes/lists.js for
+ * why repeated ranks is the wrong test.
+ *
+ * `list_shape` is a CTE rather than a correlated subquery so the per-list
+ * aggregate is computed once for the whole statement instead of once per
+ * membership row of every hydrated film.
+ */
+export const LIST_SHAPE_CTE = `list_shape AS (
+  SELECT list_id, SUM(rank = 1) > 1 AS by_year FROM list_movies GROUP BY list_id
+)`;
+
+/**
+ * A film on no list yields `[]` rather than `[null]`: json_group_array over an
+ * empty set gives `[]`, but a LEFT JOIN that found nothing would give a single
+ * null entry, and the modal would render a membership that does not exist.
+ */
+export const parseMemberships = (json) =>
+  (JSON.parse(json || '[]') ?? []).filter((row) => row && row.name);
+
+export const listMembershipsSql = (idExpr) => `(
+  SELECT json_group_array(json_object('name', name, 'rank', rank, 'year', year, 'by_year', by_year))
+  FROM (
+    SELECT l.name AS name, lm_x.rank AS rank, lm_x.raw_year AS year, s.by_year AS by_year
+    FROM list_movies lm_x
+    JOIN lists l ON l.id = lm_x.list_id
+    LEFT JOIN list_shape s ON s.list_id = l.id
+    WHERE lm_x.tmdb_id = ${idExpr} AND lm_x.status = 'resolved'
+    ORDER BY l.name COLLATE NOCASE
+  )
+)`;
+
 export function hydrateMovies(db, tmdbIds) {
   if (tmdbIds.length === 0) return [];
   const placeholders = tmdbIds.map(() => '?').join(', ');
   const rows = db
     .prepare(
-      `SELECT m.*, (
+      `WITH ${LIST_SHAPE_CTE}
+       SELECT m.*, (
          SELECT group_concat(g.name, ', ')
          FROM movie_genres mg JOIN genres g ON g.id = mg.genre_id
          WHERE mg.tmdb_id = m.tmdb_id
-       ) AS genres, (
-         SELECT group_concat(name, ', ') FROM (
-           SELECT l.name FROM list_movies lm JOIN lists l ON l.id = lm.list_id
-           WHERE lm.tmdb_id = m.tmdb_id AND lm.status = 'resolved'
-           ORDER BY l.name COLLATE NOCASE
-         )
-       ) AS lists
+       ) AS genres, ${listMembershipsSql('m.tmdb_id')} AS lists
        FROM movies m WHERE m.tmdb_id IN (${placeholders})`,
     )
     .all(...tmdbIds);
 
   const awards = awardsByTmdbId(db, tmdbIds);
-  const byId = new Map(rows.map((row) => [row.tmdb_id, { ...row, awards: awards.get(row.tmdb_id) ?? [] }]));
+  const byId = new Map(
+    rows.map((row) => [
+      row.tmdb_id,
+      { ...row, lists: parseMemberships(row.lists), awards: awards.get(row.tmdb_id) ?? [] },
+    ]),
+  );
   return tmdbIds.map((id) => byId.get(id)).filter(Boolean);
 }

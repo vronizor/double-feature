@@ -300,6 +300,21 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
 /* nowrap keeps "★ 7.9" from splitting between star and number. Safe now that
    the rating is a flex item: the line breaks BEFORE it rather than through it. */
 .movie-rating { color: var(--accent); font-weight: 620; white-space: nowrap; }
+/* "On: Box-office España #3 of 1952 · The Criterion Collection".
+
+   The "On:" label is a flex item like the memberships beside it, so the shared
+   separator rule above would put a · directly after the colon. Only that first
+   one is suppressed — the separators BETWEEN lists are the point.
+
+   The rank stays glued to its own list name: nowrap, so "#3 of 1952" can never
+   wrap away from "Box-office España" and end up reading as though it belonged
+   to the list after it. Same reasoning as the rating on the card's meta line. */
+.movie-lists > span:nth-child(2)::before { content: none; }
+.movie-list { white-space: nowrap; }
+.movie-list-rank {
+  margin-left: 0.34em; color: var(--text-faint);
+  font-variant-numeric: tabular-nums; font-size: 0.94em;
+}
 .movie-overview {
   margin: 3px 0 0; font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;
   overflow-wrap: break-word;

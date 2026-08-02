@@ -728,7 +728,11 @@ test('TMDB search flags results already on one of the host\'s lists', async () =
   const { body } = await call('/api/tmdb/search?q=Vertigo');
   const result = body.results.find((r) => r.tmdb_id === 101);
   assert.ok(result);
-  assert.equal(result.lists, 'Test List', 'Vertigo was resolved onto "Test List" earlier in this suite');
+  assert.deepEqual(
+    result.lists.map((l) => l.name),
+    ['Test List'],
+    'Vertigo was resolved onto "Test List" earlier in this suite',
+  );
 
   // A film on none of the host's lists reports no lists at all.
   const notOnAnyList = await call('/api/tmdb/search?q=Not Yet Cached');
