@@ -250,6 +250,11 @@ ceremony years was wrong for two of three editions.
   to.
 - **Provenance, not `source`** — `source` meant both where a list came from and
   how a lineup film got there.
+- **Watched films are INCLUDED in draws by default.** The README said the
+  opposite for two versions while the UI shipped this, and the UI was right: a
+  household rewatches, and a film you loved is a good thing to draw again.
+  `watched` is a record of what you have seen, not an exclusion list, and the
+  Pool setup filter is there for the nights you want something new.
 - **`is_active` means "in play by default when the app opens"**, written only
   from the Lists tab. Tonight's selection is view state.
 

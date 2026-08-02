@@ -411,6 +411,24 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 Nobody has ruled on these. Where an item is scheduled, `ROADMAP.md` is the
 authority on its state — this file only says why it is worth doing.
 
+- **A LICENSE, and the provenance of the seed lists.** *(Moved here from v5,
+  2026-08-02, deliberately unscheduled rather than dropped.)* Not code, and
+  nothing in the app depends on it — which is why it kept being the last row on
+  a table and never the work anyone picked up.
+
+  Two separate things sit under one heading. **The licence**: the repo is
+  public and therefore all-rights-reserved by default, which is almost
+  certainly not the intent of putting it on GitHub — nobody may legally reuse
+  it, including the friends it is built for. **The provenance**: the seed files
+  redistribute other people's editorial work, and TSPDT's complete 1,000-entry
+  ranking is the strongest flag, being a substantial reproduction of a
+  published list rather than a reference to it. See
+  `docs/evidence/publication-audit.md`.
+
+  Both were consciously accepted while the repo was quiet. Neither gets more
+  urgent on its own, and both get more urgent the moment anyone else looks —
+  which is the trigger to watch.
+
 Cultness and Letterboxd moved here from v5 on 2026-07-31: both were "deferred
 with a decision", and neither decision was really made. Cultness has no data
 source at all, which is the whole problem rather than a scheduling detail, and
