@@ -74,6 +74,12 @@ export async function renderDraw(container) {
     anonymous: false,
     poolCount: null,
     busy: false,
+    // The vote that is open right now, if there is one. Nothing on this tab
+    // used to know: publishing swapped the whole view for the session panel,
+    // so a host who reloaded got a blank lineup and no trace that guests were
+    // still voting — and the server would happily have opened a second vote
+    // over the first.
+    liveSession: null,
   };
 
   let sessionTeardown = null;
@@ -82,12 +88,32 @@ export async function renderDraw(container) {
     sessionTeardown = null;
   };
 
+  /**
+   * Is a vote live? Asked of the server rather than remembered, because the
+   * case this exists for is the one where nothing was remembered — a reload,
+   * or a different browser on the same house network.
+   *
+   * A failure leaves the banner off rather than guessing. The publish route
+   * refuses a second open vote on its own, so the banner is the convenience
+   * and the guard is the guarantee; getting it wrong here costs a missing
+   * banner, never a lost vote.
+   */
+  async function refreshLiveSession() {
+    try {
+      const { sessions } = await api.history();
+      state.liveSession = sessions.find((session) => session.status === 'open') ?? null;
+    } catch {
+      state.liveSession = null;
+    }
+  }
+
   async function refreshData() {
     const [{ lists }, facets, { tags }, { vibes }] = await Promise.all([
       api.lists(),
       api.facets(poolState.selectedLists()),
       api.tags(),
       api.vibes(),
+      refreshLiveSession(),
     ]);
     state.lists = lists;
     state.facets = facets;
@@ -919,6 +945,35 @@ export async function renderDraw(container) {
     );
   }
 
+  /**
+   * The way back to a vote that is already running.
+   *
+   * Rendered above everything else on the tab, because the alternative it
+   * replaces is a host staring at an empty lineup while guests are voting on
+   * a session they can no longer reach.
+   */
+  function liveSessionBanner() {
+    const live = state.liveSession;
+    if (!live) return null;
+
+    return h(
+      'div',
+      { class: 'card row live-banner' },
+      h(
+        'div',
+        {},
+        h('strong', {}, 'A vote is open'),
+        h(
+          'div',
+          { class: 'faint' },
+          `${plural(live.movie_count, 'film')} · ${plural(live.ballot_count, 'ballot')} in`,
+        ),
+      ),
+      h('span', { class: 'spacer' }),
+      h('button', { class: 'btn-primary btn-sm', onClick: () => showSession(live.slug) }, 'Go to it'),
+    );
+  }
+
   async function doPublish() {
     state.busy = true;
     paint();
@@ -927,6 +982,10 @@ export async function renderDraw(container) {
       showSession(session.slug);
     } catch (error) {
       toast(error.message, 'error');
+      // The most likely reason a publish is refused is that a vote is already
+      // open, and the host cannot see one from here. Re-deriving it puts the
+      // banner — and the route back — on screen with the error.
+      await refreshLiveSession();
       state.busy = false;
       paint();
     }
@@ -944,12 +1003,17 @@ export async function renderDraw(container) {
           'button',
           {
             class: 'btn-sm',
-            onClick: () => {
+            onClick: async () => {
               stopSession();
               lineup.clear();
               state.searchResults = [];
               state.busy = false;
               refreshCount();
+              paint();
+              // Leaving the panel does not end the vote. Re-derive it so the
+              // banner comes back with real counts rather than the stale ones
+              // this tab was carrying before the vote was published.
+              await refreshLiveSession();
               paint();
             },
           },
@@ -960,14 +1024,20 @@ export async function renderDraw(container) {
     );
     sessionTeardown = renderSessionPanel(panel, slug, {
       host: true,
-      // The vote is over, so the lineup that produced it is spent. Clearing it
-      // here means switching back to this tab starts fresh rather than showing
-      // last night's films as though they were still staged. Scoped to THIS
-      // session: the History tab renders closed sessions through the same
-      // panel and passes no callback.
-      onClosed: () => {
-        lineup.clear();
-        refreshCount();
+      // Scoped to THIS session: the History tab renders closed sessions through
+      // the same panel and passes no callback, so opening last week's result
+      // cannot wipe the lineup being built now.
+      onEnded: (outcome) => {
+        // Either ending means no vote is live, so the banner must go.
+        state.liveSession = null;
+        // But only a CLOSED vote spends the lineup that produced it — switching
+        // back should start fresh rather than show last night's films as though
+        // they were still staged. A cancelled vote was thrown away on purpose,
+        // and its lineup is the one thing worth keeping to publish again.
+        if (outcome === 'closed') {
+          lineup.clear();
+          refreshCount();
+        }
       },
     });
   }
@@ -977,6 +1047,7 @@ export async function renderDraw(container) {
       h(
         'div',
         { class: 'stack' },
+        liveSessionBanner(),
         h('div', { class: 'tools-row' }, drawControls(), addFilmPanel()),
         h(
           'div',

@@ -1994,3 +1994,54 @@ target and the destination were verified instead, by scrolling to the same
 element with `behavior: 'auto'`.
 
 Version 7.1.0.
+
+### 10.2 A live vote is visible, and unrepeatable
+
+Two halves. The server half is the one that mattered: `POST /api/sessions`
+checked the lineup and the films and never asked whether a vote was already
+open, so publishing a second one over a live one worked for six versions and
+nothing anywhere said no.
+
+**Why that is worse than it sounds.** The guest link and the QR are both just
+"the vote" — neither carries anything identifying which. A second open session
+does not compete with the first; it *replaces* it for everyone who scans from
+that moment, while the ballots already cast sit on a session nobody can reach
+any more. The failure is silent on both sides: the host sees a working QR, the
+guests see a working ballot, and two groups vote on different things.
+
+It refuses rather than resolving. The host has exactly two ways past, and both
+are deliberate acts with different meanings — **close**, which keeps the vote
+and computes its result, or **cancel**, which throws it away. Neither is
+inferable from "publish this other lineup", so picking one on the host's behalf
+would be guessing at the more destructive kind of decision.
+
+**The client half is why the guard is livable.** Publishing swapped the whole
+Draw tab for the session panel and nothing persisted that view, so a host who
+reloaded — or opened the app on the kitchen tablet instead — got an empty
+lineup and no trace that voting was open. A guard alone would have turned that
+into a refusal they could not act on. A banner above the tab now names the live
+vote and routes back to it, derived from `api.history()` rather than remembered,
+because the case it exists for is precisely the one where nothing was
+remembered. A failed lookup shows no banner rather than a guess: the guard is
+the guarantee, the banner is the convenience.
+
+**`onClosed` became `onEnded(outcome)`.** The panel had no hook at all for
+cancellation, so a cancelled vote would have left the banner claiming a vote
+was live. Making it one callback carrying its outcome rather than two callbacks
+also settled something the old name had blurred: a **closed** vote spends the
+lineup that produced it, while a **cancelled** one leaves that lineup the single
+thing worth keeping, since republishing it is the likely next move. The History
+tab still passes nothing, so opening last week's result cannot touch tonight's
+lineup.
+
+One existing test had to give a session back at the end. It published and never
+closed, which was invisible while a second open vote was legal.
+
+Verified against a throwaway copy of the real database, driven in a browser: the
+banner appears on a cold load of a tab that has never seen the vote, publishing
+a second is refused with the lineup left intact, "Go to it" reaches the live
+panel, leaving by "← New lineup" brings the banner back, and cancelling clears
+it. The confirm dialogs were stubbed rather than clicked — a real modal blocks
+the automation channel outright.
+
+Version 7.2.0.

@@ -268,6 +268,14 @@ label { display: block; }
 .range { display: flex; align-items: center; gap: 8px; }
 .range input { width: 100%; }
 
+/* Sits above everything on the Draw tab when a vote is live. Coloured by the
+   accent rather than by --danger: nothing is wrong, there is simply something
+   already running that the host has lost sight of. */
+.live-banner {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-raised));
+}
+
 .pool-count { font-variant-numeric: tabular-nums; }
 .pool-count strong { color: var(--accent); font-size: 1.05rem; }
 

@@ -795,6 +795,9 @@ test('a basket combining a draw, a search-add, and a manual entry all publish to
   );
   const manualInSession = session.body.movies.find((m) => m.tmdb_id === manual.body.movie.tmdb_id);
   assert.equal(manualInSession.title, 'A Friend’s Proposal');
+
+  // Only one vote may be open at a time, so a test that opens one puts it back.
+  await call(`/api/sessions/${published.body.slug}`, { method: 'DELETE' });
 });
 
 test('the client publishes its pool setup under the key the route reads', async () => {
@@ -831,4 +834,39 @@ test('publishing records the lists the host actually chose, not the active ones'
   const { body } = await call(`/api/sessions/${published.body.slug}`);
   assert.match(body.filter_summary, /Not In Play/, `got: ${body.filter_summary}`);
   assert.match(body.filter_summary, /1960–1969/);
+
+  await call(`/api/sessions/${published.body.slug}`, { method: 'DELETE' });
+});
+
+/**
+ * One vote at a time.
+ *
+ * The guest link and the QR are both just "the vote" — nothing on either says
+ * which one — so a second open session does not compete with the first, it
+ * replaces it for anyone scanning from then on, while the ballots already cast
+ * sit on a session nobody can reach. Publishing over a live vote was possible
+ * for six versions and nothing anywhere said no.
+ */
+test('a second vote cannot be published while one is open', async () => {
+  const first = await call('/api/sessions', { method: 'POST', body: { tmdb_ids: [101, 102] } });
+  assert.equal(first.status, 201);
+
+  const second = await call('/api/sessions', { method: 'POST', body: { tmdb_ids: [103] } });
+  assert.equal(second.status, 409);
+  assert.match(second.body.error, /already open/);
+
+  // Refused, not half-written: the live vote still has its own films.
+  const live = await call(`/api/sessions/${first.body.slug}`);
+  assert.deepEqual(live.body.movies.map((m) => m.tmdb_id).sort(), [101, 102]);
+
+  // Closing it is one of the two ways past, and the next publish goes through.
+  await call(`/api/sessions/${first.body.slug}/close`, { method: 'POST' });
+  const third = await call('/api/sessions', { method: 'POST', body: { tmdb_ids: [103] } });
+  assert.equal(third.status, 201);
+
+  // Cancelling is the other, and it also clears the way.
+  await call(`/api/sessions/${third.body.slug}`, { method: 'DELETE' });
+  const fourth = await call('/api/sessions', { method: 'POST', body: { tmdb_ids: [101] } });
+  assert.equal(fourth.status, 201);
+  await call(`/api/sessions/${fourth.body.slug}`, { method: 'DELETE' });
 });
