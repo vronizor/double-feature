@@ -1722,3 +1722,47 @@ top five of every Spanish year", which is the defect that version fixed.
 > this project keeps catching itself doing.
 
 Version 6.4.0.
+
+### 9.4 Two things that were quietly untrue
+
+Both found while building the Box office vibe, neither caused by it.
+
+**Two orphaned rows in `list_tags`**, tagging lists 20 and 21, neither of
+which exists. The table declares `ON DELETE CASCADE`, so this should be
+impossible — but SQLite enforces foreign keys only when a connection sets
+`PRAGMA foreign_keys`, and it is off by default on every new one. The app sets
+it; something that opened the database once without it did not.
+
+The symptom was the new vibe reporting five resolved lists where three exist.
+Nothing downstream was wrong: the pool query joins `lists`, so a phantom id
+matches nothing, and the count was identical with and without them. **A number
+the host reads rather than a pool they draw from** — which is precisely why it
+would have sat there indefinitely.
+
+The sweep covers `list_tags`, `vibe_tags` and `vibe_lists` and stops there. A
+row in one of those is a property of its parent and means nothing without it,
+so deleting it loses nothing. `list_movies` and the ballot tables cascade too
+and are deliberately excluded: they carry content, and an orphan in one would
+mean something had gone properly wrong and should be looked at rather than
+swept. `PRAGMA foreign_key_check` gives the whole picture when that is wanted;
+it now returns empty on the real database.
+
+**A deleted built-in vibe comes back on the next restart.** `ensureBuiltinVibes`
+runs on every boot and asks only whether the name is present. Two things said
+otherwise: the function's own comment claimed "editing or deleting one sticks",
+and a test called *"built-in vibes are seeded once and never re-added after
+deletion"* deleted a vibe and then never re-ran the seeder — so the one
+assertion that would have caught it was the one missing.
+
+The behaviour is **accepted, not fixed**. Making a delete stick needs a record
+of intentionally-removed built-ins, which is real machinery for a problem
+nobody has hit; the built-ins are six ordinary starting points and their
+returning is a small harm. What was not acceptable was a comment and a test
+name that each said the opposite of what the code does. Both now describe it,
+and the test asserts the return rather than implying it cannot happen.
+
+> A test whose name claims a property it does not assert is worse than no test,
+> because it is read as coverage. This is the second time in v6 that the wrong
+> thing was written down confidently — the first was §9.1's invented rank.
+
+Version 6.5.0.

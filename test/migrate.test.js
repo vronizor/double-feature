@@ -351,3 +351,40 @@ test('a genuine overall rank beside a per-year rank is left alone', () => {
     'a real all-time ordering survives the repair',
   );
 });
+
+test('label rows whose parent is gone are swept', () => {
+  const db = new DatabaseSync(':memory:');
+  db.exec(SCHEMA);
+  // Foreign keys OFF while the orphans are planted, which is exactly how the
+  // real ones got there: SQLite enforces them only when a connection asks it
+  // to, so anything that opened the database without the pragma could delete a
+  // list and leave its labels behind. With them on, these inserts are rejected
+  // — which is worth knowing, because it means the app itself never creates
+  // this state.
+  db.exec('PRAGMA foreign_keys = OFF');
+  db.prepare("INSERT INTO lists (id, name, origin) VALUES (1, 'Kept', 'seed')").run();
+  db.prepare("INSERT INTO list_tags (list_id, tag) VALUES (1, 'canon')").run();
+  db.prepare("INSERT INTO list_tags (list_id, tag) VALUES (99, 'box-office')").run();
+  db.prepare("INSERT INTO vibes (id, name) VALUES (1, 'Kept vibe')").run();
+  db.prepare("INSERT INTO vibe_tags (vibe_id, tag) VALUES (1, 'canon')").run();
+  db.prepare("INSERT INTO vibe_tags (vibe_id, tag) VALUES (98, 'canon')").run();
+  db.prepare('INSERT INTO vibe_lists (vibe_id, list_id) VALUES (1, 1)').run();
+  db.prepare('INSERT INTO vibe_lists (vibe_id, list_id) VALUES (1, 97)').run();
+
+  migrate(db);
+
+  assert.deepEqual(
+    db.prepare('SELECT list_id FROM list_tags ORDER BY list_id').all().map((r) => r.list_id),
+    [1],
+    'the tag on a list that no longer exists is gone',
+  );
+  assert.deepEqual(
+    db.prepare('SELECT vibe_id FROM vibe_tags').all().map((r) => r.vibe_id),
+    [1],
+  );
+  assert.deepEqual(
+    db.prepare('SELECT list_id FROM vibe_lists').all().map((r) => r.list_id),
+    [1],
+    'a pinned list that was deleted is unpinned rather than left dangling',
+  );
+});

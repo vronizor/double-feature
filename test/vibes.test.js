@@ -127,7 +127,7 @@ test('tag counts report the whole vocabulary, including unused tags', () => {
   assert.ok(counts.has('box-office'));
 });
 
-test('built-in vibes are seeded once and never re-added after deletion', () => {
+test('built-in vibes are seeded idempotently, and a deleted one COMES BACK', () => {
   const db = seed();
   ensureBuiltinVibes(db);
   const first = allVibes(db).map((v) => v.name).sort();
@@ -149,6 +149,15 @@ test('built-in vibes are seeded once and never re-added after deletion', () => {
   const family = allVibes(db).find((v) => v.name === 'Family');
   deleteVibe(db, family.id);
   assert.equal(allVibes(db).length, 6);
+
+  // ...but it does not STAY deleted, because seeding asks only whether the name
+  // is present and runs on every boot. This test's name used to claim the
+  // opposite while never calling the seeder again, so the assertion that would
+  // have caught it was the one missing. Accepted behaviour, asserted so it is
+  // a decision rather than a surprise.
+  ensureBuiltinVibes(db);
+  assert.equal(allVibes(db).length, 7, 'the deleted built-in returns on the next boot');
+  assert.ok(allVibes(db).some((v) => v.name === 'Family'));
 });
 
 test('the Box office built-in gathers the box-office lists and cuts to the top 5', () => {

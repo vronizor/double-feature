@@ -376,6 +376,7 @@ export function migrate(target) {
   ensureColumn(target, 'list_movies', 'overall_rank', 'INTEGER');
   splitBoxOfficeRanks(target);
   clearInventedOverallRanks(target);
+  sweepOrphanedLabels(target);
   migrateCategoriesToTags(target);
   renameCrowdPleasers(target);
   retagDynamicAsModern(target);
@@ -431,6 +432,43 @@ function splitBoxOfficeRanks(target) {
       seen.set(row.raw_year, n);
       setBoth.run(n, row.rank, row.id);
     }
+  }
+}
+
+/**
+ * Deletes label rows whose parent is gone.
+ *
+ * Every one of these tables declares ON DELETE CASCADE, so in principle this
+ * cannot happen -- and two rows in list_tags proved otherwise, tagging lists 20
+ * and 21, neither of which exists. SQLite enforces foreign keys only when
+ * PRAGMA foreign_keys is on, and it is off by default on every new connection:
+ * anything that opened this database without setting it could delete a list and
+ * leave its labels behind. The app sets it; a one-off script need not have.
+ *
+ * The visible symptom was a tag-driven vibe reporting five resolved lists when
+ * three exist. Harmless downstream, because the pool query joins lists and a
+ * phantom id matches nothing -- so this corrects a number the host reads, not a
+ * pool they draw from. That is exactly why it would have gone unnoticed.
+ *
+ * ONLY the pure label tables. A row here is a property of its parent and means
+ * nothing without it, so deleting it loses nothing. list_movies, ballots and
+ * ballot_ranks are deliberately excluded even though they cascade too: those
+ * carry content, an orphan in one would mean something has gone properly wrong,
+ * and it should be looked at rather than quietly swept. PRAGMA foreign_key_check
+ * reports the whole picture if that is ever needed.
+ */
+function sweepOrphanedLabels(target) {
+  for (const [table, column, parent, key] of [
+    ['list_tags', 'list_id', 'lists', 'id'],
+    ['vibe_tags', 'vibe_id', 'vibes', 'id'],
+    ['vibe_lists', 'vibe_id', 'vibes', 'id'],
+    ['vibe_lists', 'list_id', 'lists', 'id'],
+  ]) {
+    target
+      .prepare(
+        `DELETE FROM ${table} WHERE ${column} NOT IN (SELECT ${key} FROM ${parent})`,
+      )
+      .run();
   }
 }
 
@@ -644,8 +682,20 @@ const BUILTIN_VIBES = [
 ];
 
 /**
- * Inserts the built-in vibes if they're absent. Idempotent, and never touches
- * a vibe that already exists — so editing or deleting one sticks.
+ * Inserts the built-in vibes if they're absent. Idempotent, and never touches a
+ * vibe that already exists — so EDITING one sticks.
+ *
+ * DELETING one does not, and the comment here used to claim it did. This runs on
+ * every boot and asks only whether the NAME is present, so a deleted built-in
+ * comes back on the next restart. Accepted rather than fixed, deliberately: the
+ * alternative is a record of intentionally-removed built-ins, which is real
+ * machinery for a problem nobody has hit — the built-ins are six ordinary
+ * starting points and returning is not much of a harm. What was not acceptable
+ * was a comment saying the opposite of what the code does, and a test whose name
+ * claimed to cover it while asserting nothing of the kind.
+ *
+ * Renaming a built-in has the same shape and is worth knowing: the rename
+ * sticks, and the original comes back beside it.
  */
 export function ensureBuiltinVibes(target) {
   const genreId = (name) =>
