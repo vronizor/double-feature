@@ -876,7 +876,11 @@ export function movieCard(movie, { extraAction } = {}) {
 
   return h(
     'article',
-    { class: 'movie' },
+    // The id is on the card so a caller can find one again after a repaint —
+    // the lineup scrolls to the film it just drew. By id rather than by
+    // position, because the grid is rebuilt from scratch on every paint and
+    // "the nth child" would keep working right up until an entry moved.
+    { class: 'movie', dataset: { tmdbId: movie.tmdb_id } },
     movie.watched ? h('span', { class: 'watched-flag' }, 'watched') : null,
     // Top-LEFT: the watched flag already owns top-right. The count only
     // appears when there's more than one, which is 88% of the time it isn't

@@ -49,6 +49,13 @@ a { color: var(--accent); }
 .muted { color: var(--text-dim); }
 .faint { color: var(--text-faint); font-size: 0.85rem; }
 .error { color: var(--danger); }
+/* Read by screen readers, never drawn. `display:none` and `visibility:hidden`
+   would take it out of the accessibility tree with everything else, so a live
+   region hidden that way announces nothing at all. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
 .stack { display: grid; gap: 16px; }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .spacer { flex: 1; }
@@ -212,11 +219,29 @@ label { display: block; }
 .chip {
   font-size: 0.82rem; padding: 4px 10px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--border-strong); background: var(--bg-sunken); color: var(--text-dim);
+  transition: background-color 120ms, border-color 120ms, color 120ms;
+}
+/* The most-clicked control in the app had no hover state at all — inert until
+   clicked, which reads as decoration rather than a control. Behind
+   `hover: hover` so a touch screen does not leave the last-tapped chip stuck
+   in a hover it can never leave, and BEFORE the state rules below so an
+   active chip keeps its own colours; it gets its brightened variant instead. */
+@media (hover: hover) {
+  .chip:hover { background: var(--bg-raised); border-color: var(--text-faint); color: var(--text); }
 }
 .chip[data-state="include"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+@media (hover: hover) {
+  .chip[data-state="include"]:hover {
+    background: color-mix(in srgb, var(--accent) 82%, white);
+    border-color: color-mix(in srgb, var(--accent) 82%, white);
+  }
+}
 .chip[data-state="exclude"] {
   background: color-mix(in srgb, var(--danger) 22%, transparent);
   color: var(--danger); border-color: var(--danger); text-decoration: line-through;
+}
+@media (hover: hover) {
+  .chip[data-state="exclude"]:hover { background: color-mix(in srgb, var(--danger) 32%, transparent); }
 }
 /* Vibe chips read as presets rather than filter toggles, so they're a
    little larger than the include/exclude chips they sit above. */
@@ -258,6 +283,23 @@ label { display: block; }
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
 }
 .movie-grid.is-vote { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+
+/* The lineup is the payoff, not a library, and the default draw is TWO films.
+   `auto-fill` keeps the empty columns it could not fill, so a double feature
+   rendered as two cards in the first two of five slots with the rest blank —
+   which reads as a search that returned too little, not as tonight's lineup.
+   `auto-fit` collapses the empty tracks and centring the row finishes the job.
+
+   The 260px cap is load-bearing: the poster is `aspect-ratio: 2/3` at 100%
+   width, so uncapped `1fr` tracks would stretch two cards to ~525px each and
+   stand a 790px-tall poster on the page. Capped, the columns go 5 → 3 at full
+   width, which is the intended trade — fewer, larger cards on the one grid
+   that is meant to be looked at rather than scanned. Explore keeps `auto-fill`
+   for exactly the opposite reason. */
+.movie-grid.is-lineup {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 260px));
+  justify-content: center;
+}
 
 .movie {
   position: relative; background: var(--bg-raised); border: 1px solid var(--border);

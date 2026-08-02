@@ -112,11 +112,53 @@ export async function copyText(text) {
   return copied;
 }
 
+/**
+ * One persistent live region, written into — NOT a `role="status"` on the
+ * toast itself. A live region has to be in the document BEFORE its text
+ * changes for screen readers to reliably announce it; a node that arrives
+ * already carrying both the role and the text is announced by some and
+ * silently ignored by others. So the region is created once, empty, and
+ * every later message is a text change inside it.
+ */
+let liveRegion = null;
+
+export function announce(message) {
+  if (!message) return;
+  if (!liveRegion) {
+    liveRegion = h('div', { class: 'sr-only', role: 'status', 'aria-live': 'polite' });
+    document.body.appendChild(liveRegion);
+  }
+  // Same text twice running is not a change, so it would not be announced.
+  liveRegion.textContent = '';
+  liveRegion.textContent = message;
+}
+
 export function toast(message, kind = 'info') {
   const el = h('div', { class: `toast toast--${kind}` }, message);
   document.body.appendChild(el);
+  announce(message);
   setTimeout(() => el.classList.add('is-leaving'), 2600);
   setTimeout(() => el.remove(), 3200);
+}
+
+/**
+ * What a draw actually put on the table. Drawing was the one place the app
+ * did its work in silence: the lineup grew somewhere below the fold and
+ * nothing said so.
+ *
+ * Names the films rather than counting them — "Drew 2 films" is a fact the
+ * host can already see, while the titles are the thing they clicked for. Two
+ * is the default draw size, so the two-title form is the one that matters;
+ * beyond three the list stops being readable at a glance and becomes a count.
+ */
+export function drawnMessage(movies) {
+  const titles = (movies ?? []).map((movie) => movie?.title).filter(Boolean);
+  if (titles.length === 0) return null;
+  if (titles.length === 1) return `Drew ${titles[0]}`;
+  if (titles.length <= 3) {
+    return `Drew ${titles.slice(0, -1).join(', ')} and ${titles[titles.length - 1]}`;
+  }
+  return `Drew ${titles[0]}, ${titles[1]} and ${titles.length - 2} more`;
 }
 
 export const formatDate = (value) => {

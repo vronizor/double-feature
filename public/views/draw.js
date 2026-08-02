@@ -8,6 +8,7 @@ import {
   parseTmdbInput,
   openMovieModal,
   topNLabel,
+  drawnMessage,
 } from '../dom.js';
 import { api } from '../api.js';
 import { renderSessionPanel } from './session.js';
@@ -500,6 +501,40 @@ export async function renderDraw(container) {
     );
   }
 
+  /**
+   * Bring a just-drawn film into view, after the repaint that put it there.
+   *
+   * The lineup sits below the draw controls, so on anything but a tall screen
+   * a draw scrolled nothing and the page looked unchanged — the one moment
+   * this app has that is worth watching happened off-screen. Silent when the
+   * card cannot be found: a missed scroll is not worth an error, and it never
+   * runs on the vote or Explore grids, only the lineup's own.
+   */
+  function revealDrawn(movie) {
+    if (!movie) return;
+    const card = container.querySelector(
+      `.movie-grid.is-lineup > [data-tmdb-id="${movie.tmdb_id}"]`,
+    );
+    if (!card?.scrollIntoView) return;
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    card.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });
+  }
+
+  /**
+   * Toasts stack on top of one another — they are all `position: fixed` at the
+   * same offset — so every path here emits exactly ONE. When the pool came up
+   * short that is the shortfall, which is the thing the host needs to act on;
+   * the draw still announces itself by scrolling.
+   */
+  function reportDraw(movies, shortfallMessage) {
+    if (shortfallMessage) {
+      toast(shortfallMessage, 'error');
+      return;
+    }
+    const message = drawnMessage(movies);
+    if (message) toast(message, 'ok');
+  }
+
   // Everything discarded by Replace this session. Passed as `exclude` so
   // repeated Replaces cycle through fresh options instead of handing back the
   // film rejected two clicks ago — the draw otherwise only knows to avoid
@@ -518,6 +553,7 @@ export async function renderDraw(container) {
 
     state.busy = true;
     paint();
+    let firstNew = null;
     try {
       for (const movie of drawn) rejected.add(movie.tmdb_id);
       // Exclude what stays in the lineup, what we're about to drop, and
@@ -532,37 +568,46 @@ export async function renderDraw(container) {
       }
       for (const movie of drawn) lineup.remove(movie.tmdb_id);
       lineup.addAll(result.movies, 'draw');
+      firstNew = result.movies[0] ?? null;
 
-      if (result.movies.length < drawn.length) {
-        toast(`Only ${plural(result.movies.length, 'new film')} left to swap in`, 'error');
-      }
+      reportDraw(
+        result.movies,
+        result.movies.length < drawn.length
+          ? `Only ${plural(result.movies.length, 'new film')} left to swap in`
+          : null,
+      );
       await refreshCount();
     } catch (error) {
       toast(error.message, 'error');
     } finally {
       state.busy = false;
       paint();
+      revealDrawn(firstNew);
     }
   }
 
   async function doDraw() {
     state.busy = true;
     paint();
+    let firstNew = null;
     try {
       const result = await api.draw(state.size, poolState.setup, lineup.ids());
       lineup.addAll(result.movies, 'draw');
-      if (result.shortfall > 0) {
-        toast(
-          `Only ${plural(result.available, 'new film')} matched — asked for ${result.requested} more`,
-          'error',
-        );
-      }
+      firstNew = result.movies[0] ?? null;
+
+      reportDraw(
+        result.movies,
+        result.shortfall > 0
+          ? `Only ${plural(result.available, 'new film')} matched — asked for ${result.requested} more`
+          : null,
+      );
       await refreshCount();
     } catch (error) {
       toast(error.message, 'error');
     } finally {
       state.busy = false;
       paint();
+      revealDrawn(firstNew);
     }
   }
 
@@ -816,7 +861,7 @@ export async function renderDraw(container) {
       { class: 'stack' },
       h(
         'div',
-        { class: 'movie-grid' },
+        { class: 'movie-grid is-lineup' },
         lineup.movies.map((movie) =>
           movieCard(movie, {
             extraAction: {

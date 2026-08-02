@@ -1930,3 +1930,67 @@ The next version is the first that adds no data at all. Its evidence is
 [docs/evidence/ui-review.md](docs/evidence/ui-review.md).
 
 Version 6.12.0.
+
+---
+
+## 10. v7
+
+### 10.1 The lineup stops looking like a truncated search
+
+Four small changes with nothing structural between them, taken first because
+none of them is invalidated by the rail that follows — and because the version
+that changes only how things look should show something on its first day.
+
+**`auto-fill` was keeping the columns it could not fill.** The default draw is
+two films, so the payoff screen rendered as two cards in the first two of five
+slots with three empty columns after them: the shape of a search that returned
+too little, not of tonight's lineup. `auto-fit` collapses the empty tracks, and
+centring the row finishes it.
+
+It is one property in the roadmap and two in the end, because the obvious
+version is wrong. Uncapped `1fr` tracks give two cards the whole width —
+~525px each — and the poster is `aspect-ratio: 2/3` at full width, so a double
+feature would have stood two 790px-tall posters on the page. Capping the track
+at 260px trades column count for card size: five columns become three at full
+width, on the one grid meant to be looked at rather than scanned. Explore keeps
+`auto-fill` for exactly the opposite reason, so the change is scoped to a
+lineup-only class rather than made to the shared grid.
+
+**The draw was mute.** The app's one moment of theatre added films below the
+fold and said nothing, on a page tall enough that nothing visibly moved. It now
+names them — `Drew Sound of Freedom and Fort Apache` — and scrolls the first
+one into view.
+
+Naming rather than counting is the point: the count is already on screen in the
+heading, and the titles are what the host clicked for. Past three the list stops
+being readable at a glance and becomes `and 3 more`.
+
+**Every path emits exactly one toast, and that is a constraint rather than a
+style.** Toasts are all `position: fixed` at the same offset, so a second one
+lands underneath the first and neither can be read. When the pool comes up
+short that single toast is the shortfall, which is the thing the host can act
+on; the draw still announces itself by scrolling.
+
+**The announcement is a persistent live region, not a `role` on the toast.** A
+live region has to be in the document before its text changes to be reliably
+announced; a node arriving with both the role and the text already on it is
+announced by some screen readers and silently ignored by others. One empty
+region is created on first use and every later message is a text change inside
+it — which also means every existing toast in the app became audible, not just
+this one.
+
+**`.chip` had no `:hover` at all** — the most-clicked control in the app was
+inert until clicked. Behind `@media (hover: hover)` so a touch screen does not
+strand the last-tapped chip in a hover state it can never leave, and ordered
+before the active-state rules so an active chip keeps its own colours and gets
+a brightened variant instead.
+
+Verified in the running app rather than reasoned about: the lineup grid computes
+`260px 260px 0px` with `justify-content: center`, the live region carries the
+drawn message, and the hover is visibly distinct. One thing could **not** be
+observed — the smooth scroll animation never runs in an automation tab, because
+`document.visibilityState` is `hidden` there and animations are throttled. The
+target and the destination were verified instead, by scrolling to the same
+element with `behavior: 'auto'`.
+
+Version 7.1.0.
