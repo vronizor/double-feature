@@ -17,9 +17,6 @@ themselves.
 
 | Item | State | Where it stands |
 |---|---|---|
-| Can a parametric list be ranked? | ⏳ ready | **Investigation only, no build.** Director night materialises a slot list; whether it can carry a rank at all is the question. Build, if it turns out to be possible, is v6 |
-| "Custom" reads as a chip you can press | ⏳ ready | It is a status readout — "no vibe; you built this pool by hand" — sitting in a row where everything else is a control. It is not clickable and should not look like it might be |
-| A long director's name wrecks the meta line | ⏳ ready | **Two symptoms, one cause**, both from field notes. Mild: it breaks as `1994 ·` / `Krzysztof Kieślowski`, stranding a separator. Severe: with `Estibaliz Urresola Solaguren` the rating is pushed out of the card and clipped, leaving a bare `★` with no number. Caused by the v4 fix that made names unbreakable — the name can no longer split, so the whole name moves and everything after it is pushed off the line. Fixing it means deciding what the separator binds to, and whether the rating may wrap away from its star |
 | Award badge years | ⏳ ready | Show the year each award is naturally labelled by. Needs the honoured year **scraped** from the ceremony article, never derived — see `BACKLOG.md` |
 | `includeWatched` default | 🗣 open | README says exclude, the UI ships include. Inert until something is actually marked watched |
 | LICENSE, and seed-list provenance | 🗣 open | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag — see `docs/evidence/publication-audit.md` |
