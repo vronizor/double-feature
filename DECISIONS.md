@@ -40,10 +40,24 @@ so the film used to justify the axis is reached without it. Vote-count "reach"
 measures **anglophone familiarity**, not popularity. Superseded by extending box
 office to the US. See [popularity vs acclaim](docs/evidence/popularity-vs-acclaim.md).
 
-**❌ A derived award year (release year + 1).** It would silently mix real and
-guessed data in one field, and a confidently wrong year is worse than an absent
-one. It is also not a constant offset — Cannes awards a film in its own release
-year. See [award years](docs/evidence/award-years.md).
+**❌ A derived award year FROM THE RELEASE YEAR (`movies.year + 1`).** It would
+silently mix real and guessed data in one field, and a confidently wrong year is
+worse than an absent one. It is also not a constant offset — Cannes awards a
+film in its own release year. See [award years](docs/evidence/award-years.md).
+
+**✅ But the DISPLAYED year may be derived from the CEREMONY year, which is a
+different operation.** The ceremony year is scraped and stored; deriving from
+it is arithmetic on a fact, not a guess about one. Measured across the whole
+library: academies (Oscars, BAFTA, Goya) label by the films' year, so ceremony
+− 1; festivals (Cannes, Venice, Berlin) award within the year, so no shift; the
+César is named for its ceremony in French usage and was already right. The
+constant holds for every award from the mid-1930s on. The known exception is
+the 1st BAFTAs, held 1949 for 1947 films, which shows no year rather than a
+confident wrong one. The two rules are easy to confuse and the difference is
+the whole item: release year drifts from the awards world (TMDB dates Nomadland
+2021 against everyone else's 2020, and The Graduate is a 1967 film BAFTA
+honoured in 1969 on its UK release), while the ceremony year does not drift
+because it was read off the ceremony.
 
 **🔻 Streaming is a link, not cached data, and not a filter.** Two reversals in
 sequence. First: measured FR flatrate coverage is ~30% of this library and skews

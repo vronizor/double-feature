@@ -1484,3 +1484,55 @@ question, and `movies` already caches both scores. The condition is a vote
 floor: sorting a filmography by raw rating puts an obscure early title with a
 handful of votes at #1, which is precisely why TMDB Top Rated 100 was dropped
 and why Modern Classics needed 5,000 votes.
+
+### 8.12 Award badges say the year the award is called by
+
+The item was filed as real work — scrape the honoured year from each ceremony
+article, add a column, migrate, backfill. It turned out to be a display
+transform, because v3 had already scraped the thing it needed.
+
+The database stores the **ceremony year**, and that stays the truth. What
+changed is only how it is spoken:
+
+| Award | Stored | Shown |
+|---|---|---|
+| Oscars, BAFTA, Goya | 1997 | 1996 — academies name the award for the films |
+| César | 2012 | 2012 — French usage names it for the ceremony |
+| Cannes, Venice, Berlin | 2019 | 2019 — festivals award within the year |
+
+**The distinction that nearly lost this item** is that `DECISIONS.md` rejects a
+derived award year — but that rejection is about deriving from the *release*
+year, which genuinely is unsafe: TMDB dates *Nomadland* 2021 while every awards
+body honoured it as a 2020 film, and *The Graduate* is a 1967 film BAFTA
+honoured in 1969 because it reached UK cinemas in 1968. Deriving from the
+*ceremony* year is arithmetic on a scraped fact. The two read alike and are not
+alike, so the reversal now says which is which.
+
+Measured across the real library before writing any of it: the constant holds
+for every award from the mid-1930s onward. **The known exception is the 1st
+BAFTAs**, held 1949 for 1947 releases — a two-year gap — so that ceremony shows
+no year at all rather than a confident 1948. It affects one film here, *The
+Best Years of Our Lives*. Pre-1935 Academy Awards covered spans rather than
+calendar years and are left as they fall, because "Oscar 1928" is how the first
+ceremony is normally cited.
+
+283 badges shift by a year. *Burnt by the Sun* — the film that raised this from
+field notes — now reads `Oscar Intl. 1994` beside its `Grand Prix 1994`, which
+was the complaint: one film, one year, two awards that used to disagree.
+
+An unknown award defaults to no shift, so a festival list added later is right
+without touching the rules and only a new academy award needs a line.
+
+### 8.13 A research probe was seeded as a real list
+
+`seeds/icaa-1945-2026.probe.json` was an artifact of v4's Spanish work and had
+been sitting in `seeds/`, which is the only thing that decides what becomes a
+list. `seed.mjs` reads the whole directory, so it was seeded as an **active,
+user-visible list of 1,568 films** named after its own filename — it carries no
+`name` field, and the loader falls back to the basename. It sat beside
+Box-office España, with which it shared 1,409 films, so Spanish box-office
+films were in the draw pool twice.
+
+Moved to `docs/evidence/`, where the rest of that measurement already lives.
+The loader now also refuses `*.probe.json`, because a convention about where to
+put a file is not a guard, and the directory listing is what actually decides.

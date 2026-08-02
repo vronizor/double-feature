@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { createTestDb } from '../server/db.js';
 import { awardsByTmdbId, recordEntry } from '../server/movies.js';
-import { awardLabel, shortAwardName } from '../public/dom.js';
+import { awardLabel, awardYearLabel, shortAwardName } from '../public/dom.js';
 
 function seed() {
   const db = createTestDb();
@@ -144,9 +144,13 @@ test('a bare string is still accepted, so the fallback path cannot crash', () =>
 test('awardLabel omits the year entirely when it is unknown', () => {
   assert.equal(awardLabel({ name: 'Palme d’Or (Cannes)', short_name: 'Palme d’Or', year: 2019 }), 'Palme d’Or 2019');
   assert.equal(awardLabel({ name: 'César — Meilleur Film', short_name: 'César', year: null }), 'César');
+  // The 2020 ceremony honoured 2019 films — Parasite — so the full-name form
+  // shifts too. It also proves the rule matches through the short-name
+  // FALLBACK: this award carries no short_name, so "Oscar — Best Picture" is
+  // stripped to "Oscar" before the rule is looked up.
   assert.equal(
     awardLabel({ name: 'Oscar — Best Picture', year: 2020 }, { short: false }),
-    'Oscar — Best Picture 2020',
+    'Oscar — Best Picture 2019',
   );
 });
 
@@ -190,4 +194,55 @@ test('an unresolved entry keeps its rank, so reconciling it later restores a ran
   assert.equal(row.status, 'unmatched');
   assert.equal(row.rank, 1, 'the per-year rank survives');
   assert.equal(row.overall_rank, 900, 'the overall rank survives too');
+});
+
+// --- The year an award is naturally called by ------------------------------
+//
+// The database stores the CEREMONY year, which is scraped and stays the truth.
+// These cover only how it is spoken. Measured across the real library before
+// being written: the constant holds for every award from the mid-1930s on, and
+// the exceptions are the first BAFTA and the pre-calendar Oscar ceremonies.
+
+const award = (short_name, year) => ({ name: short_name, short_name, year });
+
+test('an academy is named for the films, not the ceremony', () => {
+  // The 69th Academy Awards were held in March 1997 for 1996 films.
+  assert.equal(awardYearLabel(award('Oscar', 1997)), 1996);
+  assert.equal(awardLabel(award('Oscar', 1997)), 'Oscar 1996');
+  assert.equal(awardYearLabel(award('BAFTA', 2010)), 2009);
+  assert.equal(awardYearLabel(award('Goya', 2024)), 2023);
+  assert.equal(awardYearLabel(award('Oscar Intl.', 1995)), 1994);
+});
+
+test('a festival is named for its own year', () => {
+  // No gap to close: the Palme awarded at the 2019 festival is the 2019 Palme.
+  for (const name of ['Palme d’Or', 'Golden Lion', 'Golden Bear', 'Grand Prix']) {
+    assert.equal(awardYearLabel(award(name, 2019)), 2019, name);
+  }
+});
+
+test('the César is named for its ceremony, as French usage has it', () => {
+  // "César 2012" is the right label for a 2011 film — this one was already
+  // correct and must not be shifted.
+  assert.equal(awardYearLabel(award('César', 2012)), 2012);
+});
+
+test('the first BAFTA shows no year rather than a confident wrong one', () => {
+  // The 1st BAFTAs, held 1949, honoured 1947 releases. The constant would
+  // print 1948. The Best Years of Our Lives is the film this affects.
+  assert.equal(awardYearLabel(award('BAFTA', 1949)), null);
+  assert.equal(awardLabel(award('BAFTA', 1949)), 'BAFTA');
+  // The second ceremony onwards is trustworthy again.
+  assert.equal(awardYearLabel(award('BAFTA', 1950)), 1949);
+});
+
+test('an award with no recorded year stays unlabelled', () => {
+  assert.equal(awardYearLabel(award('Oscar', null)), null);
+  assert.equal(awardLabel(award('Oscar', null)), 'Oscar');
+});
+
+test('an unknown award labels by its ceremony year rather than guessing', () => {
+  // The safer default: a new festival list added without touching the rules is
+  // correct, and only a new academy award would need a line adding.
+  assert.equal(awardYearLabel(award('Locarno', 2019)), 2019);
 });
