@@ -256,39 +256,6 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   source the way Spain needed the ICAA. Survey incomplete — headers and annual
   tables were not reached before the agent running it stalled.
 
-- **Box-office France ranks globally; Box-office España ranks per year.**
-  Found 2026-08-01 by checking the data rather than the doc, and they disagree.
-  France is 1,390 rows with 1,390 distinct ranks and a single rank=1
-  (*Bienvenue chez les Ch'tis*, the biggest French film of all time). Spain is
-  76 rows with rank=1, one per year, max rank 20.
-
-  **`HISTORY.md` §5.3 records the France decision as per-year** — *"the figure
-  is used to order films within their year and written as `rank`… so 'the top
-  20 of 1982' works with no new UI"*. That is not what was built, and "the top
-  20 of 1982" does not work: Top-N=20 returns the twenty biggest French films
-  ever, from twenty different years.
-
-  Two consequences:
-
-  - **The same Top-N control means opposite things on two lists carrying the
-    same tag.** Top-N=10 gives France's ten biggest films ever and Spain's top
-    ten of *every* year — 760 films.
-  - **It undoes the reason France was built from per-year pages at all.** That
-    source was chosen over the all-time page *for era balance*; a global rank
-    with a Top-N cut reproduces the all-time page's recency skew exactly.
-
-  **Cheap to fix, contrary to first appearance.** Re-ranking looks impossible
-  because the admissions figures were deliberately not stored — but a global
-  rank already preserves the correct relative order *within* each year, so
-  per-year rank is a dense re-numbering of existing ranks grouped by year. No
-  re-fetch, no new data.
-
-  > Worth deciding at the same time whether **both** ranks are wanted. A global
-  > rank genuinely answers "the 100 biggest French films ever", which a per-year
-  > rank cannot; a per-year rank answers "the top 5 of each year", which a
-  > global one cannot. They are different questions and `list_movies` has room
-  > for only one. Per-year is the one the feature was designed around.
-
 - **Cannes Grand Jury Prize as a second Cannes list.** Today only the Palme
   d'Or is carried. The Grand Prix is the runner-up award and reaches a
   different set of films. Same Wikidata `P166` route as the Palme, so it is a
@@ -315,101 +282,47 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
-- **Where the database lives — decide before the Pi.** It sits at
-  `~/double-feature-data/double-feature.db`, reached by `DB_PATH`, because
-  parallel worktrees each got their own empty `data/` and real state landed in
-  whichever tree was last run. Merging per chunk removed that cause, so the
-  outside-the-repo path is now belt-and-braces rather than load-bearing, and
-  moving it back to `./data/` is a file move plus four lines of `.env`.
+- **Impeccable — tried in v6, not worth more.** The detector was run against the
+  live app in three rendered states, plus a deliberately-bad control page to
+  prove it was working. It produced **one** actionable finding across the whole
+  UI (a border and a shadow doing one job on the modal, since fixed) and one
+  false positive, and it **missed a WCAG AA failure it had the rule for**. It
+  said nothing about the panel density that prompted the exercise.
 
-  Two things must stay true whichever way it goes. The database is **never
-  committed** — it carries guests' names against their ballots in a public
-  repo, and the IMDb-derived numbers are licensed for use and not
-  redistribution. And on the Pi, `DB_PATH` must be **unset**: `docker-compose`
-  bind-mounts `./data:/app/data` and passes `.env` into the container, so an
-  absolute macOS path would send the container looking for a directory it does
-  not have. *(Raised by the owner 2026-08-01: "we might swap it back in before
-  sending to the pi".)*
+  The command half is separately ruled out. There is no dry-run: `polish` and
+  its siblings edit source on taste grounds, which collides with this project's
+  rule that findings are reported rather than folded into the diff. Scoping is
+  file-or-URL granularity, so on a single hand-written stylesheet it is no
+  scoping at all — and the one element-level mode maps a browser element back to
+  source markup, which a runtime-built DOM does not have.
 
-- **A Box-office vibe.** *(From field notes, 2026-08-01.)* One chip selecting
-  the box-office lists, the way Awards selects the award lists. Deferred rather
-  than done because it is worth one chip only once there is more than one such
-  list to gather: France and Spain are seeded, the US is a live v5 item, and the
-  vibe is more useful built on top of the finished set than added now and
-  edited twice.
-
-- **Ranking a parametric list — the answer is yes, by rating, with a vote
-  floor.** *(From field notes, 2026-08-01; investigated in v5.)*
-
-  Nothing structural is in the way. `applyParameter` simply omits `rank` from
-  its insert, so every slot row is NULL, and `rank IS NULL` already means "this
-  list is not ranked" rather than "exclude it" — so a Top-N cut leaves director
-  night alone today, correctly.
-
-  It is also **safer here than on a query-backed list**. The v4 hazard was that
-  `materialiseList` reconciles and never updates a row that stayed, so ranks
-  freeze while membership moves. A parametric slot list has no such path: every
-  apply wipes the list and rewrites it, so ranks are recomputed by construction.
-
-  What blocked it was never mechanism, it was meaning, and the code comment
-  says so — chronological rank would make "top 10" mean "his first ten films".
-  But **rating is a meaning that works**: "the top 10 Kurosawa" is a question
-  people actually ask, and `movies` already caches `vote_average` and
-  `imdb_rating`, so no fetch is needed.
-
-  **It needs a vote floor or it repeats a mistake already recorded here.**
-  Sorting a filmography by raw rating puts an obscure early title with a
-  handful of votes at #1 — which is exactly why TMDB Top Rated 100 was dropped
-  and why Modern Classics needed 5,000 votes. `IMDB_VOTE_FLOOR` is the existing
-  precedent at 1,000. Decide the floor before building, not after.
-
-- **Let the reconciliation screen reach ALREADY-RESOLVED entries, not only
-  those under review.** Today it lists `needs_review` rows. A row that matched
-  *confidently but wrongly* is `resolved`, so it never appears there and nobody
-  ever looks at it again.
-
-  That makes the two failure modes asymmetric in a way the guards do not
-  reflect: an unmatched entry sits in a visible queue and can be fixed, while a
-  wrong match is invisible and permanent. The match-rate floor guards the
-  recoverable failure; nothing guards the unrecoverable one.
-
-  > **The two examples this item used to cite are FIXED and must not be quoted
-  > as live.** *Marco* (2024) resolving to the Malayalam film of identical
-  > title and year, and *Tierra de Nadie* to *Mob Land*, were both corrected by
-  > the Spanish-language candidate preference at the end of v4 — verified
-  > against the database 2026-08-01: they now resolve to *Marco* (`es`) and
-  > *Barren Land* (Spain/Mexico). Left here because the paragraph misled a
-  > later session into reporting them as live defects. **The problem is real;
-  > those instances are not.** The measured false-positive rate of about 3–4%
-  > on a 57-pair inspection was taken *before* that fix and is unmeasured
-  > after — which is itself the argument for this item, since nothing would
-  > tell you if it had got worse.
-
-  Wanted: browse a list's resolved entries, see what each matched to, and
-  re-open one for correction. Cheap in principle — `list_movies` already stores
-  `candidates_json`, and the screen already knows how to re-resolve a row.
-  *(Raised by the owner while inspecting the Spain seed.)*
-
-- **Run Impeccable over the UI** (`https://impeccable.style/`). A design tool
-  for AI-generated interfaces — "the missing design vocabulary for agents" —
-  offering a command set (`/polish`, `/distill`, `/typeset`) and a detector of
-  58 checks for the visual tells of machine-written UI. Available as a Claude
-  Code skill, an npm CLI, a Chrome extension and a CI step.
-
-  **Why v6 and not sooner.** It is a pass over the *presentation* of a UI whose
-  shape is still moving: v4 alone adds a parametric chip that does not exist
-  yet, and a picker that has to survive a second family of query-backed lists.
-  Polishing before those land means polishing twice. It also wants a stable
-  design system to respect, and this app's is a single hand-written
-  `styles.css`.
-
-  Worth stating plainly because it is not obvious: **this is a cosmetic pass,
-  not a feature**, and nothing in v4 or v5 depends on it.
+  Its read-only `critique` playbook, on the other hand, was worth having: the
+  rubric it carries is what produced the 26/40 assessment in
+  `docs/evidence/ui-review.md`. **The vocabulary was useful; the tool was not.**
 
 ## Unscheduled
 
 Nobody has ruled on these. Where an item is scheduled, `ROADMAP.md` is the
 authority on its state — this file only says why it is worth doing.
+
+- **Where the database lives.** *(Moved here from v6, 2026-08-02 — deliberately
+  unscheduled rather than decided.)* It sits at
+  `~/double-feature-data/double-feature.db`, reached by `DB_PATH`, because
+  parallel worktrees each got their own empty `data/` and real state landed in
+  whichever tree was last run. Merging per chunk removed that cause, so the
+  outside-the-repo path is now belt-and-braces rather than load-bearing, and
+  moving it back to `./data/` is a file move plus four lines of `.env`. Nothing
+  breaks while it stays where it is, which is why it moved out of the version
+  rather than being settled.
+
+  Two things must stay true whichever way it eventually goes. The database is
+  **never committed** — it carries guests' names against their ballots in a
+  public repo, and the IMDb-derived numbers are licensed for use and not
+  redistribution. And on the Pi, `DB_PATH` must be **unset**: `docker-compose`
+  bind-mounts `./data:/app/data` and passes `.env` into the container, so an
+  absolute macOS path would send the container looking for a directory it does
+  not have. **That second point is the one to re-read before the Pi**, whichever
+  way the first is answered.
 
 - **A LICENSE, and the provenance of the seed lists.** *(Moved here from v5,
   2026-08-02, deliberately unscheduled rather than dropped.)* Not code, and

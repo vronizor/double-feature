@@ -148,6 +148,12 @@ CREATE TABLE IF NOT EXISTS list_movies (
   -- just as per-year answers "the top five of each year", which this cannot.
   -- Both are stored because deriving either from the other needs the
   -- underlying figure, and that is deliberately not kept.
+  --
+  -- NULL is a legitimate value and means the source never gave a cross-year
+  -- figure at all, which is the case for the US list: it is an annual top ten
+  -- with nothing ranking 1962 against 1994. Do not back-fill it from row
+  -- position. That was tried, and it produced a column that was fully
+  -- populated, densely numbered, and simply year order under another name.
   overall_rank    INTEGER,
   -- The ceremony year, for award lists. Stored rather than derived from the
   -- release year because the offset differs per award: Cannes awards a film in
@@ -369,6 +375,8 @@ export function migrate(target) {
   ensureColumn(target, 'list_movies', 'award_year', 'INTEGER');
   ensureColumn(target, 'list_movies', 'overall_rank', 'INTEGER');
   splitBoxOfficeRanks(target);
+  clearInventedOverallRanks(target);
+  sweepOrphanedLabels(target);
   migrateCategoriesToTags(target);
   renameCrowdPleasers(target);
   retagDynamicAsModern(target);
@@ -389,6 +397,13 @@ export function migrate(target) {
  * No re-fetch, even though admissions were never stored: a global rank already
  * carries the correct RELATIVE order within each year, so per-year rank is a
  * dense renumbering of it grouped by year.
+ *
+ * THE CONVERSE IS NOT TRUE, and assuming it was is what made this wrong once.
+ * A list already stored per-year has no global ordering to recover: the figure
+ * that would rank 1962 against 1994 was deliberately never stored, so there is
+ * nothing to derive it from. Such a list is SKIPPED and its overall_rank stays
+ * NULL, which is the honest value -- see clearInventedOverallRanks below for
+ * what happened when it did not.
  */
 function splitBoxOfficeRanks(target) {
   const lists = target
@@ -405,16 +420,108 @@ function splitBoxOfficeRanks(target) {
         'SELECT id, rank, raw_year FROM list_movies WHERE list_id = ? AND rank IS NOT NULL ORDER BY rank',
       )
       .all(list.id);
-    // If a rank repeats across rows the list is already per-year, and only
-    // overall_rank needs filling.
-    const perYearAlready = new Set(rows.map((r) => r.rank)).size < rows.length;
+    // A repeated rank means the list is already per-year. There is no global
+    // ordering hiding in it, so leave overall_rank NULL rather than inventing
+    // one from row position.
+    if (new Set(rows.map((r) => r.rank)).size < rows.length) continue;
+
     const setBoth = target.prepare('UPDATE list_movies SET rank = ?, overall_rank = ? WHERE id = ?');
     const seen = new Map();
-    rows.forEach((row, i) => {
+    for (const row of rows) {
       const n = (seen.get(row.raw_year) ?? 0) + 1;
       seen.set(row.raw_year, n);
-      setBoth.run(perYearAlready ? row.rank : n, perYearAlready ? i + 1 : row.rank, row.id);
-    });
+      setBoth.run(n, row.rank, row.id);
+    }
+  }
+}
+
+/**
+ * Deletes label rows whose parent is gone.
+ *
+ * Every one of these tables declares ON DELETE CASCADE, so in principle this
+ * cannot happen -- and two rows in list_tags proved otherwise, tagging lists 20
+ * and 21, neither of which exists. SQLite enforces foreign keys only when
+ * PRAGMA foreign_keys is on, and it is off by default on every new connection:
+ * anything that opened this database without setting it could delete a list and
+ * leave its labels behind. The app sets it; a one-off script need not have.
+ *
+ * The visible symptom was a tag-driven vibe reporting five resolved lists when
+ * three exist. Harmless downstream, because the pool query joins lists and a
+ * phantom id matches nothing -- so this corrects a number the host reads, not a
+ * pool they draw from. That is exactly why it would have gone unnoticed.
+ *
+ * ONLY the pure label tables. A row here is a property of its parent and means
+ * nothing without it, so deleting it loses nothing. list_movies, ballots and
+ * ballot_ranks are deliberately excluded even though they cascade too: those
+ * carry content, an orphan in one would mean something has gone properly wrong,
+ * and it should be looked at rather than quietly swept. PRAGMA foreign_key_check
+ * reports the whole picture if that is ever needed.
+ */
+function sweepOrphanedLabels(target) {
+  for (const [table, column, parent, key] of [
+    ['list_tags', 'list_id', 'lists', 'id'],
+    ['vibe_tags', 'vibe_id', 'vibes', 'id'],
+    ['vibe_lists', 'vibe_id', 'vibes', 'id'],
+    ['vibe_lists', 'list_id', 'lists', 'id'],
+  ]) {
+    target
+      .prepare(
+        `DELETE FROM ${table} WHERE ${column} NOT IN (SELECT ${key} FROM ${parent})`,
+      )
+      .run();
+  }
+}
+
+/**
+ * Repairs the overall ranks the migration above used to invent.
+ *
+ * It ran `i + 1` over rows ordered by per-year rank, so for a list that was
+ * already per-year the "global ranking" it wrote was every year's #1 first,
+ * then every year's #2 -- year order wearing the name of a ranking. Box-office
+ * US was hit: shipped with no overall rank on purpose because its source has no
+ * cross-year figure, and left claiming that the biggest film in its history is
+ * whatever topped 1946.
+ *
+ * Nothing read the column, so nothing failed. That is the point: every count
+ * was right, the column was 100% populated and densely numbered, and only the
+ * values gave it away.
+ *
+ * TWO conditions, because either alone would catch a legitimate list. Ranks
+ * must REPEAT -- a genuine global rank is distinct per row, so requiring
+ * repetition alone protects any list ranked globally in both columns. And
+ * reading rank in overall_rank order must never step DOWN, which is only true
+ * of a sequence generated from that same ordering. Measured on the real
+ * database when this was written: Box-office US had 0 such steps, France 617
+ * and Espana 681, so the genuine pair cannot be caught by it.
+ *
+ * THE LIMIT, stated rather than hidden: a real all-time ordering that happened
+ * to interleave its years perfectly evenly would be byte-identical to a
+ * generated one, and this would clear it. Nothing can distinguish those two --
+ * the data is the same data. It needs every year to contribute in strict
+ * rotation across the whole list, which no box-office history does; two of the
+ * three here miss it by more than 600 steps. Worth knowing before this pattern
+ * is copied somewhere the shapes are closer together.
+ */
+function clearInventedOverallRanks(target) {
+  const lists = target
+    .prepare(
+      `SELECT id FROM lists WHERE name LIKE 'Box-office%'
+        AND EXISTS (SELECT 1 FROM list_movies WHERE list_id = lists.id AND overall_rank IS NOT NULL)`,
+    )
+    .all();
+
+  for (const list of lists) {
+    const ranks = target
+      .prepare(
+        'SELECT rank FROM list_movies WHERE list_id = ? AND overall_rank IS NOT NULL ORDER BY overall_rank',
+      )
+      .all(list.id)
+      .map((r) => r.rank);
+
+    if (new Set(ranks).size === ranks.length) continue;
+    if (ranks.some((rank, i) => i > 0 && rank < ranks[i - 1])) continue;
+
+    target.prepare('UPDATE list_movies SET overall_rank = NULL WHERE list_id = ?').run(list.id);
   }
 }
 
@@ -544,6 +651,17 @@ const BUILTIN_VIBES = [
   // The one built-in carrying a filter as well as a selection — which is what
   // makes it a vibe rather than just a tag shortcut.
   { name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },
+  // Gathers France, Espana and the US the way Awards gathers the award lists.
+  //
+  // The cut is the point, not decoration, and the reason is SIZE and EVENNESS
+  // rather than recency. Measured on the real library: uncut, the three lists
+  // are 3,654 distinct films -- most of what the app holds, so the chip would
+  // barely narrow anything. All three rank WITHIN a year, so a top 5 takes it
+  // to 1,202 and flattens the shape at the same time: every decade from the
+  // 1950s to the 2010s lands within two films of 149, against a 386-to-514
+  // spread uncut. The 1940s are thinner because coverage starts around 1945,
+  // and the 2020s because the decade is not over.
+  { name: 'Box office', tags: ['box-office'], position: 7, topN: 5 },
   // The first parametric vibe. It resolves to nothing until a person is
   // chosen, which is why it carries neither tags nor lists.
   {
@@ -564,8 +682,20 @@ const BUILTIN_VIBES = [
 ];
 
 /**
- * Inserts the built-in vibes if they're absent. Idempotent, and never touches
- * a vibe that already exists — so editing or deleting one sticks.
+ * Inserts the built-in vibes if they're absent. Idempotent, and never touches a
+ * vibe that already exists — so EDITING one sticks.
+ *
+ * DELETING one does not, and the comment here used to claim it did. This runs on
+ * every boot and asks only whether the NAME is present, so a deleted built-in
+ * comes back on the next restart. Accepted rather than fixed, deliberately: the
+ * alternative is a record of intentionally-removed built-ins, which is real
+ * machinery for a problem nobody has hit — the built-ins are six ordinary
+ * starting points and returning is not much of a harm. What was not acceptable
+ * was a comment saying the opposite of what the code does, and a test whose name
+ * claimed to cover it while asserting nothing of the kind.
+ *
+ * Renaming a built-in has the same shape and is worth knowing: the rename
+ * sticks, and the original comes back beside it.
  */
 export function ensureBuiltinVibes(target) {
   const genreId = (name) =>
@@ -580,15 +710,20 @@ export function ensureBuiltinVibes(target) {
       .map((name) => genreId(name) ?? (name === 'Horror' ? 27 : null))
       .filter((id) => id !== null);
 
-    const filters = excluded.length
-      ? JSON.stringify({ genres: { include: [], exclude: excluded } })
-      : null;
+    // topN rides inside the filters blob rather than in a column of its own,
+    // which is the same channel currentAsVibe uses when a host saves their own
+    // vibe — see the note there.
+    const filters = {
+      ...(excluded.length ? { genres: { include: [], exclude: excluded } } : {}),
+      ...(vibe.topN ? { topN: vibe.topN } : {}),
+    };
+    const filtersJson = Object.keys(filters).length ? JSON.stringify(filters) : null;
 
     const { lastInsertRowid } = target
       .prepare(
         'INSERT INTO vibes (name, is_builtin, param_json, filters_json, position) VALUES (?, 1, ?, ?, ?)',
       )
-      .run(vibe.name, vibe.param ? JSON.stringify(vibe.param) : null, filters, vibe.position);
+      .run(vibe.name, vibe.param ? JSON.stringify(vibe.param) : null, filtersJson, vibe.position);
 
     for (const tag of vibe.tags) {
       target

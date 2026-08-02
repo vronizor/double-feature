@@ -15,6 +15,13 @@
  * kept. That is the same distinction .gitignore already enforces for the
  * database itself.
  *
+ * RE-RUN THIS AFTER SEEDING ANY NEW LIST. Nothing calls it automatically, so
+ * every film added since the last run has an imdb_id and no rating — and the
+ * visible symptom is not an error but a *second opinion that is sometimes there
+ * and sometimes not*, which reads as a flaky tooltip rather than a stale cache.
+ * Measured 2026-08-02, before a re-run that v5's new lists had made overdue:
+ * 2,186 of 5,994 films had no rating, and 2,150 of those already carried an id.
+ *
  * The join is EXACT. `movies.imdb_id` comes from TMDB's own detail response,
  * so there is no title matching here and no fuzzy anything -- which is the
  * whole reason IMDb was chosen over Letterboxd and SensCritique.

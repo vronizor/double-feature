@@ -1,4 +1,14 @@
-import { h, clear, posterUrl, toast, plural, tmdbUrl, openMovieModal, parseTmdbInput } from '../dom.js';
+import {
+  h,
+  clear,
+  posterUrl,
+  toast,
+  plural,
+  tmdbUrl,
+  openMovieModal,
+  parseTmdbInput,
+  matchDiffers,
+} from '../dom.js';
 import { api } from '../api.js';
 import { poolState } from '../pool-state.js';
 
@@ -7,9 +17,18 @@ export async function renderLists(container) {
     lists: [],
     openListId: null,
     // Opening a list is the "inspect what's in here" action, so it shows
-    // everything by default; the checkbox narrows to the reconciliation queue.
-    reviewOnly: false,
+    // everything by default; the picker narrows to one of two queues.
+    //
+    // 'needs_review' is the entries that never matched. 'suspect' is the ones that
+    // matched but would not pass the matcher's confidence test today — the
+    // failure nothing else in the app can show you, because a wrong match is
+    // stored as resolved and looks exactly like a right one.
+    filter: 'all',
     entries: [],
+    // Resolved entries the host has opened for correction. Kept per entry id
+    // rather than as a single "editing" slot so that working through a queue
+    // does not close the row above the moment you open the next one.
+    rematching: new Set(),
     job: null,
     busy: false,
   };
@@ -142,7 +161,7 @@ export async function renderLists(container) {
   async function loadEntries(listId) {
     state.entries = (
       await api.entries(listId, {
-        ...(state.reviewOnly ? { status: 'needs_review' } : {}),
+        ...(state.filter === 'all' ? {} : { status: state.filter }),
         // Comfortably covers the biggest seed list (Criterion, ~1250 resolved).
         limit: 2000,
       })
@@ -151,12 +170,27 @@ export async function renderLists(container) {
 
   async function openList(listId) {
     state.openListId = state.openListId === listId ? null : listId;
+    // A half-finished correction belongs to the list it was opened on, so it
+    // does not follow the host into the next one.
+    state.rematching.clear();
     if (state.openListId) await loadEntries(state.openListId);
     paint();
   }
 
+  // What the row was matched FROM, shown only where it disagrees with what it
+  // matched TO. The decision lives in dom.js so it can be tested; see the note
+  // there for why agreement is defined the way it is.
+  const matchedFrom = (entry) =>
+    matchDiffers(entry)
+      ? h(
+          'span',
+          { class: 'faint', title: 'the text this list actually contained' },
+          `from “${entry.raw_title}”${entry.raw_year ? ` (${entry.raw_year})` : ''}`,
+        )
+      : null;
+
   function entryRow(entry, list) {
-    if (entry.status === 'resolved') {
+    if (entry.status === 'resolved' && !state.rematching.has(entry.id)) {
       return h(
         'div',
         { class: 'list-row' },
@@ -171,6 +205,8 @@ export async function renderLists(container) {
           : null,
         h('span', {}, `${entry.title}${entry.year ? ` (${entry.year})` : ''}`),
         entry.media_type === 'tv' ? h('span', { class: 'badge' }, 'TV') : null,
+        entry.suspect ? h('span', { class: 'badge badge-warn' }, 'check') : null,
+        matchedFrom(entry),
         h(
           'a',
           {
@@ -203,6 +239,18 @@ export async function renderLists(container) {
         h(
           'button',
           {
+            class: 'btn-sm',
+            title: 'this entry matched, but to the wrong film — pick another',
+            onClick: () => {
+              state.rematching.add(entry.id);
+              paint();
+            },
+          },
+          'Re-match',
+        ),
+        h(
+          'button',
+          {
             class: 'btn-sm btn-danger',
             onClick: async () => {
               await api.deleteEntry(entry.id);
@@ -216,10 +264,19 @@ export async function renderLists(container) {
       );
     }
 
-    // Unresolved: offer the stored candidates plus a manual search, rather than
-    // dropping the title silently. TMDB search already caps at 10 results
-    // server-side, so the "matches" stepper below just controls how many of
-    // those are shown — no extra network call needed when it changes.
+    // Unresolved, or resolved and opened for correction: offer the stored
+    // candidates plus a manual search, rather than dropping the title silently.
+    // TMDB search already caps at 10 results server-side, so the "matches"
+    // stepper below just controls how many of those are shown — no extra
+    // network call needed when it changes.
+    //
+    // A re-match reuses this editor rather than getting its own. The two are
+    // the same act — point this raw title at the right film — and the only
+    // differences are what the header says and that leaving is a cancel rather
+    // than a drop. Note `candidates` is always empty here: resolving clears
+    // candidates_json, so a re-match works from search and paste. That is not a
+    // gap, since the stored candidates are what the wrong answer came from.
+    const isRematch = state.rematching.has(entry.id);
     const searchResults = h('div', { class: 'candidate-list' });
     let lastResults = [];
     let matchLimit = 6;
@@ -239,7 +296,17 @@ export async function renderLists(container) {
         { class: 'row' },
         h('strong', {}, entry.raw_title),
         entry.raw_year ? h('span', { class: 'muted' }, `(${entry.raw_year})`) : null,
-        h('span', { class: 'badge badge-warn' }, entry.status === 'unmatched' ? 'no match' : 'needs review'),
+        isRematch
+          ? h(
+              'span',
+              { class: 'badge' },
+              `now: ${entry.title ?? 'unknown'}${entry.year ? ` (${entry.year})` : ''}`,
+            )
+          : h(
+              'span',
+              { class: 'badge badge-warn' },
+              entry.status === 'unmatched' ? 'no match' : 'needs review',
+            ),
         list.source_url
           ? h(
               'a',
@@ -254,19 +321,31 @@ export async function renderLists(container) {
             )
           : null,
         h('span', { class: 'spacer' }),
-        h(
-          'button',
-          {
-            class: 'btn-sm btn-danger',
-            onClick: async () => {
-              await api.deleteEntry(entry.id);
-              await refresh();
-              await loadEntries(state.openListId);
-              paint();
-            },
-          },
-          'Drop',
-        ),
+        isRematch
+          ? h(
+              'button',
+              {
+                class: 'btn-sm',
+                onClick: () => {
+                  state.rematching.delete(entry.id);
+                  paint();
+                },
+              },
+              'Cancel',
+            )
+          : h(
+              'button',
+              {
+                class: 'btn-sm btn-danger',
+                onClick: async () => {
+                  await api.deleteEntry(entry.id);
+                  await refresh();
+                  await loadEntries(state.openListId);
+                  paint();
+                },
+              },
+              'Drop',
+            ),
       ),
       entry.candidates.length
         ? h(
@@ -336,6 +415,7 @@ export async function renderLists(container) {
                   : `Matched to ${result.movie?.title ?? 'the pasted TMDB entry'}`,
                 'ok',
               );
+              state.rematching.delete(entry.id);
               await refresh();
               await loadEntries(state.openListId);
               paint();
@@ -481,6 +561,7 @@ export async function renderLists(container) {
                     : `Matched to ${candidate.title}`,
                   'ok',
                 );
+                state.rematching.delete(entry.id);
                 await refresh();
                 await loadEntries(state.openListId);
                 paint();
@@ -582,24 +663,47 @@ export async function renderLists(container) {
         h('span', { class: 'spacer' }),
         h(
           'label',
-          { class: 'check' },
-          h('input', {
-            type: 'checkbox',
-            checked: state.reviewOnly,
-            onChange: async (event) => {
-              state.reviewOnly = event.target.checked;
-              await loadEntries(list.id);
-              paint();
+          { class: 'row', style: 'gap:6px' },
+          h('span', { class: 'faint' }, 'Show'),
+          h(
+            'select',
+            {
+              onChange: async (event) => {
+                state.filter = event.target.value;
+                state.rematching.clear();
+                await loadEntries(list.id);
+                paint();
+              },
             },
-          }),
-          h('span', { class: 'faint' }, 'only show titles needing review'),
+            // `selected` on the option, not `value` on the select: h() applies
+            // props before it appends children, so a value naming an option
+            // that does not exist yet is silently dropped.
+            h('option', { value: 'all', selected: state.filter === 'all' }, 'everything'),
+            h(
+              'option',
+              { value: 'needs_review', selected: state.filter === 'needs_review' },
+              'titles needing review',
+            ),
+            h(
+              'option',
+              { value: 'suspect', selected: state.filter === 'suspect' },
+              'matches worth checking',
+            ),
+          ),
         ),
       ),
       state.entries.length === 0
         ? h(
             'p',
             { class: 'muted' },
-            state.reviewOnly ? 'Nothing needs review on this list.' : 'This list is empty.',
+            {
+              needs_review: 'Nothing needs review on this list.',
+              // Says "none flagged" rather than "none wrong": the filter re-runs
+              // the matcher's confidence test, and a match it would wave through
+              // can still be the wrong film.
+              suspect: 'No matches on this list are flagged as worth checking.',
+              all: 'This list is empty.',
+            }[state.filter],
           )
         : h('div', { class: 'stack', style: 'gap:8px' }, state.entries.map((entry) => entryRow(entry, list))),
     );

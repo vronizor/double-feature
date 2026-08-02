@@ -6,7 +6,17 @@
   --border-strong: #38414f;
   --text: #e8eaf0;
   --text-dim: #9aa3b4;
-  --text-faint: #6b7383;
+  /* Was #6b7383, which failed WCAG AA for body text on every surface here —
+     measured 4.02:1 on --bg, 3.66:1 on --bg-raised, 4.10:1 on --bg-sunken,
+     against the 4.5:1 the size it is used at requires. It is not decorative:
+     it carries chip counts, the "20 lists" summary, group totals and the
+     "press Enter" hints, so it is genuinely read.
+
+     #8b93a3 clears it on all three (6.21, 5.64, 6.33) while staying clearly
+     the quietest of the three text tones — the hierarchy is preserved, it is
+     just no longer below the floor. Note a deterministic UI scanner passed
+     this app without flagging it, so the number came from calculating it. */
+  --text-faint: #8b93a3;
   --accent: #e8b64c;
   --accent-ink: #201703;
   --danger: #e5674f;
@@ -300,6 +310,21 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
 /* nowrap keeps "★ 7.9" from splitting between star and number. Safe now that
    the rating is a flex item: the line breaks BEFORE it rather than through it. */
 .movie-rating { color: var(--accent); font-weight: 620; white-space: nowrap; }
+/* "On: Box-office España #3 of 1952 · The Criterion Collection".
+
+   The "On:" label is a flex item like the memberships beside it, so the shared
+   separator rule above would put a · directly after the colon. Only that first
+   one is suppressed — the separators BETWEEN lists are the point.
+
+   The rank stays glued to its own list name: nowrap, so "#3 of 1952" can never
+   wrap away from "Box-office España" and end up reading as though it belonged
+   to the list after it. Same reasoning as the rating on the card's meta line. */
+.movie-lists > span:nth-child(2)::before { content: none; }
+.movie-list { white-space: nowrap; }
+.movie-list-rank {
+  margin-left: 0.34em; color: var(--text-faint);
+  font-variant-numeric: tabular-nums; font-size: 0.94em;
+}
 .movie-overview {
   margin: 3px 0 0; font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;
   overflow-wrap: break-word;
@@ -324,8 +349,14 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
    trailer is a full-width row underneath (row 2) — a grid row naturally
    starts below whichever of the two columns above is taller, which is
    exactly "sits below whatever is lowest in the 2-column part". */
+/* No border, deliberately: the elevation does the separating on its own.
+   A 1px edge PLUS a 24px shadow blur is two treatments doing one job, and the
+   card already sits on a dimmed backdrop — so the border was the third thing
+   saying "this is in front". Dropped rather than the shadow, because the
+   shadow is what reads as depth on a dark theme where a hairline barely
+   registers. */
 .modal-card {
-  position: relative; background: var(--bg-raised); border: 1px solid var(--border-strong);
+  position: relative; background: var(--bg-raised);
   border-radius: var(--radius); max-width: 760px; width: 100%; max-height: 90vh;
   overflow-y: auto; padding: 24px; box-shadow: var(--shadow);
   display: grid; grid-template-columns: 190px 1fr; align-items: start; gap: 10px 20px;

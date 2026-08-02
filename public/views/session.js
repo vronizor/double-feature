@@ -16,6 +16,30 @@ const POLL_MS = 3500;
 const MAX_POLL_FAILURES = 4;
 
 /**
+ * The address to hand a guest, which is NOT necessarily the one the host is
+ * looking at.
+ *
+ * The QR is drawn server-side from the detected LAN address, but the link
+ * beside it was built from `location.origin` — so a host who opened the app as
+ * `localhost`, which is the natural thing to do on the machine running it, got
+ * a working QR next to a Copy link button that yields a URL no phone can
+ * reach. One fact with two sources, disagreeing exactly when it matters.
+ *
+ * `/api/config` is the same source the QR uses, so they cannot drift again.
+ * Cached because the panel re-renders every 3.5 seconds and this never changes
+ * within a session; `location.origin` remains the fallback for the moment
+ * before it resolves, and for the case where no LAN address was detected at
+ * all — the server already warns about that at boot.
+ */
+let guestBase = null;
+const guestBaseReady = api
+  .config()
+  .then(({ base_url: base }) => {
+    guestBase = base || null;
+  })
+  .catch(() => {});
+
+/**
  * The host's view of one vote session: QR code, link, live tally, close button,
  * and the results once it's closed. Reused read-only by the history tab.
  */
@@ -33,6 +57,11 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
   async function tick() {
     if (stopped) return;
     try {
+      // Settles on the first tick and is already resolved on every one after,
+      // so the guest link is right the first time it is painted rather than
+      // correcting itself 3.5 seconds later — by which point it may already
+      // have been copied.
+      await guestBaseReady;
       const session = await api.session(slug, host);
       if (stopped) return;
       consecutiveFailures = 0;
@@ -70,7 +99,7 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
   }
 
   function renderOpen(session) {
-    const url = `${location.origin}/vote/${slug}`;
+    const url = `${guestBase ?? location.origin}/vote/${slug}`;
 
     clear(container).append(
       h(

@@ -251,10 +251,21 @@ export async function renderVote(container, slug) {
                       state.name = event.target.value;
                     },
                   }),
+              // A guest with nothing ranked used to get a live, full-width
+              // primary button reading "Submit 0 picks", and learned it was
+              // invalid only from a toast fired AFTER the tap. The validation
+              // already existed; it just ran too late to prevent the mistake.
+              // The button now says what to do instead of what it will do.
               h(
                 'button',
-                { class: 'btn-primary', disabled: state.busy, onClick: submit },
-                `Submit ${plural(state.ranked.length, 'pick')}`,
+                {
+                  class: 'btn-primary',
+                  disabled: state.busy || state.ranked.length === 0,
+                  onClick: submit,
+                },
+                state.ranked.length === 0
+                  ? 'Rank a film first'
+                  : `Submit ${plural(state.ranked.length, 'pick')}`,
               ),
             ),
       ),

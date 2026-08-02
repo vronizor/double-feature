@@ -2,8 +2,14 @@ import { Router } from 'express';
 
 import { getDb } from '../db.js';
 import { parseImport } from '../parse.js';
-import { resolveEntry, getMovie, getTvShow } from '../tmdb.js';
-import { recordEntry, upsertMovie } from '../movies.js';
+import { resolveEntry, getMovie, getTvShow, scoreCandidate } from '../tmdb.js';
+import {
+  recordEntry,
+  upsertMovie,
+  LIST_SHAPE_CTE,
+  listMembershipsSql,
+  parseMemberships,
+} from '../movies.js';
 
 const router = Router();
 
@@ -18,7 +24,9 @@ function listWithCounts(db, id) {
               (SELECT COUNT(*) FROM list_movies lm
                 WHERE lm.list_id = l.id AND lm.status <> 'resolved')    AS review_count,
               (SELECT COUNT(lm.rank) FROM list_movies lm
-                WHERE lm.list_id = l.id)                               AS ranked_count
+                WHERE lm.list_id = l.id)                               AS ranked_count,
+              (SELECT SUM(lm.rank = 1) > 1 FROM list_movies lm
+                WHERE lm.list_id = l.id)                               AS ranks_by_year
        FROM lists l WHERE l.id = ?`,
     )
     .get(id);
@@ -39,6 +47,19 @@ router.get('/', (req, res) => {
               -- is worth showing at all.
               (SELECT COUNT(lm.rank) FROM list_movies lm
                 WHERE lm.list_id = l.id)                             AS ranked_count,
+              -- Whether this list's rank is a position WITHIN A YEAR rather
+              -- than across the whole list. It decides what a Top-N cut means
+              -- here — "the top 5" or "the top 5 of every year" — which is a
+              -- difference of two orders of magnitude in the pool.
+              --
+              -- The tell is MORE THAN ONE row at rank 1: a per-year list has a
+              -- #1 for every year it covers, an end-to-end ranking has exactly
+              -- one. Repeated ranks anywhere is NOT the tell, and using it was
+              -- wrong: Sight and Sound is a poll with heavy ties, 264 ranked
+              -- rows across only 71 distinct positions, and it was read as
+              -- per-year. It has one #1, like every end-to-end list here.
+              (SELECT SUM(lm.rank = 1) > 1 FROM list_movies lm
+                WHERE lm.list_id = l.id)                             AS ranks_by_year,
               (SELECT group_concat(tag, ',') FROM (
                  SELECT tag FROM list_tags WHERE list_id = l.id ORDER BY tag
                ))                                                    AS tag_csv
@@ -210,6 +231,36 @@ router.get('/imports/:jobId', (req, res) => {
 
 // --- Entries and manual reconciliation ------------------------------------
 
+/**
+ * Whether a resolved row is worth a second look.
+ *
+ * A row that failed to match sits in a visible queue; a row that matched
+ * WRONGLY is `resolved`, so it is indistinguishable from 7,000 correct ones and
+ * nobody ever looks at it again. That asymmetry is the reason this exists.
+ *
+ * It re-runs the matcher's OWN confidence rule against what the row actually
+ * ended up pointing at, rather than inventing a second notion of agreement:
+ * the question is "would the matcher be confident about this pair today", and
+ * anything it would not wave through is worth a human glance. Reusing
+ * scoreCandidate is the whole point — a bespoke heuristic here could disagree
+ * with the matcher in either direction and neither answer would mean anything.
+ *
+ * It is a PROMPT, never a verdict. Fuzzy matching is accepted on the Spanish
+ * list by decision, so a flag there often marks a correct match made loosely.
+ * Measured across the library when written: 458 of 7,358 resolved rows, 6.2%,
+ * concentrated in España (13%), France (10%) and Criterion (5%) — a queue you
+ * can actually work through, which a stricter rule would not be.
+ */
+const looksUnsure = (row) =>
+  !scoreCandidate(
+    { title: row.raw_title, year: row.raw_year },
+    {
+      title: row.title,
+      original_title: row.original_title,
+      release_date: String(row.year ?? ''),
+    },
+  ).confident;
+
 router.get('/:id/entries', (req, res) => {
   const db = getDb();
   const id = Number(req.params.id);
@@ -218,31 +269,43 @@ router.get('/:id/entries', (req, res) => {
   const where = status === 'needs_review' ? `AND lm.status <> 'resolved'` : '';
   const rows = db
     .prepare(
-      `SELECT lm.id, lm.raw_title, lm.raw_year, lm.status, lm.candidates_json,
+      `WITH ${LIST_SHAPE_CTE}
+       SELECT lm.id, lm.raw_title, lm.raw_year, lm.status, lm.candidates_json,
               lm.tmdb_id, m.media_type, m.title, m.original_title, m.year, m.poster_path, m.director,
               m.runtime, m.overview, m.original_language, m.vote_average,
               m.countries, m.languages, m.trailer_key, m.watched,
               (SELECT group_concat(g.name, ', ')
                  FROM movie_genres mg JOIN genres g ON g.id = mg.genre_id
                 WHERE mg.tmdb_id = m.tmdb_id) AS genres,
-              (SELECT group_concat(name, ', ') FROM (
-                 SELECT l2.name FROM list_movies lm2 JOIN lists l2 ON l2.id = lm2.list_id
-                 WHERE lm2.tmdb_id = m.tmdb_id AND lm2.status = 'resolved'
-                 ORDER BY l2.name COLLATE NOCASE
-               )) AS lists
+              ${listMembershipsSql('m.tmdb_id')} AS lists
        FROM list_movies lm
        LEFT JOIN movies m ON m.tmdb_id = lm.tmdb_id
        WHERE lm.list_id = ? ${where}
        ORDER BY lm.status <> 'resolved' DESC, COALESCE(m.title, lm.raw_title)
        LIMIT ? OFFSET ?`,
     )
-    .all(id, Math.min(Number(req.query.limit) || 200, 5000), Number(req.query.offset) || 0);
+    // The suspect filter runs in JS, after the rows are read, because it needs
+    // the matcher rather than SQL. So it must not be handed a page: filtering
+    // the first 200 rows alphabetically would quietly report "3 worth checking"
+    // on a 1,469-row list whose suspects mostly sit past the letter C. Read the
+    // list whole and let the filter see all of it.
+    .all(
+      id,
+      status === 'suspect' ? 5000 : Math.min(Number(req.query.limit) || 200, 5000),
+      status === 'suspect' ? 0 : Number(req.query.offset) || 0,
+    );
+
+  const entries = rows.map(({ candidates_json: candidates, ...row }) => ({
+    ...row,
+    lists: parseMemberships(row.lists),
+    candidates: candidates ? JSON.parse(candidates) : [],
+    // Only ever true on a resolved row: an unresolved one is already in the
+    // queue, and marking it as well would say nothing.
+    suspect: row.status === 'resolved' && looksUnsure(row),
+  }));
 
   res.json({
-    entries: rows.map(({ candidates_json: candidates, ...row }) => ({
-      ...row,
-      candidates: candidates ? JSON.parse(candidates) : [],
-    })),
+    entries: status === 'suspect' ? entries.filter((entry) => entry.suspect) : entries,
   });
 });
 

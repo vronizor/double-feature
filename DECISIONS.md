@@ -232,6 +232,17 @@ resolved to the US remake *Dinner for Schmucks*.
 **A note written to prevent a bug can cause it.** A recorded "invariant" about
 ceremony years was wrong for two of three editions.
 
+**A back-fill must never INVENT the ordering it back-fills.** The migration that
+split box-office ranks into per-year and overall filled `overall_rank` for every
+list matching its name pattern — including one that had been shipped with no
+global ordering on purpose, because its source has no cross-year figure. For a
+list already stored per-year it wrote row position as the global rank, which is
+year order wearing the name of a ranking. Every count checks out: the column is
+100% populated and densely numbered. Only the values give it away, and only if
+you read them — the top of that list is the earliest year, not the biggest film.
+A nullable column left NULL is a fact; a nullable column filled with an artifact
+is a lie that survives every guard.
+
 ---
 
 ## 4. Naming and vocabulary — settled
@@ -272,6 +283,22 @@ ceremony years was wrong for two of three editions.
 - **`rank IS NULL` must survive a top-N cut.** NULL means the list simply is not
   ranked; excluding those films would delete every unranked list from the pool
   rather than narrowing the ranked ones.
+- **Top-N means "the top N of each ranked GROUP", and the group is whatever the
+  list ranks within.** TSPDT ranks within itself, so its group is the list and
+  N=10 gives ten films. A box-office list ranks within a year, so its group is a
+  year and N=10 gives ten per year. That is one rule, not two, and it is the
+  rule that produces era balance — the reason per-year sources were chosen over
+  the all-time pages at all. What it does NOT do is predict the pool size, and
+  that is the part the interface owes the reader: the summary says which group
+  the cut applied to. **A second control for the other kind of cut was
+  considered and rejected** — on most of a selection one of the two would always
+  be a no-op, which is the lookalike-controls trap recorded above.
+- **A parametric list ranks by RATING, above a 1,000-vote floor.** Chronological
+  rank would make "top 10" mean "his first ten films", which is why the code
+  refused to rank these at all. Rating is a meaning that works. The floor is the
+  existing `IMDB_VOTE_FLOOR`, not Modern Classics' 5,000: a filmography is 20–40
+  films, and 5,000 votes would strip most pre-1960 work out of a Kurosawa or Ozu
+  list — the opposite failure to the one the floor exists to stop.
 - **Take every row a box-office page lists.** No admissions threshold of our
   own; the pages already apply one.
 - **Francophone by TMDB `original_language`, not by the country column.** The
@@ -296,12 +323,25 @@ ceremony years was wrong for two of three editions.
 - **National cinema night is one parametric vibe, not a list per country** —
   director night needs the same `▾` chip regardless, so it is built once and
   serves both, plus actor's night in v5.
-- **Two chip rows with similar labels are left alone until real use.** The
-  tag-filter row and the vibe row sit close together and share names: a chip
-  "Awards" *selects* the awards lists while "Awards 5" merely *narrows what the
-  picker shows*. Changing it on the strength of a code read would be guessing at
-  a problem nobody has hit. The question to answer later is whether they were
-  ever actually confused, not whether they look confusable on paper.
+- **The chip rows WERE confusable, and the answer came from use.** This entry
+  used to say they were left alone until real use, because changing them on the
+  strength of a code read would be guessing at a problem nobody had hit. That
+  was the right call and the question is now answered: **yes**, and by more than
+  was suspected. There are four pill rows within ~600px, not two — vibe presets,
+  list-group chips, metadata filters and display toggles — all sharing one shape
+  and one active colour. Four of seven vibe names recur verbatim in the row
+  below, and with `Cinephile` selected the group row still paints `All` in the
+  same active yellow, so two contradictory "this is selected" states stack in
+  one column. The fix is a deletion: the tag-filter row is a second narrowing
+  mechanism over group headers that already narrow. See
+  [the UI review](docs/evidence/ui-review.md).
+- **Disclosure by destination, not expansion in place.** A panel that triples
+  the page when opened has not deferred its complexity, it has relocated it into
+  the middle of the primary flow — measured, it pushed the Draw button ~2,900px
+  down a ~3,600px page. Configuration belongs somewhere the primary action
+  cannot be displaced from: a rail beside the flow, or a sheet over it. The
+  reference products this app is measured against do the same — neither solves
+  density with an accordion.
 
 ---
 
@@ -353,3 +393,9 @@ ceremony years was wrong for two of three editions.
   hardest on blockbusters, where TMDB runs generous.
 - **The test suite is hermetic.** No credentials, no network. A run must not
   depend on whose machine it is on.
+- **Body text clears 4.5:1, and the number is calculated rather than judged.**
+  `--text-faint` sat at 3.66:1 on `--bg-raised` for several versions while
+  carrying real content — chip counts, list summaries, input hints. It looked
+  fine. A deterministic UI scanner ran over the app and did not flag it, while
+  catching 1.6:1 on a control page, so **passing a scan is not evidence of
+  passing AA**. Compute the ratio when introducing or dimming a text colour.

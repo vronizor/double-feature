@@ -21,6 +21,17 @@ and nothing bigger than a fix is actioned without asking first.
 
 Trimmed each session; git keeps the history.
 
+_One note filed 2026-08-02 and cleared: the second rating not always appearing
+on hover. Measured against the real database, and it was two things wearing one
+symptom. About 13% of the library sits below the 1,000-vote floor and shows
+nothing **by design** — absent means "not enough votes", never "badly rated",
+and that decision stands. But 36% had no IMDb rating cached at all, while 2,150
+of those already carried an `imdb_id` — so the ids were in place and the ratings
+had simply not been fetched since the library grew through v5. Running
+`imdb-ratings` matched 5,920 films and took the shown-score count from 3,041 to
+4,202. No code changed. The durable half went to a comment in the script, since
+it is a fact about that script rather than a decision._
+
 _Six notes filed 2026-07-31 and cleared: one fixed in v4 (director names
 splitting across lines), one answered as a decision rather than a bug (award
 badge years — the data was right, the label is disputed), and four scheduled to

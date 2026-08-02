@@ -257,6 +257,59 @@ export function ratingLine(movie) {
  * so it travels with that item and can only ever appear at the start of a
  * line, never dangling at the end of one.
  */
+/**
+ * Whether a resolved entry's source text disagrees with the film it matched.
+ *
+ * The reconciliation screen shows only the ANSWER — the film a row points at —
+ * which is exactly why a wrong match is invisible: "Marco" resolving to the
+ * wrong "Marco" looks like an ordinary row. Showing the raw text on every row
+ * would be noise, since most match exactly, so it appears where the two
+ * disagree, which is where the mistakes are.
+ *
+ * Either side can disagree. A different title is the obvious case; a matching
+ * title with a different year is *Psycho* (1960) against *Psycho* (1998), which
+ * is the case most likely to be wrong and least likely to look it.
+ *
+ * `original_title` counts as agreement: a list writing "Shichinin no samurai"
+ * against TMDB's "Seven Samurai" is the same film under its own name, not a
+ * mismatch worth a host's attention.
+ */
+export function matchDiffers(entry) {
+  if (!entry?.raw_title) return false;
+  const titleAgrees =
+    entry.raw_title === entry.title || entry.raw_title === entry.original_title;
+  const yearAgrees = !entry.raw_year || !entry.year || entry.raw_year === entry.year;
+  return !titleAgrees || !yearAgrees;
+}
+
+/**
+ * How to say what a Top-N cut did.
+ *
+ * One control, one meaning — "the top N of each ranked group" — but the group
+ * is whatever a list ranks within, and that is not the same thing on every
+ * list. Top-N=10 is ten films from TSPDT and about eight hundred from
+ * Box-office France, because the first ranks end to end and the second ranks
+ * within each year. The number alone therefore cannot tell you how big the
+ * pool became, and that is the honest complaint against it.
+ *
+ * So the label carries the group rather than a second control carrying the
+ * choice. `ranked` is how many selected lists have ranks at all, `perYear` how
+ * many of those rank within a year.
+ *
+ * Kept beside `describePoolSetup`'s copy in server/pool.js, which writes the
+ * same phrase onto a finished session. The two must agree; there is no shared
+ * module between the browser and the server to put it in.
+ */
+export function topNLabel(topN, { ranked, perYear }) {
+  if (!topN || topN <= 0) return null;
+  // No ranked list selected: the cut does nothing at all, and saying "top 5"
+  // would describe a narrowing that did not happen.
+  if (ranked === 0) return `top ${topN} (no ranked lists)`;
+  if (perYear === 0) return `top ${topN}`;
+  if (perYear === ranked) return `top ${topN} per year`;
+  return `top ${topN}, per year on some lists`;
+}
+
 export function metaLine(...parts) {
   return parts
     .flat()
@@ -535,7 +588,32 @@ export function openMovieModal(movie) {
         // Doesn't matter for the draw itself (it's already deduplicated by
         // tmdb id by then), but is useful context when just browsing —
         // hence kept to the detail overlay rather than the compact card.
-        movie.lists ? h('div', { class: 'movie-meta faint' }, `On: ${movie.lists}`) : null,
+        movie.lists?.length
+          ? h(
+              'div',
+              { class: 'movie-meta faint movie-lists' },
+              h('span', {}, 'On:'),
+              ...movie.lists.map((entry) =>
+                h(
+                  'span',
+                  { class: 'movie-list' },
+                  entry.name,
+                  // The rank is the interesting half — being on Box-office
+                  // España says less than being its #3 of 1952 — and "of 1952"
+                  // is what tells you the position is within that year rather
+                  // than across the whole list. An unranked list (Criterion,
+                  // Ghibli) shows its name alone, as before.
+                  entry.rank
+                    ? h(
+                        'span',
+                        { class: 'movie-list-rank' },
+                        `#${entry.rank}${entry.by_year && entry.year ? ` of ${entry.year}` : ''}`,
+                      )
+                    : null,
+                ),
+              ),
+            )
+          : null,
         // Full award names here, one per line — the card has to abbreviate to
         // fit, this is where the whole fact belongs.
         movie.awards?.length

@@ -1,4 +1,14 @@
-import { h, clear, toast, plural, posterUrl, tmdbUrl, parseTmdbInput, openMovieModal } from '../dom.js';
+import {
+  h,
+  clear,
+  toast,
+  plural,
+  posterUrl,
+  tmdbUrl,
+  parseTmdbInput,
+  openMovieModal,
+  topNLabel,
+} from '../dom.js';
 import { api } from '../api.js';
 import { renderSessionPanel } from './session.js';
 import {
@@ -164,7 +174,16 @@ export async function renderDraw(container) {
 
     const parts = [`${plural(count, 'list')}`];
     const { topN, filters: f } = poolState.setup;
-    if (topN) parts.push(`top ${topN}`);
+    const inPlay =
+      selected === null
+        ? state.lists.filter((l) => l.is_active)
+        : state.lists.filter((l) => selected.includes(l.id));
+    const ranked = inPlay.filter((l) => l.ranked_count > 0);
+    const label = topNLabel(topN, {
+      ranked: ranked.length,
+      perYear: ranked.filter((l) => l.ranks_by_year).length,
+    });
+    if (label) parts.push(label);
     const genreName = (id) => state.facets?.genres.find((g) => g.id === id)?.name ?? `#${id}`;
     const langName = (code) => state.facets?.languages.find((l) => l.code === code)?.name ?? code;
 

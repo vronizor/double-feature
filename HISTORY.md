@@ -1585,3 +1585,348 @@ re-running a fetcher dropped from three minutes to sixteen seconds once the
 politeness sleep stopped firing for requests that were being served from cache.
 
 Version 6.0.0.
+
+---
+
+## 9. v6
+
+### 9.1 An overall rank that was really year order
+
+Found by reading values that every count agreed with.
+
+`splitBoxOfficeRanks` was written to do one thing — recover the per-year rank
+from a list stored globally — and it correctly assumed a global rank contains
+the within-year order. It then applied the converse, which is false: for a list
+already stored per-year it wrote row position as the overall rank. Ordered by
+per-year rank, that is every year's #1 followed by every year's #2, so
+Box-office US ended up claiming that the biggest film in its history was
+whatever topped 1946. *Duel in the Sun*, then *Welcome Stranger*, then *The Red
+Shoes* — a perfect chronology presented as a ranking.
+
+The list had been shipped with **no** overall rank on purpose, because its
+source is an annual top ten with nothing ranking 1962 against 1994. The
+migration filled the column anyway.
+
+**Nothing failed, and nothing could have.** The column was 100% populated,
+densely numbered from 1, and read by no query in the app. Every guard this
+project has was satisfied. It is the same lesson v4 and v5 both taught, in a
+third costume: *inspect values, not just volumes.*
+
+The repair keys on two conditions rather than a list name, because either alone
+catches something legitimate. Ranks must repeat, which a genuine global rank
+never does; and reading rank in overall-rank order must never step down, which
+only a sequence generated from that ordering achieves. On the real database
+Box-office US stepped down 0 times against France's 617 and España's 681, so
+the genuine pair is nowhere near the boundary.
+
+> **The limit is written into the code rather than left to be discovered.** A
+> real all-time ordering that interleaved its years in strict rotation would be
+> byte-identical to a generated one, and this would clear it. Nothing could
+> distinguish them — the data would be the same data. No box-office history is
+> that tidy, but the next thing to copy this pattern might be.
+
+Also settled here: `overall_rank` is now documented as **legitimately NULL**,
+meaning the source gave no cross-year figure, rather than as a column awaiting
+a back-fill. That distinction is the whole defect.
+
+Version 6.2.0.
+
+### 9.2 The wrong match becomes visible
+
+The reconciliation screen showed only the **answer** — the film a row points
+at — which is why a wrong match was permanent. An entry that failed to match
+sits in a visible queue and gets fixed; one that matched the wrong film is
+stored `resolved`, looks exactly like the 7,000 correct rows around it, and is
+never seen again. The match-rate floor guards the recoverable failure and
+nothing guarded the other.
+
+Three things, and the backend needed none of them: the resolve route never had
+a status guard, and `raw_title` is kept on every row, so the capability was
+always there and only the screen was missing.
+
+**Say what a row matched FROM**, wherever that disagrees with what it matched
+to. On every row it would be noise, since most agree exactly; where they
+disagree is where the mistakes are. A matching title with a different year is
+the case that matters most and looks wrong least — *Psycho* 1960 against
+*Psycho* 1998.
+
+**A queue of matches worth checking**, which re-runs *the matcher's own*
+confidence rule against what each row actually ended up pointing at. The
+question is "would the matcher wave this pair through today", and reusing
+`scoreCandidate` rather than inventing a second notion of agreement is the
+whole point — a bespoke rule could disagree with the matcher in either
+direction and neither answer would mean anything. Measured: **458 of 7,358
+resolved rows, 6.2%**, concentrated in España (13%), France (10%) and Criterion
+(5%). A queue that can actually be worked through.
+
+**Re-match reuses the reconciliation editor** rather than getting its own. It
+is the same act — point this raw title at the right film — and the only
+differences are what the header says and that leaving is a cancel rather than
+a drop.
+
+> **The flag is a prompt, never a verdict**, and the live data says so loudly.
+> Most flagged rows are *correct* matches made across a title variant: *Three
+> Men and a Baby* → *3 Men and a Baby*, *Por Un Puñado De Dólares* → *A Fistful
+> of Dollars*. Fuzzy matching is accepted on the Spanish list by decision, so a
+> flag there frequently marks a match that is both loose and right. Narrowing
+> it would need TMDB's alternative titles per row, which is a network call per
+> row and a different feature.
+
+Two smaller corrections fell out. `candidates_json` is cleared when a row
+resolves, so the backlog's claim that re-matching could offer the stored
+candidates was wrong — a re-match works from search and paste, which is right
+anyway, since the stored candidates are where the wrong answer came from. And
+the suspect filter runs in JS after the rows are read, so it must not be handed
+a page: filtering the first 200 rows alphabetically would have quietly reported
+"3 worth checking" on a 1,469-row list.
+
+Version 6.3.0.
+
+### 9.3 One chip for the box office
+
+Awards gathers nine award lists behind one chip; the three box-office lists
+had none, because the vibe was worth building only once there was more than
+one list to gather. The US list landed in v5, so it is built once over the
+finished set rather than added early and edited twice.
+
+Tag-driven, like Awards, so a fourth country would join it without anything
+being edited.
+
+**It carries a Top-N of 5, and that cut is the feature rather than a
+decoration.** Measured on the real library:
+
+```
+             uncut      top 5 per year
+films        3,654      1,202
+1950s          457        143
+1960s          504        148
+1970s          514        146
+1980s          460        150
+1990s          386        149
+2000s          444        149
+2010s          427        149
+```
+
+Uncut, the chip selects most of the library and barely narrows anything. Cut,
+every decade from the 1950s to the 2010s lands within two films of 149. This
+only works because all three lists now rank *within* a year — the same cut
+before §9.1 would have meant "France's five biggest films ever" beside "the
+top five of every Spanish year", which is the defect that version fixed.
+
+> **The justification changed under measurement.** The first draft of this
+> comment said an uncut selection would bring back the recency skew that
+> per-year sources exist to avoid. The numbers say otherwise: uncut is lumpy
+> (386 to 514) but not recency-skewed. The honest argument is size and
+> evenness, and the comment now says that instead. Recorded because a
+> plausible-sounding reason that the data does not support is exactly what
+> this project keeps catching itself doing.
+
+Version 6.4.0.
+
+### 9.4 Two things that were quietly untrue
+
+Both found while building the Box office vibe, neither caused by it.
+
+**Two orphaned rows in `list_tags`**, tagging lists 20 and 21, neither of
+which exists. The table declares `ON DELETE CASCADE`, so this should be
+impossible — but SQLite enforces foreign keys only when a connection sets
+`PRAGMA foreign_keys`, and it is off by default on every new one. The app sets
+it; something that opened the database once without it did not.
+
+The symptom was the new vibe reporting five resolved lists where three exist.
+Nothing downstream was wrong: the pool query joins `lists`, so a phantom id
+matches nothing, and the count was identical with and without them. **A number
+the host reads rather than a pool they draw from** — which is precisely why it
+would have sat there indefinitely.
+
+The sweep covers `list_tags`, `vibe_tags` and `vibe_lists` and stops there. A
+row in one of those is a property of its parent and means nothing without it,
+so deleting it loses nothing. `list_movies` and the ballot tables cascade too
+and are deliberately excluded: they carry content, and an orphan in one would
+mean something had gone properly wrong and should be looked at rather than
+swept. `PRAGMA foreign_key_check` gives the whole picture when that is wanted;
+it now returns empty on the real database.
+
+**A deleted built-in vibe comes back on the next restart.** `ensureBuiltinVibes`
+runs on every boot and asks only whether the name is present. Two things said
+otherwise: the function's own comment claimed "editing or deleting one sticks",
+and a test called *"built-in vibes are seeded once and never re-added after
+deletion"* deleted a vibe and then never re-ran the seeder — so the one
+assertion that would have caught it was the one missing.
+
+The behaviour is **accepted, not fixed**. Making a delete stick needs a record
+of intentionally-removed built-ins, which is real machinery for a problem
+nobody has hit; the built-ins are six ordinary starting points and their
+returning is a small harm. What was not acceptable was a comment and a test
+name that each said the opposite of what the code does. Both now describe it,
+and the test asserts the return rather than implying it cannot happen.
+
+> A test whose name claims a property it does not assert is worse than no test,
+> because it is read as coverage. This is the second time in v6 that the wrong
+> thing was written down confidently — the first was §9.1's invented rank.
+
+Version 6.5.0.
+
+### 9.5 A Top-N cut says which group it cut
+
+One control, one meaning — the top N of each ranked group — but the group is
+whatever a list ranks within, and that differs. Top-N=10 is ten films from
+TSPDT and about eight hundred from Box-office France. The number alone cannot
+tell you which happened, and that was the honest complaint against it.
+
+The fix is a label, not a second control. A second one was considered and
+rejected: on most of a selection one of the two would always be a no-op, which
+is the lookalike-controls trap already recorded in `DECISIONS.md`. So the pool
+summary now reads `top 5 per year` where the group is a year, `top 5` where it
+is the list, `top 5, per year on some lists` for a mixed selection, and
+`top 5 (no ranked lists)` where the cut did nothing at all — that last case
+mattering because "top 5" would otherwise describe a narrowing that never
+happened.
+
+> **The first detector was wrong, and the real library caught it.** It asked
+> whether ranks REPEAT, reasoning that a per-year list has a #1 for every year.
+> True, but so does any poll with ties: Sight and Sound has 264 ranked rows
+> across 71 distinct positions and was read as per-year. The right question is
+> how many rows sit at rank **1** — 82 for France, 81 for the US, exactly one
+> for Sight and Sound, TSPDT and Modern Classics. Measured across every ranked
+> list before the change went in, which is the only reason it was caught: the
+> tie-heavy list is the single counter-example in the library.
+
+The label is duplicated between `public/dom.js` and `server/pool.js` — the
+browser needs it live while the host builds a pool, the server needs it when
+writing a finished session's summary, and there is no module shared between
+them. The duplication is small, deliberate, and cross-referenced in both.
+
+Version 6.6.0.
+
+### 9.6 The "On:" line says where the film placed
+
+`On: Box-office España` answered "is this film on anything" and stopped. The
+rank is the more interesting half, and it was already stored: *Judas* (1952) is
+not merely on the Spanish box-office list, it is **#1 of 1952**.
+
+```
+On: Box-office España #1 of 1952
+On: Sight & Sound Greatest Films (2022 critics’ poll) #20 · The Criterion
+    Collection · TSPDT 1,000 Greatest Films #10
+```
+
+Three shapes in one line, and the phrasing distinguishes them without a legend.
+`#1 of 1952` is a position within that year; `#20` with no year is a position
+across the whole list; a list with no ranks at all (Criterion, Ghibli) shows its
+name alone, exactly as before. The same `by_year` fact that decides what a
+Top-N cut means decides which phrasing a membership gets, so the two can never
+disagree.
+
+`movies.lists` changed from a comma-joined string to an array of memberships.
+Cheap, because it had exactly one consumer in the whole frontend — the modal
+line itself — so there was no reason to bolt a second field alongside it. Three
+server queries build it and they now share one SQL fragment rather than three
+near-copies that had already drifted in their column aliases.
+
+> `list_shape` is a CTE, not a correlated subquery. The per-list "does this rank
+> by year" aggregate is computed once per statement rather than once per
+> membership row of every hydrated film — which for a 200-film draw over a
+> 1,567-row list is the difference between one pass and several hundred.
+
+A film on nothing returns `[]` rather than `[null]`: `json_group_array` over no
+rows gives an empty array, but a LEFT JOIN that matched nothing would have
+produced a single null entry and the modal would have rendered a membership
+that does not exist. Asserted, because it is invisible until it is not.
+
+Version 6.7.0.
+
+### 9.7 A parametric list can be ranked, by rating
+
+`applyParameter` left every rank NULL, and the code comment gave the reason:
+a filmography has no order of its own, and the obvious one is wrong, because
+chronological positions would make "top 10" mean "his first ten films".
+
+Rating is a meaning that works — "the top 10 Kurosawa" is a question people
+ask — and both numbers were already cached, so nothing new is fetched. Against
+the real library:
+
+```
+ #1  8.6  404,001  Seven Samurai (1954)
+ #2  8.4   72,758  High and Low (1963)
+ #3  8.3  103,236  Ikiru (1952)
+ #4  8.3   23,610  Red Beard (1965)
+ #5  8.2  153,447  Ran (1985)
+ …
+#30  5.6    2,850  The Most Beautiful (1944)
+#31  5.9      231  Song of the Horse (1970)
+#32  6.5      222  Those Who Make Tomorrow (1946)
+```
+
+The floor is **1,000 IMDb votes**, not the 5,000 the Modern Classics query
+needed. That number is right for a query sorting the whole of TMDB; it is wrong
+for a closed set of one director's films, where it would strip most pre-1960
+work out of a Kurosawa or an Ozu — deleting the canon to keep out noise the set
+does not contain. The bottom three rows above are the floor working: two films
+rating 5.9 and 6.5 on about 220 votes each sit *below* one rating 5.6 on 2,850.
+
+Ties break on vote count, which is why Ikiru precedes Red Beard at 8.3.
+
+> **Nothing is left NULL, and that is the subtle part.** A NULL rank means "this
+> list is not ranked", and a Top-N cut deliberately KEEPS those films —
+> otherwise asking for the top 100 would delete every unranked list from the
+> pool. Correct across lists, wrong within one. Leaving the unrateable films
+> NULL here would have made "top 10 Kurosawa" return ten good films *plus*
+> every obscure title that could not be rated. So they sink to the bottom of
+> the order instead of floating out of the cut, and the test asserts the
+> absence of NULLs directly rather than trusting the ordering to imply it.
+
+Two ways to be unrateable and both land there: too few votes, and no IMDb
+rating at all. The second is ordinary rather than exceptional — ratings arrive
+from a script run by hand, so a film fetched into the library today carries
+none until it is next run.
+
+The slot list ends up with distinct ranks and a single #1, so it reads as an
+end-to-end ranking rather than a per-year one, and the Top-N label calls it
+`top 10` rather than `top 10 per year`. That falls out of §9.5's rule without
+anything being special-cased.
+
+Version 6.8.0.
+
+### 9.8 Closing v6
+
+Eleven chunks. **The version that made the app trust itself**, which is not
+what it was scheduled to be — v6 opened as consolidation-and-ship and turned
+into a run of things that were quietly wrong and said nothing.
+
+What shipped: re-matching a resolved entry, with a queue that flags the matches
+worth checking; a Box office vibe; Top-N labels that name the group they cut;
+the `On:` line carrying rank; parametric lists ranked by rating; and the
+corrections below.
+
+**Four things were confidently recorded and false.** That is the number worth
+carrying forward, because none of them failed, threw, or dropped a row.
+
+- `BACKLOG.md` described France's global rank and Spain's per-year rank as a
+  live disagreement. It had shipped in v5. The stale entry cost a session one
+  wrong recommendation before anyone checked the code.
+- A back-fill migration invented the `overall_rank` it wrote, so Box-office US —
+  shipped with no cross-year ordering on purpose — claimed its biggest film of
+  all time was whatever topped 1946. Fully populated, densely numbered,
+  meaningless.
+- `ensureBuiltinVibes` was commented as making a delete stick. It does the
+  opposite, and the test named for that property never asserted it.
+- The reason recorded for deferring the design tool was wrong on the facts. The
+  tool assumes no design system; the real obstacle was that our DOM is built in
+  JavaScript, which nobody had written down.
+
+> **The pattern across all four: a confident claim, no failure, and nothing that
+> would ever contradict it.** Every one was caught by reading values or source
+> and asking whether the claim could be true — never by a test, a guard or a
+> tool. v4 taught the same lesson about counts; v6 taught it about prose.
+
+**A detector was run over the UI and produced one actionable finding**, while
+missing a WCAG AA failure it had the rule for. Also caught this version: an
+Explore count printed twice on every load, a guest submit button live at zero
+picks, a guest link that disagreed with the QR beside it, two orphaned rows in
+`list_tags`, and a text colour at 3.66:1.
+
+The next version is the first that adds no data at all. Its evidence is
+[docs/evidence/ui-review.md](docs/evidence/ui-review.md).
+
+Version 6.12.0.
