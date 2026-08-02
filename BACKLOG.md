@@ -282,20 +282,6 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
-- **A Box-office vibe.** *(From field notes, 2026-08-01.)* One chip selecting
-  the box-office lists, the way Awards selects the award lists. Deferred rather
-  than done because it is worth one chip only once there is more than one such
-  list to gather: France and Spain are seeded, the US is a live v5 item, and the
-  vibe is more useful built on top of the finished set than added now and
-  edited twice.
-
-  **It ships with Top-N=5 — decided 2026-08-02.** Unset, the chip selects 3,766
-  memberships across the three lists. All three now rank per-year, so a cut of 5
-  means "the top five of every year in three countries" — roughly 1,200 films
-  that stay era-balanced instead of collapsing onto the decades with the most
-  rows. Vibes already carry `topN` inside their filters blob, so this costs
-  nothing to set.
-
 - **Ranking a parametric list — the answer is yes, by rating, with a vote
   floor.** *(From field notes, 2026-08-01; investigated in v5.)*
 

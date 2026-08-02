@@ -134,6 +134,7 @@ test('built-in vibes are seeded once and never re-added after deletion', () => {
   assert.deepEqual(first, [
     "Actor's night",
     'Awards',
+    'Box office',
     'Cinephile',
     'Director night',
     'Family',
@@ -142,13 +143,23 @@ test('built-in vibes are seeded once and never re-added after deletion', () => {
 
   // Idempotent.
   ensureBuiltinVibes(db);
-  assert.equal(allVibes(db).length, 6);
+  assert.equal(allVibes(db).length, 7);
 
-  // Built-ins are ordinary rows: deletable, and a delete sticks for as long as
-  // the row is absent from THIS database.
+  // Built-ins are ordinary rows, so deleting one works.
   const family = allVibes(db).find((v) => v.name === 'Family');
   deleteVibe(db, family.id);
-  assert.equal(allVibes(db).length, 5);
+  assert.equal(allVibes(db).length, 6);
+});
+
+test('the Box office built-in gathers the box-office lists and cuts to the top 5', () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+
+  const boxOffice = allVibes(db).find((v) => v.name === 'Box office');
+  assert.deepEqual(boxOffice.tags, ['box-office'], 'tag-driven, so a fourth country joins on its own');
+  // The cut is what makes it a vibe rather than a tag shortcut: without it the
+  // chip means "every box-office row we hold", which is not a night's shape.
+  assert.equal(boxOffice.filters.topN, 5);
 });
 
 test('the Family built-in carries a filter, not just a list selection', () => {

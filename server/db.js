@@ -613,6 +613,17 @@ const BUILTIN_VIBES = [
   // The one built-in carrying a filter as well as a selection — which is what
   // makes it a vibe rather than just a tag shortcut.
   { name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },
+  // Gathers France, Espana and the US the way Awards gathers the award lists.
+  //
+  // The cut is the point, not decoration, and the reason is SIZE and EVENNESS
+  // rather than recency. Measured on the real library: uncut, the three lists
+  // are 3,654 distinct films -- most of what the app holds, so the chip would
+  // barely narrow anything. All three rank WITHIN a year, so a top 5 takes it
+  // to 1,202 and flattens the shape at the same time: every decade from the
+  // 1950s to the 2010s lands within two films of 149, against a 386-to-514
+  // spread uncut. The 1940s are thinner because coverage starts around 1945,
+  // and the 2020s because the decade is not over.
+  { name: 'Box office', tags: ['box-office'], position: 7, topN: 5 },
   // The first parametric vibe. It resolves to nothing until a person is
   // chosen, which is why it carries neither tags nor lists.
   {
@@ -649,15 +660,20 @@ export function ensureBuiltinVibes(target) {
       .map((name) => genreId(name) ?? (name === 'Horror' ? 27 : null))
       .filter((id) => id !== null);
 
-    const filters = excluded.length
-      ? JSON.stringify({ genres: { include: [], exclude: excluded } })
-      : null;
+    // topN rides inside the filters blob rather than in a column of its own,
+    // which is the same channel currentAsVibe uses when a host saves their own
+    // vibe — see the note there.
+    const filters = {
+      ...(excluded.length ? { genres: { include: [], exclude: excluded } } : {}),
+      ...(vibe.topN ? { topN: vibe.topN } : {}),
+    };
+    const filtersJson = Object.keys(filters).length ? JSON.stringify(filters) : null;
 
     const { lastInsertRowid } = target
       .prepare(
         'INSERT INTO vibes (name, is_builtin, param_json, filters_json, position) VALUES (?, 1, ?, ?, ?)',
       )
-      .run(vibe.name, vibe.param ? JSON.stringify(vibe.param) : null, filters, vibe.position);
+      .run(vibe.name, vibe.param ? JSON.stringify(vibe.param) : null, filtersJson, vibe.position);
 
     for (const tag of vibe.tags) {
       target

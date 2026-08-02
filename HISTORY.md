@@ -1681,3 +1681,44 @@ a page: filtering the first 200 rows alphabetically would have quietly reported
 "3 worth checking" on a 1,469-row list.
 
 Version 6.3.0.
+
+### 9.3 One chip for the box office
+
+Awards gathers nine award lists behind one chip; the three box-office lists
+had none, because the vibe was worth building only once there was more than
+one list to gather. The US list landed in v5, so it is built once over the
+finished set rather than added early and edited twice.
+
+Tag-driven, like Awards, so a fourth country would join it without anything
+being edited.
+
+**It carries a Top-N of 5, and that cut is the feature rather than a
+decoration.** Measured on the real library:
+
+```
+             uncut      top 5 per year
+films        3,654      1,202
+1950s          457        143
+1960s          504        148
+1970s          514        146
+1980s          460        150
+1990s          386        149
+2000s          444        149
+2010s          427        149
+```
+
+Uncut, the chip selects most of the library and barely narrows anything. Cut,
+every decade from the 1950s to the 2010s lands within two films of 149. This
+only works because all three lists now rank *within* a year — the same cut
+before §9.1 would have meant "France's five biggest films ever" beside "the
+top five of every Spanish year", which is the defect that version fixed.
+
+> **The justification changed under measurement.** The first draft of this
+> comment said an uncut selection would bring back the recency skew that
+> per-year sources exist to avoid. The numbers say otherwise: uncut is lumpy
+> (386 to 514) but not recency-skewed. The honest argument is size and
+> evenness, and the comment now says that instead. Recorded because a
+> plausible-sounding reason that the data does not support is exactly what
+> this project keeps catching itself doing.
+
+Version 6.4.0.
