@@ -353,10 +353,62 @@ export const shortAwardName = (award) => {
   return String(name ?? '').replace(/\s*\(.*\)$/, '').replace(/\s*—.*$/, '');
 };
 
-/** "Palme d’Or 2019", or just "Palme d’Or" when the year isn't recorded. */
+/**
+ * Which year an award is NATURALLY called by, given the ceremony year we store.
+ *
+ * The database holds the ceremony year, which is a scraped fact and stays the
+ * truth. This is only how it is SPOKEN. The two differ because academies hand
+ * out prizes in the spring after the films they honour and then name the award
+ * for the films: the 69th Academy Awards were held in March 1997 and are "the
+ * 1996 Oscars". Festivals have no such gap — the Palme d'Or awarded at the
+ * 2019 festival is the 2019 Palme — and French usage names the César for its
+ * ceremony, so "César 2012" is the right label for a 2011 film.
+ *
+ * **Keyed on the short name, and unknown awards default to no shift.** A new
+ * festival list added without touching this map labels by its ceremony year,
+ * which is correct for festivals; a new academy award would need a line here.
+ * That is the safer way round, since festivals are the common case.
+ *
+ * **Never derived from the film's release year**, which is the thing
+ * DECISIONS.md rejects and for good reason: TMDB dates Nomadland 2021 while
+ * every awards body honoured it as a 2020 film, and The Graduate is a 1967
+ * film that BAFTA honoured in 1969 because it reached UK cinemas in 1968.
+ * Ceremony year is a fact we scraped; release year is a different fact that
+ * happens to be close most of the time.
+ */
+const AWARD_YEAR_RULES = {
+  Oscar: { offset: -1 },
+  'Oscar Intl.': { offset: -1 },
+  // The 1st BAFTAs, held 1949, honoured 1947 releases — a two-year gap, so the
+  // constant is wrong for exactly that ceremony. `from` suppresses the year
+  // rather than printing a confident 1948, on the rule that an absent year
+  // beats a wrong one.
+  BAFTA: { offset: -1, from: 1950 },
+  Goya: { offset: -1 },
+};
+
+/**
+ * The year to print, or null when there isn't one that can be trusted.
+ *
+ * Pre-1935 Academy Awards covered spans rather than calendar years — the 1st
+ * honoured 1927/28 — so the derived label there is one half of a span rather
+ * than a clean year. That is left as-is deliberately: "Oscar 1928" is how the
+ * first ceremony is usually cited, so it reads correctly even though the
+ * period was longer.
+ */
+export const awardYearLabel = (award) => {
+  if (!award?.year) return null;
+  const rule = AWARD_YEAR_RULES[shortAwardName(award)];
+  if (!rule) return award.year;
+  if (rule.from && award.year < rule.from) return null;
+  return award.year + rule.offset;
+};
+
+/** "Palme d’Or 2019", or just "Palme d’Or" when no year can be trusted. */
 export const awardLabel = (award, { short = true } = {}) => {
   const name = short ? shortAwardName(award) : award.name;
-  return award.year ? `${name} ${award.year}` : name;
+  const year = awardYearLabel(award);
+  return year ? `${name} ${year}` : name;
 };
 
 /**

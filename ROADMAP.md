@@ -17,7 +17,6 @@ themselves.
 
 | Item | State | Where it stands |
 |---|---|---|
-| Award badge years | ⏳ ready | Show the year each award is naturally labelled by. Needs the honoured year **scraped** from the ceremony article, never derived — see `BACKLOG.md` |
 | `includeWatched` default | 🗣 open | README says exclude, the UI ships include. Inert until something is actually marked watched |
 | LICENSE, and seed-list provenance | 🗣 open | Not code. The repo is public and therefore all-rights-reserved by default; TSPDT's complete 1,000-entry ranking is the strongest provenance flag — see `docs/evidence/publication-audit.md` |
 
