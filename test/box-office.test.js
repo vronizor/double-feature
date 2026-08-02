@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseBoxOfficePage, parseAdmissions } from '../scripts/fetch-seed-lists.mjs';
+import {
+  parseBoxOfficePage,
+  parseAdmissions,
+  parseUsBoxOfficePage,
+  parseYearInFilmPage,
+} from '../scripts/fetch-seed-lists.mjs';
 
 // Each fixture is the real markup shape from a specific era of the corpus, cut
 // down to two rows. The variants were found by surveying all 82 pages rather
@@ -231,4 +236,209 @@ test('a footnote welded to the column header does not hide the column', () => {
   const rows = parseBoxOfficePage(page);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].admissions, 5442000);
+});
+
+// --- Box office, United States ---------------------------------------------
+//
+// Fixtures are the real markup shapes from the survey of all 81 US pages. The
+// selection rules are the whole risk in this parser: every page carries a
+// weekly table that must never be used, most carry two annual tables that
+// measure different things, and the header spellings change across eras.
+
+const WEEKLY = `
+==Number-one films==
+{| class="wikitable sortable"
+|+ Number-one films of 2019
+|-
+! {{abbr|#|Week number}}
+! Weekend end date
+! Film
+! Gross
+|-
+| 1 || {{Date|2019-01-06}} || ''[[Aquaman (film)|Aquaman]]'' || $31,003,280
+|-
+| 2 || {{Date|2019-01-13}} || ''[[Glass (2019 film)|Glass]]'' || $40,234,000
+|}
+`;
+
+const CALENDAR = `
+===Calendar Gross===
+{| class="wikitable sortable"
+|+ Highest-grossing films of 1990 by Calendar Gross
+|-
+!scope="col"| Rank
+!scope="col"| Title
+!scope="col"| Studio(s)
+!scope="col"| Actor(s)
+!scope="col"| Director(s)
+!scope="col"| Gross
+|-
+| 1. ||''[[Ghost (1990 film)|Ghost]]'' || [[Paramount Pictures]] || [[Patrick Swayze]] || [[Jerry Zucker]] || $217,631,306
+|}
+`;
+
+const IN_YEAR = `
+===In-year release===
+{| class="wikitable sortable" style="margin:auto; margin:auto;"
+|+ Highest-grossing films of 1990 by In-year release<ref>{{cite web|url=https://example.invalid|title=Domestic Box Office For 1990}}</ref>
+|-
+!scope="col"| Rank
+!scope="col"| Title
+!scope="col"| Distributor
+!scope="col"| Domestic gross
+|-
+| 1. ||scope="row"|''[[Home Alone]]'' || [[20th Century Fox]] || $285,761,243
+|-
+| 2. ||scope="row"|''[[Ghost (1990 film)|Ghost]]'' || [[Paramount Pictures|Paramount]] || $217,631,306
+|}
+`;
+
+test('the weekly number-one table is never the source', () => {
+  // It is a membership test, not a magnitude: a film that sat at #2 all year
+  // is absent while one that won a quiet January weekend is present.
+  assert.deepEqual(parseUsBoxOfficePage(WEEKLY), []);
+});
+
+test('Calendar Gross is rejected in favour of the release-year table', () => {
+  // Both are real and neither is wrong — they answer different questions. A
+  // December release earns its money the following January, which is why Ghost
+  // tops the 1990 calendar and Home Alone tops 1990 releases.
+  const rows = parseUsBoxOfficePage(WEEKLY + CALENDAR + IN_YEAR);
+  assert.deepEqual(rows.map((r) => r.title), ['Home Alone', 'Ghost']);
+  assert.deepEqual(rows.map((r) => r.rank), [1, 2]);
+});
+
+test('Calendar Gross alone yields nothing rather than the wrong measure', () => {
+  assert.deepEqual(parseUsBoxOfficePage(WEEKLY + CALENDAR), []);
+});
+
+test('the 1950s-70s header writes its unit into the column name', () => {
+  // "Gross ($)" and "Rental ($)", not "gross" and "rental" — matching only the
+  // bare words silently lost 1968-1974 on the first attempt.
+  const page = `
+==Highest-grossing films==
+{| class="wikitable sortable"
+|-
+! Rank || Title || Studio||Director ||Producer|| Rental ($)
+|-
+| 1 || ''[[The Love Bug]]'' || [[Walt Disney Productions|Disney]] || Robert Stevenson || Bill Walsh || 17,000,000
+|}
+`;
+  assert.deepEqual(parseUsBoxOfficePage(page).map((r) => r.title), ['The Love Bug']);
+});
+
+test('rental beats a bare gross chart when a year offers both', () => {
+  // 1969 and 1970 carry a 25-row gross chart beside the 10-row Variety rental
+  // one. Taking rental keeps those two years on the same measure as the rest
+  // of their era instead of switching mid-decade.
+  const page = `
+==Highest-grossing films==
+{| class="wikitable sortable"
+|-
+! Rank || Title || Studio||Playing weeks{{refn|group=nb|one theatre, one week}} || Gross ($)||Rank on 1969 rental chart<ref name=69rentals/>
+|-
+| 1 || ''[[Butch Cassidy and the Sundance Kid]]'' || Fox || 20 || 40,000,000 || 3
+|}
+{| class="wikitable sortable"
+|-
+! Rank || Title || Studio||Director ||Producer|| Rental ($)
+|-
+| 1 || ''[[The Love Bug]]'' || Disney || Robert Stevenson || Bill Walsh || 17,000,000
+|}
+`;
+  assert.deepEqual(parseUsBoxOfficePage(page).map((r) => r.title), ['The Love Bug']);
+});
+
+test('rank comes from position, so a page numbering "1." still counts from one', () => {
+  const rows = parseUsBoxOfficePage(IN_YEAR);
+  assert.deepEqual(rows.map((r) => r.rank), [1, 2]);
+});
+
+test('the linked page name is kept apart from the display title', () => {
+  // Identity resolves through the page name to a QID; the pipe label is only
+  // what the article prints.
+  const rows = parseUsBoxOfficePage(IN_YEAR);
+  assert.equal(rows[1].page, 'Ghost (1990 film)');
+  assert.equal(rows[1].title, 'Ghost');
+});
+
+// --- The gap-year fallback -------------------------------------------------
+//
+// Markup copied from the real `1977 in film` and `1975 in film` articles. Note
+// the rank cell is itself a header cell there, which is why a header row is
+// recognised by having at least TWO of them rather than one.
+
+const IN_FILM_US = `
+==Highest-grossing films (U.S.)==
+{{see also|List of 1977 box office number-one films in the United States}}
+The top ten 1977 released films by box office gross in North America are as follows:
+{| class="wikitable sortable" style="margin:auto; margin:auto;"
+|+ Highest-grossing films of 1977
+|-
+! Rank!! Title !! Distributor !! Box-office gross 
+|-
+! style="text-align:center;"| 1
+| ''[[Star Wars (film)|Star Wars]]''
+| [[20th Century Fox]]
+| $307,263,857
+|-
+! style="text-align:center;"| 2
+| ''[[Smokey and the Bandit]]''
+| [[Universal Pictures|Universal]]
+| $126,737,428
+|}
+`;
+
+const IN_FILM_WORLDWIDE = `
+==Worldwide gross==
+The following table lists known worldwide gross figures for several high-grossing films that originally released in 1975.
+{| class="wikitable sortable" style="margin:auto; margin:auto;"
+|-
+! Title !! Admissions !! Revenue !! Country
+|-
+| ''[[Jaws (film)|Jaws]]'' || 128,078,818 || $476,512,065 || United States
+|}
+`;
+
+test('the fallback takes a section that claims the United States', () => {
+  const rows = parseYearInFilmPage(IN_FILM_US);
+  assert.deepEqual(rows.map((r) => r.title), ['Star Wars', 'Smokey and the Bandit']);
+  assert.deepEqual(rows.map((r) => r.rank), [1, 2]);
+  assert.equal(rows[0].page, 'Star Wars (film)', 'identity resolves through the page name');
+});
+
+test('a worldwide table is refused by the rule, not by a hardcoded year', () => {
+  // 1975's only chart is worldwide. Refusing it here is what keeps the list
+  // meaning one thing; the year is left empty and the seed note says why.
+  assert.deepEqual(parseYearInFilmPage(IN_FILM_WORLDWIDE), []);
+});
+
+test('both spellings of the fallback money column are read', () => {
+  // 1946, 1948 and 1976 say "Domestic rentals"; 1977 says "Box-office gross".
+  const rentals = IN_FILM_US
+    .replace('Box-office gross', 'Domestic rentals')
+    .replace('Highest-grossing films (U.S.)', 'Top-grossing films (U.S.)');
+  assert.equal(parseYearInFilmPage(rentals).length, 2);
+});
+
+test('the fallback ignores a US section that carries no usable table', () => {
+  assert.deepEqual(parseYearInFilmPage('==Highest-grossing films (U.S.)==\nProse only.\n'), []);
+});
+
+test('a region-named section counts as a US table', () => {
+  // 1975 heads its chart "North America" and 1979 "United States and Canada",
+  // nested under "Highest-grossing films". Matching only "(U.S.)" missed both
+  // and left Jaws, Alien and Apocalypse Now out of the list.
+  const page = IN_FILM_US
+    .replace('==Highest-grossing films (U.S.)==', '==Highest-grossing films==\n===North America===');
+  assert.equal(parseYearInFilmPage(page).length, 2);
+});
+
+test('"Outside North America" is not North America', () => {
+  // 1966 heads its two tables "North America" and "Outside North America", so
+  // rejecting has to run before accepting or the international chart is taken
+  // as well.
+  const page = IN_FILM_US
+    .replace('==Highest-grossing films (U.S.)==', '===Outside North America===');
+  assert.deepEqual(parseYearInFilmPage(page), []);
 });

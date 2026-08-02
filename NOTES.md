@@ -26,6 +26,12 @@ splitting across lines), one answered as a decision rather than a bug (award
 badge years — the data was right, the label is disputed), and four scheduled to
 v5. Nothing outstanding._
 
+_One note filed 2026-08-01 and cleared: a second card-preview defect, folded
+into the existing `ROADMAP.md` v5 row rather than opening a duplicate. It is
+the same cause as the dangling separator — an unbreakable director's name —
+but a worse symptom, since `Estibaliz Urresola Solaguren` pushes the rating out
+of the card entirely and leaves a bare star. The row now carries both._
+
 _Four notes filed 2026-08-01 and cleared. Three to `ROADMAP.md` v5: whether a
 parametric list can be ranked (investigation only — the build is v6), "Custom"
 looking like a chip you can press, and the dangling `·` left behind when a

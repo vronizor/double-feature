@@ -1356,3 +1356,72 @@ Ten is loose on purpose rather than tuned. Measured across four actors it keeps
 83–97% of a filmography, and `order` was present on **every** credit, so the
 rule loses nothing to missing data. Mifune resolves to 150 films of 167, which
 is exactly what the measurement predicted before the code existed.
+
+### 8.7 Box office — United States
+
+818 films, all carrying a TMDB id, ranked within their chart year. The last
+country on the box-office axis.
+
+**The plan was wrong in two ways, and both would have produced a plausible
+list rather than a broken one** — which is the failure mode this project keeps
+meeting.
+
+*First, modern pages carry TWO annual tables.* "Calendar Gross" is what a film
+earned **during** that year; "In-Year Release" is films **released** in it. A
+December release earns its money the following January, so the two disagree —
+*Ghost* tops 1990's calendar, *Home Alone* tops 1990's releases. Neither is
+wrong; they answer different questions. This list takes the release-year table,
+because that is the rule Box-office France already follows and a list has to
+mean one thing.
+
+*Second, the gaps were three times as wide as recorded.* Not 1946 and 1975 but
+1946, 1948, 1975, 1976, 1977 and 1979 — verified by reading those pages, not
+inferred from a parser returning nothing, which would have been the same
+observation with none of the confidence.
+
+**The weekly number-one table is never used.** It is a membership test rather
+than a magnitude: a film that sat at #2 all year is excluded while one that won
+a quiet January weekend is in.
+
+**`overall_rank` is deliberately absent, departing from France and Spain.**
+Those rank on admissions, which count people and therefore compare across
+eighty years. This source has only money — rentals before about 1980, domestic
+gross after, neither inflation-adjusted. An all-time ranking would sort 2019
+above 1975 for reasons that have nothing to do with how many people went, and
+would do it silently under a column promising otherwise. Within-year is the
+whole of what the data supports, and a top-3 cut still selects 233 films across
+78 years, which is the era balance the per-year rank exists to give.
+
+**Four of the six gaps were recovered from `<year> in film`.** That source was
+rejected for the main route because its tables switch to worldwide gross in
+1988 — a reason that does not reach years ending in 1979. The fallback is gated
+on the section naming the United States, so 1975, whose only chart is headed
+"Worldwide gross", is refused by the same rule that admits the others rather
+than by a hardcoded exception. *Star Wars* and *Rocky* came back; *Jaws* and
+*Alien* did not, and the seed note says so in those words.
+
+**Exact header matching lost seven years before anyone noticed a number.** The
+first matcher accepted "gross" and "rental" and silently dropped 1968-1974,
+whose pages write the unit into the column name as `Gross ($)`. Found by a
+count that did not add up, again. The synonym list is now read off the corpus,
+and rental outranks a bare gross chart so 1969 and 1970 stay on the same
+measure as the rest of their era.
+
+### 8.8 A cached re-run of a fetcher, in 16 seconds instead of three minutes
+
+Raised from use: re-running a fetcher cost an afternoon. Two causes, and the
+smaller one was the one that looked like the problem.
+
+The identity steps — page title to QID, QID to TMDB id — had no cache, so
+iterating on a *parser* re-resolved 800 titles through two APIs every run. They
+have one now, with **no expiry**: the entire reason this pipeline resolves
+through identifiers rather than titles is that identifiers do not drift. Misses
+are cached too, as null, so a title that resolves to nothing is not re-asked
+forever.
+
+The larger waste was dumber. Each per-year loop carried `await sleep(1500)` for
+politeness, and it fired whether or not a request had actually happened — so a
+fully cached run of an 81-year source spent three minutes sleeping between
+reads of local files. The throttle moved into `fetchWikitext`, where it runs
+only on a real network fetch. **3m11s to 16s, with byte-identical output across
+runs.** Throttle the thing being throttled, not the loop around it.
