@@ -235,7 +235,33 @@ export function chooseRating(movie, preferred = 'tmdb') {
 export function ratingLine(movie) {
   const chosen = chooseRating(movie, prefs.primaryRating);
   if (!chosen) return null;
-  return h('span', { class: 'movie-rating', title: chosen.title }, ` · ${chosen.text}`);
+  // No separator in the text. The meta line draws its own, bound to the item
+  // that follows it — see metaLine.
+  return h('span', { class: 'movie-rating', title: chosen.title }, chosen.text);
+}
+
+/**
+ * The year · director · rating line, as items rather than one string.
+ *
+ * It used to be a joined string with a nowrap rating span glued on, and a long
+ * director's name broke it two ways. `keepNameTogether` makes a name
+ * unbreakable, so the whole name moved to the next line and left the separator
+ * stranded — "1994 ·" with nothing after it. Worse, the rating span's own text
+ * began with " · " and carried `white-space: nowrap`, so the line could not
+ * break before it either: with `Estibaliz Urresola Solaguren` the rating was
+ * pushed past the card's edge and clipped, leaving a bare star and no number.
+ *
+ * Both are properties of packing a wrapping line into one string. As separate
+ * items in a wrapping flex row the rating can move to its own line instead of
+ * overflowing, and the separator is drawn by CSS on the item that FOLLOWS it,
+ * so it travels with that item and can only ever appear at the start of a
+ * line, never dangling at the end of one.
+ */
+export function metaLine(...parts) {
+  return parts
+    .flat()
+    .filter((part) => part !== null && part !== undefined && part !== '')
+    .map((part) => (part instanceof Node ? part : h('span', {}, String(part))));
 }
 
 /**
@@ -440,13 +466,12 @@ export function openMovieModal(movie) {
         h(
           'div',
           { class: 'movie-meta' },
-          [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
-          ratingLine(movie),
+          ...metaLine(movie.year, keepNameTogether(movie.director), ratingLine(movie)),
         ),
         h(
           'div',
           { class: 'movie-meta faint' },
-          [movie.runtime ? `${movie.runtime} min` : null, movie.genres].filter(Boolean).join(' · '),
+          ...metaLine(movie.runtime ? `${movie.runtime} min` : null, movie.genres),
         ),
         movie.countries || movie.languages
           ? h(

@@ -338,9 +338,30 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   vibe is more useful built on top of the finished set than added now and
   edited twice.
 
-- **Building a rank onto parametric lists.** *(From field notes, 2026-08-01.)*
-  v5 answers only whether it is possible — see `ROADMAP.md`. The build lands
-  here if the answer is yes.
+- **Ranking a parametric list — the answer is yes, by rating, with a vote
+  floor.** *(From field notes, 2026-08-01; investigated in v5.)*
+
+  Nothing structural is in the way. `applyParameter` simply omits `rank` from
+  its insert, so every slot row is NULL, and `rank IS NULL` already means "this
+  list is not ranked" rather than "exclude it" — so a Top-N cut leaves director
+  night alone today, correctly.
+
+  It is also **safer here than on a query-backed list**. The v4 hazard was that
+  `materialiseList` reconciles and never updates a row that stayed, so ranks
+  freeze while membership moves. A parametric slot list has no such path: every
+  apply wipes the list and rewrites it, so ranks are recomputed by construction.
+
+  What blocked it was never mechanism, it was meaning, and the code comment
+  says so — chronological rank would make "top 10" mean "his first ten films".
+  But **rating is a meaning that works**: "the top 10 Kurosawa" is a question
+  people actually ask, and `movies` already caches `vote_average` and
+  `imdb_rating`, so no fetch is needed.
+
+  **It needs a vote floor or it repeats a mistake already recorded here.**
+  Sorting a filmography by raw rating puts an obscure early title with a
+  handful of votes at #1 — which is exactly why TMDB Top Rated 100 was dropped
+  and why Modern Classics needed 5,000 votes. `IMDB_VOTE_FLOOR` is the existing
+  precedent at 1,000. Decide the floor before building, not after.
 
 - **Let the reconciliation screen reach ALREADY-RESOLVED entries, not only
   those under review.** Today it lists `needs_review` rows. A row that matched

@@ -9,6 +9,7 @@ import {
   posterUrl,
   toast,
   ratingLine,
+  metaLine,
   countryLabel,
   keepNameTogether,
   openMovieModal,
@@ -463,7 +464,23 @@ export function renderVibeChips(
   return h(
     'div',
     {},
-    h('div', { class: 'field-label' }, 'Tonight is…'),
+    // The status lives on the LABEL, not in the row of chips.
+    //
+    // "Custom" used to sit at the end of that row, and it was reported as
+    // looking like a chip you could press — which is exactly what it looked
+    // like, sitting in a line of pressable things at the same size. It is a
+    // readout, not a control: it says no vibe is applied and this pool was
+    // built by hand. On the label it cannot be mistaken for either.
+    h(
+      'div',
+      { class: 'field-label' },
+      'Tonight is…',
+      editing
+        ? h('span', { class: 'field-label-note' }, 'pick one to delete')
+        : poolState.vibe === null
+          ? h('span', { class: 'field-label-note' }, 'custom')
+          : null,
+    ),
     h(
       'div',
       { class: 'chips' },
@@ -538,11 +555,6 @@ export function renderVibeChips(
             editing ? 'Done' : 'Edit',
           )
         : null,
-      editing
-        ? h('span', { class: 'faint', style: 'align-self:center' }, 'Pick one to delete')
-        : poolState.vibe === null
-          ? h('span', { class: 'faint', style: 'align-self:center' }, 'Custom')
-          : null,
     ),
   );
 }
@@ -896,13 +908,12 @@ export function movieCard(movie, { extraAction } = {}) {
       h(
         'div',
         { class: 'movie-meta' },
-        [movie.year, keepNameTogether(movie.director)].filter(Boolean).join(' · '),
-        ratingLine(movie),
+        ...metaLine(movie.year, keepNameTogether(movie.director), ratingLine(movie)),
       ),
       h(
         'div',
         { class: 'movie-meta faint' },
-        [movie.runtime ? `${movie.runtime} min` : null, movie.genres].filter(Boolean).join(' · '),
+        ...metaLine(movie.runtime ? `${movie.runtime} min` : null, movie.genres),
       ),
       // Two at most, then "+N" — three award names would take four lines on a
       // 190px card and crowd out the synopsis. The full set is one tap away in

@@ -1425,3 +1425,62 @@ fully cached run of an 81-year source spent three minutes sleeping between
 reads of local files. The throttle moved into `fetchWikitext`, where it runs
 only on a real network fetch. **3m11s to 16s, with byte-identical output across
 runs.** Throttle the thing being throttled, not the loop around it.
+
+### 8.9 The card's meta line stops breaking badly
+
+Two field notes, one cause, and the cause was packing a wrapping line into a
+single string.
+
+`keepNameTogether` (v4) makes a director's name unbreakable, which fixed names
+splitting mid-word but meant a long name now moves to the next line **whole**,
+stranding the separator behind it: `1994 ·` with nothing after it. Worse, the
+rating span's own text began with `" · "` and carried `white-space: nowrap`, so
+the line could not break before the rating either — with *Estibaliz Urresola
+Solaguren* it was pushed past the card's edge and clipped, leaving a bare star
+and no number. A film's score, silently gone.
+
+Both are properties of the string, not of the names. The line is now a wrapping
+flex row of items:
+
+- **The rating is its own item**, so a line break happens *before* it rather
+  than through it. It can no longer be pushed out of the card.
+- **The separator is drawn in CSS on the item that FOLLOWS it**, so it travels
+  with that item. It can appear at the start of a wrapped line, which reads as
+  a continuation; it can no longer be left dangling at the end of one, which
+  reads as missing text.
+
+`white-space: nowrap` stays on the rating — it keeps `★ 7.9` from splitting
+between star and number — and is now safe, because the break happens at the
+item boundary instead.
+
+### 8.10 "Custom" stops looking like a chip
+
+Reported from use: *what does "Custom" do? it's not clickable.* Correct on both
+counts — it is a readout saying no vibe is applied and this pool was built by
+hand, and it was sitting at the end of a row of pressable chips at the same
+size. Anything in that row reads as a control, because everything else in it is
+one.
+
+It moves onto the field label — "Tonight is… — custom" — where it cannot be
+mistaken for either a chip or a button. Edit mode's "pick one to delete" moved
+with it for the same reason.
+
+### 8.11 A parametric list CAN be ranked, and the blocker was never mechanism
+
+Investigated, not built — the build is v6. `applyParameter` omits `rank` from
+its insert, so slot rows are NULL, and `rank IS NULL` already means "not
+ranked" rather than "excluded", so Top-N correctly leaves director night alone
+today.
+
+Ranking is also *safer* here than on a query-backed list. The v4 hazard was
+that `materialiseList` reconciles and never updates a row that stayed, freezing
+ranks while membership moved. A slot list has no such path: every apply wipes
+and rewrites it, so ranks would be recomputed by construction.
+
+What actually blocked it was meaning. Chronological rank would make "top 10"
+mean "his first ten films", which is what the code comment says and why it was
+left NULL. **Rating is a meaning that works** — "the top 10 Kurosawa" is a real
+question, and `movies` already caches both scores. The condition is a vote
+floor: sorting a filmography by raw rating puts an obscure early title with a
+handful of votes at #1, which is precisely why TMDB Top Rated 100 was dropped
+and why Modern Classics needed 5,000 votes.

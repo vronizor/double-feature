@@ -285,7 +285,20 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
   font-style: italic; font-weight: 460; color: var(--text-dim);
   font-size: 0.85em; line-height: 1.25; overflow-wrap: break-word;
 }
-.movie-meta { font-size: 0.78rem; color: var(--text-dim); overflow-wrap: break-word; }
+/* A wrapping row of items, not one string. The separator is drawn on the item
+   that FOLLOWS it, so it travels with that item when the line wraps and can
+   only ever appear at the start of a line — never stranded at the end of one,
+   which is what "1994 ·" with nothing after it was. And because the rating is
+   its own item it wraps to the next line instead of being pushed past the
+   card's edge and clipped, which is how a long director's name used to leave a
+   bare star with no number. */
+.movie-meta {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.32em;
+  font-size: 0.78rem; color: var(--text-dim); overflow-wrap: break-word;
+}
+.movie-meta > * + *::before { content: '·'; margin-right: 0.32em; color: var(--text-faint); }
+/* nowrap keeps "★ 7.9" from splitting between star and number. Safe now that
+   the rating is a flex item: the line breaks BEFORE it rather than through it. */
 .movie-rating { color: var(--accent); font-weight: 620; white-space: nowrap; }
 .movie-overview {
   margin: 3px 0 0; font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;
@@ -500,3 +513,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 /* Names the selection behind the films on screen — without it, a filmography
    looks like the library changed. */
 .selection-label { color: var(--text); font-weight: 560; }
+
+/* A readout attached to a field label — "Tonight is… custom". Deliberately
+   unlike a chip: no border, no pill, and set apart by a dash rather than
+   sitting in the row of pressable things, where it was mistaken for one. */
+.field-label-note { color: var(--text-faint); }
+.field-label-note::before { content: '— '; }
