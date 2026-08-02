@@ -7,22 +7,10 @@
   "category": "box-office",
   "source": "en.wikipedia \"List of <year> box office number-one films in the United States\", 1946-2026, annual chart only, resolved to TMDB ids via Wikidata",
   "source_url": "https://en.wikipedia.org/wiki/List_of_2019_box_office_number-one_films_in_the_United_States",
-  "note": "The annual release-year chart, never the weekly number-ones (which would exclude a film that sat at #2 all year) and never the Calendar Gross table (which ranks what a film earned DURING the year rather than films released in it). Ranked within the year only: the source gives rentals before about 1980 and domestic gross after, and neither is inflation-adjusted, so an all-time ranking would measure ticket prices. Years whose number-one page carries no annual chart fall back to the US-domestic table on \"<year> in film\", which is checked for a section naming the United States — so 1975, whose only chart is worldwide, is refused rather than quietly mixed in. 1975 and 1979 are therefore absent from this list: no Jaws, no Alien.",
-  "fetched_at": "2026-08-01",
-  "count": 818,
+  "note": "Films RELEASED in a year, ranked by what they took in the US. Two sources, because neither covers the whole range: \"<year> in film\" through 1981, and the In-Year Release section of the number-one pages from 1982, which is where that section starts. The number-one pages own pre-1982 charts are CALENDAR-year and deliberately unused — 1974 tops out with The Exorcist, The Sting and Papillon, every one a 1973 release — because ranking those beside release-year charts would put two meanings in one column. The weekly number-one table is never used at all: it is a membership test, not a magnitude, so a film that sat at #2 all year would be missing while one that won a quiet January weekend would be in. Ranked WITHIN the year only, and carrying no overall rank: the source gives rentals before about 1980 and gross after, neither inflation-adjusted, so an all-time ranking would measure ticket prices rather than how many people went.",
+  "fetched_at": "2026-08-02",
+  "count": 809,
   "entries": [
-    {
-      "title": "Gone with the Wind",
-      "year": 1939,
-      "tmdb_id": 770,
-      "rank": 3
-    },
-    {
-      "title": "Gone with the Wind",
-      "year": 1939,
-      "tmdb_id": 770,
-      "rank": 9
-    },
     {
       "title": "Saratoga Trunk",
       "year": 1945,
@@ -84,57 +72,63 @@
       "rank": 10
     },
     {
-      "title": "Forever Amber",
+      "title": "Welcome Stranger",
       "year": 1947,
-      "tmdb_id": 104720,
+      "tmdb_id": 113841,
+      "rank": 1
+    },
+    {
+      "title": "The Egg and I",
+      "year": 1947,
+      "tmdb_id": 42342,
       "rank": 2
-    },
-    {
-      "title": "Unconquered",
-      "year": 1947,
-      "tmdb_id": 72241,
-      "rank": 3
-    },
-    {
-      "title": "Road to Rio",
-      "year": 1947,
-      "tmdb_id": 31980,
-      "rank": 4
-    },
-    {
-      "title": "Captain from Castile",
-      "year": 1947,
-      "tmdb_id": 44534,
-      "rank": 5
     },
     {
       "title": "Life with Father",
       "year": 1947,
       "tmdb_id": 41465,
+      "rank": 3
+    },
+    {
+      "title": "Forever Amber",
+      "year": 1947,
+      "tmdb_id": 104720,
+      "rank": 4
+    },
+    {
+      "title": "Unconquered",
+      "year": 1947,
+      "tmdb_id": 72241,
+      "rank": 5
+    },
+    {
+      "title": "Road to Rio",
+      "year": 1947,
+      "tmdb_id": 31980,
       "rank": 6
-    },
-    {
-      "title": "The Bachelor and the Bobby-Soxer",
-      "year": 1947,
-      "tmdb_id": 27437,
-      "rank": 7
-    },
-    {
-      "title": "Welcome Stranger",
-      "year": 1947,
-      "tmdb_id": 113841,
-      "rank": 8
-    },
-    {
-      "title": "Gentleman's Agreement",
-      "year": 1947,
-      "tmdb_id": 33667,
-      "rank": 9
     },
     {
       "title": "Green Dolphin Street",
       "year": 1947,
       "tmdb_id": 108994,
+      "rank": 7
+    },
+    {
+      "title": "The Bachelor and the Bobby-Soxer",
+      "year": 1947,
+      "tmdb_id": 27437,
+      "rank": 8
+    },
+    {
+      "title": "Mother Wore Tights",
+      "year": 1947,
+      "tmdb_id": 106825,
+      "rank": 9
+    },
+    {
+      "title": "Cass Timberlane",
+      "year": 1947,
+      "tmdb_id": 108688,
       "rank": 10
     },
     {
@@ -162,21 +156,9 @@
       "rank": 4
     },
     {
-      "title": "The Snake Pit",
-      "year": 1948,
-      "tmdb_id": 62694,
-      "rank": 4
-    },
-    {
       "title": "Easter Parade",
       "year": 1948,
       "tmdb_id": 29380,
-      "rank": 5
-    },
-    {
-      "title": "Joan of Arc",
-      "year": 1948,
-      "tmdb_id": 43443,
       "rank": 5
     },
     {
@@ -184,6 +166,12 @@
       "year": 1948,
       "tmdb_id": 41609,
       "rank": 6
+    },
+    {
+      "title": "The Snake Pit",
+      "year": 1948,
+      "tmdb_id": 62694,
+      "rank": 7
     },
     {
       "title": "The Emperor Waltz",
@@ -198,33 +186,27 @@
       "rank": 9
     },
     {
-      "title": "Words and Music",
-      "year": 1948,
-      "tmdb_id": 43458,
-      "rank": 9
-    },
-    {
       "title": "Sitting Pretty",
       "year": 1948,
       "tmdb_id": 76211,
       "rank": 10
     },
     {
-      "title": "Little Women",
-      "year": 1949,
-      "tmdb_id": 43436,
-      "rank": 8
-    },
-    {
       "title": "Sands of Iwo Jima",
       "year": 1949,
       "tmdb_id": 18712,
-      "rank": 8
+      "rank": 4
     },
     {
-      "title": "Twelve O'Clock High",
+      "title": "The Heiress",
       "year": 1949,
-      "tmdb_id": 15497,
+      "tmdb_id": 28571,
+      "rank": 7
+    },
+    {
+      "title": "Little Women",
+      "year": 1949,
+      "tmdb_id": 43436,
       "rank": 10
     },
     {
@@ -240,15 +222,15 @@
       "rank": 1
     },
     {
-      "title": "Pinky",
-      "year": 1950,
-      "tmdb_id": 62727,
-      "rank": 2
-    },
-    {
       "title": "Battleground",
       "year": 1950,
       "tmdb_id": 31623,
+      "rank": 2
+    },
+    {
+      "title": "King Solomon's Mines",
+      "year": 1950,
+      "tmdb_id": 43388,
       "rank": 2
     },
     {
@@ -258,9 +240,9 @@
       "rank": 3
     },
     {
-      "title": "King Solomon's Mines",
+      "title": "Annie Get Your Gun",
       "year": 1950,
-      "tmdb_id": 43388,
+      "tmdb_id": 25209,
       "rank": 3
     },
     {
@@ -270,21 +252,21 @@
       "rank": 4
     },
     {
-      "title": "Annie Get Your Gun",
-      "year": 1950,
-      "tmdb_id": 25209,
-      "rank": 5
-    },
-    {
       "title": "The Stratton Story",
       "year": 1950,
       "tmdb_id": 43440,
-      "rank": 6
+      "rank": 5
     },
     {
       "title": "Cinderella",
       "year": 1950,
       "tmdb_id": 11224,
+      "rank": 5
+    },
+    {
+      "title": "Pinky",
+      "year": 1950,
+      "tmdb_id": 62727,
       "rank": 6
     },
     {
@@ -294,39 +276,51 @@
       "rank": 6
     },
     {
-      "title": "Mr. Belvedere Goes to College",
-      "year": 1950,
-      "tmdb_id": 77012,
-      "rank": 7
-    },
-    {
       "title": "Father of the Bride",
       "year": 1950,
       "tmdb_id": 20758,
       "rank": 7
     },
     {
+      "title": "Mr. Belvedere Goes to College",
+      "year": 1950,
+      "tmdb_id": 77012,
+      "rank": 8
+    },
+    {
       "title": "Broken Arrow",
       "year": 1950,
       "tmdb_id": 37292,
-      "rank": 9
-    },
-    {
-      "title": "At War with the Army",
-      "year": 1950,
-      "tmdb_id": 23325,
-      "rank": 9
+      "rank": 8
     },
     {
       "title": "Neptune's Daughter",
       "year": 1950,
       "tmdb_id": 43437,
+      "rank": 9
+    },
+    {
+      "title": "All About Eve",
+      "year": 1950,
+      "tmdb_id": 705,
+      "rank": 9
+    },
+    {
+      "title": "Three Little Words",
+      "year": 1950,
+      "tmdb_id": 42767,
       "rank": 10
     },
     {
-      "title": "David and Bathsheba",
+      "title": "At War with the Army",
+      "year": 1950,
+      "tmdb_id": 23325,
+      "rank": 10
+    },
+    {
+      "title": "Quo Vadis",
       "year": 1951,
-      "tmdb_id": 42567,
+      "tmdb_id": 11620,
       "rank": 1
     },
     {
@@ -336,15 +330,9 @@
       "rank": 2
     },
     {
-      "title": "Quo Vadis",
+      "title": "David and Bathsheba",
       "year": 1951,
-      "tmdb_id": 11620,
-      "rank": 2
-    },
-    {
-      "title": "An American in Paris",
-      "year": 1951,
-      "tmdb_id": 2769,
+      "tmdb_id": 42567,
       "rank": 3
     },
     {
@@ -372,16 +360,16 @@
       "rank": 7
     },
     {
-      "title": "A Place in the Sun",
+      "title": "An American in Paris",
       "year": 1951,
-      "tmdb_id": 25673,
+      "tmdb_id": 2769,
       "rank": 8
     },
     {
-      "title": "Father's Little Dividend",
+      "title": "A Place in the Sun",
       "year": 1951,
-      "tmdb_id": 22968,
-      "rank": 10
+      "tmdb_id": 25673,
+      "rank": 9
     },
     {
       "title": "The Greatest Show on Earth",
@@ -390,57 +378,57 @@
       "rank": 1
     },
     {
-      "title": "Ivanhoe",
+      "title": "This Is Cinerama",
       "year": 1952,
-      "tmdb_id": 26175,
-      "rank": 3
+      "tmdb_id": 98017,
+      "rank": 2
     },
     {
       "title": "The Snows of Kilimanjaro",
       "year": 1952,
       "tmdb_id": 4460,
-      "rank": 4
-    },
-    {
-      "title": "Sailor Beware",
-      "year": 1952,
-      "tmdb_id": 39015,
-      "rank": 5
+      "rank": 3
     },
     {
       "title": "Hans Christian Andersen",
       "year": 1952,
       "tmdb_id": 16618,
+      "rank": 4
+    },
+    {
+      "title": "Ivanhoe",
+      "year": 1952,
+      "tmdb_id": 26175,
+      "rank": 5
+    },
+    {
+      "title": "Sailor Beware",
+      "year": 1952,
+      "tmdb_id": 39015,
       "rank": 6
-    },
-    {
-      "title": "Jumping Jacks",
-      "year": 1952,
-      "tmdb_id": 43359,
-      "rank": 7
-    },
-    {
-      "title": "High Noon",
-      "year": 1952,
-      "tmdb_id": 288,
-      "rank": 8
-    },
-    {
-      "title": "Son of Paleface",
-      "year": 1952,
-      "tmdb_id": 30801,
-      "rank": 9
-    },
-    {
-      "title": "Singin' in the Rain",
-      "year": 1952,
-      "tmdb_id": 872,
-      "rank": 10
     },
     {
       "title": "Moulin Rouge",
       "year": 1952,
       "tmdb_id": 10910,
+      "rank": 7
+    },
+    {
+      "title": "Jumping Jacks",
+      "year": 1952,
+      "tmdb_id": 43359,
+      "rank": 8
+    },
+    {
+      "title": "The Quiet Man",
+      "year": 1952,
+      "tmdb_id": 3109,
+      "rank": 9
+    },
+    {
+      "title": "High Noon",
+      "year": 1952,
+      "tmdb_id": 288,
       "rank": 10
     },
     {
@@ -477,19 +465,31 @@
       "title": "House of Wax",
       "year": 1953,
       "tmdb_id": 18573,
-      "rank": 7
-    },
-    {
-      "title": "Mogambo",
-      "year": 1953,
-      "tmdb_id": 25009,
-      "rank": 8
+      "rank": 6
     },
     {
       "title": "Gentlemen Prefer Blondes",
       "year": 1953,
       "tmdb_id": 759,
+      "rank": 7
+    },
+    {
+      "title": "Salome",
+      "year": 1953,
+      "tmdb_id": 40165,
+      "rank": 8
+    },
+    {
+      "title": "Mogambo",
+      "year": 1953,
+      "tmdb_id": 25009,
       "rank": 9
+    },
+    {
+      "title": "Knights of the Round Table",
+      "year": 1953,
+      "tmdb_id": 19957,
+      "rank": 10
     },
     {
       "title": "White Christmas",
@@ -504,27 +504,21 @@
       "rank": 2
     },
     {
-      "title": "The Glenn Miller Story",
-      "year": 1954,
-      "tmdb_id": 17729,
-      "rank": 3
-    },
-    {
-      "title": "The Egyptian",
-      "year": 1954,
-      "tmdb_id": 24973,
-      "rank": 4
-    },
-    {
       "title": "20,000 Leagues Under the Sea",
       "year": 1954,
       "tmdb_id": 173,
+      "rank": 3
+    },
+    {
+      "title": "The Glenn Miller Story",
+      "year": 1954,
+      "tmdb_id": 17729,
       "rank": 4
     },
     {
-      "title": "Rear Window",
+      "title": "The Country Girl",
       "year": 1954,
-      "tmdb_id": 567,
+      "tmdb_id": 2438,
       "rank": 5
     },
     {
@@ -534,45 +528,33 @@
       "rank": 6
     },
     {
-      "title": "The Country Girl",
+      "title": "Seven Brides for Seven Brothers",
       "year": 1954,
-      "tmdb_id": 2438,
-      "rank": 6
+      "tmdb_id": 16563,
+      "rank": 7
+    },
+    {
+      "title": "Rear Window",
+      "year": 1954,
+      "tmdb_id": 567,
+      "rank": 8
     },
     {
       "title": "Magnificent Obsession",
       "year": 1954,
       "tmdb_id": 13457,
-      "rank": 7
-    },
-    {
-      "title": "Three Coins in the Fountain",
-      "year": 1954,
-      "tmdb_id": 41503,
-      "rank": 8
-    },
-    {
-      "title": "Seven Brides for Seven Brothers",
-      "year": 1954,
-      "tmdb_id": 16563,
       "rank": 9
     },
     {
-      "title": "Désirée",
+      "title": "There's No Business Like Show Business",
       "year": 1954,
-      "tmdb_id": 43333,
+      "tmdb_id": 21468,
       "rank": 10
     },
     {
       "title": "Cinerama Holiday",
       "year": 1955,
       "tmdb_id": 182874,
-      "rank": 1
-    },
-    {
-      "title": "Guys and Dolls",
-      "year": 1955,
-      "tmdb_id": 4825,
       "rank": 1
     },
     {
@@ -588,45 +570,45 @@
       "rank": 3
     },
     {
-      "title": "Not as a Stranger",
+      "title": "Oklahoma!",
       "year": 1955,
-      "tmdb_id": 76117,
-      "rank": 5
+      "tmdb_id": 13936,
+      "rank": 4
     },
     {
-      "title": "I'll Cry Tomorrow",
+      "title": "Guys and Dolls",
       "year": 1955,
-      "tmdb_id": 28575,
+      "tmdb_id": 4825,
       "rank": 5
-    },
-    {
-      "title": "Picnic",
-      "year": 1955,
-      "tmdb_id": 39940,
-      "rank": 6
     },
     {
       "title": "Lady and the Tramp",
       "year": 1955,
       "tmdb_id": 10340,
+      "rank": 6
+    },
+    {
+      "title": "Picnic",
+      "year": 1955,
+      "tmdb_id": 39940,
       "rank": 7
+    },
+    {
+      "title": "Not as a Stranger",
+      "year": 1955,
+      "tmdb_id": 76117,
+      "rank": 8
     },
     {
       "title": "Strategic Air Command",
       "year": 1955,
       "tmdb_id": 61880,
-      "rank": 8
-    },
-    {
-      "title": "To Hell and Back",
-      "year": 1955,
-      "tmdb_id": 16514,
       "rank": 9
     },
     {
-      "title": "The Sea Chase",
+      "title": "I'll Cry Tomorrow",
       "year": 1955,
-      "tmdb_id": 40578,
+      "tmdb_id": 28575,
       "rank": 10
     },
     {
@@ -636,22 +618,10 @@
       "rank": 1
     },
     {
-      "title": "The King and I",
-      "year": 1956,
-      "tmdb_id": 16520,
-      "rank": 2
-    },
-    {
       "title": "Around the World in 80 Days",
       "year": 1956,
       "tmdb_id": 2897,
       "rank": 2
-    },
-    {
-      "title": "Trapeze",
-      "year": 1956,
-      "tmdb_id": 40494,
-      "rank": 3
     },
     {
       "title": "Giant",
@@ -660,21 +630,21 @@
       "rank": 3
     },
     {
-      "title": "High Society",
-      "year": 1956,
-      "tmdb_id": 11424,
-      "rank": 4
-    },
-    {
       "title": "Seven Wonders of the World",
       "year": 1956,
       "tmdb_id": 316095,
+      "rank": 4
+    },
+    {
+      "title": "The King and I",
+      "year": 1956,
+      "tmdb_id": 16520,
       "rank": 5
     },
     {
-      "title": "The Teahouse of the August Moon",
+      "title": "Trapeze",
       "year": 1956,
-      "tmdb_id": 43313,
+      "tmdb_id": 40494,
       "rank": 6
     },
     {
@@ -684,33 +654,21 @@
       "rank": 7
     },
     {
-      "title": "The Eddy Duchin Story",
+      "title": "High Society",
       "year": 1956,
-      "tmdb_id": 43199,
+      "tmdb_id": 11424,
       "rank": 8
     },
     {
-      "title": "Anastasia",
+      "title": "The Teahouse of the August Moon",
       "year": 1956,
-      "tmdb_id": 38171,
-      "rank": 8
-    },
-    {
-      "title": "Moby Dick",
-      "year": 1956,
-      "tmdb_id": 10339,
+      "tmdb_id": 43313,
       "rank": 9
     },
     {
-      "title": "The Searchers",
+      "title": "The Eddy Duchin Story",
       "year": 1956,
-      "tmdb_id": 3114,
-      "rank": 10
-    },
-    {
-      "title": "Love Me Tender",
-      "year": 1956,
-      "tmdb_id": 39833,
+      "tmdb_id": 43199,
       "rank": 10
     },
     {
@@ -732,52 +690,64 @@
       "rank": 3
     },
     {
-      "title": "Pal Joey",
-      "year": 1957,
-      "tmdb_id": 33734,
-      "rank": 4
-    },
-    {
       "title": "Search for Paradise",
       "year": 1957,
       "tmdb_id": 271147,
-      "rank": 6
-    },
-    {
-      "title": "The Pride and the Passion",
-      "year": 1957,
-      "tmdb_id": 23102,
-      "rank": 7
-    },
-    {
-      "title": "Island in the Sun",
-      "year": 1957,
-      "tmdb_id": 37373,
-      "rank": 9
+      "rank": 4
     },
     {
       "title": "Old Yeller",
       "year": 1957,
       "tmdb_id": 22660,
-      "rank": 9
+      "rank": 5
     },
     {
       "title": "Raintree County",
       "year": 1957,
       "tmdb_id": 65488,
-      "rank": 10
+      "rank": 6
     },
     {
-      "title": "Auntie Mame",
-      "year": 1958,
-      "tmdb_id": 16347,
-      "rank": 1
+      "title": "Island in the Sun",
+      "year": 1957,
+      "tmdb_id": 37373,
+      "rank": 7
+    },
+    {
+      "title": "Pal Joey",
+      "year": 1957,
+      "tmdb_id": 33734,
+      "rank": 8
+    },
+    {
+      "title": "Gunfight at the O.K. Corral",
+      "year": 1957,
+      "tmdb_id": 22201,
+      "rank": 9
+    },
+    {
+      "title": "Don't Go Near the Water",
+      "year": 1957,
+      "tmdb_id": 109441,
+      "rank": 10
     },
     {
       "title": "South Pacific",
       "year": 1958,
       "tmdb_id": 17352,
+      "rank": 1
+    },
+    {
+      "title": "Auntie Mame",
+      "year": 1958,
+      "tmdb_id": 16347,
       "rank": 2
+    },
+    {
+      "title": "Cat on a Hot Tin Roof",
+      "year": 1958,
+      "tmdb_id": 261,
+      "rank": 3
     },
     {
       "title": "No Time for Sergeants",
@@ -786,16 +756,40 @@
       "rank": 4
     },
     {
-      "title": "The Vikings",
+      "title": "Gigi",
       "year": 1958,
-      "tmdb_id": 42661,
+      "tmdb_id": 17281,
       "rank": 5
     },
     {
-      "title": "Cat on a Hot Tin Roof",
+      "title": "The Vikings",
       "year": 1958,
-      "tmdb_id": 261,
+      "tmdb_id": 42661,
+      "rank": 6
+    },
+    {
+      "title": "The Young Lions",
+      "year": 1958,
+      "tmdb_id": 40739,
+      "rank": 7
+    },
+    {
+      "title": "The Inn of the Sixth Happiness",
+      "year": 1958,
+      "tmdb_id": 37451,
       "rank": 8
+    },
+    {
+      "title": "Some Came Running",
+      "year": 1958,
+      "tmdb_id": 38724,
+      "rank": 9
+    },
+    {
+      "title": "Indiscreet",
+      "year": 1958,
+      "tmdb_id": 22874,
+      "rank": 10
     },
     {
       "title": "Ben-Hur",
@@ -810,51 +804,33 @@
       "rank": 2
     },
     {
+      "title": "Operation Petticoat",
+      "year": 1959,
+      "tmdb_id": 9660,
+      "rank": 3
+    },
+    {
       "title": "Some Like It Hot",
       "year": 1959,
       "tmdb_id": 239,
-      "rank": 3
+      "rank": 4
+    },
+    {
+      "title": "Pillow Talk",
+      "year": 1959,
+      "tmdb_id": 4952,
+      "rank": 5
     },
     {
       "title": "Imitation of Life",
       "year": 1959,
       "tmdb_id": 34148,
-      "rank": 4
-    },
-    {
-      "title": "Operation Petticoat",
-      "year": 1959,
-      "tmdb_id": 9660,
-      "rank": 4
-    },
-    {
-      "title": "The Nun's Story",
-      "year": 1959,
-      "tmdb_id": 27029,
-      "rank": 5
+      "rank": 6
     },
     {
       "title": "Suddenly, Last Summer",
       "year": 1959,
       "tmdb_id": 14698,
-      "rank": 5
-    },
-    {
-      "title": "Anatomy of a Murder",
-      "year": 1959,
-      "tmdb_id": 93,
-      "rank": 6
-    },
-    {
-      "title": "On the Beach",
-      "year": 1959,
-      "tmdb_id": 35412,
-      "rank": 6
-    },
-    {
-      "title": "Solomon and Sheba",
-      "year": 1959,
-      "tmdb_id": 29996,
       "rank": 7
     },
     {
@@ -864,9 +840,15 @@
       "rank": 8
     },
     {
-      "title": "Sleeping Beauty",
+      "title": "North by Northwest",
       "year": 1959,
-      "tmdb_id": 10882,
+      "tmdb_id": 213,
+      "rank": 9
+    },
+    {
+      "title": "Anatomy of a Murder",
+      "year": 1959,
+      "tmdb_id": 93,
       "rank": 10
     },
     {
@@ -879,24 +861,36 @@
       "title": "Psycho",
       "year": 1960,
       "tmdb_id": 539,
+      "rank": 2
+    },
+    {
+      "title": "Exodus",
+      "year": 1960,
+      "tmdb_id": 1941,
       "rank": 3
     },
     {
       "title": "Swiss Family Robinson",
       "year": 1960,
       "tmdb_id": 18444,
-      "rank": 5
+      "rank": 4
     },
     {
-      "title": "Exodus",
+      "title": "The Alamo",
       "year": 1960,
-      "tmdb_id": 1941,
-      "rank": 6
+      "tmdb_id": 11209,
+      "rank": 5
     },
     {
       "title": "The World of Suzie Wong",
       "year": 1960,
       "tmdb_id": 45608,
+      "rank": 6
+    },
+    {
+      "title": "BUtterfield 8",
+      "year": 1960,
+      "tmdb_id": 23724,
       "rank": 7
     },
     {
@@ -906,16 +900,28 @@
       "rank": 8
     },
     {
-      "title": "The Alamo",
+      "title": "Ocean's 11",
       "year": 1960,
-      "tmdb_id": 11209,
-      "rank": 8
+      "tmdb_id": 299,
+      "rank": 9
+    },
+    {
+      "title": "La Dolce Vita",
+      "year": 1960,
+      "tmdb_id": 439,
+      "rank": 9
     },
     {
       "title": "From the Terrace",
       "year": 1960,
       "tmdb_id": 42541,
-      "rank": 9
+      "rank": 10
+    },
+    {
+      "title": "West Side Story",
+      "year": 1961,
+      "tmdb_id": 1725,
+      "rank": 1
     },
     {
       "title": "The Guns of Navarone",
@@ -924,21 +930,9 @@
       "rank": 2
     },
     {
-      "title": "West Side Story",
+      "title": "El Cid",
       "year": 1961,
-      "tmdb_id": 1725,
-      "rank": 2
-    },
-    {
-      "title": "The Absent-Minded Professor",
-      "year": 1961,
-      "tmdb_id": 17984,
-      "rank": 3
-    },
-    {
-      "title": "Lover Come Back",
-      "year": 1961,
-      "tmdb_id": 40894,
+      "tmdb_id": 16638,
       "rank": 3
     },
     {
@@ -948,10 +942,10 @@
       "rank": 4
     },
     {
-      "title": "El Cid",
+      "title": "The Absent-Minded Professor",
       "year": 1961,
-      "tmdb_id": 16638,
-      "rank": 4
+      "tmdb_id": 17984,
+      "rank": 5
     },
     {
       "title": "King of Kings",
@@ -960,39 +954,63 @@
       "rank": 6
     },
     {
-      "title": "Flower Drum Song",
+      "title": "Lover Come Back",
       "year": 1961,
-      "tmdb_id": 25105,
-      "rank": 8
+      "tmdb_id": 40894,
+      "rank": 7
     },
     {
       "title": "One Hundred and One Dalmatians",
       "year": 1961,
       "tmdb_id": 12230,
+      "rank": 8
+    },
+    {
+      "title": "Come September",
+      "year": 1961,
+      "tmdb_id": 22386,
       "rank": 10
     },
     {
       "title": "The Longest Day",
       "year": 1962,
       "tmdb_id": 9289,
-      "rank": 2
+      "rank": 1
     },
     {
       "title": "Lawrence of Arabia",
       "year": 1962,
       "tmdb_id": 947,
-      "rank": 4
+      "rank": 2
     },
     {
       "title": "How the West Was Won",
       "year": 1962,
       "tmdb_id": 11897,
-      "rank": 5
+      "rank": 2
+    },
+    {
+      "title": "The Music Man",
+      "year": 1962,
+      "tmdb_id": 13671,
+      "rank": 3
+    },
+    {
+      "title": "That Touch of Mink",
+      "year": 1962,
+      "tmdb_id": 12708,
+      "rank": 4
     },
     {
       "title": "Mutiny on the Bounty",
       "year": 1962,
       "tmdb_id": 11085,
+      "rank": 5
+    },
+    {
+      "title": "To Kill a Mockingbird",
+      "year": 1962,
+      "tmdb_id": 595,
       "rank": 6
     },
     {
@@ -1002,10 +1020,28 @@
       "rank": 7
     },
     {
-      "title": "To Kill a Mockingbird",
+      "title": "Dr. No",
       "year": 1962,
-      "tmdb_id": 595,
+      "tmdb_id": 646,
+      "rank": 7
+    },
+    {
+      "title": "Gypsy",
+      "year": 1962,
+      "tmdb_id": 39391,
       "rank": 8
+    },
+    {
+      "title": "Bon Voyage!",
+      "year": 1962,
+      "tmdb_id": 103709,
+      "rank": 9
+    },
+    {
+      "title": "In Search of the Castaways",
+      "year": 1962,
+      "tmdb_id": 34774,
+      "rank": 10
     },
     {
       "title": "Cleopatra",
@@ -1017,42 +1053,48 @@
       "title": "It's a Mad, Mad, Mad, Mad World",
       "year": 1963,
       "tmdb_id": 11576,
-      "rank": 2
+      "rank": 3
+    },
+    {
+      "title": "Tom Jones",
+      "year": 1963,
+      "tmdb_id": 5769,
+      "rank": 4
     },
     {
       "title": "Irma la Douce",
       "year": 1963,
       "tmdb_id": 2690,
-      "rank": 3
+      "rank": 5
     },
     {
-      "title": "Charade",
+      "title": "From Russia with Love",
       "year": 1963,
-      "tmdb_id": 4808,
-      "rank": 4
-    },
-    {
-      "title": "The Cardinal",
-      "year": 1963,
-      "tmdb_id": 3010,
-      "rank": 6
+      "tmdb_id": 657,
+      "rank": 5
     },
     {
       "title": "Son of Flubber",
       "year": 1963,
       "tmdb_id": 19762,
-      "rank": 7
+      "rank": 6
     },
     {
-      "title": "Move Over, Darling",
+      "title": "Charade",
       "year": 1963,
-      "tmdb_id": 30204,
-      "rank": 7
+      "tmdb_id": 4808,
+      "rank": 8
     },
     {
       "title": "Bye Bye Birdie",
       "year": 1963,
       "tmdb_id": 25167,
+      "rank": 9
+    },
+    {
+      "title": "The Pink Panther",
+      "year": 1963,
+      "tmdb_id": 936,
       "rank": 9
     },
     {
@@ -1062,22 +1104,16 @@
       "rank": 10
     },
     {
-      "title": "The Carpetbaggers",
-      "year": 1964,
-      "tmdb_id": 42792,
-      "rank": 1
-    },
-    {
       "title": "Mary Poppins",
       "year": 1964,
       "tmdb_id": 433,
       "rank": 1
     },
     {
-      "title": "The Unsinkable Molly Brown",
+      "title": "My Fair Lady",
       "year": 1964,
-      "tmdb_id": 42797,
-      "rank": 3
+      "tmdb_id": 11113,
+      "rank": 2
     },
     {
       "title": "Goldfinger",
@@ -1086,64 +1122,88 @@
       "rank": 3
     },
     {
-      "title": "My Fair Lady",
+      "title": "The Carpetbaggers",
       "year": 1964,
-      "tmdb_id": 11113,
+      "tmdb_id": 42792,
       "rank": 4
     },
     {
-      "title": "Good Neighbor Sam",
+      "title": "A Shot in the Dark",
       "year": 1964,
-      "tmdb_id": 3011,
-      "rank": 9
+      "tmdb_id": 1594,
+      "rank": 6
     },
     {
-      "title": "Father Goose",
+      "title": "What a Way to Go!",
       "year": 1964,
-      "tmdb_id": 30295,
-      "rank": 9
+      "tmdb_id": 23574,
+      "rank": 7
     },
     {
-      "title": "Thunderball",
-      "year": 1965,
-      "tmdb_id": 660,
-      "rank": 1
+      "title": "The Unsinkable Molly Brown",
+      "year": 1964,
+      "tmdb_id": 42797,
+      "rank": 8
+    },
+    {
+      "title": "A Hard Day's Night",
+      "year": 1964,
+      "tmdb_id": 704,
+      "rank": 10
     },
     {
       "title": "The Sound of Music",
       "year": 1965,
       "tmdb_id": 15121,
-      "rank": 2
+      "rank": 1
     },
     {
       "title": "Doctor Zhivago",
       "year": 1965,
       "tmdb_id": 907,
+      "rank": 2
+    },
+    {
+      "title": "Thunderball",
+      "year": 1965,
+      "tmdb_id": 660,
       "rank": 3
+    },
+    {
+      "title": "Those Magnificent Men in their Flying Machines",
+      "year": 1965,
+      "tmdb_id": 10338,
+      "rank": 4
+    },
+    {
+      "title": "The Great Race",
+      "year": 1965,
+      "tmdb_id": 11575,
+      "rank": 5
     },
     {
       "title": "That Darn Cat!",
       "year": 1965,
       "tmdb_id": 20723,
-      "rank": 5
+      "rank": 6
+    },
+    {
+      "title": "Cat Ballou",
+      "year": 1965,
+      "tmdb_id": 11694,
+      "rank": 7
     },
     {
       "title": "What's New Pussycat?",
       "year": 1965,
       "tmdb_id": 3681,
-      "rank": 6
+      "rank": 8
     },
     {
       "title": "Shenandoah",
       "year": 1965,
       "tmdb_id": 21027,
-      "rank": 7
-    },
-    {
-      "title": "The Sandpiper",
-      "year": 1965,
-      "tmdb_id": 77915,
-      "rank": 8
+      "rank": 9
     },
     {
       "title": "Von Ryan's Express",
@@ -1152,16 +1212,34 @@
       "rank": 10
     },
     {
+      "title": "Hawaii",
+      "year": 1966,
+      "tmdb_id": 14689,
+      "rank": 1
+    },
+    {
+      "title": "The Bible: In the Beginning...",
+      "year": 1966,
+      "tmdb_id": 2525,
+      "rank": 2
+    },
+    {
       "title": "Who's Afraid of Virginia Woolf?",
       "year": 1966,
       "tmdb_id": 396,
+      "rank": 3
+    },
+    {
+      "title": "The Sand Pebbles",
+      "year": 1966,
+      "tmdb_id": 5923,
       "rank": 4
     },
     {
       "title": "A Man for All Seasons",
       "year": 1966,
       "tmdb_id": 874,
-      "rank": 4
+      "rank": 5
     },
     {
       "title": "The Russians Are Coming, the Russians Are Coming",
@@ -1170,40 +1248,28 @@
       "rank": 6
     },
     {
-      "title": "Lt. Robin Crusoe, U.S.N.",
+      "title": "Grand Prix",
       "year": 1966,
-      "tmdb_id": 54227,
+      "tmdb_id": 20379,
       "rank": 7
+    },
+    {
+      "title": "The Professionals",
+      "year": 1966,
+      "tmdb_id": 22383,
+      "rank": 8
+    },
+    {
+      "title": "Alfie",
+      "year": 1966,
+      "tmdb_id": 15598,
+      "rank": 9
     },
     {
       "title": "Georgy Girl",
       "year": 1966,
       "tmdb_id": 42719,
-      "rank": 7
-    },
-    {
-      "title": "The Silencers",
-      "year": 1966,
-      "tmdb_id": 21779,
-      "rank": 8
-    },
-    {
-      "title": "Grand Prix",
-      "year": 1966,
-      "tmdb_id": 20379,
-      "rank": 9
-    },
-    {
-      "title": "Our Man Flint",
-      "year": 1966,
-      "tmdb_id": 23728,
       "rank": 10
-    },
-    {
-      "title": "The Dirty Dozen",
-      "year": 1967,
-      "tmdb_id": 1654,
-      "rank": 1
     },
     {
       "title": "The Graduate",
@@ -1212,87 +1278,93 @@
       "rank": 1
     },
     {
-      "title": "You Only Live Twice",
-      "year": 1967,
-      "tmdb_id": 667,
-      "rank": 2
-    },
-    {
       "title": "Guess Who's Coming to Dinner",
       "year": 1967,
       "tmdb_id": 1879,
       "rank": 2
     },
     {
-      "title": "Casino Royale",
+      "title": "Bonnie and Clyde",
       "year": 1967,
-      "tmdb_id": 12208,
+      "tmdb_id": 475,
       "rank": 3
+    },
+    {
+      "title": "The Dirty Dozen",
+      "year": 1967,
+      "tmdb_id": 1654,
+      "rank": 4
     },
     {
       "title": "Valley of the Dolls",
       "year": 1967,
       "tmdb_id": 3055,
-      "rank": 4
-    },
-    {
-      "title": "Thoroughly Modern Millie",
-      "year": 1967,
-      "tmdb_id": 32489,
       "rank": 5
-    },
-    {
-      "title": "Barefoot in the Park",
-      "year": 1967,
-      "tmdb_id": 17887,
-      "rank": 6
     },
     {
       "title": "To Sir, with Love",
       "year": 1967,
       "tmdb_id": 25934,
+      "rank": 6
+    },
+    {
+      "title": "You Only Live Twice",
+      "year": 1967,
+      "tmdb_id": 667,
+      "rank": 7
+    },
+    {
+      "title": "Thoroughly Modern Millie",
+      "year": 1967,
+      "tmdb_id": 32489,
       "rank": 8
     },
     {
       "title": "The Jungle Book",
       "year": 1967,
       "tmdb_id": 9325,
-      "rank": 8
+      "rank": 9
     },
     {
-      "title": "Hombre",
+      "title": "Camelot",
       "year": 1967,
-      "tmdb_id": 27945,
+      "tmdb_id": 18978,
       "rank": 10
-    },
-    {
-      "title": "The Love Bug",
-      "year": 1968,
-      "tmdb_id": 14136,
-      "rank": 1
     },
     {
       "title": "Funny Girl",
       "year": 1968,
       "tmdb_id": 16085,
+      "rank": 1
+    },
+    {
+      "title": "2001: A Space Odyssey",
+      "year": 1968,
+      "tmdb_id": 62,
       "rank": 2
     },
     {
-      "title": "Bullitt",
+      "title": "The Love Bug",
       "year": 1968,
-      "tmdb_id": 916,
-      "rank": 3
+      "tmdb_id": 14136,
+      "rank": 2
     },
     {
       "title": "The Odd Couple",
       "year": 1968,
       "tmdb_id": 11356,
-      "rank": 5
+      "rank": 3
     },
     {
-      "title": "Romeo and Juliet",
+      "title": "Bullitt",
       "year": 1968,
-      "tmdb_id": 6003,
+      "tmdb_id": 916,
+      "rank": 4
+    },
+    {
+      "title": "Oliver!",
+      "year": 1968,
+      "tmdb_id": 17917,
       "rank": 5
     },
     {
@@ -1308,9 +1380,9 @@
       "rank": 7
     },
     {
-      "title": "Oliver!",
+      "title": "Romeo and Juliet",
       "year": 1968,
-      "tmdb_id": 17917,
+      "tmdb_id": 6003,
       "rank": 8
     },
     {
@@ -1320,76 +1392,64 @@
       "rank": 9
     },
     {
-      "title": "Chitty Chitty Bang Bang",
+      "title": "The Lion in Winter",
       "year": 1968,
-      "tmdb_id": 11708,
-      "rank": 9
-    },
-    {
-      "title": "The Green Berets",
-      "year": 1968,
-      "tmdb_id": 22377,
+      "tmdb_id": 18988,
       "rank": 10
     },
     {
       "title": "Butch Cassidy and the Sundance Kid",
       "year": 1969,
       "tmdb_id": 642,
-      "rank": 4
-    },
-    {
-      "title": "Bob & Carol & Ted & Alice",
-      "year": 1969,
-      "tmdb_id": 26520,
-      "rank": 4
-    },
-    {
-      "title": "True Grit",
-      "year": 1969,
-      "tmdb_id": 17529,
-      "rank": 6
-    },
-    {
-      "title": "Hello, Dolly!",
-      "year": 1969,
-      "tmdb_id": 14030,
-      "rank": 6
-    },
-    {
-      "title": "The Stewardesses",
-      "year": 1969,
-      "tmdb_id": 70478,
-      "rank": 6
+      "rank": 1
     },
     {
       "title": "Midnight Cowboy",
       "year": 1969,
       "tmdb_id": 3116,
+      "rank": 3
+    },
+    {
+      "title": "Easy Rider",
+      "year": 1969,
+      "tmdb_id": 624,
+      "rank": 4
+    },
+    {
+      "title": "Hello, Dolly!",
+      "year": 1969,
+      "tmdb_id": 14030,
+      "rank": 5
+    },
+    {
+      "title": "Bob & Carol & Ted & Alice",
+      "year": 1969,
+      "tmdb_id": 26520,
+      "rank": 6
+    },
+    {
+      "title": "Paint Your Wagon",
+      "year": 1969,
+      "tmdb_id": 20391,
       "rank": 7
+    },
+    {
+      "title": "True Grit",
+      "year": 1969,
+      "tmdb_id": 17529,
+      "rank": 8
+    },
+    {
+      "title": "A Boy Named Charlie Brown",
+      "year": 1969,
+      "tmdb_id": 15374,
+      "rank": 9
     },
     {
       "title": "Cactus Flower",
       "year": 1969,
       "tmdb_id": 28289,
-      "rank": 7
-    },
-    {
-      "title": "On Her Majesty's Secret Service",
-      "year": 1969,
-      "tmdb_id": 668,
-      "rank": 9
-    },
-    {
-      "title": "The Reivers",
-      "year": 1969,
-      "tmdb_id": 5928,
       "rank": 10
-    },
-    {
-      "title": "Airport",
-      "year": 1970,
-      "tmdb_id": 10671,
-      "rank": 1
     },
     {
       "title": "Love Story",
@@ -1398,22 +1458,22 @@
       "rank": 1
     },
     {
+      "title": "Airport",
+      "year": 1970,
+      "tmdb_id": 10671,
+      "rank": 2
+    },
+    {
       "title": "MASH",
       "year": 1970,
       "tmdb_id": 651,
-      "rank": 2
+      "rank": 3
     },
     {
       "title": "Patton",
       "year": 1970,
       "tmdb_id": 11202,
-      "rank": 3
-    },
-    {
-      "title": "Little Big Man",
-      "year": 1970,
-      "tmdb_id": 11040,
-      "rank": 3
+      "rank": 4
     },
     {
       "title": "Woodstock",
@@ -1422,52 +1482,40 @@
       "rank": 5
     },
     {
-      "title": "The Owl and the Pussycat",
+      "title": "Little Big Man",
       "year": 1970,
-      "tmdb_id": 42597,
-      "rank": 5
-    },
-    {
-      "title": "Ryan's Daughter",
-      "year": 1970,
-      "tmdb_id": 38953,
-      "rank": 7
-    },
-    {
-      "title": "Catch-22",
-      "year": 1970,
-      "tmdb_id": 10364,
-      "rank": 8
+      "tmdb_id": 11040,
+      "rank": 6
     },
     {
       "title": "Tora! Tora! Tora!",
       "year": 1970,
       "tmdb_id": 11165,
-      "rank": 12
+      "rank": 7
     },
     {
-      "title": "Five Easy Pieces",
+      "title": "Ryan's Daughter",
       "year": 1970,
-      "tmdb_id": 26617,
-      "rank": 18
+      "tmdb_id": 38953,
+      "rank": 8
     },
     {
-      "title": "Song of Norway",
+      "title": "Catch-22",
       "year": 1970,
-      "tmdb_id": 215843,
-      "rank": 20
+      "tmdb_id": 10364,
+      "rank": 9
     },
     {
-      "title": "Summer of '42",
-      "year": 1971,
-      "tmdb_id": 41357,
-      "rank": 2
+      "title": "The Owl and the Pussycat",
+      "year": 1970,
+      "tmdb_id": 42597,
+      "rank": 10
     },
     {
       "title": "Fiddler on the Roof",
       "year": 1971,
       "tmdb_id": 14811,
-      "rank": 2
+      "rank": 1
     },
     {
       "title": "Billy Jack",
@@ -1476,40 +1524,40 @@
       "rank": 2
     },
     {
-      "title": "Carnal Knowledge",
-      "year": 1971,
-      "tmdb_id": 36492,
-      "rank": 4
-    },
-    {
       "title": "The French Connection",
       "year": 1971,
       "tmdb_id": 1051,
-      "rank": 4
+      "rank": 3
     },
     {
-      "title": "A Clockwork Orange",
+      "title": "Summer of '42",
       "year": 1971,
-      "tmdb_id": 185,
-      "rank": 6
+      "tmdb_id": 41357,
+      "rank": 4
     },
     {
       "title": "Diamonds Are Forever",
       "year": 1971,
       "tmdb_id": 681,
+      "rank": 5
+    },
+    {
+      "title": "Dirty Harry",
+      "year": 1971,
+      "tmdb_id": 984,
+      "rank": 6
+    },
+    {
+      "title": "A Clockwork Orange",
+      "year": 1971,
+      "tmdb_id": 185,
       "rank": 7
     },
     {
-      "title": "The Hospital",
+      "title": "Carnal Knowledge",
       "year": 1971,
-      "tmdb_id": 32082,
+      "tmdb_id": 36492,
       "rank": 8
-    },
-    {
-      "title": "The Anderson Tapes",
-      "year": 1971,
-      "tmdb_id": 30941,
-      "rank": 9
     },
     {
       "title": "The Last Picture Show",
@@ -1518,82 +1566,10 @@
       "rank": 9
     },
     {
-      "title": "A New Leaf",
+      "title": "Bedknobs and Broomsticks",
       "year": 1971,
-      "tmdb_id": 36850,
+      "tmdb_id": 12335,
       "rank": 10
-    },
-    {
-      "title": "Dirty Harry",
-      "year": 1971,
-      "tmdb_id": 984,
-      "rank": 10
-    },
-    {
-      "title": "Willard",
-      "year": 1971,
-      "tmdb_id": 42532,
-      "rank": 11
-    },
-    {
-      "title": "Shaft",
-      "year": 1971,
-      "tmdb_id": 482,
-      "rank": 13
-    },
-    {
-      "title": "Klute",
-      "year": 1971,
-      "tmdb_id": 466,
-      "rank": 14
-    },
-    {
-      "title": "Plaza Suite",
-      "year": 1971,
-      "tmdb_id": 42514,
-      "rank": 16
-    },
-    {
-      "title": "The Andromeda Strain",
-      "year": 1971,
-      "tmdb_id": 10514,
-      "rank": 17
-    },
-    {
-      "title": "Nicholas and Alexandra",
-      "year": 1971,
-      "tmdb_id": 38646,
-      "rank": 18
-    },
-    {
-      "title": "Bananas",
-      "year": 1971,
-      "tmdb_id": 11302,
-      "rank": 21
-    },
-    {
-      "title": "The Love Machine",
-      "year": 1971,
-      "tmdb_id": 215538,
-      "rank": 22
-    },
-    {
-      "title": "Sweet Sweetback's Baadasssss Song",
-      "year": 1971,
-      "tmdb_id": 5822,
-      "rank": 23
-    },
-    {
-      "title": "Cold Turkey",
-      "year": 1971,
-      "tmdb_id": 42493,
-      "rank": 24
-    },
-    {
-      "title": "Kotch",
-      "year": 1971,
-      "tmdb_id": 76002,
-      "rank": 25
     },
     {
       "title": "The Godfather",
@@ -1605,25 +1581,43 @@
       "title": "The Poseidon Adventure",
       "year": 1972,
       "tmdb_id": 551,
-      "rank": 1
-    },
-    {
-      "title": "Cabaret",
-      "year": 1972,
-      "tmdb_id": 10784,
-      "rank": 3
-    },
-    {
-      "title": "Last Tango in Paris",
-      "year": 1972,
-      "tmdb_id": 1643,
-      "rank": 3
+      "rank": 2
     },
     {
       "title": "What's Up, Doc?",
       "year": 1972,
       "tmdb_id": 6949,
+      "rank": 3
+    },
+    {
+      "title": "Deliverance",
+      "year": 1972,
+      "tmdb_id": 10669,
+      "rank": 4
+    },
+    {
+      "title": "Jeremiah Johnson",
+      "year": 1972,
+      "tmdb_id": 11943,
       "rank": 5
+    },
+    {
+      "title": "Cabaret",
+      "year": 1972,
+      "tmdb_id": 10784,
+      "rank": 6
+    },
+    {
+      "title": "Deep Throat",
+      "year": 1972,
+      "tmdb_id": 5853,
+      "rank": 7
+    },
+    {
+      "title": "Last Tango in Paris",
+      "year": 1972,
+      "tmdb_id": 1643,
+      "rank": 7
     },
     {
       "title": "The Getaway",
@@ -1632,136 +1626,16 @@
       "rank": 8
     },
     {
-      "title": "The Heartbreak Kid",
+      "title": "Brother of the Wind",
       "year": 1972,
-      "tmdb_id": 40687,
+      "tmdb_id": 209639,
       "rank": 9
-    },
-    {
-      "title": "Deliverance",
-      "year": 1972,
-      "tmdb_id": 10669,
-      "rank": 10
-    },
-    {
-      "title": "Super Fly",
-      "year": 1972,
-      "tmdb_id": 21968,
-      "rank": 11
-    },
-    {
-      "title": "Deep Throat",
-      "year": 1972,
-      "tmdb_id": 5853,
-      "rank": 11
-    },
-    {
-      "title": "Butterflies Are Free",
-      "year": 1972,
-      "tmdb_id": 55106,
-      "rank": 12
-    },
-    {
-      "title": "Sleuth",
-      "year": 1972,
-      "tmdb_id": 993,
-      "rank": 12
     },
     {
       "title": "Lady Sings the Blues",
       "year": 1972,
       "tmdb_id": 23148,
-      "rank": 13
-    },
-    {
-      "title": "Frenzy",
-      "year": 1972,
-      "tmdb_id": 573,
-      "rank": 14
-    },
-    {
-      "title": "Everything You Always Wanted to Know About Sex*",
-      "year": 1972,
-      "tmdb_id": 11624,
-      "rank": 15
-    },
-    {
-      "title": "Play It Again, Sam",
-      "year": 1972,
-      "tmdb_id": 11610,
-      "rank": 16
-    },
-    {
-      "title": "The New Centurions",
-      "year": 1972,
-      "tmdb_id": 37608,
-      "rank": 17
-    },
-    {
-      "title": "The Valachi Papers",
-      "year": 1972,
-      "tmdb_id": 33357,
-      "rank": 20
-    },
-    {
-      "title": "Sounder",
-      "year": 1972,
-      "tmdb_id": 42489,
-      "rank": 20
-    },
-    {
-      "title": "Fritz the Cat",
-      "year": 1972,
-      "tmdb_id": 12593,
-      "rank": 21
-    },
-    {
-      "title": "King Boxer",
-      "year": 1972,
-      "tmdb_id": 21964,
-      "rank": 21
-    },
-    {
-      "title": "Across 110th Street",
-      "year": 1972,
-      "tmdb_id": 23847,
-      "rank": 22
-    },
-    {
-      "title": "Shaft's Big Score",
-      "year": 1972,
-      "tmdb_id": 493,
-      "rank": 23
-    },
-    {
-      "title": "Pete 'n' Tillie",
-      "year": 1972,
-      "tmdb_id": 107774,
-      "rank": 23
-    },
-    {
-      "title": "Buck and the Preacher",
-      "year": 1972,
-      "tmdb_id": 26928,
-      "rank": 24
-    },
-    {
-      "title": "Conquest of the Planet of the Apes",
-      "year": 1972,
-      "tmdb_id": 1688,
-      "rank": 25
-    },
-    {
-      "title": "Man of La Mancha",
-      "year": 1972,
-      "tmdb_id": 45793,
-      "rank": 25
-    },
-    {
-      "title": "Way of the Dragon",
-      "year": 1972,
-      "tmdb_id": 9462,
-      "rank": 25
+      "rank": 10
     },
     {
       "title": "The Exorcist",
@@ -1776,178 +1650,166 @@
       "rank": 2
     },
     {
+      "title": "American Graffiti",
+      "year": 1973,
+      "tmdb_id": 838,
+      "rank": 3
+    },
+    {
       "title": "Papillon",
       "year": 1973,
       "tmdb_id": 5924,
-      "rank": 3
+      "rank": 4
     },
     {
       "title": "The Way We Were",
       "year": 1973,
       "tmdb_id": 10236,
-      "rank": 4
-    },
-    {
-      "title": "Serpico",
-      "year": 1973,
-      "tmdb_id": 9040,
-      "rank": 4
-    },
-    {
-      "title": "Live and Let Die",
-      "year": 1973,
-      "tmdb_id": 253,
       "rank": 5
     },
     {
-      "title": "American Graffiti",
+      "title": "Magnum Force",
       "year": 1973,
-      "tmdb_id": 838,
-      "rank": 5
-    },
-    {
-      "title": "The Devil in Miss Jones",
-      "year": 1973,
-      "tmdb_id": 284109,
+      "tmdb_id": 10648,
       "rank": 6
     },
     {
       "title": "Paper Moon",
       "year": 1973,
       "tmdb_id": 11293,
-      "rank": 7
+      "rank": 8
     },
     {
-      "title": "Jesus Christ Superstar",
+      "title": "Live and Let Die",
       "year": 1973,
-      "tmdb_id": 12545,
-      "rank": 14
+      "tmdb_id": 253,
+      "rank": 9
     },
     {
-      "title": "The Day of the Jackal",
+      "title": "Serpico",
       "year": 1973,
-      "tmdb_id": 4909,
-      "rank": 15
+      "tmdb_id": 9040,
+      "rank": 10
     },
     {
-      "title": "Sleeper",
-      "year": 1973,
-      "tmdb_id": 11561,
-      "rank": 16
-    },
-    {
-      "title": "A Touch of Class",
-      "year": 1973,
-      "tmdb_id": 42458,
-      "rank": 17
-    },
-    {
-      "title": "Enter the Dragon",
-      "year": 1973,
-      "tmdb_id": 9461,
-      "rank": 18
-    },
-    {
-      "title": "Tom Sawyer",
-      "year": 1973,
-      "tmdb_id": 42473,
-      "rank": 19
-    },
-    {
-      "title": "Magnum Force",
-      "year": 1973,
-      "tmdb_id": 10648,
-      "rank": 19
-    },
-    {
-      "title": "Westworld",
-      "year": 1973,
-      "tmdb_id": 2362,
-      "rank": 24
-    },
-    {
-      "title": "That's Entertainment!",
+      "title": "The Towering Inferno",
       "year": 1974,
-      "tmdb_id": 33740,
-      "rank": 6
+      "tmdb_id": 5919,
+      "rank": 1
     },
     {
       "title": "Blazing Saddles",
       "year": 1974,
       "tmdb_id": 11072,
-      "rank": 7
+      "rank": 2
     },
     {
-      "title": "Chinatown",
+      "title": "Young Frankenstein",
       "year": 1974,
-      "tmdb_id": 829,
-      "rank": 8
-    },
-    {
-      "title": "The Longest Yard",
-      "year": 1974,
-      "tmdb_id": 4985,
-      "rank": 9
-    },
-    {
-      "title": "The Great Gatsby",
-      "year": 1974,
-      "tmdb_id": 11034,
-      "rank": 10
-    },
-    {
-      "title": "The Trial of Billy Jack",
-      "year": 1974,
-      "tmdb_id": 83980,
-      "rank": 11
-    },
-    {
-      "title": "Vanishing Wilderness",
-      "year": 1974,
-      "tmdb_id": 270984,
-      "rank": 12
-    },
-    {
-      "title": "Death Wish",
-      "year": 1974,
-      "tmdb_id": 13939,
-      "rank": 13
-    },
-    {
-      "title": "For Pete's Sake",
-      "year": 1974,
-      "tmdb_id": 31901,
-      "rank": 15
-    },
-    {
-      "title": "Uptown Saturday Night",
-      "year": 1974,
-      "tmdb_id": 29464,
-      "rank": 17
-    },
-    {
-      "title": "Airport 1975",
-      "year": 1974,
-      "tmdb_id": 27932,
-      "rank": 18
-    },
-    {
-      "title": "Mame",
-      "year": 1974,
-      "tmdb_id": 35275,
-      "rank": 20
-    },
-    {
-      "title": "Herbie Rides Again",
-      "year": 1974,
-      "tmdb_id": 10869,
-      "rank": 21
+      "tmdb_id": 3034,
+      "rank": 3
     },
     {
       "title": "Earthquake",
       "year": 1974,
       "tmdb_id": 11123,
-      "rank": 22
+      "rank": 4
+    },
+    {
+      "title": "The Trial of Billy Jack",
+      "year": 1974,
+      "tmdb_id": 83980,
+      "rank": 5
+    },
+    {
+      "title": "The Godfather Part II",
+      "year": 1974,
+      "tmdb_id": 240,
+      "rank": 6
+    },
+    {
+      "title": "Airport 1975",
+      "year": 1974,
+      "tmdb_id": 27932,
+      "rank": 7
+    },
+    {
+      "title": "The Longest Yard",
+      "year": 1974,
+      "tmdb_id": 4985,
+      "rank": 8
+    },
+    {
+      "title": "Death Wish",
+      "year": 1974,
+      "tmdb_id": 13939,
+      "rank": 9
+    },
+    {
+      "title": "The Life and Times of Grizzly Adams",
+      "year": 1974,
+      "tmdb_id": 112323,
+      "rank": 10
+    },
+    {
+      "title": "Jaws",
+      "year": 1975,
+      "tmdb_id": 578,
+      "rank": 1
+    },
+    {
+      "title": "One Flew Over the Cuckoo's Nest",
+      "year": 1975,
+      "tmdb_id": 510,
+      "rank": 2
+    },
+    {
+      "title": "The Rocky Horror Picture Show",
+      "year": 1975,
+      "tmdb_id": 36685,
+      "rank": 3
+    },
+    {
+      "title": "Shampoo",
+      "year": 1975,
+      "tmdb_id": 31121,
+      "rank": 4
+    },
+    {
+      "title": "Dog Day Afternoon",
+      "year": 1975,
+      "tmdb_id": 968,
+      "rank": 5
+    },
+    {
+      "title": "The Return of the Pink Panther",
+      "year": 1975,
+      "tmdb_id": 11843,
+      "rank": 6
+    },
+    {
+      "title": "Three Days of the Condor",
+      "year": 1975,
+      "tmdb_id": 11963,
+      "rank": 7
+    },
+    {
+      "title": "Funny Lady",
+      "year": 1975,
+      "tmdb_id": 39282,
+      "rank": 8
+    },
+    {
+      "title": "The Other Side of the Mountain",
+      "year": 1975,
+      "tmdb_id": 86233,
+      "rank": 9
+    },
+    {
+      "title": "Tommy",
+      "year": 1975,
+      "tmdb_id": 11326,
+      "rank": 10
     },
     {
       "title": "Rocky",
@@ -2016,16 +1878,16 @@
       "rank": 2
     },
     {
-      "title": "Saturday Night Fever",
-      "year": 1977,
-      "tmdb_id": 11009,
-      "rank": 2
-    },
-    {
       "title": "Close Encounters of the Third Kind",
       "year": 1977,
       "tmdb_id": 840,
       "rank": 3
+    },
+    {
+      "title": "Saturday Night Fever",
+      "year": 1977,
+      "tmdb_id": 11009,
+      "rank": 4
     },
     {
       "title": "The Goodbye Girl",
@@ -2076,58 +1938,136 @@
       "rank": 1
     },
     {
+      "title": "Superman",
+      "year": 1978,
+      "tmdb_id": 1924,
+      "rank": 2
+    },
+    {
       "title": "Animal House",
       "year": 1978,
       "tmdb_id": 8469,
-      "rank": 4
+      "rank": 3
     },
     {
-      "title": "Jaws 2",
+      "title": "Every Which Way but Loose",
       "year": 1978,
-      "tmdb_id": 579,
-      "rank": 5
+      "tmdb_id": 15417,
+      "rank": 4
     },
     {
       "title": "Heaven Can Wait",
       "year": 1978,
       "tmdb_id": 12185,
-      "rank": 6
+      "rank": 5
     },
     {
       "title": "Hooper",
       "year": 1978,
       "tmdb_id": 16214,
+      "rank": 6
+    },
+    {
+      "title": "Jaws 2",
+      "year": 1978,
+      "tmdb_id": 579,
+      "rank": 7
+    },
+    {
+      "title": "Revenge of the Pink Panther",
+      "year": 1978,
+      "tmdb_id": 6081,
+      "rank": 8
+    },
+    {
+      "title": "The Deer Hunter",
+      "year": 1978,
+      "tmdb_id": 11778,
       "rank": 9
     },
     {
-      "title": "Foul Play",
+      "title": "Halloween",
       "year": 1978,
-      "tmdb_id": 15659,
+      "tmdb_id": 948,
       "rank": 10
     },
     {
       "title": "Kramer vs. Kramer",
       "year": 1979,
       "tmdb_id": 12102,
+      "rank": 1
+    },
+    {
+      "title": "The Amityville Horror",
+      "year": 1979,
+      "tmdb_id": 11449,
       "rank": 2
+    },
+    {
+      "title": "Rocky II",
+      "year": 1979,
+      "tmdb_id": 1367,
+      "rank": 3
+    },
+    {
+      "title": "Apocalypse Now",
+      "year": 1979,
+      "tmdb_id": 28,
+      "rank": 4
+    },
+    {
+      "title": "Star Trek: The Motion Picture",
+      "year": 1979,
+      "tmdb_id": 152,
+      "rank": 5
+    },
+    {
+      "title": "Alien",
+      "year": 1979,
+      "tmdb_id": 348,
+      "rank": 6
+    },
+    {
+      "title": "The Muppet Movie",
+      "year": 1979,
+      "tmdb_id": 11176,
+      "rank": 7
+    },
+    {
+      "title": "10",
+      "year": 1979,
+      "tmdb_id": 9051,
+      "rank": 8
     },
     {
       "title": "The Jerk",
       "year": 1979,
       "tmdb_id": 6471,
-      "rank": 3
+      "rank": 9
     },
     {
-      "title": "The Electric Horseman",
+      "title": "Moonraker",
       "year": 1979,
-      "tmdb_id": 11145,
-      "rank": 9
+      "tmdb_id": 698,
+      "rank": 10
     },
     {
       "title": "Star Wars: Episode V – The Empire Strikes Back",
       "year": 1980,
       "tmdb_id": 1891,
       "rank": 1
+    },
+    {
+      "title": "9 to 5",
+      "year": 1980,
+      "tmdb_id": 19494,
+      "rank": 2
+    },
+    {
+      "title": "Stir Crazy",
+      "year": 1980,
+      "tmdb_id": 21629,
+      "rank": 3
     },
     {
       "title": "Superman II",
@@ -2142,33 +2082,39 @@
       "rank": 4
     },
     {
-      "title": "Smokey and the Bandit II",
+      "title": "Any Which Way You Can",
       "year": 1980,
-      "tmdb_id": 12705,
+      "tmdb_id": 17169,
       "rank": 5
-    },
-    {
-      "title": "Coal Miner's Daughter",
-      "year": 1980,
-      "tmdb_id": 16769,
-      "rank": 6
     },
     {
       "title": "Private Benjamin",
       "year": 1980,
       "tmdb_id": 10765,
+      "rank": 6
+    },
+    {
+      "title": "Coal Miner's Daughter",
+      "year": 1980,
+      "tmdb_id": 16769,
       "rank": 7
+    },
+    {
+      "title": "Smokey and the Bandit II",
+      "year": 1980,
+      "tmdb_id": 12705,
+      "rank": 8
+    },
+    {
+      "title": "The Blue Lagoon",
+      "year": 1980,
+      "tmdb_id": 5689,
+      "rank": 9
     },
     {
       "title": "The Blues Brothers",
       "year": 1980,
       "tmdb_id": 525,
-      "rank": 8
-    },
-    {
-      "title": "The Shining",
-      "year": 1980,
-      "tmdb_id": 694,
       "rank": 10
     },
     {

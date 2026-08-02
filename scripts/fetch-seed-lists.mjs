@@ -879,6 +879,21 @@ export function parseBoxOfficePage(wikitext) {
 // name alone cannot choose, and the money column breaks the tie.
 const US_BOX_OFFICE_FIRST_YEAR = 1946;
 
+// Where the number-one pages start carrying an "In-Year Release" section, and
+// therefore where this list switches source. Verified rather than assumed:
+// 1981's page has no such section, 1982's has, and the survey counted exactly
+// 45 of them across the corpus — which is 1982 to 2026 inclusive.
+//
+// The switch exists because the two sources measure different things and only
+// one of them is available for the whole range. Before 1982 the number-one
+// pages carry a CALENDAR-year chart: 1974's top five are The Exorcist, The
+// Sting, Papillon, Serpico and American Graffiti, every one a 1973 release.
+// Ranking those against a modern in-year-release chart would put two meanings
+// in one column, which is the same objection that rejects Calendar Gross for
+// the years where both exist. `<year> in film` publishes release-year charts
+// for the whole early range, so the list can mean one thing throughout.
+const US_IN_YEAR_FIRST = 1982;
+
 // Case genuinely varies across the corpus ("In-Year Release" 41 times,
 // "In-year release" 4), so these are compared lowercased.
 const US_SECTION_REJECT = ['calendar gross'];
@@ -1096,10 +1111,11 @@ export function parseYearInFilmPage(wikitext) {
   for (const part of wikitext.split(/\n(?==+[^=\n]+=+\s*$)/m)) {
     const heading = /^(=+)\s*(.+?)\s*\1\s*$/m.exec(part);
     if (heading) section = heading[2].toLowerCase().trim();
-    // Nothing else will do. "Worldwide gross" is a different measurement
-    // wearing a similar name, and mixing it in would put two meanings under
-    // one rank column.
-    if (!section.includes('(u.s.)')) continue;
+    // Reject before accept, and the order is load-bearing: 1966 heads its two
+    // tables "North America" and "Outside North America", so a plain substring
+    // test for the region would take the international chart as well.
+    if (/outside|international|worldwide|overseas/.test(section)) continue;
+    if (!/\(u\.s\.\)|north america|united states/.test(section)) continue;
 
     for (const table of part.split(/\n\{\|/).slice(1)) {
       const body = table.split(/\n\|\}/)[0];
@@ -1168,20 +1184,18 @@ async function fetchBoxOfficeUS(meta) {
   for (let year = US_BOX_OFFICE_FIRST_YEAR; year <= THIS_YEAR; year += 1) {
     let rows = [];
     try {
-      const wikitext = await fetchWikitext(
-        'en',
-        `List of ${year} box office number-one films in the United States`,
-      );
-      if (wikitext) rows = parseUsBoxOfficePage(wikitext);
-      // The number-one page is the source; `<year> in film` is consulted only
-      // where it has nothing, so no year can be served by both and the primary
-      // source is never silently overridden.
-      if (rows.length === 0) {
-        const fallback = await fetchWikitext('en', `${year} in film`);
-        if (fallback) {
-          rows = parseYearInFilmPage(fallback);
-          if (rows.length) console.log(`\n  ℹ️  ${year}: no annual chart — used "${year} in film" (${rows.length} films)`);
-        }
+      if (year < US_IN_YEAR_FIRST) {
+        // Release-year charts, from the article that publishes them as such:
+        // "The top ten 1975 released films by box office gross in North
+        // America are as follows".
+        const wikitext = await fetchWikitext('en', `${year} in film`);
+        if (wikitext) rows = parseYearInFilmPage(wikitext);
+      } else {
+        const wikitext = await fetchWikitext(
+          'en',
+          `List of ${year} box office number-one films in the United States`,
+        );
+        if (wikitext) rows = parseUsBoxOfficePage(wikitext);
       }
     } catch (error) {
       if (error instanceof RateLimited) throw error;
@@ -1200,23 +1214,16 @@ async function fetchBoxOfficeUS(meta) {
   // Six years genuinely have no annual table, so a zero there is expected and
   // must not be reported as a fault. Anything ELSE at zero means the layout
   // moved, which is worth saying out loud.
-  // What neither source covers. 1975's only chart is worldwide, and 1979 has
-  // no box-office section at all — see the seed note.
-  const KNOWN_EMPTY = new Set([1975, 1979]);
+  // Every year in range should now yield a chart. There is no known-empty
+  // list any more, which is the point of the restructure: a year that comes
+  // back empty is a layout change, not an expected hole.
+  const KNOWN_EMPTY = new Set();
   const unexpectedlyEmpty = perYear.filter((e) => e.count === 0 && !KNOWN_EMPTY.has(e.year));
   if (unexpectedlyEmpty.length) {
     console.log(
       `\n  ⚠️  ${unexpectedlyEmpty.length} year(s) parsed to nothing and were expected to have a ` +
         `table: ${unexpectedlyEmpty.map((e) => e.year).join(' ')}`,
     );
-  }
-  const missing = [...KNOWN_EMPTY].filter((year) =>
-    perYear.some((e) => e.year === year && e.count > 0),
-  );
-  if (missing.length) {
-    // The guard is downstream of what it checks unless it can also notice the
-    // good news: a year gaining a table means the note above is now wrong.
-    console.log(`\n  ℹ️  ${missing.join(' ')} now HAS an annual table — update KNOWN_EMPTY.`);
   }
 
   const pages = [...best.keys()];
@@ -1507,15 +1514,17 @@ const SOURCES = [
         source_url:
           'https://en.wikipedia.org/wiki/List_of_2019_box_office_number-one_films_in_the_United_States',
         note:
-          'The annual release-year chart, never the weekly number-ones (which would exclude a ' +
-          'film that sat at #2 all year) and never the Calendar Gross table (which ranks what a ' +
-          'film earned DURING the year rather than films released in it). Ranked within the ' +
-          'year only: the source gives rentals before about 1980 and domestic gross after, and ' +
-          'neither is inflation-adjusted, so an all-time ranking would measure ticket prices. ' +
-          'Years whose number-one page carries no annual chart fall back to the US-domestic table on ' +
-          '"<year> in film", which is checked for a section naming the United States — so 1975, whose ' +
-          'only chart is worldwide, is refused rather than quietly mixed in. 1975 and 1979 are therefore ' +
-          'absent from this list: no Jaws, no Alien.',
+          'Films RELEASED in a year, ranked by what they took in the US. Two sources, because ' +
+          'neither covers the whole range: "<year> in film" through 1981, and the In-Year Release ' +
+          'section of the number-one pages from 1982, which is where that section starts. The ' +
+          'number-one pages own pre-1982 charts are CALENDAR-year and deliberately unused — 1974 ' +
+          'tops out with The Exorcist, The Sting and Papillon, every one a 1973 release — because ' +
+          'ranking those beside release-year charts would put two meanings in one column. The ' +
+          'weekly number-one table is never used at all: it is a membership test, not a magnitude, ' +
+          'so a film that sat at #2 all year would be missing while one that won a quiet January ' +
+          'weekend would be in. Ranked WITHIN the year only, and carrying no overall rank: the ' +
+          'source gives rentals before about 1980 and gross after, neither inflation-adjusted, so ' +
+          'an all-time ranking would measure ticket prices rather than how many people went.',
       }),
   },
   {

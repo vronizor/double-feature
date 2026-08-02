@@ -424,3 +424,21 @@ test('both spellings of the fallback money column are read', () => {
 test('the fallback ignores a US section that carries no usable table', () => {
   assert.deepEqual(parseYearInFilmPage('==Highest-grossing films (U.S.)==\nProse only.\n'), []);
 });
+
+test('a region-named section counts as a US table', () => {
+  // 1975 heads its chart "North America" and 1979 "United States and Canada",
+  // nested under "Highest-grossing films". Matching only "(U.S.)" missed both
+  // and left Jaws, Alien and Apocalypse Now out of the list.
+  const page = IN_FILM_US
+    .replace('==Highest-grossing films (U.S.)==', '==Highest-grossing films==\n===North America===');
+  assert.equal(parseYearInFilmPage(page).length, 2);
+});
+
+test('"Outside North America" is not North America', () => {
+  // 1966 heads its two tables "North America" and "Outside North America", so
+  // rejecting has to run before accepting or the international chart is taken
+  // as well.
+  const page = IN_FILM_US
+    .replace('==Highest-grossing films (U.S.)==', '===Outside North America===');
+  assert.deepEqual(parseYearInFilmPage(page), []);
+});
