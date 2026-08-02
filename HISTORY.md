@@ -1887,3 +1887,46 @@ end-to-end ranking rather than a per-year one, and the Top-N label calls it
 anything being special-cased.
 
 Version 6.8.0.
+
+### 9.8 Closing v6
+
+Eleven chunks. **The version that made the app trust itself**, which is not
+what it was scheduled to be — v6 opened as consolidation-and-ship and turned
+into a run of things that were quietly wrong and said nothing.
+
+What shipped: re-matching a resolved entry, with a queue that flags the matches
+worth checking; a Box office vibe; Top-N labels that name the group they cut;
+the `On:` line carrying rank; parametric lists ranked by rating; and the
+corrections below.
+
+**Four things were confidently recorded and false.** That is the number worth
+carrying forward, because none of them failed, threw, or dropped a row.
+
+- `BACKLOG.md` described France's global rank and Spain's per-year rank as a
+  live disagreement. It had shipped in v5. The stale entry cost a session one
+  wrong recommendation before anyone checked the code.
+- A back-fill migration invented the `overall_rank` it wrote, so Box-office US —
+  shipped with no cross-year ordering on purpose — claimed its biggest film of
+  all time was whatever topped 1946. Fully populated, densely numbered,
+  meaningless.
+- `ensureBuiltinVibes` was commented as making a delete stick. It does the
+  opposite, and the test named for that property never asserted it.
+- The reason recorded for deferring the design tool was wrong on the facts. The
+  tool assumes no design system; the real obstacle was that our DOM is built in
+  JavaScript, which nobody had written down.
+
+> **The pattern across all four: a confident claim, no failure, and nothing that
+> would ever contradict it.** Every one was caught by reading values or source
+> and asking whether the claim could be true — never by a test, a guard or a
+> tool. v4 taught the same lesson about counts; v6 taught it about prose.
+
+**A detector was run over the UI and produced one actionable finding**, while
+missing a WCAG AA failure it had the rule for. Also caught this version: an
+Explore count printed twice on every load, a guest submit button live at zero
+picks, a guest link that disagreed with the QR beside it, two orphaned rows in
+`list_tags`, and a text colour at 3.66:1.
+
+The next version is the first that adds no data at all. Its evidence is
+[docs/evidence/ui-review.md](docs/evidence/ui-review.md).
+
+Version 6.12.0.

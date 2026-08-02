@@ -282,45 +282,23 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
-- **Run Impeccable over the UI** (`https://impeccable.style/`). A design tool
-  for AI-generated interfaces — "the missing design vocabulary for agents" —
-  offering a command set (`/polish`, `/distill`, `/typeset`) and a detector of
-  58 checks for the visual tells of machine-written UI. Available as a Claude
-  Code skill, an npm CLI, a Chrome extension and a CI step.
+- **Impeccable — tried in v6, not worth more.** The detector was run against the
+  live app in three rendered states, plus a deliberately-bad control page to
+  prove it was working. It produced **one** actionable finding across the whole
+  UI (a border and a shadow doing one job on the modal, since fixed) and one
+  false positive, and it **missed a WCAG AA failure it had the rule for**. It
+  said nothing about the panel density that prompted the exercise.
 
-  **Why v6 and not sooner.** It is a pass over the *presentation* of a UI whose
-  shape was still moving: v4 added a parametric chip that did not exist yet,
-  and a picker that had to survive a second family of query-backed lists.
-  Polishing before those land means polishing twice. That reason has now
-  expired — the shape has stopped moving.
+  The command half is separately ruled out. There is no dry-run: `polish` and
+  its siblings edit source on taste grounds, which collides with this project's
+  rule that findings are reported rather than folded into the diff. Scoping is
+  file-or-URL granularity, so on a single hand-written stylesheet it is no
+  scoping at all — and the one element-level mode maps a browser element back to
+  source markup, which a runtime-built DOM does not have.
 
-  > **The SECOND reason recorded here was wrong, checked 2026-08-02.** It said
-  > the tool wants a stable design system to respect and this app's is one
-  > hand-written stylesheet. Design-system awareness is optional: it activates
-  > only if a `DESIGN.md` or equivalent exists, and there is a flag to disable
-  > it. The detector assumes no framework and no tokens, ships its own static
-  > CSSOM rather than a browser, and resolves `:root` custom properties through
-  > the cascade — a hand-written stylesheet with CSS variables is its native
-  > input, not a hard case.
-
-  **The real obstacle is different and narrower: this app's DOM is built in
-  JavaScript.** `index.html` is a near-empty shell, and the detector picks its
-  engine by file extension — HTML gets the full cascade, a bare `.css` falls
-  back to regex. Pointed at this repo's source it would see an empty page and
-  give the stylesheet only regex treatment. Meaningful detection needs the
-  RENDERED page: either a headless-browser scan of the running app, which
-  means a Chromium download, or the browser extension against it by hand.
-
-  Two more things worth knowing before anyone spends a session on it. The tool
-  splits cleanly in half, and **only one half is safe here**: the detector is
-  report-only with per-rule ignores, while the command set (`/polish` and
-  friends) EDITS SOURCE on taste grounds — which collides head-on with this
-  project's rule that findings are reported rather than folded into the diff.
-  And the vendor's own documentation pitches it at creation rather than
-  retrofit, warning against expecting it to fix existing code.
-
-  Worth stating plainly because it is not obvious: **this is a cosmetic pass,
-  not a feature**, and nothing in v4, v5 or v6 depends on it.
+  Its read-only `critique` playbook, on the other hand, was worth having: the
+  rubric it carries is what produced the 26/40 assessment in
+  `docs/evidence/ui-review.md`. **The vocabulary was useful; the tool was not.**
 
 ## Unscheduled
 

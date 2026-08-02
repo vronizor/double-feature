@@ -323,12 +323,25 @@ is a lie that survives every guard.
 - **National cinema night is one parametric vibe, not a list per country** —
   director night needs the same `▾` chip regardless, so it is built once and
   serves both, plus actor's night in v5.
-- **Two chip rows with similar labels are left alone until real use.** The
-  tag-filter row and the vibe row sit close together and share names: a chip
-  "Awards" *selects* the awards lists while "Awards 5" merely *narrows what the
-  picker shows*. Changing it on the strength of a code read would be guessing at
-  a problem nobody has hit. The question to answer later is whether they were
-  ever actually confused, not whether they look confusable on paper.
+- **The chip rows WERE confusable, and the answer came from use.** This entry
+  used to say they were left alone until real use, because changing them on the
+  strength of a code read would be guessing at a problem nobody had hit. That
+  was the right call and the question is now answered: **yes**, and by more than
+  was suspected. There are four pill rows within ~600px, not two — vibe presets,
+  list-group chips, metadata filters and display toggles — all sharing one shape
+  and one active colour. Four of seven vibe names recur verbatim in the row
+  below, and with `Cinephile` selected the group row still paints `All` in the
+  same active yellow, so two contradictory "this is selected" states stack in
+  one column. The fix is a deletion: the tag-filter row is a second narrowing
+  mechanism over group headers that already narrow. See
+  [the UI review](docs/evidence/ui-review.md).
+- **Disclosure by destination, not expansion in place.** A panel that triples
+  the page when opened has not deferred its complexity, it has relocated it into
+  the middle of the primary flow — measured, it pushed the Draw button ~2,900px
+  down a ~3,600px page. Configuration belongs somewhere the primary action
+  cannot be displaced from: a rail beside the flow, or a sheet over it. The
+  reference products this app is measured against do the same — neither solves
+  density with an accordion.
 
 ---
 
@@ -380,3 +393,9 @@ is a lie that survives every guard.
   hardest on blockbusters, where TMDB runs generous.
 - **The test suite is hermetic.** No credentials, no network. A run must not
   depend on whose machine it is on.
+- **Body text clears 4.5:1, and the number is calculated rather than judged.**
+  `--text-faint` sat at 3.66:1 on `--bg-raised` for several versions while
+  carrying real content — chip counts, list summaries, input hints. It looked
+  fine. A deterministic UI scanner ran over the app and did not flag it, while
+  catching 1.6:1 on a control page, so **passing a scan is not evidence of
+  passing AA**. Compute the ratio when introducing or dimming a text colour.
