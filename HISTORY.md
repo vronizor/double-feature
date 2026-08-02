@@ -1585,3 +1585,48 @@ re-running a fetcher dropped from three minutes to sixteen seconds once the
 politeness sleep stopped firing for requests that were being served from cache.
 
 Version 6.0.0.
+
+---
+
+## 9. v6
+
+### 9.1 An overall rank that was really year order
+
+Found by reading values that every count agreed with.
+
+`splitBoxOfficeRanks` was written to do one thing — recover the per-year rank
+from a list stored globally — and it correctly assumed a global rank contains
+the within-year order. It then applied the converse, which is false: for a list
+already stored per-year it wrote row position as the overall rank. Ordered by
+per-year rank, that is every year's #1 followed by every year's #2, so
+Box-office US ended up claiming that the biggest film in its history was
+whatever topped 1946. *Duel in the Sun*, then *Welcome Stranger*, then *The Red
+Shoes* — a perfect chronology presented as a ranking.
+
+The list had been shipped with **no** overall rank on purpose, because its
+source is an annual top ten with nothing ranking 1962 against 1994. The
+migration filled the column anyway.
+
+**Nothing failed, and nothing could have.** The column was 100% populated,
+densely numbered from 1, and read by no query in the app. Every guard this
+project has was satisfied. It is the same lesson v4 and v5 both taught, in a
+third costume: *inspect values, not just volumes.*
+
+The repair keys on two conditions rather than a list name, because either alone
+catches something legitimate. Ranks must repeat, which a genuine global rank
+never does; and reading rank in overall-rank order must never step down, which
+only a sequence generated from that ordering achieves. On the real database
+Box-office US stepped down 0 times against France's 617 and España's 681, so
+the genuine pair is nowhere near the boundary.
+
+> **The limit is written into the code rather than left to be discovered.** A
+> real all-time ordering that interleaved its years in strict rotation would be
+> byte-identical to a generated one, and this would clear it. Nothing could
+> distinguish them — the data would be the same data. No box-office history is
+> that tidy, but the next thing to copy this pattern might be.
+
+Also settled here: `overall_rank` is now documented as **legitimately NULL**,
+meaning the source gave no cross-year figure, rather than as a column awaiting
+a back-fill. That distinction is the whole defect.
+
+Version 6.2.0.

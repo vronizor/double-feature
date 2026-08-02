@@ -148,6 +148,12 @@ CREATE TABLE IF NOT EXISTS list_movies (
   -- just as per-year answers "the top five of each year", which this cannot.
   -- Both are stored because deriving either from the other needs the
   -- underlying figure, and that is deliberately not kept.
+  --
+  -- NULL is a legitimate value and means the source never gave a cross-year
+  -- figure at all, which is the case for the US list: it is an annual top ten
+  -- with nothing ranking 1962 against 1994. Do not back-fill it from row
+  -- position. That was tried, and it produced a column that was fully
+  -- populated, densely numbered, and simply year order under another name.
   overall_rank    INTEGER,
   -- The ceremony year, for award lists. Stored rather than derived from the
   -- release year because the offset differs per award: Cannes awards a film in
@@ -369,6 +375,7 @@ export function migrate(target) {
   ensureColumn(target, 'list_movies', 'award_year', 'INTEGER');
   ensureColumn(target, 'list_movies', 'overall_rank', 'INTEGER');
   splitBoxOfficeRanks(target);
+  clearInventedOverallRanks(target);
   migrateCategoriesToTags(target);
   renameCrowdPleasers(target);
   retagDynamicAsModern(target);
@@ -390,16 +397,12 @@ export function migrate(target) {
  * carries the correct RELATIVE order within each year, so per-year rank is a
  * dense renumbering of it grouped by year.
  *
- * KNOWN DEFECT, found 2026-08-02 -- the perYearAlready branch INVENTS the
- * overall rank it writes. For a list already stored per-year there is no global
- * ordering to recover, so `i + 1` is just row position under an ORDER BY rank:
- * every year's #1 first, then every year's #2. Box-office US was shipped with
- * no overall rank on purpose, because its source has no cross-year figure, and
- * this filled it anyway -- its "biggest film ever" is now whatever topped 1946.
- * Nothing reads overall_rank yet, which is the only reason it is invisible.
- * The fix is to leave the column NULL on that branch and clear the rows already
- * written; see ROADMAP.md. Do not "improve" this by deriving an ordering from
- * anything else -- the figure it would need was deliberately never stored.
+ * THE CONVERSE IS NOT TRUE, and assuming it was is what made this wrong once.
+ * A list already stored per-year has no global ordering to recover: the figure
+ * that would rank 1962 against 1994 was deliberately never stored, so there is
+ * nothing to derive it from. Such a list is SKIPPED and its overall_rank stays
+ * NULL, which is the honest value -- see clearInventedOverallRanks below for
+ * what happened when it did not.
  */
 function splitBoxOfficeRanks(target) {
   const lists = target
@@ -416,16 +419,71 @@ function splitBoxOfficeRanks(target) {
         'SELECT id, rank, raw_year FROM list_movies WHERE list_id = ? AND rank IS NOT NULL ORDER BY rank',
       )
       .all(list.id);
-    // If a rank repeats across rows the list is already per-year, and only
-    // overall_rank needs filling.
-    const perYearAlready = new Set(rows.map((r) => r.rank)).size < rows.length;
+    // A repeated rank means the list is already per-year. There is no global
+    // ordering hiding in it, so leave overall_rank NULL rather than inventing
+    // one from row position.
+    if (new Set(rows.map((r) => r.rank)).size < rows.length) continue;
+
     const setBoth = target.prepare('UPDATE list_movies SET rank = ?, overall_rank = ? WHERE id = ?');
     const seen = new Map();
-    rows.forEach((row, i) => {
+    for (const row of rows) {
       const n = (seen.get(row.raw_year) ?? 0) + 1;
       seen.set(row.raw_year, n);
-      setBoth.run(perYearAlready ? row.rank : n, perYearAlready ? i + 1 : row.rank, row.id);
-    });
+      setBoth.run(n, row.rank, row.id);
+    }
+  }
+}
+
+/**
+ * Repairs the overall ranks the migration above used to invent.
+ *
+ * It ran `i + 1` over rows ordered by per-year rank, so for a list that was
+ * already per-year the "global ranking" it wrote was every year's #1 first,
+ * then every year's #2 -- year order wearing the name of a ranking. Box-office
+ * US was hit: shipped with no overall rank on purpose because its source has no
+ * cross-year figure, and left claiming that the biggest film in its history is
+ * whatever topped 1946.
+ *
+ * Nothing read the column, so nothing failed. That is the point: every count
+ * was right, the column was 100% populated and densely numbered, and only the
+ * values gave it away.
+ *
+ * TWO conditions, because either alone would catch a legitimate list. Ranks
+ * must REPEAT -- a genuine global rank is distinct per row, so requiring
+ * repetition alone protects any list ranked globally in both columns. And
+ * reading rank in overall_rank order must never step DOWN, which is only true
+ * of a sequence generated from that same ordering. Measured on the real
+ * database when this was written: Box-office US had 0 such steps, France 617
+ * and Espana 681, so the genuine pair cannot be caught by it.
+ *
+ * THE LIMIT, stated rather than hidden: a real all-time ordering that happened
+ * to interleave its years perfectly evenly would be byte-identical to a
+ * generated one, and this would clear it. Nothing can distinguish those two --
+ * the data is the same data. It needs every year to contribute in strict
+ * rotation across the whole list, which no box-office history does; two of the
+ * three here miss it by more than 600 steps. Worth knowing before this pattern
+ * is copied somewhere the shapes are closer together.
+ */
+function clearInventedOverallRanks(target) {
+  const lists = target
+    .prepare(
+      `SELECT id FROM lists WHERE name LIKE 'Box-office%'
+        AND EXISTS (SELECT 1 FROM list_movies WHERE list_id = lists.id AND overall_rank IS NOT NULL)`,
+    )
+    .all();
+
+  for (const list of lists) {
+    const ranks = target
+      .prepare(
+        'SELECT rank FROM list_movies WHERE list_id = ? AND overall_rank IS NOT NULL ORDER BY overall_rank',
+      )
+      .all(list.id)
+      .map((r) => r.rank);
+
+    if (new Set(ranks).size === ranks.length) continue;
+    if (ranks.some((rank, i) => i > 0 && rank < ranks[i - 1])) continue;
+
+    target.prepare('UPDATE list_movies SET overall_rank = NULL WHERE list_id = ?').run(list.id);
   }
 }
 

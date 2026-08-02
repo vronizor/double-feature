@@ -245,3 +245,109 @@ test('an old-shaped database survives the REAL boot sequence, not just migrate()
   assert.ok(columns(db, 'movies').includes('imdb_rating'));
   assert.equal(db.prepare('SELECT watched FROM movies WHERE tmdb_id = 346').get().watched, 1);
 });
+
+/**
+ * The two box-office rank migrations.
+ *
+ * These matter more than their size suggests, because both failure modes are
+ * silent: a rank that is wrong still counts, still sorts, and still renders.
+ * The defect these cover shipped fully populated and densely numbered, and was
+ * found only by reading the values.
+ */
+function boxOfficeDb(name, rows) {
+  const db = new DatabaseSync(':memory:');
+  db.exec(SCHEMA);
+  db.prepare("INSERT INTO lists (id, name, origin) VALUES (1, ?, 'seed')").run(name);
+  const insert = db.prepare(
+    `INSERT INTO list_movies (list_id, raw_title, raw_year, rank, overall_rank, status)
+     VALUES (1, ?, ?, ?, ?, 'resolved')`,
+  );
+  rows.forEach(([year, rank, overall], i) => insert.run(`Film ${i + 1}`, year, rank, overall));
+  return db;
+}
+
+const ranksOf = (db) =>
+  db
+    .prepare('SELECT raw_year, rank, overall_rank FROM list_movies ORDER BY id')
+    .all()
+    .map((r) => [r.raw_year, r.rank, r.overall_rank]);
+
+test('a globally ranked box-office list is split into per-year rank and overall rank', () => {
+  // Rank is the all-time position, which is how France was stored. Three years
+  // rather than two, deliberately: with exactly two years alternating, the
+  // correct answer is byte-identical to a generated sequence and nothing could
+  // tell them apart. Real data is not that tidy -- France steps down 617 times.
+  const db = boxOfficeDb('Box-office France', [
+    [1994, 1, null],
+    [1962, 2, null],
+    [1994, 3, null],
+    [1979, 4, null],
+  ]);
+  migrate(db);
+
+  // rank becomes the position WITHIN the year; the all-time order survives in
+  // overall_rank rather than being thrown away.
+  assert.deepEqual(ranksOf(db), [
+    [1994, 1, 1],
+    [1962, 1, 2],
+    [1994, 2, 3],
+    [1979, 1, 4],
+  ]);
+});
+
+test('a list already stored per-year keeps a NULL overall rank rather than an invented one', () => {
+  // The US shape: an annual top three, with nothing ranking 1962 against 1994.
+  const db = boxOfficeDb('Box-office US', [
+    [1994, 1, null],
+    [1962, 1, null],
+    [1994, 2, null],
+    [1962, 2, null],
+  ]);
+  migrate(db);
+
+  assert.deepEqual(ranksOf(db), [
+    [1994, 1, null],
+    [1962, 1, null],
+    [1994, 2, null],
+    [1962, 2, null],
+  ]);
+});
+
+test('an already-written invented overall rank is cleared', () => {
+  // What the old migration left behind: overall_rank is row position under an
+  // ORDER BY rank, so it steps 1,1,2,2 -- every year's #1, then every year's
+  // #2. Fully populated, densely numbered, and meaningless.
+  const db = boxOfficeDb('Box-office US', [
+    [1994, 1, 1],
+    [1962, 1, 2],
+    [1994, 2, 3],
+    [1962, 2, 4],
+  ]);
+  migrate(db);
+
+  assert.deepEqual(
+    ranksOf(db).map((r) => r[2]),
+    [null, null, null, null],
+    'overall_rank is cleared where it was generated from the per-year ordering',
+  );
+  assert.deepEqual(ranksOf(db).map((r) => r[1]), [1, 1, 2, 2], 'the per-year rank is untouched');
+});
+
+test('a genuine overall rank beside a per-year rank is left alone', () => {
+  // France after the split: reading rank in overall_rank order steps DOWN --
+  // the third-biggest film of all time is its year's #2, the fourth is another
+  // year's #1 -- which a generated sequence never does.
+  const db = boxOfficeDb('Box-office France', [
+    [1994, 1, 1],
+    [1962, 1, 2],
+    [1994, 2, 3],
+    [1979, 1, 4],
+  ]);
+  migrate(db);
+
+  assert.deepEqual(
+    ranksOf(db).map((r) => r[2]),
+    [1, 2, 3, 4],
+    'a real all-time ordering survives the repair',
+  );
+});
