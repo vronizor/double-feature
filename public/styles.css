@@ -6,7 +6,17 @@
   --border-strong: #38414f;
   --text: #e8eaf0;
   --text-dim: #9aa3b4;
-  --text-faint: #6b7383;
+  /* Was #6b7383, which failed WCAG AA for body text on every surface here —
+     measured 4.02:1 on --bg, 3.66:1 on --bg-raised, 4.10:1 on --bg-sunken,
+     against the 4.5:1 the size it is used at requires. It is not decorative:
+     it carries chip counts, the "20 lists" summary, group totals and the
+     "press Enter" hints, so it is genuinely read.
+
+     #8b93a3 clears it on all three (6.21, 5.64, 6.33) while staying clearly
+     the quietest of the three text tones — the hierarchy is preserved, it is
+     just no longer below the floor. Note a deterministic UI scanner passed
+     this app without flagging it, so the number came from calculating it. */
+  --text-faint: #8b93a3;
   --accent: #e8b64c;
   --accent-ink: #201703;
   --danger: #e5674f;

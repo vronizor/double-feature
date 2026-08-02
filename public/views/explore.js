@@ -187,7 +187,16 @@ export async function renderExplore(container) {
           : null,
         state.total === 0 && !state.loading
           ? 'No films match'
-          : h('span', {}, h('strong', {}, String(state.total)), ` ${plural(state.total, 'film', 'films')} match`),
+          : // plural() ALREADY prefixes the count, so wrapping the number in its
+            // own element beside it printed "1750 1750 films match" on every
+            // load. The number is emphasised by splitting the string here
+            // rather than by counting it twice.
+            h(
+              'span',
+              {},
+              h('strong', {}, state.total.toLocaleString()),
+              ` ${state.total === 1 ? 'film' : 'films'} match`,
+            ),
       ),
     );
   }
