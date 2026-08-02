@@ -256,39 +256,6 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   source the way Spain needed the ICAA. Survey incomplete — headers and annual
   tables were not reached before the agent running it stalled.
 
-- **Box-office France ranks globally; Box-office España ranks per year.**
-  Found 2026-08-01 by checking the data rather than the doc, and they disagree.
-  France is 1,390 rows with 1,390 distinct ranks and a single rank=1
-  (*Bienvenue chez les Ch'tis*, the biggest French film of all time). Spain is
-  76 rows with rank=1, one per year, max rank 20.
-
-  **`HISTORY.md` §5.3 records the France decision as per-year** — *"the figure
-  is used to order films within their year and written as `rank`… so 'the top
-  20 of 1982' works with no new UI"*. That is not what was built, and "the top
-  20 of 1982" does not work: Top-N=20 returns the twenty biggest French films
-  ever, from twenty different years.
-
-  Two consequences:
-
-  - **The same Top-N control means opposite things on two lists carrying the
-    same tag.** Top-N=10 gives France's ten biggest films ever and Spain's top
-    ten of *every* year — 760 films.
-  - **It undoes the reason France was built from per-year pages at all.** That
-    source was chosen over the all-time page *for era balance*; a global rank
-    with a Top-N cut reproduces the all-time page's recency skew exactly.
-
-  **Cheap to fix, contrary to first appearance.** Re-ranking looks impossible
-  because the admissions figures were deliberately not stored — but a global
-  rank already preserves the correct relative order *within* each year, so
-  per-year rank is a dense re-numbering of existing ranks grouped by year. No
-  re-fetch, no new data.
-
-  > Worth deciding at the same time whether **both** ranks are wanted. A global
-  > rank genuinely answers "the 100 biggest French films ever", which a per-year
-  > rank cannot; a per-year rank answers "the top 5 of each year", which a
-  > global one cannot. They are different questions and `list_movies` has room
-  > for only one. Per-year is the one the feature was designed around.
-
 - **Cannes Grand Jury Prize as a second Cannes list.** Today only the Palme
   d'Or is carried. The Grand Prix is the runner-up award and reaches a
   different set of films. Same Wikidata `P166` route as the Palme, so it is a
@@ -315,28 +282,19 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
-- **Where the database lives — decide before the Pi.** It sits at
-  `~/double-feature-data/double-feature.db`, reached by `DB_PATH`, because
-  parallel worktrees each got their own empty `data/` and real state landed in
-  whichever tree was last run. Merging per chunk removed that cause, so the
-  outside-the-repo path is now belt-and-braces rather than load-bearing, and
-  moving it back to `./data/` is a file move plus four lines of `.env`.
-
-  Two things must stay true whichever way it goes. The database is **never
-  committed** — it carries guests' names against their ballots in a public
-  repo, and the IMDb-derived numbers are licensed for use and not
-  redistribution. And on the Pi, `DB_PATH` must be **unset**: `docker-compose`
-  bind-mounts `./data:/app/data` and passes `.env` into the container, so an
-  absolute macOS path would send the container looking for a directory it does
-  not have. *(Raised by the owner 2026-08-01: "we might swap it back in before
-  sending to the pi".)*
-
 - **A Box-office vibe.** *(From field notes, 2026-08-01.)* One chip selecting
   the box-office lists, the way Awards selects the award lists. Deferred rather
   than done because it is worth one chip only once there is more than one such
   list to gather: France and Spain are seeded, the US is a live v5 item, and the
   vibe is more useful built on top of the finished set than added now and
   edited twice.
+
+  **It ships with Top-N=5 — decided 2026-08-02.** Unset, the chip selects 3,766
+  memberships across the three lists. All three now rank per-year, so a cut of 5
+  means "the top five of every year in three countries" — roughly 1,200 films
+  that stay era-balanced instead of collapsing onto the decades with the most
+  rows. Vibes already carry `topN` inside their filters blob, so this costs
+  nothing to set.
 
 - **Ranking a parametric list — the answer is yes, by rating, with a vote
   floor.** *(From field notes, 2026-08-01; investigated in v5.)*
@@ -357,11 +315,13 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   people actually ask, and `movies` already caches `vote_average` and
   `imdb_rating`, so no fetch is needed.
 
-  **It needs a vote floor or it repeats a mistake already recorded here.**
-  Sorting a filmography by raw rating puts an obscure early title with a
-  handful of votes at #1 — which is exactly why TMDB Top Rated 100 was dropped
-  and why Modern Classics needed 5,000 votes. `IMDB_VOTE_FLOOR` is the existing
-  precedent at 1,000. Decide the floor before building, not after.
+  **The floor is 1,000 IMDb votes — decided 2026-08-02.** Sorting a filmography
+  by raw rating puts an obscure early title with a handful of votes at #1, which
+  is exactly why TMDB Top Rated 100 was dropped and why Modern Classics needed
+  5,000. But 5,000 is the wrong number *here*: a filmography is 20–40 films, and
+  that floor would strip most pre-1960 work out of a Kurosawa or Ozu list —
+  which is the opposite failure. `IMDB_VOTE_FLOOR` at 1,000 is the existing
+  precedent and it is the one used. Recorded in `DECISIONS.md`.
 
 - **Let the reconciliation screen reach ALREADY-RESOLVED entries, not only
   those under review.** Today it lists `needs_review` rows. A row that matched
@@ -410,6 +370,25 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 Nobody has ruled on these. Where an item is scheduled, `ROADMAP.md` is the
 authority on its state — this file only says why it is worth doing.
+
+- **Where the database lives.** *(Moved here from v6, 2026-08-02 — deliberately
+  unscheduled rather than decided.)* It sits at
+  `~/double-feature-data/double-feature.db`, reached by `DB_PATH`, because
+  parallel worktrees each got their own empty `data/` and real state landed in
+  whichever tree was last run. Merging per chunk removed that cause, so the
+  outside-the-repo path is now belt-and-braces rather than load-bearing, and
+  moving it back to `./data/` is a file move plus four lines of `.env`. Nothing
+  breaks while it stays where it is, which is why it moved out of the version
+  rather than being settled.
+
+  Two things must stay true whichever way it eventually goes. The database is
+  **never committed** — it carries guests' names against their ballots in a
+  public repo, and the IMDb-derived numbers are licensed for use and not
+  redistribution. And on the Pi, `DB_PATH` must be **unset**: `docker-compose`
+  bind-mounts `./data:/app/data` and passes `.env` into the container, so an
+  absolute macOS path would send the container looking for a directory it does
+  not have. **That second point is the one to re-read before the Pi**, whichever
+  way the first is answered.
 
 - **A LICENSE, and the provenance of the seed lists.** *(Moved here from v5,
   2026-08-02, deliberately unscheduled rather than dropped.)* Not code, and

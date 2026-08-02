@@ -232,6 +232,17 @@ resolved to the US remake *Dinner for Schmucks*.
 **A note written to prevent a bug can cause it.** A recorded "invariant" about
 ceremony years was wrong for two of three editions.
 
+**A back-fill must never INVENT the ordering it back-fills.** The migration that
+split box-office ranks into per-year and overall filled `overall_rank` for every
+list matching its name pattern — including one that had been shipped with no
+global ordering on purpose, because its source has no cross-year figure. For a
+list already stored per-year it wrote row position as the global rank, which is
+year order wearing the name of a ranking. Every count checks out: the column is
+100% populated and densely numbered. Only the values give it away, and only if
+you read them — the top of that list is the earliest year, not the biggest film.
+A nullable column left NULL is a fact; a nullable column filled with an artifact
+is a lie that survives every guard.
+
 ---
 
 ## 4. Naming and vocabulary — settled
@@ -272,6 +283,22 @@ ceremony years was wrong for two of three editions.
 - **`rank IS NULL` must survive a top-N cut.** NULL means the list simply is not
   ranked; excluding those films would delete every unranked list from the pool
   rather than narrowing the ranked ones.
+- **Top-N means "the top N of each ranked GROUP", and the group is whatever the
+  list ranks within.** TSPDT ranks within itself, so its group is the list and
+  N=10 gives ten films. A box-office list ranks within a year, so its group is a
+  year and N=10 gives ten per year. That is one rule, not two, and it is the
+  rule that produces era balance — the reason per-year sources were chosen over
+  the all-time pages at all. What it does NOT do is predict the pool size, and
+  that is the part the interface owes the reader: the summary says which group
+  the cut applied to. **A second control for the other kind of cut was
+  considered and rejected** — on most of a selection one of the two would always
+  be a no-op, which is the lookalike-controls trap recorded above.
+- **A parametric list ranks by RATING, above a 1,000-vote floor.** Chronological
+  rank would make "top 10" mean "his first ten films", which is why the code
+  refused to rank these at all. Rating is a meaning that works. The floor is the
+  existing `IMDB_VOTE_FLOOR`, not Modern Classics' 5,000: a filmography is 20–40
+  films, and 5,000 votes would strip most pre-1960 work out of a Kurosawa or Ozu
+  list — the opposite failure to the one the floor exists to stop.
 - **Take every row a box-office page lists.** No admissions threshold of our
   own; the pages already apply one.
 - **Francophone by TMDB `original_language`, not by the country column.** The

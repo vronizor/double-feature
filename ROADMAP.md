@@ -18,14 +18,17 @@ themselves.
 | Item | State | Where it stands |
 |---|---|---|
 | Re-match an already-resolved entry | ⏳ ready | **The only unrecoverable failure in the app.** A confident wrong match is `resolved`, so it never reaches the review queue and nobody looks again. The backend already allows it — the resolve route has no status guard and `raw_title` is kept on every row — so this is UI only. See `BACKLOG.md` |
-| Rank a parametric list, by rating | ⏳ ready | Answered in v5: mechanism was never the blocker, and a slot list is wiped and rewritten on every apply so it has none of the stale-rank hazard. **Needs a vote floor decided first**, or it repeats why TMDB Top Rated 100 was dropped |
-| A Box-office vibe | ⏳ ready | One chip gathering France, España and US, the way Awards gathers the award lists. Waited for the US list, which now exists |
-| Where the database lives | 🗣 open | It sits outside the repo at `~/double-feature-data` because parallel worktrees each got an empty `data/`. Merging per chunk removed that cause, so moving it back is now a file move plus four lines of `.env`. **Decide before the Pi** — and note `DB_PATH` must be unset there, or the container hunts for a macOS path |
+| An invented `overall_rank` on Box-office US | ⏳ ready | Found 2026-08-02 by inspection. The back-fill migration writes a positional sequence as the global rank for any list that was ALREADY per-year, so the US list — which has no cross-year figure and was shipped with none on purpose — now claims a top-to-bottom ordering that is really just year order. Nothing reads the column yet, which is the only reason it is invisible. Clear it, and narrow the migration so it never invents an ordering the source did not give |
+| Rank a parametric list, by rating | ⏳ ready | Answered in v5: mechanism was never the blocker, and a slot list is wiped and rewritten on every apply so it has none of the stale-rank hazard. **Floor decided 2026-08-02: 1,000 IMDb votes**, matching the existing `IMDB_VOTE_FLOOR` rather than Modern Classics' 5,000, which would strip most pre-1960 work from a director's filmography |
+| A Box-office vibe | ⏳ ready | One chip gathering France, España and US, the way Awards gathers the award lists. Waited for the US list, which now exists. **Ships with Top-N=5** — decided 2026-08-02, because unset selects 3,766 memberships and all three lists are per-year, so 5 gives roughly 1,200 films that stay era-balanced |
+| Say what a Top-N cut actually did | ⏳ ready | Decided 2026-08-02. One control, one meaning — "the top N of each ranked group" — but the same N yields 10 films from TSPDT and ~820 from Box-office France, so the pool summary must say `top 10 per year` where the group is a year and `top 10` where it is the list. Label only; no second control, and `overall_rank` stays unread |
 | A design pass with Impeccable | 🗣 open | Not settled that it is wanted. `https://impeccable.style/` — a detector of 58 visual tells of machine-written UI, plus `/polish` and `/typeset` commands. See `BACKLOG.md` |
 
 Deferred, so they are not re-proposed early: **Unscheduled** — cultness,
-Letterboxd, household memory, nominees as well as winners, box office beyond
-France/Spain/US, and a LICENSE. All in `BACKLOG.md`.
+household memory, nominees as well as winners, box office beyond
+France/Spain/US, where the database lives, and a LICENSE. All in `BACKLOG.md`.
+Letterboxd is not deferred but **closed** — an explicit published refusal, not a
+"not yet".
 
 ---
 

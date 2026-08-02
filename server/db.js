@@ -389,6 +389,17 @@ export function migrate(target) {
  * No re-fetch, even though admissions were never stored: a global rank already
  * carries the correct RELATIVE order within each year, so per-year rank is a
  * dense renumbering of it grouped by year.
+ *
+ * KNOWN DEFECT, found 2026-08-02 -- the perYearAlready branch INVENTS the
+ * overall rank it writes. For a list already stored per-year there is no global
+ * ordering to recover, so `i + 1` is just row position under an ORDER BY rank:
+ * every year's #1 first, then every year's #2. Box-office US was shipped with
+ * no overall rank on purpose, because its source has no cross-year figure, and
+ * this filled it anyway -- its "biggest film ever" is now whatever topped 1946.
+ * Nothing reads overall_rank yet, which is the only reason it is invisible.
+ * The fix is to leave the column NULL on that branch and clear the rows already
+ * written; see ROADMAP.md. Do not "improve" this by deriving an ordering from
+ * anything else -- the figure it would need was deliberately never stored.
  */
 function splitBoxOfficeRanks(target) {
   const lists = target
