@@ -1835,3 +1835,55 @@ produced a single null entry and the modal would have rendered a membership
 that does not exist. Asserted, because it is invisible until it is not.
 
 Version 6.7.0.
+
+### 9.7 A parametric list can be ranked, by rating
+
+`applyParameter` left every rank NULL, and the code comment gave the reason:
+a filmography has no order of its own, and the obvious one is wrong, because
+chronological positions would make "top 10" mean "his first ten films".
+
+Rating is a meaning that works — "the top 10 Kurosawa" is a question people
+ask — and both numbers were already cached, so nothing new is fetched. Against
+the real library:
+
+```
+ #1  8.6  404,001  Seven Samurai (1954)
+ #2  8.4   72,758  High and Low (1963)
+ #3  8.3  103,236  Ikiru (1952)
+ #4  8.3   23,610  Red Beard (1965)
+ #5  8.2  153,447  Ran (1985)
+ …
+#30  5.6    2,850  The Most Beautiful (1944)
+#31  5.9      231  Song of the Horse (1970)
+#32  6.5      222  Those Who Make Tomorrow (1946)
+```
+
+The floor is **1,000 IMDb votes**, not the 5,000 the Modern Classics query
+needed. That number is right for a query sorting the whole of TMDB; it is wrong
+for a closed set of one director's films, where it would strip most pre-1960
+work out of a Kurosawa or an Ozu — deleting the canon to keep out noise the set
+does not contain. The bottom three rows above are the floor working: two films
+rating 5.9 and 6.5 on about 220 votes each sit *below* one rating 5.6 on 2,850.
+
+Ties break on vote count, which is why Ikiru precedes Red Beard at 8.3.
+
+> **Nothing is left NULL, and that is the subtle part.** A NULL rank means "this
+> list is not ranked", and a Top-N cut deliberately KEEPS those films —
+> otherwise asking for the top 100 would delete every unranked list from the
+> pool. Correct across lists, wrong within one. Leaving the unrateable films
+> NULL here would have made "top 10 Kurosawa" return ten good films *plus*
+> every obscure title that could not be rated. So they sink to the bottom of
+> the order instead of floating out of the cut, and the test asserts the
+> absence of NULLs directly rather than trusting the ordering to imply it.
+
+Two ways to be unrateable and both land there: too few votes, and no IMDb
+rating at all. The second is ordinary rather than exceptional — ratings arrive
+from a script run by hand, so a film fetched into the library today carries
+none until it is next run.
+
+The slot list ends up with distinct ranks and a single #1, so it reads as an
+end-to-end ranking rather than a per-year one, and the Top-N label calls it
+`top 10` rather than `top 10 per year`. That falls out of §9.5's rule without
+anything being special-cased.
+
+Version 6.8.0.

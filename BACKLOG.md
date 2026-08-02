@@ -282,33 +282,6 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 
 ## v6 — deferred with a decision
 
-- **Ranking a parametric list — the answer is yes, by rating, with a vote
-  floor.** *(From field notes, 2026-08-01; investigated in v5.)*
-
-  Nothing structural is in the way. `applyParameter` simply omits `rank` from
-  its insert, so every slot row is NULL, and `rank IS NULL` already means "this
-  list is not ranked" rather than "exclude it" — so a Top-N cut leaves director
-  night alone today, correctly.
-
-  It is also **safer here than on a query-backed list**. The v4 hazard was that
-  `materialiseList` reconciles and never updates a row that stayed, so ranks
-  freeze while membership moves. A parametric slot list has no such path: every
-  apply wipes the list and rewrites it, so ranks are recomputed by construction.
-
-  What blocked it was never mechanism, it was meaning, and the code comment
-  says so — chronological rank would make "top 10" mean "his first ten films".
-  But **rating is a meaning that works**: "the top 10 Kurosawa" is a question
-  people actually ask, and `movies` already caches `vote_average` and
-  `imdb_rating`, so no fetch is needed.
-
-  **The floor is 1,000 IMDb votes — decided 2026-08-02.** Sorting a filmography
-  by raw rating puts an obscure early title with a handful of votes at #1, which
-  is exactly why TMDB Top Rated 100 was dropped and why Modern Classics needed
-  5,000. But 5,000 is the wrong number *here*: a filmography is 20–40 films, and
-  that floor would strip most pre-1960 work out of a Kurosawa or Ozu list —
-  which is the opposite failure. `IMDB_VOTE_FLOOR` at 1,000 is the existing
-  precedent and it is the one used. Recorded in `DECISIONS.md`.
-
 - **Run Impeccable over the UI** (`https://impeccable.style/`). A design tool
   for AI-generated interfaces — "the missing design vocabulary for agents" —
   offering a command set (`/polish`, `/distill`, `/typeset`) and a detector of

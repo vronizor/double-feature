@@ -102,10 +102,60 @@ function slotList(db, vibe) {
  * Kurosawa that is 17 of 32, so half the night costs nothing. The rest are
  * fetched through getMovie, so the TMDB semaphore still caps concurrency.
  *
- * Rank is deliberately left NULL. A filmography has no ranking, and writing
- * chronological positions would make "top 10" mean "his first ten films",
- * which is not what anyone asking for a top 10 wants.
+ * Ranked by RATING, which is the meaning that works. A filmography has no
+ * order of its own, and the obvious one is wrong: writing chronological
+ * positions would make "top 10" mean "his first ten films". Rating makes "the
+ * top 10 Kurosawa" the question people actually ask, and the numbers are
+ * already cached, so no fetch is added.
+ *
+ * See rankByRating for the floor and for why nothing is left NULL.
  */
+/**
+ * Below this many IMDb votes a rating is noise rather than an opinion.
+ *
+ * The same floor `formatImdb` uses to decide whether a second rating is worth
+ * showing at all, and it is duplicated here for the same reason `topNLabel` is:
+ * that one lives in the browser bundle and the server cannot import it. If one
+ * moves, move both.
+ *
+ * 1,000 rather than the 5,000 the Modern Classics query needed. That number is
+ * right for a query sorting the whole of TMDB, where anything looser returns
+ * Gabriel's Inferno; it is wrong here. A filmography is twenty to forty films,
+ * and 5,000 votes would strip most pre-1960 work out of a Kurosawa or an Ozu —
+ * deleting the canon to keep out noise that a closed, human-curated set of one
+ * director's films does not contain in the first place.
+ */
+const IMDB_VOTE_FLOOR = 1000;
+
+/**
+ * Orders a slot list's films best-first, and ranks EVERY one of them.
+ *
+ * **Nothing may be left NULL, and that is the subtle part.** A NULL rank means
+ * "this list is not ranked" and a Top-N cut deliberately keeps those films —
+ * otherwise asking for the top 100 would delete every unranked list from the
+ * pool. Correct across lists, wrong within one: leaving the unrated films NULL
+ * here would make "top 10 Kurosawa" return ten good films PLUS every obscure
+ * title that could not be rated, which is the opposite of what was asked.
+ *
+ * So films that cannot be rated sink to the bottom of the order rather than
+ * floating out of the cut. Two ways to be unrateable and both land there: too
+ * few votes, and no IMDb rating at all — the latter is ordinary rather than
+ * exceptional, because ratings arrive from a script that is run by hand, so a
+ * film fetched into the library today has none until it is next run.
+ */
+function rankByRating(films) {
+  const rateable = (film) => film.imdb_rating > 0 && (film.imdb_votes ?? 0) >= IMDB_VOTE_FLOOR;
+
+  return [...films].sort((a, b) => {
+    if (rateable(a) !== rateable(b)) return rateable(a) ? -1 : 1;
+    if (!rateable(a)) return String(a.title).localeCompare(String(b.title));
+    // Votes break a rating tie: at equal scores the more-seen film is the
+    // better answer to "his best", and it keeps the order stable rather than
+    // letting SQLite's row order decide.
+    return b.imdb_rating - a.imdb_rating || (b.imdb_votes ?? 0) - (a.imdb_votes ?? 0);
+  });
+}
+
 export async function applyParameter(db, vibe, value) {
   if (!vibe.param) throw new Error(`"${vibe.name}" is not a parametric vibe`);
 
@@ -172,13 +222,26 @@ export async function applyParameter(db, vibe, value) {
     db.prepare('DELETE FROM list_movies WHERE list_id = ?').run(list.id);
 
     const insert = db.prepare(
-      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)
-       VALUES (?, ?, ?, ?, 'resolved')`,
+      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, rank, status)
+       VALUES (?, ?, ?, ?, ?, 'resolved')`,
     );
-    for (const film of films) {
-      const known = db.prepare('SELECT title, year FROM movies WHERE tmdb_id = ?').get(film.id);
-      if (!known) continue; // never cached and the fetch failed
-      insert.run(list.id, film.id, known.title ?? film.title, known.year ?? film.year);
+
+    // Read the ratings back AFTER the upserts above, so a film fetched moments
+    // ago is ranked on the same footing as one the library already held.
+    const known = db.prepare(
+      'SELECT title, year, imdb_rating, imdb_votes FROM movies WHERE tmdb_id = ?',
+    );
+    const rows = films
+      .map((film) => {
+        const row = known.get(film.id);
+        // Never cached and the fetch failed: there is no title to show and no
+        // rating to rank on, so the film is dropped rather than ranked last.
+        return row ? { ...row, id: film.id, title: row.title ?? film.title, year: row.year ?? film.year } : null;
+      })
+      .filter(Boolean);
+
+    for (const [index, row] of rankByRating(rows).entries()) {
+      insert.run(list.id, row.id, row.title, row.year, index + 1);
       count += 1;
     }
     db.prepare('UPDATE lists SET name = ?, materialised_at = datetime(\'now\') WHERE id = ?').run(

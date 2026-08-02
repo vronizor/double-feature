@@ -274,3 +274,61 @@ test('a vibe that takes no parameter refuses one', async () => {
     /not a parametric vibe/,
   );
 });
+
+/**
+ * A slot list is ranked by RATING, because the obvious alternative is wrong:
+ * chronological order would make "top 10" mean "his first ten films".
+ */
+test('a slot list is ranked by rating, and every film gets a rank', async () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+  const vibe = allVibes(db).find((v) => v.name === 'Director night');
+
+  const realFetch = globalThis.fetch;
+  const films = [
+    { id: 9101, title: 'Masterpiece', release_date: '1954-04-26' },
+    { id: 9102, title: 'Good One', release_date: '1963-03-01' },
+    { id: 9103, title: 'Obscure Early Short', release_date: '1943-01-01' },
+    { id: 9104, title: 'Also Unrated', release_date: '1946-01-01' },
+  ];
+  globalThis.fetch = async (input) =>
+    String(input).includes('/movie_credits')
+      ? { ok: true, status: 200, json: async () => ({ crew: films.map((f) => ({ ...f, job: 'Director' })), cast: [] }) }
+      : { ok: true, status: 200, json: async () => ({ id: 1, title: 'x' }) };
+
+  // The obscure short is rated 9.9 — higher than anything else — but on 12
+  // votes. Without a floor it would be this director's "best film", which is
+  // the exact failure that got TMDB Top Rated 100 dropped in v1.
+  db.exec(`INSERT INTO movies (tmdb_id, title, year, imdb_rating, imdb_votes) VALUES
+    (9101, 'Masterpiece',         1954, 8.6, 404001),
+    (9102, 'Good One',            1963, 8.4,  72758),
+    (9103, 'Obscure Early Short',  1943, 9.9,     12),
+    (9104, 'Also Unrated',         1946, NULL,  NULL)`);
+
+  const { applyParameter } = await import('../server/parametric.js');
+  const applied = await applyParameter(db, vibe, { id: 5026, name: 'A Director' });
+  assert.equal(applied.count, 4);
+
+  const ranked = db
+    .prepare('SELECT tmdb_id, rank FROM list_movies WHERE list_id = ? ORDER BY rank')
+    .all(applied.list_id);
+
+  assert.deepEqual(
+    ranked.map((r) => r.tmdb_id),
+    [9101, 9102, 9104, 9103],
+    'rated films first by score, then the unrateable two alphabetically — ' +
+      '"Also Unrated" before "Obscure Early Short", which is the 9.9 on 12 votes',
+  );
+  assert.deepEqual(ranked.map((r) => r.rank), [1, 2, 3, 4]);
+
+  // The load-bearing assertion. A NULL rank means "this list is not ranked" and
+  // a Top-N cut deliberately KEEPS those films, so leaving the unrateable ones
+  // NULL would make "top 2" return the two best plus both duds.
+  assert.equal(
+    db.prepare('SELECT COUNT(*) AS n FROM list_movies WHERE list_id = ? AND rank IS NULL').get(applied.list_id).n,
+    0,
+    'nothing is left NULL, or a Top-N cut would not cut',
+  );
+
+  globalThis.fetch = realFetch;
+});

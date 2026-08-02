@@ -1,6 +1,6 @@
 {
   "name": "double-feature",
-  "version": "6.7.0",
+  "version": "6.8.0",
   "description": "Self-hosted movie-night app: draw random films from curated lists, then pick one by ranked-choice vote.",
   "type": "module",
   "private": true,
