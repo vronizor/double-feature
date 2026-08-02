@@ -323,33 +323,6 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   which is the opposite failure. `IMDB_VOTE_FLOOR` at 1,000 is the existing
   precedent and it is the one used. Recorded in `DECISIONS.md`.
 
-- **Let the reconciliation screen reach ALREADY-RESOLVED entries, not only
-  those under review.** Today it lists `needs_review` rows. A row that matched
-  *confidently but wrongly* is `resolved`, so it never appears there and nobody
-  ever looks at it again.
-
-  That makes the two failure modes asymmetric in a way the guards do not
-  reflect: an unmatched entry sits in a visible queue and can be fixed, while a
-  wrong match is invisible and permanent. The match-rate floor guards the
-  recoverable failure; nothing guards the unrecoverable one.
-
-  > **The two examples this item used to cite are FIXED and must not be quoted
-  > as live.** *Marco* (2024) resolving to the Malayalam film of identical
-  > title and year, and *Tierra de Nadie* to *Mob Land*, were both corrected by
-  > the Spanish-language candidate preference at the end of v4 — verified
-  > against the database 2026-08-01: they now resolve to *Marco* (`es`) and
-  > *Barren Land* (Spain/Mexico). Left here because the paragraph misled a
-  > later session into reporting them as live defects. **The problem is real;
-  > those instances are not.** The measured false-positive rate of about 3–4%
-  > on a 57-pair inspection was taken *before* that fix and is unmeasured
-  > after — which is itself the argument for this item, since nothing would
-  > tell you if it had got worse.
-
-  Wanted: browse a list's resolved entries, see what each matched to, and
-  re-open one for correction. Cheap in principle — `list_movies` already stores
-  `candidates_json`, and the screen already knows how to re-resolve a row.
-  *(Raised by the owner while inspecting the Spain seed.)*
-
 - **Run Impeccable over the UI** (`https://impeccable.style/`). A design tool
   for AI-generated interfaces — "the missing design vocabulary for agents" —
   offering a command set (`/polish`, `/distill`, `/typeset`) and a detector of

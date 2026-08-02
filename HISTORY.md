@@ -1630,3 +1630,54 @@ meaning the source gave no cross-year figure, rather than as a column awaiting
 a back-fill. That distinction is the whole defect.
 
 Version 6.2.0.
+
+### 9.2 The wrong match becomes visible
+
+The reconciliation screen showed only the **answer** — the film a row points
+at — which is why a wrong match was permanent. An entry that failed to match
+sits in a visible queue and gets fixed; one that matched the wrong film is
+stored `resolved`, looks exactly like the 7,000 correct rows around it, and is
+never seen again. The match-rate floor guards the recoverable failure and
+nothing guarded the other.
+
+Three things, and the backend needed none of them: the resolve route never had
+a status guard, and `raw_title` is kept on every row, so the capability was
+always there and only the screen was missing.
+
+**Say what a row matched FROM**, wherever that disagrees with what it matched
+to. On every row it would be noise, since most agree exactly; where they
+disagree is where the mistakes are. A matching title with a different year is
+the case that matters most and looks wrong least — *Psycho* 1960 against
+*Psycho* 1998.
+
+**A queue of matches worth checking**, which re-runs *the matcher's own*
+confidence rule against what each row actually ended up pointing at. The
+question is "would the matcher wave this pair through today", and reusing
+`scoreCandidate` rather than inventing a second notion of agreement is the
+whole point — a bespoke rule could disagree with the matcher in either
+direction and neither answer would mean anything. Measured: **458 of 7,358
+resolved rows, 6.2%**, concentrated in España (13%), France (10%) and Criterion
+(5%). A queue that can actually be worked through.
+
+**Re-match reuses the reconciliation editor** rather than getting its own. It
+is the same act — point this raw title at the right film — and the only
+differences are what the header says and that leaving is a cancel rather than
+a drop.
+
+> **The flag is a prompt, never a verdict**, and the live data says so loudly.
+> Most flagged rows are *correct* matches made across a title variant: *Three
+> Men and a Baby* → *3 Men and a Baby*, *Por Un Puñado De Dólares* → *A Fistful
+> of Dollars*. Fuzzy matching is accepted on the Spanish list by decision, so a
+> flag there frequently marks a match that is both loose and right. Narrowing
+> it would need TMDB's alternative titles per row, which is a network call per
+> row and a different feature.
+
+Two smaller corrections fell out. `candidates_json` is cleared when a row
+resolves, so the backlog's claim that re-matching could offer the stored
+candidates was wrong — a re-match works from search and paste, which is right
+anyway, since the stored candidates are where the wrong answer came from. And
+the suspect filter runs in JS after the rows are read, so it must not be handed
+a page: filtering the first 200 rows alphabetically would have quietly reported
+"3 worth checking" on a 1,469-row list.
+
+Version 6.3.0.

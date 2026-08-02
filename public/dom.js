@@ -257,6 +257,31 @@ export function ratingLine(movie) {
  * so it travels with that item and can only ever appear at the start of a
  * line, never dangling at the end of one.
  */
+/**
+ * Whether a resolved entry's source text disagrees with the film it matched.
+ *
+ * The reconciliation screen shows only the ANSWER — the film a row points at —
+ * which is exactly why a wrong match is invisible: "Marco" resolving to the
+ * wrong "Marco" looks like an ordinary row. Showing the raw text on every row
+ * would be noise, since most match exactly, so it appears where the two
+ * disagree, which is where the mistakes are.
+ *
+ * Either side can disagree. A different title is the obvious case; a matching
+ * title with a different year is *Psycho* (1960) against *Psycho* (1998), which
+ * is the case most likely to be wrong and least likely to look it.
+ *
+ * `original_title` counts as agreement: a list writing "Shichinin no samurai"
+ * against TMDB's "Seven Samurai" is the same film under its own name, not a
+ * mismatch worth a host's attention.
+ */
+export function matchDiffers(entry) {
+  if (!entry?.raw_title) return false;
+  const titleAgrees =
+    entry.raw_title === entry.title || entry.raw_title === entry.original_title;
+  const yearAgrees = !entry.raw_year || !entry.year || entry.raw_year === entry.year;
+  return !titleAgrees || !yearAgrees;
+}
+
 export function metaLine(...parts) {
   return parts
     .flat()

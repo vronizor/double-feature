@@ -197,6 +197,66 @@ test('the host can resolve a flagged entry by picking a candidate', async () => 
   assert.ok(!after.body.entries.some((entry) => entry.raw_title === 'Psycho'));
 });
 
+/**
+ * The unrecoverable failure: a row that matched CONFIDENTLY but wrongly is
+ * stored as resolved, so it never reaches the review queue and nothing in the
+ * app would ever show it to you again.
+ */
+test('a resolved entry is flagged for checking when the matcher would not confirm it today', async () => {
+  const { body } = await call(`/api/lists/${listId}/entries`);
+
+  const vertigo = body.entries.find((entry) => entry.raw_title === 'Vertigo');
+  assert.equal(vertigo.status, 'resolved');
+  assert.equal(vertigo.suspect, false, 'an exact title and year agreement is not flagged');
+
+  // "Psycho" was imported with no year at all, which is why it was ambiguous
+  // in the first place — and a year is exactly what the matcher needs before
+  // it will confirm anything. So the row stays worth a look even now that a
+  // human has resolved it.
+  const psycho = body.entries.find((entry) => entry.raw_title === 'Psycho');
+  assert.equal(psycho.status, 'resolved');
+  assert.equal(psycho.suspect, true);
+
+  const filtered = await call(`/api/lists/${listId}/entries?status=suspect`);
+  const flagged = filtered.body.entries.map((entry) => entry.raw_title);
+  assert.ok(flagged.includes('Psycho'));
+  assert.ok(!flagged.includes('Vertigo'));
+  assert.ok(
+    filtered.body.entries.every((entry) => entry.status === 'resolved'),
+    'the flag is only ever set on resolved rows — an unresolved one is already queued',
+  );
+});
+
+test('an already-resolved entry can be re-matched to a different film', async () => {
+  const before = await call(`/api/lists/${listId}/entries`);
+  const psycho = before.body.entries.find((entry) => entry.raw_title === 'Psycho');
+  assert.equal(psycho.tmdb_id, 104, 'starts on the 1960 film');
+
+  // The resolve route has no status guard, deliberately: correcting a wrong
+  // match is the same act as making one, and raw_title is kept on every row
+  // precisely so it stays possible.
+  const again = await call(`/api/lists/entries/${psycho.id}/resolve`, {
+    method: 'POST',
+    body: { tmdb_id: 105 },
+  });
+  assert.equal(again.status, 200);
+  assert.equal(again.body.status, 'resolved');
+
+  const after = await call(`/api/lists/${listId}/entries`);
+  const moved = after.body.entries.find((entry) => entry.raw_title === 'Psycho');
+  assert.equal(moved.tmdb_id, 105, 'now points at the 1998 remake');
+  assert.equal(moved.year, 1998);
+
+  // Put it back, so the pool the later tests draw from is the one they expect.
+  await call(`/api/lists/entries/${psycho.id}/resolve`, { method: 'POST', body: { tmdb_id: 104 } });
+  const restored = await call(`/api/lists/${listId}/entries`);
+  assert.equal(
+    restored.body.entries.find((entry) => entry.raw_title === 'Psycho').tmdb_id,
+    104,
+    're-matching works in both directions',
+  );
+});
+
 test('activating the list fills the draw pool', async () => {
   await call(`/api/lists/${listId}`, { method: 'PATCH', body: { is_active: true } });
 

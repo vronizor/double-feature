@@ -17,7 +17,6 @@ themselves.
 
 | Item | State | Where it stands |
 |---|---|---|
-| Re-match an already-resolved entry | ⏳ ready | **The only unrecoverable failure in the app.** A confident wrong match is `resolved`, so it never reaches the review queue and nobody looks again. The backend already allows it — the resolve route has no status guard and `raw_title` is kept on every row — so this is UI only. See `BACKLOG.md` |
 | Rank a parametric list, by rating | ⏳ ready | Answered in v5: mechanism was never the blocker, and a slot list is wiped and rewritten on every apply so it has none of the stale-rank hazard. **Floor decided 2026-08-02: 1,000 IMDb votes**, matching the existing `IMDB_VOTE_FLOOR` rather than Modern Classics' 5,000, which would strip most pre-1960 work from a director's filmography |
 | A Box-office vibe | ⏳ ready | One chip gathering France, España and US, the way Awards gathers the award lists. Waited for the US list, which now exists. **Ships with Top-N=5** — decided 2026-08-02, because unset selects 3,766 memberships and all three lists are per-year, so 5 gives roughly 1,200 films that stay era-balanced |
 | Say what a Top-N cut actually did | ⏳ ready | Decided 2026-08-02. One control, one meaning — "the top N of each ranked group" — but the same N yields 10 films from TSPDT and ~820 from Box-office France, so the pool summary must say `top 10 per year` where the group is a year and `top 10` where it is the list. Label only; no second control, and `overall_rank` stays unread |
