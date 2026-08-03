@@ -472,6 +472,18 @@ label { display: block; }
   justify-content: center;
 }
 
+/* TWO COLUMNS ON A PHONE — a deliberate experiment, easy to revert by deleting
+   this block. A 390px screen leaves ~358px of content, and a 190px minimum
+   needs 396px for two tracks, so every grid fell to a single full-width card:
+   one poster per screen, ~537px tall, on a tab whose job is browsing. 150px
+   fits two at ~171px each. The lineup is included because a double feature is
+   two films and seeing both at once is the whole point of the screen. */
+@media (max-width: 560px) {
+  .movie-grid,
+  .movie-grid.is-vote { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .movie-grid.is-lineup { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
+
 .movie {
   position: relative; background: var(--bg-raised); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column;

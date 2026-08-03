@@ -535,7 +535,18 @@ export function renderVibeChips(
             'button',
             {
               class: `chip chip--vibe${editing ? ' chip--deleting' : ''}`,
-              dataset: { state: active && !editing ? 'include' : 'off' },
+              // Highlighted on the same condition that shows the value, or the
+              // chip contradicts itself: reading "Director: Steven Spielberg"
+              // in the unselected grey while that is exactly what the pool is
+              // drawing from. The "custom" note on the label above is what says
+              // the pool has been hand-edited since; the chip only claims that
+              // its own list is in play.
+              dataset: {
+                state:
+                  !editing && (active || (vibe.slot?.value && poolState.isSelected(vibe.slot.list_id)))
+                    ? 'include'
+                    : 'off',
+              },
               title: editing
                 ? `Delete the "${vibe.name}" vibe`
                 : active && !vibe.param
@@ -949,7 +960,7 @@ const chosen = (group) => (group?.include?.length ?? 0) + (group?.exclude?.lengt
 export function renderFilterPanel(
   filters,
   facets,
-  { onChipChange, onValueChange, onClear, lists = null, onTopNChange = null },
+  { onChipChange, onValueChange, onClear, lists = null, onTopNChange = null, onToggleChange = null },
 ) {
   return h(
     'div',
@@ -1045,7 +1056,7 @@ export function renderFilterPanel(
         checked: filters.includeWatched,
         onChange: (event) => {
           filters.includeWatched = event.target.checked;
-          onValueChange();
+          (onToggleChange ?? onValueChange)();
         },
       }),
       h('span', {}, 'Include films already marked watched (allow rewatches)'),
@@ -1059,7 +1070,7 @@ export function renderFilterPanel(
         checked: filters.awardWinners,
         onChange: (event) => {
           filters.awardWinners = event.target.checked;
-          onValueChange();
+          (onToggleChange ?? onValueChange)();
         },
       }),
       h('span', {}, '🏆 Only films that won an award'),

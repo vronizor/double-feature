@@ -2559,3 +2559,46 @@ repaints on its own now, like the pool count, and so does the film/films word
 beside it.
 
 Version 7.17.0.
+
+### 10.18 One stale render, reported three different ways
+
+All three came from one sequence — Spielberg, then award winners, then draw,
+then Clear all — and all three are the same shape: something rendered once from
+state that changed afterwards.
+
+**The Draw button died and stayed dead.** After "Clear all" the count read
+"1 new film matches" beside a Draw button that could not be clicked. The button's
+`disabled` came from `state.poolCount` at paint time, and `refreshCount` is
+async — "Clear all" did not await it, so the repaint used the previous count of
+zero and nothing re-evaluated the button when the real number arrived. Removing
+the same film from its card worked, and that is the tell: that path awaited the
+count before painting. `paintCount` now refreshes the button's disabled state
+too, which fixes every path rather than the one that was reported.
+
+**The "custom" label lagged a whole interaction behind.** Ticking "only films
+that won an award" demoted the pool but left the label claiming the vibe until
+something else repainted — usually the next draw, which is why it looked like
+drawing had caused it. The range inputs deliberately do not repaint, because a
+repaint per keystroke throws the caret out of the field; a checkbox holds no
+caret, so it gets the full repaint and the label is honest immediately.
+
+**The parametric chip went grey while still being what was drawn.** v7.17 made
+it keep its VALUE when the pool is hand-edited, and stopped there — so it read
+"Director: Steven Spielberg" in the unselected grey while that was exactly what
+the pool was drawing from. The highlight now follows the same condition as the
+value: this vibe's slot list is in play. The "custom" note on the label above is
+what says the pool has been edited since.
+
+### 10.19 Two columns on a phone
+
+A 390px screen leaves ~358px of content, and a 190px track minimum needs 396px
+for two — so every grid collapsed to a single full-width card, one ~537px
+poster per screen, on a tab whose job is browsing. Below 560px the minimum
+drops to 150px, which measures `171px 171px` against the old rule's single
+`358px`. The lineup is included: a double feature is two films and seeing both
+at once is the point of the screen.
+
+**Deliberately a media query and nothing else**, so reverting is deleting one
+block — it is an experiment, and the phone is the only place it can be judged.
+
+Version 7.18.0.

@@ -181,6 +181,7 @@ export async function renderDraw(container) {
       if (token === countToken) {
         state.poolCount = count;
         paintCount();
+        paintDrawButton();
       }
     } catch {
       // A failed count is not worth interrupting the host over.
@@ -199,6 +200,13 @@ export async function renderDraw(container) {
     drawButtonNode.textContent = lineup.movies.length
       ? `Draw ${state.size} more`
       : `Draw ${state.size}`;
+    // The DISABLED state too, and that is the important half. `refreshCount`
+    // is async; paths that do not await it — "Clear all" was one — repaint with
+    // the previous count and render the button dead, then update the number
+    // beside it and leave the button dead. Observed: "1 new film matches" next
+    // to a Draw button that could not be clicked, while removing the same film
+    // from its card worked, because THAT path awaited the count first.
+    drawButtonNode.disabled = state.busy || state.poolCount === 0;
   }
 
   let unitNode = null;
@@ -454,6 +462,16 @@ export async function renderDraw(container) {
         poolState.markCustom();
         refreshCount();
         paintPills();
+      },
+      // Checkboxes, unlike the range inputs beside them, hold no caret — so
+      // they can afford the full repaint that keeps the "custom" label honest.
+      // Without it, ticking "only award winners" demoted the pool while the
+      // label went on claiming the vibe until something else happened to
+      // repaint, which was usually the next draw.
+      onToggleChange: () => {
+        poolState.markCustom();
+        refreshCount();
+        paint();
       },
       onClear: () => {
         poolState.clearFilters();
