@@ -70,7 +70,18 @@ export async function renderDraw(container) {
     // about by the time you come back.
     editingVibes: false,
     size: 2,
+    // Adding a named film is discoverable-but-rare: wanted often enough to
+    // deserve a permanent button, not often enough to deserve half the screen
+    // standing empty. Open state lives here rather than in the render closure
+    // so adding one film does not close the panel on the host mid-way through
+    // adding a second.
+    addFilmOpen: false,
     searchResults: [],
+    // Set when the search box was given bare digits, which are ambiguous —
+    // 1917, 300, 2012 and 1408 are all films AND all plausible TMDB ids. The
+    // search runs, and this offers the id reading alongside it rather than
+    // choosing one silently.
+    idOffer: null,
     anonymous: false,
     poolCount: null,
     busy: false,
@@ -701,8 +712,21 @@ export async function renderDraw(container) {
         ),
         // Search hits your own curated lists just as often as it hits
         // something nobody's imported — worth knowing which before adding.
-        candidate.lists
-          ? h('div', { class: 'faint' }, `Already on: ${candidate.lists}`)
+        // `lists` is an array of membership OBJECTS ({ name, rank, year,
+        // by_year }), not the comma-joined string this once interpolated —
+        // which rendered "Already on: [object Object]" for every film that was
+        // on one. Names only here: the ranks belong in the detail overlay,
+        // where there is room to say what a rank is of.
+        //
+        // Length, not truthiness: a film known to the library but on no list
+        // comes back as an empty array, which is truthy and printed nothing
+        // after the colon.
+        candidate.lists?.length
+          ? h(
+              'div',
+              { class: 'faint' },
+              `Already on: ${candidate.lists.map((entry) => entry.name).join(', ')}`,
+            )
           : h('div', { class: 'faint' }, 'Not on any of your lists'),
         candidate.overview ? h('p', { class: 'candidate-overview' }, candidate.overview) : null,
         h(
@@ -736,27 +760,116 @@ export async function renderDraw(container) {
     }
   }
 
+  /**
+   * Adding a film by name, behind one permanent secondary button.
+   *
+   * It used to sit in a `1fr 1fr` grid beside the draw controls, which sized it
+   * wrong in both directions at once: half the screen standing empty on the
+   * many nights nobody uses it, and a 480px column crushing the search results
+   * on the nights they do. Demoting it to a button that expands to full width
+   * fixes both, because the two states no longer have to share a size.
+   */
   function addFilmPanel() {
+    const toggle = h(
+      'button',
+      {
+        class: state.addFilmOpen ? 'btn-sm' : 'btn-sm add-film-toggle',
+        'aria-expanded': state.addFilmOpen ? 'true' : 'false',
+        onClick: () => {
+          state.addFilmOpen = !state.addFilmOpen;
+          if (!state.addFilmOpen) {
+            state.searchResults = [];
+            state.idOffer = null;
+          }
+          paint();
+        },
+      },
+      state.addFilmOpen ? 'Hide' : '+ Add a specific film',
+    );
+
+    const row = h(
+      'div',
+      { class: 'row' },
+      toggle,
+      state.addFilmOpen
+        ? null
+        : h('span', { class: 'faint' }, 'someone already has a proposal — no draw required'),
+    );
+
+    if (!state.addFilmOpen) return row;
+
     const results = h('div', { class: 'candidate-list' });
     const renderResults = () => {
-      clear(results).append(...state.searchResults.map((candidate) => searchResultCard(candidate)));
+      clear(results).append(
+        // The bare-digits offer, when there is one, sits ABOVE the search hits:
+        // it is the reading the host had to type an id to get, so burying it
+        // under a title match would defeat the point of offering it.
+        state.idOffer
+          ? h(
+              'div',
+              { class: 'row id-offer' },
+              h(
+                'span',
+                { class: 'muted' },
+                `“${state.idOffer.raw}” could also be a TMDB id.`,
+              ),
+              h('span', { class: 'spacer' }),
+              h(
+                'button',
+                {
+                  class: 'btn-sm',
+                  onClick: () => addToLineup(state.idOffer.tmdbId, 'movie'),
+                },
+                `Add movie id ${state.idOffer.tmdbId}`,
+              ),
+            )
+          : null,
+        ...state.searchResults.map((candidate) => searchResultCard(candidate)),
+      );
     };
     renderResults();
 
+    /**
+     * One box for all three ways in, because they were never really different
+     * questions — "which film" was just being asked three times.
+     *
+     * A URL is unambiguous and adds the film outright. Bare digits are NOT:
+     * every one of 1917, 300, 2012 and 1408 is both a real title and a
+     * plausible id, so `parseTmdbInput` reading them as an id would quietly
+     * add the wrong film to somebody's night. Those search like anything else
+     * and get the id reading offered beside the results instead.
+     */
     const searchInput = h('input', {
       type: 'search',
-      placeholder: 'Search TMDB…',
-      style: 'max-width:320px',
+      placeholder: 'Search TMDB, or paste a URL or id…',
       onKeydown: async (event) => {
         if (event.key !== 'Enter') return;
-        const { results: found } = await api.searchTmdb(event.target.value);
-        state.searchResults = found;
-        renderResults();
+        const raw = event.target.value.trim();
+        if (!raw) return;
+
+        const parsed = parseTmdbInput(raw);
+        const bareDigits = /^\d+$/.test(raw);
+        if (parsed && !bareDigits) {
+          // No need to clear the box on success: adding repaints the panel, and
+          // a failed add is one the host will want to edit rather than retype.
+          await addToLineup(parsed.tmdbId, parsed.mediaType);
+          return;
+        }
+
+        try {
+          const { results: found } = await api.searchTmdb(raw);
+          state.searchResults = found;
+          state.idOffer = bareDigits ? { raw, tmdbId: Number(raw) } : null;
+          if (found.length === 0 && !bareDigits) toast(`Nothing found for “${raw}”`, 'error');
+          renderResults();
+        } catch (error) {
+          toast(error.message, 'error');
+        }
       },
     });
 
-    // Collapsed by default — genuinely rare (a proposal not on TMDB at all),
-    // so it shouldn't compete for attention with search, the normal path.
+    // Genuinely rare — a proposal not on TMDB at all — so it stays folded even
+    // inside a panel the host has already opened deliberately.
     let manualOpen = false;
     let manualTitle = '';
     let manualYear = '';
@@ -803,70 +916,51 @@ export async function renderDraw(container) {
 
     return h(
       'div',
-      { class: 'card stack' },
-      h('h2', {}, 'Add a specific film'),
-      h(
-        'p',
-        { class: 'muted' },
-        'For when someone already has a proposal — search TMDB directly, no draw required.',
-      ),
+      { class: 'stack' },
+      row,
       h(
         'div',
-        { class: 'row' },
-        searchInput,
-        h('span', { class: 'faint' }, 'press Enter'),
+        { class: 'card stack' },
         h(
-          'button',
-          {
-            class: 'btn-sm',
-            onClick: () => {
-              searchInput.value = '';
-              state.searchResults = [];
-              renderResults();
-              searchInput.focus();
+          'div',
+          { class: 'row' },
+          searchInput,
+          h(
+            'button',
+            {
+              class: 'btn-sm',
+              onClick: () => {
+                searchInput.value = '';
+                state.searchResults = [];
+                state.idOffer = null;
+                renderResults();
+                searchInput.focus();
+              },
             },
-          },
-          'Clear',
+            'Clear',
+          ),
         ),
-      ),
-      results,
-      h(
-        'div',
-        { class: 'row' },
-        h('input', {
-          type: 'text',
-          placeholder: 'Or paste a TMDB URL or id (movie or TV)…',
-          style: 'max-width:340px',
-          onKeydown: async (event) => {
-            if (event.key !== 'Enter') return;
-            const parsed = parseTmdbInput(event.target.value);
-            if (!parsed) {
-              toast('Paste a themoviedb.org/movie/… or /tv/… URL, or a bare numeric id', 'error');
-              return;
-            }
-            await addToLineup(parsed.tmdbId, parsed.mediaType);
-            event.target.value = '';
-          },
-        }),
         h(
           'span',
           { class: 'faint' },
-          'press Enter — for TV-catalogued titles search can’t find',
+          'press Enter — a themoviedb.org URL adds the film outright, ' +
+            'which is the way in for TV-catalogued titles search cannot find',
         ),
-      ),
-      h(
-        'button',
-        {
-          class: 'expand-link',
-          style: 'margin:4px 0 0',
-          onClick: () => {
-            manualOpen = !manualOpen;
-            renderManual();
+        results,
+        h(
+          'button',
+          {
+            class: 'expand-link',
+            style: 'margin:4px 0 0',
+            onClick: () => {
+              manualOpen = !manualOpen;
+              renderManual();
+            },
           },
-        },
-        manualOpen ? 'Hide manual entry' : 'Still can’t find it? Add it manually',
+          'Still can’t find it? Add it manually',
+        ),
+        manualBody,
       ),
-      manualBody,
     );
   }
 
@@ -882,9 +976,15 @@ export async function renderDraw(container) {
       );
     }
 
+    // Deliberately NOT `.stack`. A sticky element is offset within its
+    // containing block, and for a grid item that is its own grid area — which
+    // is exactly its own height, so it has nowhere to travel and never sticks
+    // at all. Measured: the bar sat 2,578px down the page with `position:
+    // sticky` computed and doing nothing. A block wrapper gives it the height
+    // of the grid above it to move through.
     return h(
       'div',
-      { class: 'stack' },
+      { class: 'lineup-wrap' },
       h(
         'div',
         { class: 'movie-grid is-lineup' },
@@ -901,45 +1001,54 @@ export async function renderDraw(container) {
           }),
         ),
       ),
+      // Publish is the point of the screen and it used to sit under every card
+      // in the lineup — four screens down on a phone with five films staged.
+      // Sticky, in the same shape the vote screen already uses for the same
+      // reason: the primary action does not get pushed off the page by the
+      // content it acts on.
       h(
         'div',
-        { class: 'card stack' },
-        h(
-          'label',
-          { class: 'check' },
-          h('input', {
-            type: 'checkbox',
-            checked: state.anonymous,
-            onChange: (event) => {
-              state.anonymous = event.target.checked;
-              paint();
-            },
-          }),
-          h(
-            'span',
-            {},
-            'Anonymous voting',
-            h(
-              'span',
-              { class: 'faint' },
-              ' — once closed, individual ballots stay hidden from everyone, including you. ' +
-                'Only totals are shown.',
-            ),
-          ),
-        ),
+        { class: 'lineup-sticky' },
         h(
           'div',
-          { class: 'row' },
+          { class: 'card stack' },
           h(
-            'button',
-            {
-              class: 'btn-primary',
-              disabled: state.busy || lineup.movies.length === 0,
-              onClick: doPublish,
-            },
-            'Publish & open voting',
+            'label',
+            { class: 'check' },
+            h('input', {
+              type: 'checkbox',
+              checked: state.anonymous,
+              onChange: (event) => {
+                state.anonymous = event.target.checked;
+                paint();
+              },
+            }),
+            h(
+              'span',
+              {},
+              'Anonymous voting',
+              h(
+                'span',
+                { class: 'faint' },
+                ' — once closed, individual ballots stay hidden from everyone, including you. ' +
+                  'Only totals are shown.',
+              ),
+            ),
           ),
-          h('span', { class: 'faint' }, `${plural(lineup.movies.length, 'film')} on the ballot`),
+          h(
+            'div',
+            { class: 'row' },
+            h(
+              'button',
+              {
+                class: 'btn-primary',
+                disabled: state.busy || lineup.movies.length === 0,
+                onClick: doPublish,
+              },
+              'Publish & open voting',
+            ),
+            h('span', { class: 'faint' }, `${plural(lineup.movies.length, 'film')} on the ballot`),
+          ),
         ),
       ),
     );
@@ -1048,7 +1157,8 @@ export async function renderDraw(container) {
         'div',
         { class: 'stack' },
         liveSessionBanner(),
-        h('div', { class: 'tools-row' }, drawControls(), addFilmPanel()),
+        drawControls(),
+        addFilmPanel(),
         h(
           'div',
           { class: 'row' },

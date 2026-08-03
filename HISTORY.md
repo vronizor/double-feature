@@ -2045,3 +2045,53 @@ it. The confirm dialogs were stubbed rather than clicked — a real modal blocks
 the automation channel outright.
 
 Version 7.2.0.
+
+### 10.3 Publish stops being the last thing on the page
+
+**A sticky bar does not stick if its parent is a grid.** That is the finding
+worth carrying forward, and it cost the first attempt at this. A sticky element
+is offset within its containing block, and for a grid item the containing block
+is its own grid area — the same height as the item, so there is nowhere to
+travel. `position: sticky` computed correctly, the class was right, and the bar
+sat 2,578px down the page doing nothing. The lineup's wrapper is a plain block
+now, which gives the bar the height of the grid above it to move through.
+Measured after: pinned in the viewport across a 2,117px page at three different
+scroll positions.
+
+Publish had been the last thing after every card in the lineup — four screens
+down on a phone with five films staged, which is a strange place to put the
+point of the screen.
+
+**"Add a specific film" stopped claiming half the tab.** It sat in a `1fr 1fr`
+grid beside the draw controls on the reasoning that neither had priority, and
+that was wrong in both directions at once: half the screen stood empty on the
+many nights nobody adds a named film, and a 480px column crushed the search
+results on the nights they do. One permanent secondary button that expands to
+full width lets the two states stop sharing a size. As a side effect the vibe
+chips now fit on one row instead of three.
+
+Its three inputs became one box, and the interesting part is what that
+required. A themoviedb.org URL is unambiguous and adds the film outright. **Bare
+digits are not**: 1917, 300, 2012 and 1408 are all real titles AND plausible
+TMDB ids, so letting `parseTmdbInput` read them as an id would have quietly put
+the wrong film on somebody's night — searching `1917` returns the Sam Mendes
+film first, and the id reading would have skipped it. Bare digits therefore
+search like any other text, and the id reading is *offered* above the results
+rather than chosen. The panel's open state moved into view state so that adding
+one film does not close the panel on a host part-way through adding a second.
+
+**One defect fixed rather than reported, deliberately.** `candidate.lists` is an
+array of membership objects and the search card interpolated it into a string,
+so every film already on one of your lists read `Already on: [object Object]`.
+It was in the panel this chunk rebuilt, it was one line, and shipping the
+rebuilt panel with that on screen was not defensible. Named as an exception
+here because the standing rule is that findings are reported, not folded in.
+The same line also treated an empty array as truthy, printing nothing after the
+colon for a film known to the library but on no list.
+
+Verified in a browser against a copy of the real database: the bar pins across
+a long lineup, a URL adds outright ("Added 12 Angry Men"), `1917` returns the
+film with the id offered beside it, and the membership line reads
+`Already on: BAFTA — Best Film, Modern Classics (last 10 years)`.
+
+Version 7.3.0.

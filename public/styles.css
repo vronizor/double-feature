@@ -279,10 +279,16 @@ label { display: block; }
 .pool-count { font-variant-numeric: tabular-nums; }
 .pool-count strong { color: var(--accent); font-size: 1.05rem; }
 
-/* The Draw tab's two ways to add a film to the lineup — random draw and a
-   specific search — side by side, since neither has priority over the other. */
-.tools-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-@media (max-width: 780px) { .tools-row { grid-template-columns: 1fr; } }
+/* The two ways to add a film used to sit in a `1fr 1fr` grid "since neither
+   has priority over the other". They do: a draw is the tab's whole purpose and
+   a named add is occasional, and equal billing sized the second one wrong in
+   both directions at once — half the screen empty when unused, a 480px column
+   crushing search results when used. It is a full-width disclosure now, so the
+   row is gone rather than restyled. */
+
+/* Reads as a control rather than a card, so it does not compete with the draw
+   panel above it while it is closed. */
+.add-film-toggle { border-style: dashed; color: var(--text-dim); }
 
 /* --- Movie grid --------------------------------------------------------- */
 
@@ -544,6 +550,35 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .vote-sticky {
   position: sticky; bottom: 0; z-index: 5; padding: 12px 0 max(12px, env(safe-area-inset-bottom));
   background: linear-gradient(to top, var(--bg) 72%, transparent);
+}
+
+/* The host's half of the same idea: Publish sat below every card in the lineup,
+   which put it four screens down on a phone with five films staged. Same
+   treatment as the guest's Submit, for the same reason — the primary action of
+   a screen must not be pushed off it by the content it acts on.
+
+   Deliberately NOT sharing one class with .vote-sticky. They are the same shape
+   today and have no reason to stay that way: one carries a checkbox and a count
+   of films, the other a running rank total, and merging them would make every
+   later change to either a change to both. */
+.lineup-sticky {
+  position: sticky; bottom: 0; z-index: 5; padding: 12px 0 max(12px, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 72%, transparent);
+}
+
+/* A BLOCK wrapper, not `.stack`, and that is the whole reason it exists. A
+   sticky element is offset within its containing block, and a grid item's
+   containing block is its own grid area — the same height as the item, so it
+   has nowhere to travel and never sticks. The grid keeps its own bottom margin
+   in place of the gap it no longer inherits. */
+.lineup-wrap { display: block; }
+.lineup-wrap > .movie-grid { margin-bottom: 16px; }
+
+/* Bare digits are both a plausible title and a plausible id, so the search
+   offers the second reading here instead of guessing between them. */
+.id-offer {
+  border: 1px dashed var(--border-strong); border-radius: 8px;
+  padding: 8px 10px; font-size: 0.85rem;
 }
 
 /* --- Toast -------------------------------------------------------------- */
