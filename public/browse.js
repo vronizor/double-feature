@@ -467,6 +467,24 @@ function renderParamPicker(vibe, { onChosen, onCancel, onClear = null }) {
   // A country list is short and closed, so show all of it immediately rather
   // than making the host guess what is in there. A person search cannot.
   if (isCountry) search();
+
+  // Focus the box as soon as it is on the page. Opening this picker has one
+  // possible next move — type a name — and asking for a second tap to reach
+  // the only input on offer is a tap for nothing. On a phone it also brings
+  // the keyboard up with the picker instead of after it.
+  //
+  // A microtask, because this node is not in the document yet: it is returned
+  // into a paint that appends it, and focus() on a detached element does
+  // nothing. Queuing runs this once that whole paint has finished.
+  //
+  // Deliberately NOT requestAnimationFrame, which was the first attempt:
+  // Chrome does not run rAF at all in a background tab, so the focus silently
+  // never happened. Nobody is typing into a background tab, so it would not
+  // have mattered to a host — but it would have deferred the focus until the
+  // tab came forward, stealing it at some later moment nobody asked for.
+  queueMicrotask(() => {
+    if (input.isConnected) input.focus();
+  });
   return h(
     'div',
     { class: 'param-picker card' },

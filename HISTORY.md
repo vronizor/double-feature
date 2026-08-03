@@ -2602,3 +2602,21 @@ at once is the point of the screen.
 block — it is an experiment, and the phone is the only place it can be judged.
 
 Version 7.18.0.
+
+### 10.20 The person picker takes the caret with it
+
+Opening Director's night or Actor's night has exactly one possible next move —
+type a name — and it took a second tap to reach the only input on offer. The box
+is focused as it appears now, so a phone brings the keyboard up with the picker
+rather than after it.
+
+**A microtask, not `requestAnimationFrame`**, and that was worth finding out.
+The node is not in the document when it is built — it is returned into a paint
+that appends it, and `focus()` on a detached element does nothing — so the call
+has to be deferred. rAF was the first attempt and never ran: **Chrome does not
+run rAF at all in a background tab.** Harmless for a host, who is by definition
+looking at the page, but it would have parked the focus until the tab came
+forward and then taken it at a moment nobody asked for. A microtask runs as
+soon as the paint that appended the node has finished, throttled by nothing.
+
+Version 7.19.0.
