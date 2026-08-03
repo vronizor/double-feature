@@ -144,6 +144,8 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
   const groups = groupListsByTag(lists, vocabulary);
   const allIds = lists.map((list) => list.id);
   const selectedCount = lists.filter((list) => poolState.isSelected(list.id)).length;
+  const multiTaggedNames = lists.filter((list) => (list.tags ?? []).length > 1).map((l) => l.name);
+  const multiTagged = multiTaggedNames.length;
 
   const bulk = (label, ids, on) =>
     h(
@@ -192,7 +194,25 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
     h(
       'div',
       { class: 'row' },
-      h('span', { class: 'faint' }, `${selectedCount} of ${lists.length} lists selected`),
+      // "20 of 20 lists selected" is true, and you can count 29 checkboxes
+      // underneath it, because a list appears under every tag it carries —
+      // Studio Ghibli under Animation, Collections AND Family. Both numbers
+      // are honest and nothing reconciled them, so the header read as a bug.
+      //
+      // Said out loud rather than fixed by hiding the repetition: a list
+      // genuinely belongs to several tags, which is the whole point of tags.
+      h(
+        'span',
+        { class: 'faint' },
+        `${selectedCount} of ${lists.length} lists selected`,
+        multiTagged
+          ? h(
+              'span',
+              { title: multiTaggedNames.join(', ') },
+              ` · ${multiTagged} appear under more than one tag`,
+            )
+          : null,
+      ),
       h('span', { class: 'spacer' }),
       // One toggle rather than two buttons: with every group already open,
       // "Expand all" is a no-op that looks like it should do something.

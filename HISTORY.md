@@ -2458,3 +2458,22 @@ Not reachable by ordinary clicking, which is why it had survived; a real
 double-click was measured and is correct either way.
 
 Version 7.13.0.
+
+### 10.14 The picker's counts stop contradicting themselves
+
+"20 of 20 lists selected", with 29 checkboxes underneath it. Both numbers were
+true — a list appears under every tag it carries, and seven of the twenty carry
+more than one — and nothing reconciled them, so the header read as a bug.
+
+**Decided in favour of keeping the repetition and saying so.** A list genuinely
+belongs to several tags: Studio Ghibli is animation, a collection, and family
+viewing, and hiding two of those to make an arithmetic tidy would be answering
+a display question by deleting information. The header now says
+`20 of 20 lists selected · 7 appear under more than one tag`, and names them on
+hover.
+
+Measured rather than assumed: 20 lists, 29 rows, and the seven are Disney
+Animated Canon, Studio Ghibli, The Criterion Collection, and the four festival
+awards that are both `awards` and `festivals`.
+
+Version 7.14.0.
