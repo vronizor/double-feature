@@ -976,15 +976,9 @@ export async function renderDraw(container) {
       );
     }
 
-    // Deliberately NOT `.stack`. A sticky element is offset within its
-    // containing block, and for a grid item that is its own grid area — which
-    // is exactly its own height, so it has nowhere to travel and never sticks
-    // at all. Measured: the bar sat 2,578px down the page with `position:
-    // sticky` computed and doing nothing. A block wrapper gives it the height
-    // of the grid above it to move through.
     return h(
       'div',
-      { class: 'lineup-wrap' },
+      { class: 'stack' },
       h(
         'div',
         { class: 'movie-grid is-lineup' },

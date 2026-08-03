@@ -2048,19 +2048,35 @@ Version 7.2.0.
 
 ### 10.3 Publish stops being the last thing on the page
 
-**A sticky bar does not stick if its parent is a grid.** That is the finding
-worth carrying forward, and it cost the first attempt at this. A sticky element
-is offset within its containing block, and for a grid item the containing block
-is its own grid area — the same height as the item, so there is nowhere to
-travel. `position: sticky` computed correctly, the class was right, and the bar
-sat 2,578px down the page doing nothing. The lineup's wrapper is a plain block
-now, which gives the bar the height of the grid above it to move through.
-Measured after: pinned in the viewport across a 2,117px page at three different
-scroll positions.
-
 Publish had been the last thing after every card in the lineup — four screens
 down on a phone with five films staged, which is a strange place to put the
-point of the screen.
+point of the screen. It sits in a `.lineup-sticky` now, the same shape the
+guest's Submit already used.
+
+**A wrong explanation was committed here and then withdrawn; this paragraph is
+the correction.** The bar was first measured sitting 2,578px down the page with
+`position: sticky` computed and doing nothing, and that was blamed on its parent
+being a grid — the theory being that a grid item's containing block is its own
+area, leaving no room to travel. A block wrapper was added on that basis.
+
+**The theory was wrong and the wrapper was a no-op.** Tested by flipping the
+same page between the two wrappers and measuring: the bar pins identically as a
+grid item and as a block child, and in the original conditions *neither* pins.
+The guest screen settled it independently — `.vote-sticky` has had a grid parent
+the whole time and pins correctly across a ten-film ballot.
+
+What is actually true is a plain property of `position: sticky`: it cannot pull
+an element beyond its own containing block. A two-film lineup gives the bar only
+its own ~440px of travel, so sitting 2,578px down a 3,297px page it cannot reach
+the viewport until the lineup nearly does. With eight films it pins from the
+first pixel. **That is the behaviour to want, not a bug to route around** — a
+Publish button hovering over a lineup nobody can see is worse than one that
+arrives together with it.
+
+The lesson is the one `DECISIONS.md` §3 already records in another form: a note
+written to prevent a bug can cause one. The first measurement was real, the
+inference from it was invented, and only a controlled A/B — same page, same
+scroll, one variable — separated them.
 
 **"Add a specific film" stopped claiming half the tab.** It sat in a `1fr 1fr`
 grid beside the draw controls on the reasoning that neither had priority, and
@@ -2090,8 +2106,21 @@ The same line also treated an empty array as truthy, printing nothing after the
 colon for a film known to the library but on no list.
 
 Verified in a browser against a copy of the real database: the bar pins across
-a long lineup, a URL adds outright ("Added 12 Angry Men"), `1917` returns the
-film with the id offered beside it, and the membership line reads
-`Already on: BAFTA — Best Film, Modern Classics (last 10 years)`.
+an eight-film lineup at every scroll position, a URL adds outright ("Added 12
+Angry Men"), `1917` returns the film with the id offered beside it, and the
+membership line reads `Already on: BAFTA — Best Film, Modern Classics (last 10
+years)`.
 
-Version 7.3.0.
+Version 7.3.0, corrected in 7.4.0.
+
+### 10.4 The guest's sticky bar was never broken
+
+Raised as a suspicion off the back of 10.3 and closed by measuring it: a
+ten-film ballot on a 2,628px page keeps the Submit bar pinned to the viewport
+bottom at every scroll position. No change was needed and none was made.
+
+Worth the round trip anyway, because chasing it is what exposed the wrong
+explanation in 10.3 — the guest bar has had a grid parent since it was written,
+so "a grid parent breaks sticky" could not survive it working. **A suspicion
+that a second surface shares a defect is a cheap thing to check and a very
+expensive thing to assume.**

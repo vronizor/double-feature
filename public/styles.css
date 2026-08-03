@@ -560,19 +560,21 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
    Deliberately NOT sharing one class with .vote-sticky. They are the same shape
    today and have no reason to stay that way: one carries a checkbox and a count
    of films, the other a running rank total, and merging them would make every
-   later change to either a change to both. */
+   later change to either a change to both.
+
+   What sticky does NOT do, measured rather than assumed: it cannot pull the bar
+   further than its own containing block, so with a two-film lineup 2,578px down
+   a long page the bar stays put until the lineup itself is nearly on screen. It
+   pins from the first pixel once the lineup is tall enough to have travel. That
+   is the behaviour we want and not a bug to route around — a Publish button
+   hovering over a lineup nobody can see would be worse than one that arrives
+   with it. An earlier note here blamed the grid parent and was simply wrong:
+   the bar pins identically as a grid item and as a block child. */
 .lineup-sticky {
   position: sticky; bottom: 0; z-index: 5; padding: 12px 0 max(12px, env(safe-area-inset-bottom));
   background: linear-gradient(to top, var(--bg) 72%, transparent);
 }
 
-/* A BLOCK wrapper, not `.stack`, and that is the whole reason it exists. A
-   sticky element is offset within its containing block, and a grid item's
-   containing block is its own grid area — the same height as the item, so it
-   has nowhere to travel and never sticks. The grid keeps its own bottom margin
-   in place of the gap it no longer inherits. */
-.lineup-wrap { display: block; }
-.lineup-wrap > .movie-grid { margin-bottom: 16px; }
 
 /* Bare digits are both a plausible title and a plausible id, so the search
    offers the second reading here instead of guessing between them. */
