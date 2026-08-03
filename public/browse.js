@@ -560,13 +560,24 @@ export function renderVibeChips(
                 onApply();
               },
             },
-            // Reads back the value only while this vibe is actually applied.
-            // A chip showing "Robert Eggers" when nothing is selected is
-            // claiming a pool that is not in play — the state says Custom and
-            // the chip says otherwise. The label stays in front of the value
-            // so it is clear WHAT was chosen, not just who.
+            // Reads back the value while this vibe's SLOT LIST is in the pool
+            // — not while the vibe label happens to be applied.
+            //
+            // The original rule was `active`, to stop a chip claiming "Robert
+            // Eggers" when nothing of his was in play, and that concern is
+            // right and still met: switching to another vibe deselects the
+            // slot list, so the chip reverts on its own.
+            //
+            // But `active` was the wrong test for it. Any hand-edit clears the
+            // vibe label to Custom — including the Top-N cut, deliberately —
+            // so picking Spielberg and then asking for his top 10 blanked the
+            // chip back to "Director's night ▾" while the pool was still
+            // exactly Spielberg, and the Top-N caption two panels away still
+            // read "of Director's night — Steven Spielberg". One screen saying
+            // both things. The pool is the honest test, and the label already
+            // says Custom for the pool as a whole.
             vibe.param
-              ? active && vibe.slot?.value
+              ? vibe.slot?.value && poolState.isSelected(vibe.slot.list_id)
                 ? `${vibe.param.label ?? 'Value'}: ${vibe.slot.value} ▾`
                 : `${vibe.name} ▾`
               : vibe.name,

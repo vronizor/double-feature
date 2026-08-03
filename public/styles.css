@@ -400,7 +400,25 @@ label { display: block; }
   max-width: 640px; width: 100%; max-height: none;
   border-radius: 0; overflow-y: auto;
 }
-.sheet-head { position: sticky; top: 0; z-index: 2; background: var(--bg-raised); padding-bottom: 10px; }
+/* Bleeds to the card's edges, and that is the point.
+
+   `.modal-card` has 24px of padding, so a sticky header inset by it leaves a
+   24px strip above and beside it that the header's background never covers —
+   and content scrolling underneath shows through the gap. Reported from a
+   phone: "The canon · 3 lists · 2,442 films" reading straight through the
+   "Pool setup" bar. Negative margins pull the header out to the card edges and
+   the padding puts its content back where it was, so the background spans the
+   whole width and the full height of the strip. */
+.sheet-head {
+  /* `top: -24px`, not 0. The negative margins pull the header's box out to the
+     card's edges, but the sticky offset still resolves against the card's
+     CONTENT box — so `top: 0` pinned it 24px down and left a strip of scrolling
+     content showing above it. Measured: header top 24, card top 0. */
+  position: sticky; top: -24px; z-index: 2;
+  background: var(--bg-raised);
+  margin: -24px -24px 0; padding: 24px 24px 12px;
+  border-bottom: 1px solid var(--border);
+}
 
 /* Genres, Country and Language are ~40 chips between them, which made the rail
    one long scroll with the year and runtime controls stranded below all of it.

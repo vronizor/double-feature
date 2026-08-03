@@ -187,6 +187,21 @@ export async function renderDraw(container) {
     }
   }
 
+  // The draw button's label carries the size, and the size input deliberately
+  // does NOT repaint — a repaint per keystroke would throw the caret out of the
+  // field being typed in, the same reason the filter value inputs don't. So the
+  // label was rendered once and then lied: typing 5 left a button reading
+  // "Draw 2" beside a count that had already updated to "fewer than the 5
+  // you're drawing". Repainted on its own, like the count.
+  let drawButtonNode = null;
+  function paintDrawButton() {
+    if (!drawButtonNode) return;
+    drawButtonNode.textContent = lineup.movies.length
+      ? `Draw ${state.size} more`
+      : `Draw ${state.size}`;
+  }
+
+  let unitNode = null;
   let countNode = null;
   function paintCount() {
     if (!countNode) return;
@@ -584,16 +599,18 @@ export async function renderDraw(container) {
             );
             event.target.value = String(state.size);
             paintCount();
+            paintDrawButton();
+            if (unitNode) unitNode.textContent = state.size === 1 ? 'film' : 'films';
           },
         }),
-        h('span', { class: 'muted' }, state.size === 1 ? 'film' : 'films'),
+        (unitNode = h('span', { class: 'muted' }, state.size === 1 ? 'film' : 'films')),
         h('span', { class: 'spacer' }),
         countNode,
       ),
       h(
         'div',
         { class: 'row' },
-        h(
+        (drawButtonNode = h(
           'button',
           {
             class: 'btn-primary',
@@ -601,7 +618,7 @@ export async function renderDraw(container) {
             onClick: doDraw,
           },
           lineup.movies.length ? `Draw ${state.size} more` : `Draw ${state.size}`,
-        ),
+        )),
         // Only offered when there is something drawn to replace — with a
         // hand-picked lineup this button would do nothing.
         lineup.drawn().length

@@ -2524,3 +2524,38 @@ a collapsed group leave it collapsed, and a group opened by hand stays open
 even when every list in it is unchecked.
 
 Version 7.16.0.
+
+### 10.17 Three more from the phone, and one of them was mine
+
+**The sheet's sticky header was see-through.** Reported with a screenshot of
+"The canon · 3 lists · 2,442 films" reading straight through the "Pool setup"
+bar. `.modal-card` carries 24px of padding, so a sticky header inset by it
+leaves a 24px strip above and beside it that its own background never covers.
+Negative margins pull the header out to the card's edges — and `top: -24px`,
+not `0`, because the sticky offset still resolves against the card's CONTENT
+box, so `top: 0` pinned it 24px down and left the strip. Measured both times:
+header top 24 against card top 0 before, 0 and 0 after, with the topmost pixel
+belonging to the header at every scroll position.
+
+**A parametric vibe forgot its value the moment anything else changed.** Pick
+Director's night → Steven Spielberg → top 10, and the chip fell back to a bare
+"Director's night ▾" while the Top-N caption two panels away still read "of
+Director's night — Steven Spielberg". One screen saying both things.
+
+The chip read back its value only while the vibe LABEL was applied, and any
+hand-edit clears that label to Custom — deliberately, and the Top-N cut counts.
+The original rule existed to stop a chip claiming "Robert Eggers" when nothing
+of his was in play, which is right; `active` was simply the wrong test for it.
+The chip now reads back its value while its **slot list is in the pool**, which
+is the honest condition and still reverts on its own when you switch vibes. The
+label continues to say Custom, because the pool as a whole genuinely is.
+
+**The draw button lied about its own number.** Typing 5 into the size field left
+a button reading "Draw 2" beside a count that had already updated to "fewer than
+the 5 you're drawing". The field deliberately does not repaint — a repaint per
+keystroke throws the caret out of the field being typed in, the same reason the
+filter value inputs don't — so the label was rendered once and never again. It
+repaints on its own now, like the pool count, and so does the film/films word
+beside it.
+
+Version 7.17.0.
