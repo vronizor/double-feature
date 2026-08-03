@@ -739,6 +739,46 @@ function rangeInputs(filters, key, unit, bounds, onChange) {
  *                     (repaint NOT expected — just re-fetch a count/page)
  *   onClear()       — "Clear filters" was clicked
  */
+/**
+ * Which chip groups the host opened by hand, this session.
+ *
+ * A group with a selection is open regardless — you should always be able to
+ * see what is narrowing your pool. This remembers the ones opened merely to
+ * browse, so a repaint (every chip click causes one) does not fold them shut
+ * again mid-decision. Module-level because the panel is rebuilt from scratch
+ * on every paint and shared between Draw and Explore, and because it is
+ * presentation state that deliberately does not outlive a reload.
+ */
+const openFilterGroups = new Set();
+
+/**
+ * One collapsible group of filter chips.
+ *
+ * `<details>` rather than a button and a class: it is a disclosure widget, the
+ * element exists, and it comes with the keyboard behaviour and the screen
+ * reader announcement already correct.
+ */
+function collapsibleChips(label, selectedCount, chips) {
+  const el = h(
+    'details',
+    { class: 'filter-group', open: selectedCount > 0 || openFilterGroups.has(label) },
+    h(
+      'summary',
+      {},
+      h('span', { class: 'field-label' }, label),
+      selectedCount ? h('span', { class: 'badge' }, String(selectedCount)) : null,
+    ),
+    chips,
+  );
+  el.addEventListener('toggle', () => {
+    if (el.open) openFilterGroups.add(label);
+    else openFilterGroups.delete(label);
+  });
+  return el;
+}
+
+const chosen = (group) => (group?.include?.length ?? 0) + (group?.exclude?.length ?? 0);
+
 export function renderFilterPanel(
   filters,
   facets,
@@ -757,24 +797,23 @@ export function renderFilterPanel(
     h(
       'div',
       { class: 'filters' },
-      h(
-        'div',
-        {},
-        h('div', { class: 'field-label' }, 'Genres'),
+      collapsibleChips(
+        'Genres',
+        chosen(filters.genres),
         chipToggleGroup(facets.genres, filters.genres, (g) => g.id, (g) => g.name, onChipChange),
       ),
-      h(
-        'div',
-        {},
-        // Countries behave exactly like languages here: a fixed vocabulary of
-        // the commonest, as toggle chips. The long tail is deliberately not
-        // offered -- 96 countries as chips is not a control, it is a wall.
-        h('div', { class: 'field-label' }, 'Country'),
-        // The real object, never a copy: chipToggleGroup mutates include and
-        // exclude in place, so a synthesised group would swallow every click.
-        // Label is shortened, key is not: the filter still sends the full
-        // name, which is what movies.countries stores and what the pool query
-        // matches on. Full name on hover, so nothing is actually hidden.
+      // Countries behave exactly like languages here: a fixed vocabulary of
+      // the commonest, as toggle chips. The long tail is deliberately not
+      // offered -- 96 countries as chips is not a control, it is a wall.
+      //
+      // The real object, never a copy: chipToggleGroup mutates include and
+      // exclude in place, so a synthesised group would swallow every click.
+      // Label is shortened, key is not: the filter still sends the full
+      // name, which is what movies.countries stores and what the pool query
+      // matches on. Full name on hover, so nothing is actually hidden.
+      collapsibleChips(
+        'Country',
+        chosen(filters.countries),
         chipToggleGroup(
           facets.countries ?? [],
           filters.countries,
@@ -784,10 +823,9 @@ export function renderFilterPanel(
           (c) => c.country,
         ),
       ),
-      h(
-        'div',
-        {},
-        h('div', { class: 'field-label' }, 'Language'),
+      collapsibleChips(
+        'Language',
+        chosen(filters.languages),
         chipToggleGroup(
           facets.languages.slice(0, 14),
           filters.languages,

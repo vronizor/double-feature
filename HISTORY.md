@@ -2256,3 +2256,31 @@ Checked across all four tabs, because `.stack` is everywhere: no overflow, no
 collapsed cards.
 
 Version 7.7.0.
+
+### 10.8 The filter chips fold away
+
+From field notes, raised as soon as the rail made it visible: Genres, Country
+and Language are about forty chips between them, so the rail was one long
+scroll with the year and runtime controls stranded below all of it. The panel
+was always that long — the rail simply put it somewhere you look.
+
+`<details>` and `<summary>`, not a button and a class. It is a disclosure
+widget, the element exists, and the keyboard behaviour and screen reader
+announcement come with it.
+
+**A group with a selection is always open**, because you must be able to see
+what is narrowing your pool without hunting for it, and the summary carries a
+count when it is shut. Groups opened merely to browse are remembered separately
+for the session — every chip click repaints the panel, and without that the
+group would fold shut under the host mid-decision. Verified: opening Genres by
+hand, then picking a chip, leaves it open with a "1" against it and an
+`Action ×` pill in the column beside it.
+
+**It did not shorten the rail much, and that is worth recording rather than
+claiming otherwise.** Collapsed, the three groups save ~360px of a ~4,300px
+rail. The rest is the list picker: all twenty lists are selected by default, a
+group with a selection defaults to open, so every one of the eight groups is
+expanded on a first load. The chip groups were the reported problem and are
+fixed; the picker's default is a separate question and is now in `ROADMAP.md`.
+
+Version 7.8.0.

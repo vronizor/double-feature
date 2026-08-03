@@ -380,6 +380,23 @@ label { display: block; }
 }
 .sheet-head { position: sticky; top: 0; z-index: 2; background: var(--bg-raised); padding-bottom: 10px; }
 
+/* Genres, Country and Language are ~40 chips between them, which made the rail
+   one long scroll with the year and runtime controls stranded below all of it.
+   A group with a selection is always open — you must be able to see what is
+   narrowing your pool without hunting for it. */
+.filter-group summary {
+  cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px;
+  padding: 2px 0;
+}
+.filter-group summary::-webkit-details-marker { display: none; }
+.filter-group summary .field-label { margin-bottom: 0; }
+/* The marker is drawn rather than inherited, so it points the same way as the
+   list picker's groups, which use text arrows rather than a native marker. */
+.filter-group summary::before { content: '\25b8'; color: var(--text-faint); font-size: 0.7rem; }
+.filter-group[open] summary::before { content: '\25be'; }
+@media (hover: hover) { .filter-group summary:hover .field-label { color: var(--text); } }
+.filter-group[open] > .chips { margin-top: 6px; }
+
 /* Pool state, read back as facts you can strike out one at a time. */
 .pool-pills { align-items: center; }
 .chip--static { cursor: default; border-style: dashed; }
