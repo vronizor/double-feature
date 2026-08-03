@@ -10,6 +10,7 @@ import {
   openOverlay,
   topNLabel,
   drawnMessage,
+  fill,
 } from '../dom.js';
 import { api } from '../api.js';
 import { renderSessionPanel } from './session.js';
@@ -398,12 +399,22 @@ export async function renderDraw(container) {
         ),
         body,
       ],
+      // Escape and a backdrop click do not go through any closer of ours, so
+      // the overlay reports every exit here instead.
+      onClose: () => {
+        poolSheet = null;
+        // Repaint, or the rail stays empty behind a sheet that is gone.
+        paint();
+        // And only now can focus go home: the overlay restores it to the node
+        // that opened the sheet, which the repaint above has just replaced.
+        document.getElementById('pool-setup-open')?.focus();
+      },
     });
-    // Escape and a backdrop click close the overlay without going through any
-    // closer of ours, so ownership is decided by whether the node is still in
-    // the document rather than by trying to intercept every exit — see paint().
     poolSheet = { body, close: overlay.close };
-    clear(body).append(poolSetupContent());
+    // Immediately, not on the next repaint. paint() is what moves the controls
+    // out of the rail and into the sheet, and until it runs BOTH exist — which
+    // is the duplicate-id state this arrangement is meant to prevent.
+    paint();
   }
 
   // --- Vibes ----------------------------------------------------------------
@@ -605,7 +616,11 @@ export async function renderDraw(container) {
         { class: 'row pool-sheet-row' },
         h(
           'button',
-          { class: 'btn-sm', onClick: openPoolSheet },
+          // Stable id, which is this codebase's standing contract for anything
+          // that has to survive a repaint (see `preserveFocus`). Closing the
+          // sheet repaints the tab, so the button focus should return to is
+          // never the same node that opened it.
+          { id: 'pool-setup-open', class: 'btn-sm', onClick: openPoolSheet },
           'Pool setup',
         ),
         h('span', { class: 'faint' }, 'lists, filters and the top-N cut'),
@@ -935,7 +950,8 @@ export async function renderDraw(container) {
 
     const results = h('div', { class: 'candidate-list' });
     const renderResults = () => {
-      clear(results).append(
+      fill(
+        results,
         // The bare-digits offer, when there is one, sits ABOVE the search hits:
         // it is the reading the host had to type an id to get, so burying it
         // under a title match would defeat the point of offering it.

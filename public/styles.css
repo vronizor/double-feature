@@ -334,9 +334,26 @@ label { display: block; }
 .draw-rail .list-pick, .draw-rail .list-group, .draw-rail .row { min-width: 0; }
 
 /* Full-screen rather than a centred card: this is a destination, not an
-   interruption, and it holds a list picker that will always want the height. */
-.sheet-card {
-  max-width: 640px; width: 100%; max-height: 100dvh; height: 100dvh;
+   interruption, and it holds a list picker that will always want the height.
+
+   The backdrop centres its child inside 20px of padding, which is right for a
+   film's detail card and wrong for this — measured at 614px wide it left the
+   sheet 631px tall in a 701px viewport, inset and floating, which reads as a
+   dialog you dismiss rather than a place you have gone. `:has()` turns the
+   padding off for this one child instead of giving `openOverlay` a second
+   class to thread through for a purely visual difference. */
+.modal-backdrop:has(> .sheet-card) { padding: 0; align-items: stretch; }
+/* Height comes from stretching to the backdrop, which is `position: fixed;
+   inset: 0` and therefore the viewport by definition. `height: 100dvh` was
+   measured resolving 70px short of `window.innerHeight` in a 701px window and
+   left the sheet floating with 35px above and below it. Stretching cannot
+   disagree with the viewport, because it is not measuring one. */
+/* `.modal-card.sheet-card`, not `.sheet-card`: the base class sets
+   `max-height: 90vh` and is defined further down this file, so at equal
+   specificity it won on source order and capped the sheet at 631px of a 701px
+   viewport — the same 90% every time, which is what gave it away. */
+.modal-card.sheet-card {
+  max-width: 640px; width: 100%; max-height: none;
   border-radius: 0; overflow-y: auto;
 }
 .sheet-head { position: sticky; top: 0; z-index: 2; background: var(--bg-raised); padding-bottom: 10px; }

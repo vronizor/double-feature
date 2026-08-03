@@ -21,6 +21,19 @@ and nothing bigger than a fix is actioned without asking first.
 
 Trimmed each session; git keeps the history.
 
+_Six notes filed 2026-08-03 and cleared. **One was a live defect and is fixed**:
+a literal `null` under the search box, from `clear(node).append(…)` stringifying
+a null child where `h()` would have dropped it — fixed at the root with a `fill`
+helper so the next one cannot happen. **One was already fixed** before it was
+reported: the rail clipping its own contents, corrected in v7.5 and re-measured
+at 1020px and 1440px with nothing past the edge. **One was a question, answered
+and recorded in `DECISIONS.md`**: why not a modal for lists and filters at every
+width. **Three went to `ROADMAP.md` v7**: collapsing the genre/country/language
+chip groups, the vote panel's list summary stretching the page, and "Director
+night" → "Director's night" — the last carrying the migration caveat, since
+`ensureBuiltinVibes` matches by name and a seed edit alone would be a no-op.
+Nothing outstanding._
+
 _One note filed 2026-08-02 and cleared: the second rating not always appearing
 on hover. Measured against the real database, and it was two things wearing one
 symptom. About 13% of the library sits below the 1,000-vote floor and shows

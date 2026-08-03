@@ -28,6 +28,27 @@ export function clear(node) {
   return node;
 }
 
+/**
+ * Empty a node and refill it, with `h`'s child rules.
+ *
+ * `clear(node).append(...)` reads like the same thing and is not: `append` is
+ * the raw DOM method, which stringifies whatever it is given, so a `null` from
+ * a conditional child renders the WORD "null" on the page. `h` has always
+ * filtered those out, which is exactly why the difference is easy to miss —
+ * the same expression is safe inside `h(...)` and not safe after `clear(...)`.
+ *
+ * Shipped once: a `null` sat under the search box in v7.3 wherever the id
+ * offer was absent.
+ */
+export function fill(node, ...children) {
+  clear(node);
+  for (const child of children.flat(Infinity)) {
+    if (child === null || child === undefined || child === false) continue;
+    node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
+  return node;
+}
+
 // setSelectionRange throws InvalidStateError on input types that have no text
 // selection model — number is the one that matters here, since every filter
 // range input is one.
@@ -585,7 +606,7 @@ function trailerBlock(movie) {
  * `render(close)` builds the card's contents and is handed the closer, since
  * most overlays want a control of their own that dismisses them.
  */
-export function openOverlay({ label, cardClass = 'modal-card', render }) {
+export function openOverlay({ label, cardClass = 'modal-card', render, onClose = null }) {
   // Restoring focus matters more than it looks: without it, closing drops the
   // caret back to the top of the document, so a keyboard user who opened this
   // from the tenth card has to walk back down to it.
@@ -621,6 +642,10 @@ export function openOverlay({ label, cardClass = 'modal-card', render }) {
     document.removeEventListener('keydown', onKeydown);
     document.body.style.overflow = previousOverflow;
     if (opener instanceof HTMLElement && document.contains(opener)) opener.focus();
+    // Fires for EVERY exit — the caller's own control, Escape, and a backdrop
+    // click all end up here. An owner that only cleaned up on its own button
+    // would be wrong two-thirds of the time.
+    onClose?.();
   }
 
   const card = h('div', {

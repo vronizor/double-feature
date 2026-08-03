@@ -2188,3 +2188,38 @@ its opener directly, which proves it works and says nothing about how it looks
 at 390px. That is the standing v7 gap, not a new one.
 
 Version 7.5.0.
+
+### 10.6 Finishing the keystone against a real narrow window
+
+Everything 10.5 left unverified, plus what verifying it found.
+
+**The sheet was never full-screen.** `.modal-card` sets `max-height: 90vh` and
+is defined further down the stylesheet, so at equal specificity it beat
+`.sheet-card` on source order and capped the sheet at 631px of a 701px viewport
+— the same 90% every time, which is what gave it away. The backdrop also
+centres its child inside 20px of padding, right for a film's detail card and
+wrong for a destination. Both fixed; the sheet now fills the viewport exactly,
+scrolls internally, and keeps its header pinned.
+
+**Focus did not come home.** Closing the sheet repaints the tab, which destroys
+the very button the overlay had just restored focus to. The opener carries a
+stable id now and is re-focused after the repaint — the same contract
+`preserveFocus` already states for anything that must survive one.
+
+**The duplicate ids were only half prevented.** Opening the sheet set the owner
+but did not repaint, so both copies of the filter panel existed until something
+else happened to repaint. Opening now repaints immediately, and `openOverlay`
+reports *every* exit — its own control, Escape, and a backdrop click — so the
+rail is refilled however the sheet is dismissed. Measured at each step: exactly
+one `#filter-year-min` in the document throughout.
+
+**A narrow window was finally rendered.** `resize_window` was asked for 390×844
+and produced 614px of inner width — Chrome's minimum, reported as success,
+which is the recorded trap doing exactly what the trap list says it does. 614px
+is still below the rail's breakpoint, so **for the first time in this project
+the responsive switch has been seen rather than reasoned about**: the rail is
+`display: none`, the sheet's opener is visible, the sheet fills the screen, and
+nothing overflows horizontally. It is not 390px, and the sub-500px layout
+remains unobserved.
+
+Version 7.6.0.
