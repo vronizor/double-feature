@@ -2423,3 +2423,38 @@ forgotten and that is exactly how a defect this cosmetic survives three
 versions. `childList` only, so writing classes cannot retrigger it.
 
 Version 7.12.0.
+
+### 10.13 One control shape stops meaning four things
+
+Vibe presets, list-group jump chips, genre/country/language filters and display
+toggles were all fully-round pills that turned solid yellow when active, sitting
+in four rows within ~600px — and four of the seven vibe names recurred verbatim
+in the rows below them. With `Cinephile` applied, the group row still painted
+`All` in that same active yellow, so two unrelated "selected" states stacked in
+one column saying different things.
+
+**The tag-filter row is deleted outright.** It narrowed which lists the picker
+showed, which the group headers already do by collapsing — a second mechanism
+over the first, and the one carrying the contradictory `All`.
+
+What is left is two kinds of control that now look like two kinds of control: a
+**pill** is a preset you apply, a **token** is a value you include or exclude.
+Tokens are square-cornered and carry an explicit `+` or `−`, so the tri-state
+stops resting on colour alone — include and exclude were yellow, and red with a
+strikethrough, and nothing else.
+
+This answers a question `DECISIONS.md` had deliberately left open since v5,
+where the entry said the row should not be changed on the strength of a code
+read and that the real question was whether the two rows had ever actually been
+confused. Four independent review passes converging on it is that evidence.
+
+**One defect hardened while in there.** The tri-state advanced from a state
+captured at render time and pushed with no guard, so a click landing on a node
+a repaint had already replaced could add a key the group already held.
+Demonstrated: two entries for Comedy made the pool summary read
+`Action/Comedy/Comedy` — corrupt state and a sentence describing it wrongly in
+the same breath. It now reads the group itself and never pushes a duplicate.
+Not reachable by ordinary clicking, which is why it had survived; a real
+double-click was measured and is correct either way.
+
+Version 7.13.0.

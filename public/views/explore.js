@@ -7,7 +7,6 @@ import {
   renderAwardsToggle,
   renderRatingToggle,
   createPoolDestination,
-  renderTagFilter,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -39,7 +38,6 @@ export async function renderExplore(container) {
     // a title here silently shrank the Draw pool with no visible cause.
     search: '',
     openGroups: new Set(),
-    tagFilter: null,
     vocabulary: [],
     sort: 'title',
     movies: [],
@@ -106,7 +104,7 @@ export async function renderExplore(container) {
         refreshFacets();
         loadPage({ reset: true });
       },
-      { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
+      { vocabulary: state.vocabulary },
     );
   }
 
@@ -121,10 +119,6 @@ export async function renderExplore(container) {
       'div',
       { class: 'stack' },
       h('div', { class: 'field-label' }, 'Lists in play'),
-      renderTagFilter(state.vocabulary, state.tagFilter, (tag) => {
-        state.tagFilter = tag;
-        paint();
-      }),
       listPicker(),
       filterPanel(),
     );

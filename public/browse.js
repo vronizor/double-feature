@@ -119,7 +119,7 @@ export function selectionLabel(lists) {
   return `${selected.length} lists`;
 }
 
-export function renderListPicker(lists, openGroups, onChange, { vocabulary = [], tagFilter = null } = {}) {
+export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] } = {}) {
   // A slot list is hidden while it is not in play — it belongs to a
   // parametric vibe and is not something anyone curates. But hiding one that
   // IS selected makes the picker lie: every checkbox unticked while films are
@@ -136,14 +136,13 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
     );
   }
 
-  // Narrowing by tag is what keeps this usable as the library grows: at thirty
-  // lists you tap "family" and see four, instead of scrolling past everything.
-  const visible = tagFilter
-    ? lists.filter((list) => (list.tags ?? []).includes(tagFilter))
-    : lists;
-
-  const groups = groupListsByTag(visible, vocabulary);
-  const allIds = visible.map((list) => list.id);
+  // The tag-filter chip row above this used to narrow which lists were shown.
+  // It was deleted in v7.13: it is a second narrowing mechanism stacked on
+  // group headers that already narrow, and its "All" chip painted itself in
+  // the same active yellow as the vibe row above, so two unrelated "selected"
+  // states sat in one column saying different things.
+  const groups = groupListsByTag(lists, vocabulary);
+  const allIds = lists.map((list) => list.id);
   const selectedCount = lists.filter((list) => poolState.isSelected(list.id)).length;
 
   const bulk = (label, ids, on) =>
@@ -307,33 +306,6 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
  * Renders nothing when no vibe can produce a pool — on a fresh install
  * with no lists, an empty row of dead chips would be worse than no row.
  */
-/**
- * Tag filter chips above the picker. Narrowing to one tag is what stops the
- * picker becoming a scroll as the library grows — the whole reason lists carry
- * tags rather than a single category.
- */
-export function renderTagFilter(vocabulary, active, onChange) {
-  const withLists = vocabulary.filter((entry) => entry.count > 0);
-  if (withLists.length <= 1) return null;
-
-  const chip = (label, tag) =>
-    h(
-      'button',
-      {
-        class: 'chip',
-        dataset: { state: active === tag ? 'include' : 'off' },
-        onClick: () => onChange(active === tag ? null : tag),
-      },
-      label,
-    );
-
-  return h(
-    'div',
-    { class: 'chips' },
-    chip('All', null),
-    ...withLists.map((entry) => chip(`${entry.label} ${entry.count}`, entry.tag)),
-  );
-}
 
 /**
  * The parameter picker for a parametric vibe — "director night, but who?".
@@ -675,7 +647,10 @@ function chipToggleGroup(items, group, getKey, getLabel, onChange, getTitle = nu
       return h(
         'button',
         {
-          class: 'chip',
+          // `chip--filter`, not a bare `.chip`. A vibe pill and a filter token
+          // are different kinds of thing and stopped looking alike in v7.13 —
+          // see the shape note in styles.css.
+          class: 'chip chip--filter',
           dataset: { state: chipState },
           // The full name leads when the label is an abbreviation — a chip
           // reading "USA" should say what it stands for before it explains
@@ -683,17 +658,36 @@ function chipToggleGroup(items, group, getKey, getLabel, onChange, getTitle = nu
           title: getTitle
             ? `${getTitle(item)} — click to include, again to exclude, again to clear`
             : 'Click to include, again to exclude, again to clear',
+          // Reads the group rather than the captured `chipState`, and never
+          // pushes a key it already holds. The captured value is correct for
+          // the node it was rendered on, but a click that lands on a node the
+          // repaint has already replaced would advance the state machine from
+          // where it USED to be — and `push` with no guard turns that into a
+          // duplicate. Demonstrated: two entries for Comedy made the pool
+          // summary read "Action/Comedy/Comedy", so the state was corrupt and
+          // the sentence describing it was wrong in the same breath.
           onClick: () => {
-            if (chipState === 'off') group.include.push(key);
-            else if (chipState === 'include') {
-              group.include.splice(group.include.indexOf(key), 1);
-              group.exclude.push(key);
+            const drop = (list) => {
+              const at = list.indexOf(key);
+              if (at !== -1) list.splice(at, 1);
+            };
+            if (group.include.includes(key)) {
+              drop(group.include);
+              if (!group.exclude.includes(key)) group.exclude.push(key);
+            } else if (group.exclude.includes(key)) {
+              drop(group.exclude);
             } else {
-              group.exclude.splice(group.exclude.indexOf(key), 1);
+              group.include.push(key);
             }
             onChange();
           },
         },
+        // The state is spelled as well as coloured. Include and exclude were
+        // yellow and red-with-a-strikethrough and nothing else, which asks the
+        // reader to hold a colour key in their head — and fails outright for
+        // anyone who cannot separate the two.
+        chipState === 'include' ? h('span', { class: 'chip-mark' }, '+') : null,
+        chipState === 'exclude' ? h('span', { class: 'chip-mark' }, '−') : null,
         getLabel(item),
         h('span', { class: 'faint' }, ` ${item.count}`),
       );

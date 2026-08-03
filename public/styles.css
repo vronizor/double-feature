@@ -268,6 +268,18 @@ label { display: block; }
 /* Vibe chips read as presets rather than filter toggles, so they're a
    little larger than the include/exclude chips they sit above. */
 .chip--vibe { font-size: 0.88rem; padding: 6px 14px; }
+
+/* One shape used to mean four things: vibe presets, list-group jump chips,
+   genre/country/language filters and display toggles were all fully-round
+   pills that turned solid yellow when active, and four of the seven vibe names
+   recurred verbatim in the rows below. The jump chips are deleted (see
+   renderListPicker) and what remains is two kinds of control that now LOOK
+   like two kinds of control: a pill is a preset you apply, a token is a value
+   you include or exclude. */
+.chip--filter { border-radius: 6px; }
+.chip-mark {
+  font-weight: 700; margin-right: 0.3em; font-variant-numeric: tabular-nums;
+}
 .chip--save { border-style: dashed; color: var(--text-dim); }
 
 .vibe-chip-wrap { display: inline-flex; align-items: center; gap: 2px; }

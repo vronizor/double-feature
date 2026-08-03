@@ -18,7 +18,6 @@ import {
   renderListPicker,
   renderVibeChips,
   renderParamPicker,
-  renderTagFilter,
   renderAwardsToggle,
   renderRatingToggle,
   createPoolDestination,
@@ -62,7 +61,6 @@ export async function renderDraw(container) {
     openGroups: new Set(),
     // Which tag the picker is narrowed to, and the vocabulary/vibes fetched
     // from the server. Presentation + server data, so not in poolState.
-    tagFilter: null,
     vocabulary: [],
     vibes: [],
     // Edit mode for the vibe row: chips delete instead of applying. Presentation
@@ -350,7 +348,7 @@ export async function renderDraw(container) {
    * The pool controls themselves, built once and shown in two places: a sticky
    * rail on a wide screen, and a full-screen sheet on anything narrower.
    *
-   * `renderTagFilter`, `renderListPicker` and `renderFilterPanel` are reused
+   * `renderListPicker` and `renderFilterPanel` are reused
    * completely unchanged — that reuse is the entire reason this is a small
    * change rather than a rewrite of the pool UI.
    */
@@ -359,10 +357,6 @@ export async function renderDraw(container) {
       'div',
       { class: 'stack' },
       h('div', { class: 'field-label' }, 'Lists in play'),
-      renderTagFilter(state.vocabulary, state.tagFilter, (tag) => {
-        state.tagFilter = tag;
-        paint();
-      }),
       renderListPicker(
         state.lists,
         state.openGroups,
@@ -371,7 +365,7 @@ export async function renderDraw(container) {
           refreshFacets();
           paint();
         },
-        { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
+        { vocabulary: state.vocabulary },
       ),
       state.facets ? filterPanel() : null,
     );

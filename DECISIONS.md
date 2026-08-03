@@ -344,8 +344,12 @@ is a lie that survives every guard.
   and one active colour. Four of seven vibe names recur verbatim in the row
   below, and with `Cinephile` selected the group row still paints `All` in the
   same active yellow, so two contradictory "this is selected" states stack in
-  one column. The fix is a deletion: the tag-filter row is a second narrowing
-  mechanism over group headers that already narrow. See
+  one column. **Deleted in v7.13**: the tag-filter row was a second narrowing
+  mechanism over group headers that already narrow, and it carried the
+  contradictory `All`. What remains is two kinds of control that look like two
+  kinds of control — a **pill** is a preset you apply, a **token** is a value
+  you include or exclude. Tokens are square-cornered and carry an explicit `+`
+  or `−`, so the tri-state no longer rests on colour alone. See
   [the UI review](docs/evidence/ui-review.md).
 - **Disclosure by destination, not expansion in place.** A panel that triples
   the page when opened has not deferred its complexity, it has relocated it into
