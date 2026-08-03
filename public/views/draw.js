@@ -7,6 +7,7 @@ import {
   tmdbUrl,
   parseTmdbInput,
   openMovieModal,
+  openOverlay,
   topNLabel,
   drawnMessage,
   fill,
@@ -482,6 +483,190 @@ export async function renderDraw(container) {
     });
   }
 
+
+  // --- Keyboard ---------------------------------------------------------------
+
+  /**
+   * The shortcut table, and the only place it is written down — the help card
+   * renders from this array, so a key that works and a key that is documented
+   * cannot drift apart.
+   */
+  const SHORTCUTS = [
+    { keys: ['p'], what: 'Open or close Pool setup' },
+    { keys: ['d'], what: 'Draw' },
+    { keys: ['r'], what: 'Replace the drawn films' },
+    { keys: ['c'], what: 'Clear the lineup' },
+    { keys: ['l'], what: 'Select all lists, or none' },
+    { keys: ['a'], what: 'Add a specific film' },
+    { keys: ['/'], what: 'Search for a film by name' },
+    { keys: ['\u21e7', '\u2191'], what: 'Draw one more film', join: ' + ' },
+    { keys: ['\u21e7', '\u2193'], what: 'Draw one fewer', join: ' + ' },
+    { keys: ['\u2190', '\u2192'], what: 'Move between vibe chips, once one is focused', join: ' / ' },
+    { keys: ['Enter'], what: 'Apply the focused vibe' },
+    { keys: ['Esc'], what: 'Close whatever is open' },
+    { keys: ['?'], what: 'This card' },
+  ];
+
+  function showShortcuts() {
+    openOverlay({
+      label: 'Keyboard shortcuts',
+      cardClass: 'modal-card shortcuts-card',
+      render: (close) => [
+        h(
+          'div',
+          { class: 'row' },
+          h('h2', {}, 'Keyboard shortcuts'),
+          h('span', { class: 'spacer' }),
+          h('button', { class: 'btn-sm', onClick: close }, 'Close'),
+        ),
+        h(
+          'dl',
+          { class: 'shortcut-list' },
+          ...SHORTCUTS.flatMap((row) => [
+            h(
+              'dt',
+              {},
+              ...row.keys.flatMap((key, i) => [
+                i ? h('span', { class: 'faint' }, row.join ?? ' ') : null,
+                h('kbd', {}, key),
+              ]),
+            ),
+            h('dd', {}, row.what),
+          ]),
+        ),
+        h(
+          'p',
+          { class: 'faint' },
+          'Keys are ignored while you are typing, so a title with a "d" in it stays a title.',
+        ),
+      ],
+    });
+  }
+
+  /**
+   * One handler for the tab's shortcuts.
+   *
+   * Two rules keep it out of the way. It never fires while the caret is in a
+   * field — otherwise typing "Indiana Jones" would draw, clear the lineup and
+   * open the pool setup on the way past — and it never fires while an overlay
+   * is up, because whatever is open owns the keyboard until it closes.
+   */
+  function onKeydown(event) {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+    const el = event.target;
+    const typing =
+      el instanceof HTMLElement &&
+      (el.matches('input, textarea, select') || el.isContentEditable);
+
+    // Arrow-cycling the vibe row is the exception to "not while typing": the
+    // chips are buttons, so focus is on one of them, not in a field.
+    if (!typing && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+      const chips = [...container.querySelectorAll('.chip--vibe')];
+      const at = chips.indexOf(document.activeElement);
+      if (at !== -1) {
+        event.preventDefault();
+        const step = event.key === 'ArrowRight' ? 1 : -1;
+        chips[(at + step + chips.length) % chips.length].focus();
+        return;
+      }
+    }
+
+    if (typing) return;
+
+    // An overlay owns the keyboard while it is up — with two exceptions: the
+    // key that says what the keys are, and the key that OPENED the pool sheet,
+    // which has to be able to close it again or "p toggles" is a lie.
+    const overlay = document.querySelector('.modal-backdrop');
+    if (overlay) {
+      const isPoolSheet = Boolean(overlay.querySelector('.sheet-card'));
+      if (event.key === 'p' && isPoolSheet) {
+        event.preventDefault();
+        poolDestination.toggle();
+        return;
+      }
+      if (event.key !== '?') return;
+    }
+
+    const bump = (by) => {
+      state.size = Math.min(MAX_DRAW_SIZE, Math.max(MIN_DRAW_SIZE, state.size + by));
+      const field = container.querySelector('input[type=number]');
+      if (field) field.value = String(state.size);
+      paintCount();
+      paintDrawButton();
+      if (unitNode) unitNode.textContent = state.size === 1 ? 'film' : 'films';
+    };
+
+    const press = (label) => {
+      const button = [...container.querySelectorAll('button')].find(
+        (b) => !b.disabled && b.textContent.trim().startsWith(label),
+      );
+      button?.click();
+      return Boolean(button);
+    };
+
+    if (event.shiftKey) {
+      if (event.key === 'ArrowUp') return event.preventDefault(), bump(1);
+      if (event.key === 'ArrowDown') return event.preventDefault(), bump(-1);
+    }
+
+    switch (event.key) {
+      case '?':
+        event.preventDefault();
+        showShortcuts();
+        break;
+      case 'p':
+        event.preventDefault();
+        poolDestination.toggle();
+        break;
+      case 'd':
+        event.preventDefault();
+        if (!state.busy && state.poolCount !== 0) doDraw();
+        break;
+      case 'r':
+        event.preventDefault();
+        if (!state.busy && lineup.drawn().length) doReplace();
+        break;
+      case 'c':
+        event.preventDefault();
+        press('Clear all');
+        break;
+      case 'l': {
+        event.preventDefault();
+        // One key, both directions: anything less than everything selects all,
+        // and everything selects none. A second key for "none" would be a key
+        // nobody remembers the difference of.
+        const ids = state.lists.filter((list) => !list.hidden).map((list) => list.id);
+        const allOn = ids.every((id) => poolState.isSelected(id));
+        poolState.setMany(ids, !allOn);
+        refreshCount();
+        refreshFacets();
+        paint();
+        break;
+      }
+      case 'a':
+        event.preventDefault();
+        if (!state.addFilmOpen) {
+          state.addFilmOpen = true;
+          paint();
+        }
+        document.getElementById('add-film-search')?.focus();
+        break;
+      case '/':
+        event.preventDefault();
+        if (!state.addFilmOpen) {
+          state.addFilmOpen = true;
+          paint();
+        }
+        document.getElementById('add-film-search')?.focus();
+        break;
+      default:
+        break;
+    }
+  }
+
+  document.addEventListener('keydown', onKeydown);
+
   // --- Random draw ----------------------------------------------------------
 
   function drawControls() {
@@ -491,7 +676,23 @@ export async function renderDraw(container) {
     return h(
       'div',
       { class: 'card stack' },
-      h('h2', {}, 'Draw random films'),
+      h(
+        'div',
+        { class: 'row' },
+        h('h2', {}, 'Draw random films'),
+        h('span', { class: 'spacer' }),
+        // Discreet on purpose: it is a door for people who already want one.
+        h(
+          'button',
+          {
+            class: 'kbd-hint',
+            title: 'Keyboard shortcuts (?)',
+            'aria-label': 'Keyboard shortcuts',
+            onClick: showShortcuts,
+          },
+          '\u2328',
+        ),
+      ),
       // Vibe chips sit inside this card, immediately above Pool setup,
       // because that is exactly what they configure — "Add a specific film"
       // next door is deliberately untouched by them.
@@ -968,6 +1169,9 @@ export async function renderDraw(container) {
      * and get the id reading offered beside the results instead.
      */
     const searchInput = h('input', {
+      // Stable id so the "/" and "a" shortcuts can find this box and not the
+      // person picker's, which is also a search input on the same screen.
+      id: 'add-film-search',
       type: 'search',
       placeholder: 'Search TMDB, or paste a URL or id…',
       onKeydown: async (event) => {
@@ -1335,6 +1539,7 @@ export async function renderDraw(container) {
 
   return () => {
     countToken += 1;
+    document.removeEventListener('keydown', onKeydown);
     stopSession();
   };
 }

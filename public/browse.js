@@ -893,6 +893,10 @@ export function createPoolDestination({ content, repaint, label = 'Pool setup' }
   }
 
   return {
+    /** Open it if closed, close it if open — one key for both, see the tab's
+     *  shortcut table. */
+    toggle: () => (sheet ? sheet.close() : open()),
+
     /** The rail. Empty while the sheet is up: only one copy may be live. */
     rail: () =>
       h(
@@ -901,7 +905,26 @@ export function createPoolDestination({ content, repaint, label = 'Pool setup' }
         h(
           'div',
           { class: 'card stack draw-rail-inner' },
-          h('div', { class: 'row' }, h('h3', {}, label)),
+          h(
+            'div',
+            { class: 'row' },
+            h('h3', {}, label),
+            h('span', { class: 'spacer' }),
+            // The rail is 300px and deliberately so; this is the way out of it
+            // when the job at hand wants room — the same panel, overlaid wide,
+            // where the picker goes multi-column. Also on "p", but a shortcut
+            // nobody can see is not a way in.
+            h(
+              'button',
+              {
+                class: 'rail-expand',
+                title: 'Expand to a wide card (p)',
+                'aria-label': 'Expand pool setup',
+                onClick: open,
+              },
+              '\u2921',
+            ),
+          ),
           // `rangeInputs` gives its fields fixed ids so focus survives a
           // repaint, so two panels in one document means getElementById
           // answers with whichever came first — which, below the rail's

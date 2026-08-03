@@ -2644,3 +2644,40 @@ Verified at scroll 900 across three separate repaint paths, and the "custom"
 label still lands immediately, which is what the repaint was for.
 
 Version 7.20.0.
+
+### 10.22 Keyboard shortcuts, and a wide Pool setup
+
+Asked for. `p` opens or closes Pool setup, `d` draws, `r` replaces the drawn
+films, `c` clears the lineup, `l` selects all lists or none, `a` and `/` reach
+the add-a-film box, shift with the arrows changes the draw size, `?` shows the
+card that lists all of it — rendered from the same array the handler switches
+on, so a key that works and a key that is documented cannot drift apart.
+
+**Tab was asked for and deliberately not taken.** Cycling the vibe chips with
+Tab means hijacking the one key the platform reserves for reaching everything
+else: no keyboard route to Publish, to the tabs, to the browser's own chrome,
+and screen readers broken outright. `←`/`→` cycle the chips once focus is in
+that row, which is the ARIA toolbar pattern, and Tab still gets you there and
+Enter still selects. Raised before building; the owner agreed.
+
+Two rules keep the handler out of the way: never while the caret is in a field
+— otherwise typing "Indiana Jones" would draw, clear the lineup and open the
+pool setup on the way past — and never while an overlay is up, since whatever
+is open owns the keyboard. With one exception, because "p toggles" would
+otherwise be a lie: `p` closes the pool sheet it opened.
+
+**Pool setup gained a wide overlaid form on desktop**, opened by `p` or by a
+`⤢` in the rail's own header — a shortcut nobody can see is not a way in. Same
+component and the same one-copy rule as the phone sheet; only the shape
+differs. At 1040px the picker lays out two columns and the filter groups sit
+three across, which is the fiddling room a 300px rail cannot give.
+
+**The same specificity trap caught twice.** `.modal-card` is defined further
+down the stylesheet than either `.sheet-card` or `.shortcuts-card`, so at equal
+specificity its `190px 1fr` poster grid won: the sheet's sticky header rendered
+a third of the card wide with content showing beside it, and the shortcut table
+was squeezed into the second column. Both are `.modal-card.x` now. Worth
+recording because it is the third time this file's source order has decided a
+rule — see also `max-height: 90vh` capping the sheet at 631px.
+
+Version 7.21.0.
