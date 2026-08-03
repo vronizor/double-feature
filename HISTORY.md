@@ -2497,3 +2497,30 @@ lists are in Awards?" costs one click. Against scrolling 4,300px past 29 ticked
 boxes to reach the filters below, that is the better trade.
 
 Version 7.15.0.
+
+### 10.16 Three things the rail only revealed on a phone
+
+All three reported from real use within minutes of the app going on the LAN,
+and all three are the rail meeting a 300px column for the first time.
+
+**A summary that grew wrapped its controls into a ragged third line.** Adding
+"· 7 appear under more than one tag" pushed the picker's header to two lines,
+which shunted "Deselect all" onto a line of its own under the other two. The
+summary is a sentence and the buttons are controls, so they get a line each
+now.
+
+**"all" and "none" are one control in two halves.** Left to wrap
+independently in a group header, "none" stranded itself under "all" and read
+as a stray button. Both pairs — the group's and the picker's — wrap as a unit
+or not at all.
+
+**Turning a group off used to fling it open.** Clicking `none` on a COLLAPSED
+group pinned it open and expanded it. The pin exists for a good reason —
+unchecking the last list in a group you are looking at would otherwise collapse
+it instantly, yanking the checkbox out from under the cursor — but it was
+ungated, and nothing about "I do not want these" asks to see them. It now pins
+only a group that is already open. Verified all four ways: `none` and `all` on
+a collapsed group leave it collapsed, and a group opened by hand stays open
+even when every list in it is unchecked.
+
+Version 7.16.0.

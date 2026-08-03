@@ -152,6 +152,16 @@ label { display: block; }
 
 /* The Draw tab's list picker is just a checkbox + name + two badges per row —
    full page width is wasted on it once there's room for more than one column. */
+/* Summary on its own line, controls on theirs. In a 300px rail the summary is
+   two lines of text, and sharing a flex row with three buttons pushed the last
+   one onto a ragged line of its own. */
+.picker-head { display: grid; gap: 8px; }
+.picker-head .row { gap: 8px; }
+/* "all"/"none" and "Select all"/"Deselect all" are one control in two halves;
+   they wrap as a unit or not at all. Letting them wrap independently left the
+   second half alone on the next line, which reads as a stray button. */
+.bulk-pair { display: flex; gap: 6px; flex: none; }
+
 .list-picker-grid { display: grid; gap: 8px; }
 @media (min-width: 820px) {
   .list-picker-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }

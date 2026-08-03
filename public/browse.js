@@ -205,9 +205,13 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
   return h(
     'div',
     { class: 'stack', style: 'gap:10px' },
+    // The summary is a SENTENCE and the buttons are controls, so they get a
+    // line each. Sharing one `.row` worked while the summary was three words;
+    // once it grew it wrapped to two lines and shunted "Deselect all" onto a
+    // third, ragged, line of its own.
     h(
       'div',
-      { class: 'row' },
+      { class: 'picker-head' },
       // "20 of 20 lists selected" is true, and you can count 29 checkboxes
       // underneath it, because a list appears under every tag it carries —
       // Studio Ghibli under Animation, Collections AND Family. Both numbers
@@ -227,12 +231,26 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
             )
           : null,
       ),
-      h('span', { class: 'spacer' }),
-      // One toggle rather than two buttons: with every group already open,
-      // "Expand all" is a no-op that looks like it should do something.
-      groups.length > 1 ? expandAll(!allOpen) : null,
-      bulk('Select all', allIds, true),
-      bulk('Deselect all', allIds, false),
+      h(
+        'div',
+        { class: 'row' },
+        // One toggle rather than two buttons: with every group already open,
+        // "Expand all" is a no-op that looks like it should do something.
+        //
+        // It sits apart from the pair beside it because it is a different kind
+        // of action — expanding changes what you can SEE, selecting changes
+        // what you DRAW FROM — which this file already keeps deliberately
+        // separate. In a narrow rail that distinction is also what stops three
+        // buttons breaking 2+1.
+        groups.length > 1 ? expandAll(!allOpen) : null,
+        h('span', { class: 'spacer' }),
+        h(
+          'div',
+          { class: 'bulk-pair' },
+          bulk('Select all', allIds, true),
+          bulk('Deselect all', allIds, false),
+        ),
+      ),
     ),
     ...groups.map((group) => {
       const ids = group.lists.map((list) => list.id);
@@ -243,11 +261,18 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
       // keeps the panel readable at all.
       const isOpen = isGroupOpen(openGroups, group.key, isPartiallySelected(group.lists));
 
-      // Interacting with a group pins it open. Without this, unchecking the
-      // last selected list in a group would drop `selected` to 0 and collapse
-      // the group instantly — yanking the very checkbox being clicked out from
-      // under the cursor.
-      const pinOpen = () => setGroupOpen(openGroups, group.key, true);
+      // Interacting with a group you are LOOKING AT pins it open. Without this,
+      // unchecking the last selected list would drop the group out of the
+      // part-selected state and collapse it instantly — yanking the very
+      // checkbox being clicked out from under the cursor.
+      //
+      // Gated on it already being open, which the first version was not: from
+      // a collapsed group, "none" pinned it open and then expanded it, so
+      // turning a group off flung its contents into your face. Nothing about
+      // "I do not want these" asks to see them.
+      const pinOpen = () => {
+        if (isOpen) setGroupOpen(openGroups, group.key, true);
+      };
 
       const groupBulk = (label, on) =>
         h(
@@ -266,29 +291,36 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
       return h(
         'div',
         { class: `list-group${selected > 0 ? ' is-active' : ''}` },
+        // Two lines by construction, not by wrapping. In a 300px rail the
+        // label, the stats and two buttons cannot share one line, and a plain
+        // flex row broke them 3+1 — leaving "none" stranded on a line of its
+        // own under "all". The pair is kept together as its own unit instead.
         h(
           'div',
-          { class: 'row list-group-head' },
+          { class: 'list-group-head' },
           h(
-            'button',
-            {
-              class: 'expand-link',
-              onClick: () => {
-                setGroupOpen(openGroups, group.key, !isOpen);
-                onChange();
+            'div',
+            { class: 'row' },
+            h(
+              'button',
+              {
+                class: 'expand-link',
+                onClick: () => {
+                  setGroupOpen(openGroups, group.key, !isOpen);
+                  onChange();
+                },
               },
-            },
-            `${isOpen ? '▾' : '▸'} ${group.label}`,
+              `${isOpen ? '▾' : '▸'} ${group.label}`,
+            ),
+            h(
+              'span',
+              { class: 'faint' },
+              `${group.lists.length} ${group.lists.length === 1 ? 'list' : 'lists'} · ${films.toLocaleString()} films` +
+                (selected > 0 ? ` · ${selected} on` : ''),
+            ),
+            h('span', { class: 'spacer' }),
+            h('div', { class: 'bulk-pair' }, groupBulk('all', true), groupBulk('none', false)),
           ),
-          h(
-            'span',
-            { class: 'faint' },
-            `${group.lists.length} ${group.lists.length === 1 ? 'list' : 'lists'} · ${films.toLocaleString()} films` +
-              (selected > 0 ? ` · ${selected} on` : ''),
-          ),
-          h('span', { class: 'spacer' }),
-          groupBulk('all', true),
-          groupBulk('none', false),
         ),
         isOpen
           ? h(
