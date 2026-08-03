@@ -7,6 +7,7 @@ import {
   tmdbUrl,
   parseTmdbInput,
   openMovieModal,
+  openOverlay,
   topNLabel,
   drawnMessage,
 } from '../dom.js';
@@ -54,7 +55,6 @@ export async function renderDraw(container) {
   const state = {
     lists: [],
     facets: null,
-    poolSetupOpen: false,
     // Which picker categories are expanded. Lives here (not in poolState)
     // because it's presentation, not pool definition — but it must outlive a
     // repaint, which is why it isn't a local in the render function.
@@ -92,6 +92,11 @@ export async function renderDraw(container) {
     // over the first.
     liveSession: null,
   };
+
+  // The pool sheet, while it is up. Held so `paint()` can refresh its contents:
+  // every control inside it calls paint(), which would otherwise update only
+  // the page behind the sheet.
+  let poolSheet = null;
 
   let sessionTeardown = null;
   const stopSession = () => {
@@ -205,13 +210,25 @@ export async function renderDraw(container) {
 
   // A compact one-line readout of the pool config, shown next to the
   // collapsed toggle so it's still visible at a glance without expanding it.
-  function poolSetupSummary() {
+  /**
+   * What the pool is, as a list of removable facts rather than one run-on
+   * string.
+   *
+   * The string it replaces read `20 lists · top 5 per year · Drama · 1960–1969`
+   * and could only be acted on by opening the panel and hunting for whichever
+   * control had produced the clause you wanted gone. Every clause here carries
+   * the undo for itself, which is the whole point of moving pool state out to a
+   * place you read rather than a form you fill in.
+   *
+   * The list count is deliberately NOT removable: "no lists" is not a narrowing
+   * of the pool, it is an empty pool, and the picker is right there.
+   */
+  function poolSetupPills() {
     const selected = poolState.selectedLists();
     const count = selected === null ? state.lists.filter((l) => l.is_active).length : selected.length;
-    if (count === 0) return 'No lists selected — tap to choose';
-
-    const parts = [`${plural(count, 'list')}`];
+    const pills = [];
     const { topN, filters: f } = poolState.setup;
+
     const inPlay =
       selected === null
         ? state.lists.filter((l) => l.is_active)
@@ -221,72 +238,172 @@ export async function renderDraw(container) {
       ranked: ranked.length,
       perYear: ranked.filter((l) => l.ranks_by_year).length,
     });
-    if (label) parts.push(label);
+
+    pills.push({ label: count === 0 ? 'No lists selected' : plural(count, 'list'), fixed: true });
+    if (label) pills.push({ label, remove: () => poolState.setTopN(null) });
+
     const genreName = (id) => state.facets?.genres.find((g) => g.id === id)?.name ?? `#${id}`;
     const langName = (code) => state.facets?.languages.find((l) => l.code === code)?.name ?? code;
 
-    if (f.genres.include.length) parts.push(f.genres.include.map(genreName).join('/'));
-    if (f.genres.exclude.length) parts.push(`no ${f.genres.exclude.map(genreName).join('/')}`);
-    if (f.languages.include.length) parts.push(f.languages.include.map(langName).join('/'));
-    if (f.languages.exclude.length) parts.push(`no ${f.languages.exclude.map(langName).join('/')}`);
-    if (f.year.min !== null || f.year.max !== null) parts.push(`${f.year.min ?? '…'}–${f.year.max ?? '…'}`);
-    if (f.runtime.min !== null || f.runtime.max !== null) {
-      parts.push(`${f.runtime.min ?? 0}–${f.runtime.max ?? '…'} min`);
+    if (f.genres.include.length) {
+      pills.push({
+        label: f.genres.include.map(genreName).join('/'),
+        remove: () => f.genres.include.splice(0),
+      });
     }
-    if (f.awardWinners) parts.push('award winners');
-    if (!f.includeWatched) parts.push('unwatched only');
+    if (f.genres.exclude.length) {
+      pills.push({
+        label: `no ${f.genres.exclude.map(genreName).join('/')}`,
+        remove: () => f.genres.exclude.splice(0),
+      });
+    }
+    if (f.languages.include.length) {
+      pills.push({
+        label: f.languages.include.map(langName).join('/'),
+        remove: () => f.languages.include.splice(0),
+      });
+    }
+    if (f.languages.exclude.length) {
+      pills.push({
+        label: `no ${f.languages.exclude.map(langName).join('/')}`,
+        remove: () => f.languages.exclude.splice(0),
+      });
+    }
+    if (f.year.min !== null || f.year.max !== null) {
+      pills.push({
+        label: `${f.year.min ?? '\u2026'}\u2013${f.year.max ?? '\u2026'}`,
+        remove: () => {
+          f.year.min = null;
+          f.year.max = null;
+        },
+      });
+    }
+    if (f.runtime.min !== null || f.runtime.max !== null) {
+      pills.push({
+        label: `${f.runtime.min ?? 0}\u2013${f.runtime.max ?? '\u2026'} min`,
+        remove: () => {
+          f.runtime.min = null;
+          f.runtime.max = null;
+        },
+      });
+    }
+    if (f.awardWinners) pills.push({ label: 'award winners', remove: () => { f.awardWinners = false; } });
+    if (!f.includeWatched) {
+      pills.push({ label: 'unwatched only', remove: () => { f.includeWatched = true; } });
+    }
 
-    return parts.join(' · ');
+    return pills;
   }
 
-  // Collapsed by default: which lists/filters the pool draws from is only a
-  // dependency of the random draw below, not of the whole tab, so it
-  // shouldn't default to taking up the most visual space. `state.poolSetupOpen`
-  // (not a local closure var) so it survives the repaints that filter chips
-  // and list checkboxes already trigger while it's open.
-  function poolSetup() {
-    return h(
-      'div',
-      {},
-      h(
-        'div',
-        { class: 'row' },
-        h(
-          'button',
-          {
-            class: 'expand-link',
-            onClick: () => {
-              state.poolSetupOpen = !state.poolSetupOpen;
-              paint();
-            },
-          },
-          state.poolSetupOpen ? '▾ Pool setup' : '▸ Pool setup',
-        ),
-        h('span', { class: 'faint' }, poolSetupSummary()),
-      ),
-      state.poolSetupOpen
-        ? h(
-            'div',
-            { class: 'stack', style: 'margin-top:10px' },
-            h('div', { class: 'field-label' }, 'Lists in play'),
-            renderTagFilter(state.vocabulary, state.tagFilter, (tag) => {
-              state.tagFilter = tag;
-              paint();
-            }),
-            renderListPicker(
-              state.lists,
-              state.openGroups,
-              () => {
+  /**
+   * The pool, read back. Removing a pill demotes the vibe to Custom for the
+   * same reason editing any filter does — the chip would otherwise keep
+   * claiming a vibe the pool no longer matches.
+   */
+  // Repainted on its own, the way the pool count already is. The value inputs
+  // (year, runtime, top-N) deliberately do NOT call paint() — a repaint on
+  // every keystroke would throw the caret out of the number field being typed
+  // in — so a summary that only refreshed with the page would have sat there
+  // describing the pool as it was before the host started typing.
+  let pillsNode = null;
+  function paintPills() {
+    if (!pillsNode) return;
+    clear(pillsNode).append(...pillChips());
+  }
+
+  function pillChips() {
+    return poolSetupPills().map((pill) =>
+      pill.fixed
+        ? h('span', { class: 'chip chip--static' }, pill.label)
+        : h(
+            'button',
+            {
+              class: 'chip chip--removable',
+              title: `Remove: ${pill.label}`,
+              onClick: () => {
+                pill.remove();
+                poolState.markCustom();
                 refreshCount();
                 refreshFacets();
                 paint();
               },
-              { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
-            ),
-            state.facets ? filterPanel() : null,
-          )
-        : null,
+            },
+            pill.label,
+            h('span', { class: 'chip-x', 'aria-hidden': 'true' }, '\u00d7'),
+          ),
     );
+  }
+
+  function poolSummaryPills() {
+    pillsNode = h(
+      'div',
+      { class: 'chips pool-pills' },
+      ...pillChips(),
+    );
+    return pillsNode;
+  }
+
+  /**
+   * The pool controls themselves, built once and shown in two places: a sticky
+   * rail on a wide screen, and a full-screen sheet on anything narrower.
+   *
+   * `renderTagFilter`, `renderListPicker` and `renderFilterPanel` are reused
+   * completely unchanged — that reuse is the entire reason this is a small
+   * change rather than a rewrite of the pool UI.
+   */
+  function poolSetupContent() {
+    return h(
+      'div',
+      { class: 'stack' },
+      h('div', { class: 'field-label' }, 'Lists in play'),
+      renderTagFilter(state.vocabulary, state.tagFilter, (tag) => {
+        state.tagFilter = tag;
+        paint();
+      }),
+      renderListPicker(
+        state.lists,
+        state.openGroups,
+        () => {
+          refreshCount();
+          refreshFacets();
+          paint();
+        },
+        { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
+      ),
+      state.facets ? filterPanel() : null,
+    );
+  }
+
+  /**
+   * The sheet: the same controls, as a destination, for screens too narrow to
+   * carry a rail beside the content.
+   *
+   * It repaints from `paint()` rather than owning its own render loop, because
+   * every control inside it already calls `paint()` — see the `poolSheet` hook
+   * there. Without that, picking a list inside the sheet updated the page
+   * behind it and left the sheet showing the state before the tap.
+   */
+  function openPoolSheet() {
+    const body = h('div');
+    const overlay = openOverlay({
+      label: 'Pool setup',
+      cardClass: 'modal-card sheet-card',
+      render: (close) => [
+        h(
+          'div',
+          { class: 'row sheet-head' },
+          h('h2', {}, 'Pool setup'),
+          h('span', { class: 'spacer' }),
+          h('button', { class: 'btn-sm', onClick: close }, 'Done'),
+        ),
+        body,
+      ],
+    });
+    // Escape and a backdrop click close the overlay without going through any
+    // closer of ours, so ownership is decided by whether the node is still in
+    // the document rather than by trying to intercept every exit — see paint().
+    poolSheet = { body, close: overlay.close };
+    clear(body).append(poolSetupContent());
   }
 
   // --- Vibes ----------------------------------------------------------------
@@ -344,7 +461,10 @@ export async function renderDraw(container) {
   function filterPanel() {
     return renderFilterPanel(poolState.filters, state.facets, {
       lists: state.lists,
-      onTopNChange: () => refreshCount(),
+      onTopNChange: () => {
+        refreshCount();
+        paintPills();
+      },
       onChipChange: () => {
         poolState.markCustom();
         refreshCount();
@@ -353,6 +473,7 @@ export async function renderDraw(container) {
       onValueChange: () => {
         poolState.markCustom();
         refreshCount();
+        paintPills();
       },
       onClear: () => {
         poolState.clearFilters();
@@ -474,7 +595,21 @@ export async function renderDraw(container) {
             },
           })
         : null,
-      poolSetup(),
+      // What the pool is, in the main column, where the decision is made. The
+      // controls that change it live in the rail beside this or behind the
+      // button below — but reading the pool should never require opening
+      // anything, which is what the old accordion demanded.
+      poolSummaryPills(),
+      h(
+        'div',
+        { class: 'row pool-sheet-row' },
+        h(
+          'button',
+          { class: 'btn-sm', onClick: openPoolSheet },
+          'Pool setup',
+        ),
+        h('span', { class: 'faint' }, 'lists, filters and the top-N cut'),
+      ),
       h(
         'div',
         { class: 'row' },
@@ -1145,25 +1280,72 @@ export async function renderDraw(container) {
     });
   }
 
+  /**
+   * The tab, as a main column and a rail.
+   *
+   * Pool setup used to be an accordion inside the flow, and opening it pushed
+   * everything below it down — measured at its worst with the Draw button
+   * ~2,900px down a ~3,600px page, four viewport heights below the vibe chips
+   * that had just changed the pool. The controls are a destination now:
+   * a sticky rail where there is room beside the content, and a full-screen
+   * sheet where there is not. Neither can displace the Draw button, because
+   * neither is in the same column as it.
+   *
+   * Which one is on screen is decided in CSS, by width. Both are in the DOM;
+   * the rail is hidden below the breakpoint and the button that opens the sheet
+   * is hidden above it, so there is no viewport measuring in JavaScript to go
+   * stale on a resize.
+   */
   function paint() {
+    // Escape or a backdrop click can have closed the sheet without telling us.
+    if (poolSheet && !document.contains(poolSheet.body)) poolSheet = null;
+
     clear(container).append(
       h(
         'div',
-        { class: 'stack' },
-        liveSessionBanner(),
-        drawControls(),
-        addFilmPanel(),
+        { class: 'draw-shell' },
         h(
           'div',
-          { class: 'row' },
-          h('h2', {}, `Your lineup${lineup.movies.length ? ` (${lineup.movies.length})` : ''}`),
-          h('span', { class: 'spacer' }),
-          renderAwardsToggle(paint),
-          renderRatingToggle(paint),
+          { class: 'stack draw-main' },
+          liveSessionBanner(),
+          drawControls(),
+          addFilmPanel(),
+          h(
+            'div',
+            { class: 'row' },
+            h('h2', {}, `Your lineup${lineup.movies.length ? ` (${lineup.movies.length})` : ''}`),
+            h('span', { class: 'spacer' }),
+            renderAwardsToggle(paint),
+            renderRatingToggle(paint),
+          ),
+          lineupGrid(),
         ),
-        lineupGrid(),
+        h(
+          'aside',
+          { class: 'draw-rail', 'aria-label': 'Pool setup' },
+          h(
+            'div',
+            { class: 'card stack draw-rail-inner' },
+            h('div', { class: 'row' }, h('h3', {}, 'Pool setup')),
+            // No pills here: they are already in the main column, which is
+            // where the draw decision is made. Two copies of one summary a few
+            // hundred pixels apart is the reader's problem, not their comfort.
+            //
+            // And EMPTY while the sheet is up. Only one copy of these controls
+            // may exist at a time: `rangeInputs` gives its year and runtime
+            // fields fixed ids so focus can be restored across a repaint, and
+            // two panels in one document means `getElementById` answers with
+            // whichever came first — which, below the rail's breakpoint, is the
+            // `display:none` one nobody can see. `display:none` hides an
+            // element; it does not take it out of the document.
+            poolSheet ? null : poolSetupContent(),
+          ),
+        ),
       ),
     );
+
+    // Same controls, refreshed in place, when the sheet is the one on screen.
+    if (poolSheet) clear(poolSheet.body).append(poolSetupContent());
   }
 
   await refreshData();

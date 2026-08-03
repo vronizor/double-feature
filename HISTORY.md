@@ -2124,3 +2124,67 @@ explanation in 10.3 — the guest bar has had a grid parent since it was written
 so "a grid parent breaks sticky" could not survive it working. **A suspicion
 that a second surface shares a defect is a cheap thing to check and a very
 expensive thing to assume.**
+
+Version 7.4.0.
+
+### 10.5 Pool setup leaves the flow
+
+The keystone of v7, and the one all four review passes converged on: opening
+Pool setup pushed the whole tab down, at its worst leaving the Draw button
+~2,900px down a ~3,600px page — four viewport heights below the vibe chips that
+had just changed the pool. It is a destination now rather than an accordion: a
+sticky rail where there is room beside the content, a full-screen sheet where
+there is not, and neither can displace the Draw button because neither is in
+the same column as it.
+
+**The reuse held.** `renderTagFilter`, `renderListPicker` and
+`renderFilterPanel` all moved unchanged, which is what kept this a day's work.
+The entire cost of that reuse was two CSS lines: both panels size themselves
+against the *viewport* — the filters by a media query, the picker by a 280px
+track minimum — so on a wide screen they laid out for a wide screen and
+overflowed a 300px rail.
+
+**Pool state is read back as removable pills.** The string they replace read
+`20 lists · top 5 per year · Drama · 1960–1969` and could only be acted on by
+opening the panel and hunting for whichever control had produced the clause you
+wanted gone. Every pill now carries its own undo. The list count deliberately
+does not: "no lists" is not a narrowing of the pool, it is an empty pool.
+
+They repaint on their own, like the pool count already did, because the value
+inputs deliberately do not call `paint()` — a repaint on every keystroke throws
+the caret out of the number field being typed in. Verified: typing `1960` adds
+the pill while the caret stays in the field.
+
+**An overlay helper came out of `openMovieModal`, and it was incomplete.** The
+modal closed on Escape and on a backdrop click and stopped there: it announced
+`aria-modal="true"` while never taking focus, so Tab from an open dialog walked
+the page behind it, and the page behind stayed scrollable. Focus-in, Tab
+trapped, focus restored to whatever opened it, and a scroll lock all belong to
+*being* an overlay rather than to showing a film, so they now live in
+`openOverlay` and the modal gets them for free. **That closes the focus half of
+the modal row in `ROADMAP.md`** — what remains there is its lack of actions.
+
+The trap list is queried on every Tab rather than once on open, because the
+sheet repaints its own contents as filters are picked and a list captured at
+open time would trap focus against nodes that no longer exist.
+
+**One defect found by building it: duplicate element ids.** `rangeInputs` gives
+its year and runtime fields fixed ids so focus survives a repaint, so rendering
+the filter panel in both the rail and the sheet put two `#filter-year-min` in
+one document — and `display: none` hides an element without removing it, so
+below the rail's breakpoint `getElementById` would answer with the copy nobody
+can see. The rail renders empty while the sheet is up; only one copy is ever
+live.
+
+Verified in a browser against a copy of the real database: the rail pins at
+`top: 16` through a long scroll and does not overflow, the sheet opens with
+focus inside it and the page behind locked, typing inside the sheet updates the
+pills in the column behind, and removing a pill clears the underlying filter.
+
+⚠️ **Two things are NOT verified.** The duplicate-id fix landed after the
+browser extension disconnected, so it is reasoned and not seen. And **no part
+of this has been rendered at phone width** — the sheet was exercised by calling
+its opener directly, which proves it works and says nothing about how it looks
+at 390px. That is the standing v7 gap, not a new one.
+
+Version 7.5.0.

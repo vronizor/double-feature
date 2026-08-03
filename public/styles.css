@@ -290,6 +290,67 @@ label { display: block; }
    panel above it while it is closed. */
 .add-film-toggle { border-style: dashed; color: var(--text-dim); }
 
+/* --- The Draw tab: main column + pool rail ------------------------------- */
+
+/* One column by default, so the phone case needs no undoing. The rail appears
+   only where there is genuinely room beside the content — below that width the
+   same controls are a full-screen sheet instead, and BOTH are always in the
+   DOM. Which one is live is decided here, by width, rather than by measuring
+   the viewport in JavaScript and going stale on the next resize. */
+.draw-shell { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.draw-rail { display: none; }
+.pool-sheet-row { margin-top: 2px; }
+
+@media (min-width: 1000px) {
+  /* NO `align-items: start`. It would shrink the rail's own column to its
+     content, and a sticky child cannot travel further than its parent — the
+     same rule that decides how far the publish bar can pin. Stretched, the
+     aside is as tall as the lineup beside it, which is exactly the distance
+     the rail needs to stay put through. */
+  .draw-shell { grid-template-columns: minmax(0, 1fr) 300px; }
+  .draw-rail { display: block; }
+  /* The button that opens the sheet is the same control as the rail; showing
+     both would be two doors to one room. */
+  .pool-sheet-row { display: none; }
+
+  /* Sticky so the pool controls stay put while the lineup scrolls past them —
+     this is the half of "disclosure by destination" that a phone cannot have.
+     Its own scrollbar, because the list picker is taller than any viewport. */
+  .draw-rail-inner {
+    position: sticky; top: 16px;
+    max-height: calc(100dvh - 32px); overflow-y: auto;
+  }
+}
+
+/* Both of these size themselves against the VIEWPORT — the filter panel by a
+   media query, the picker by a 280px track minimum — so on a wide screen they
+   lay out for a wide screen and overflow a 300px rail. Inside the rail they are
+   one column, whatever the window is doing. This is the whole cost of reusing
+   the two panels unchanged, and it is two lines. */
+.draw-rail .filters,
+.draw-rail .list-picker-grid { grid-template-columns: 1fr; }
+/* Grid and flex children default to min-width:auto, so a long list name would
+   push the rail wider than its track rather than ellipsing inside it. */
+.draw-rail .list-pick, .draw-rail .list-group, .draw-rail .row { min-width: 0; }
+
+/* Full-screen rather than a centred card: this is a destination, not an
+   interruption, and it holds a list picker that will always want the height. */
+.sheet-card {
+  max-width: 640px; width: 100%; max-height: 100dvh; height: 100dvh;
+  border-radius: 0; overflow-y: auto;
+}
+.sheet-head { position: sticky; top: 0; z-index: 2; background: var(--bg-raised); padding-bottom: 10px; }
+
+/* Pool state, read back as facts you can strike out one at a time. */
+.pool-pills { align-items: center; }
+.chip--static { cursor: default; border-style: dashed; }
+.chip--removable { display: inline-flex; align-items: center; gap: 6px; }
+.chip-x { color: var(--text-faint); font-size: 0.95em; line-height: 1; }
+@media (hover: hover) {
+  .chip--removable:hover { border-color: var(--danger); color: var(--danger); }
+  .chip--removable:hover .chip-x { color: var(--danger); }
+}
+
 /* --- Movie grid --------------------------------------------------------- */
 
 .movie-grid {

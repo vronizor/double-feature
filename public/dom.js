@@ -569,22 +569,67 @@ function trailerBlock(movie) {
 }
 
 /**
- * Full-detail overlay for a movie card's "Read more" — cards themselves
- * truncate the synopsis with a CSS line-clamp, so this is the only place the
- * untruncated text is shown. Closes on backdrop click, the close button, or
- * Escape.
+ * One overlay, for anything that has to interrupt.
+ *
+ * Extracted from `openMovieModal`, which had grown the only implementation of
+ * this in the app — and an incomplete one. It closed on Escape and on a
+ * backdrop click, and stopped there: it announced `aria-modal="true"` while
+ * never taking focus, so Tab from an open dialog walked the page behind it and
+ * a keyboard user could neither reach the close button nor tell what had
+ * changed. It also left the page behind free to scroll.
+ *
+ * All four behaviours belong to *being an overlay*, not to showing a film, so
+ * they live here once: focus in on open, Tab trapped inside, focus restored to
+ * whatever opened it on close, and the body held still while it is up.
+ *
+ * `render(close)` builds the card's contents and is handed the closer, since
+ * most overlays want a control of their own that dismisses them.
  */
-export function openMovieModal(movie) {
-  const poster = posterUrl(movie.poster_path, 'w342');
+export function openOverlay({ label, cardClass = 'modal-card', render }) {
+  // Restoring focus matters more than it looks: without it, closing drops the
+  // caret back to the top of the document, so a keyboard user who opened this
+  // from the tenth card has to walk back down to it.
+  const opener = document.activeElement;
 
   const onKeydown = (event) => {
-    if (event.key === 'Escape') close();
+    if (event.key === 'Escape') {
+      close();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    // Query on every Tab rather than once on open — an overlay whose contents
+    // change (the pool sheet repaints itself as filters are picked) would
+    // otherwise trap focus against a list of nodes that no longer exist.
+    const focusable = card.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   };
 
   function close() {
     backdrop.remove();
     document.removeEventListener('keydown', onKeydown);
+    document.body.style.overflow = previousOverflow;
+    if (opener instanceof HTMLElement && document.contains(opener)) opener.focus();
   }
+
+  const card = h('div', {
+    class: cardClass,
+    role: 'dialog',
+    'aria-modal': 'true',
+    'aria-label': label,
+  });
+  card.append(...[render(close)].flat(Infinity).filter(Boolean));
 
   const backdrop = h(
     'div',
@@ -594,9 +639,33 @@ export function openMovieModal(movie) {
         if (event.target === backdrop) close();
       },
     },
-    h(
-      'div',
-      { class: 'modal-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': movie.title },
+    card,
+  );
+
+  const previousOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  document.body.appendChild(backdrop);
+  document.addEventListener('keydown', onKeydown);
+
+  // Focus the card itself rather than its first control: a dialog that opens
+  // with the close button focused reads as "the action here is to leave".
+  card.setAttribute('tabindex', '-1');
+  card.focus();
+
+  return { close, card };
+}
+
+/**
+ * Full-detail overlay for a movie card's "Read more" — cards themselves
+ * truncate the synopsis with a CSS line-clamp, so this is the only place the
+ * untruncated text is shown.
+ */
+export function openMovieModal(movie) {
+  const poster = posterUrl(movie.poster_path, 'w342');
+
+  return openOverlay({
+    label: movie.title,
+    render: (close) => [
       h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: close }, '✕'),
       poster
         ? h('img', { class: 'modal-poster', src: poster, alt: '' })
@@ -689,9 +758,6 @@ export function openMovieModal(movie) {
         ),
       ),
       h('div', { class: 'modal-trailer-row' }, trailerBlock(movie)),
-    ),
-  );
-
-  document.addEventListener('keydown', onKeydown);
-  document.body.appendChild(backdrop);
+    ],
+  });
 }
