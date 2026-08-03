@@ -373,6 +373,71 @@ export function topNLabel(topN, { ranked, perYear }) {
   return `top ${topN}, per year on some lists`;
 }
 
+/**
+ * Removes the separator from any meta item that STARTS a wrapped line.
+ *
+ * Third attempt at this, and the first two each moved the orphan rather than
+ * removing it: v4 drew the separator after each item and left `1994 ·`
+ * dangling at the end of a line; v5 moved it to a `::before` on the following
+ * item, which travels with that item and so lands at the START of the next
+ * line instead — `· ★ 6.0`.
+ *
+ * **CSS cannot express the rule.** There is no selector for "is the first thing
+ * on its line": that is a fact about layout, not about the tree, and it changes
+ * with the width of the card. So it has to be measured after the browser has
+ * laid the row out, which is what this does.
+ *
+ * ALL reads happen before ANY writes. Interleaving them makes each write
+ * invalidate layout and each following read recompute it, which on a hundred-
+ * card grid is a hundred forced reflows instead of one.
+ */
+export function sweepMetaSeparators(root = document) {
+  const pending = [];
+
+  // Read pass. Nothing here mutates the DOM.
+  for (const row of root.querySelectorAll('.movie-meta')) {
+    const items = [...row.children];
+    if (items.length < 2) continue;
+    let lineTop = null;
+    for (const item of items) {
+      const top = item.offsetTop;
+      const startsLine = lineTop === null || top > lineTop;
+      if (startsLine) lineTop = top;
+      pending.push([item, startsLine]);
+    }
+  }
+
+  // Write pass.
+  for (const [item, startsLine] of pending) item.classList.toggle('starts-line', startsLine);
+}
+
+// Coalesced to one pass per frame: a repaint can replace a hundred cards, and
+// each replacement would otherwise ask for its own sweep.
+let sweepScheduled = false;
+function scheduleMetaSweep() {
+  if (sweepScheduled) return;
+  sweepScheduled = true;
+  requestAnimationFrame(() => {
+    sweepScheduled = false;
+    sweepMetaSeparators();
+  });
+}
+
+/**
+ * Self-installing, because the alternative is a call at the end of every view's
+ * paint() and one of them eventually gets forgotten — which is exactly how a
+ * defect this cosmetic survives three versions.
+ *
+ * `childList` only: the sweep writes CLASSES, which are attribute mutations, so
+ * it cannot retrigger itself. The ResizeObserver covers the case the observer
+ * cannot see at all — nothing in the DOM changed, the window merely got
+ * narrower and the row rewrapped.
+ */
+if (typeof window !== 'undefined' && typeof ResizeObserver === 'function' && document.body) {
+  new ResizeObserver(scheduleMetaSweep).observe(document.documentElement);
+  new MutationObserver(scheduleMetaSweep).observe(document.body, { childList: true, subtree: true });
+}
+
 export function metaLine(...parts) {
   return parts
     .flat()

@@ -476,10 +476,32 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
    card's edge and clipped, which is how a long director's name used to leave a
    bare star with no number. */
 .movie-meta {
-  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.32em;
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  /* Wide enough to hold the separator, which now lives IN the gap rather than
+     in the flow — see below. */
+  column-gap: 0.85em;
   font-size: 0.78rem; color: var(--text-dim); overflow-wrap: break-word;
 }
-.movie-meta > * + *::before { content: '·'; margin-right: 0.32em; color: var(--text-faint); }
+/* The separator is drawn OUT OF FLOW, and that is the whole trick.
+
+   In flow it has width, so suppressing it on a wrapped item frees that width
+   and the item can pull back onto the previous line — where it then needs the
+   separator again. Bistable: measured wrapped, unmarked it fits, marked it
+   wraps. Observed on "2010 · Jean-Loup Felicioli, Alain Gagnol · ★ 6.5", where
+   the sweep and a re-measurement of its own result disagreed permanently.
+
+   Absolutely positioned in the gap, the dot contributes nothing to the item's
+   width, so hiding it cannot change where anything wraps and one pass settles. */
+.movie-meta > * { position: relative; }
+.movie-meta > * + *::before {
+  content: '·'; position: absolute; left: -0.425em; transform: translateX(-50%);
+  color: var(--text-faint);
+}
+/* Written by `sweepMetaSeparators` after layout. There is no CSS selector for
+   "starts a line" — it is a fact about how the row wrapped, not about the tree
+   — so the separator is suppressed from the measured side. Higher specificity
+   than the rule above, so no !important is needed. */
+.movie-meta > .starts-line::before { content: none; }
 /* nowrap keeps "★ 7.9" from splitting between star and number. Safe now that
    the rating is a flex item: the line breaks BEFORE it rather than through it. */
 .movie-rating { color: var(--accent); font-weight: 620; white-space: nowrap; }

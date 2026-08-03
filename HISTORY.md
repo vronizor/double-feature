@@ -2386,3 +2386,40 @@ They sit in the info column under the links now, which is the end of the block
 you actually read to decide. Measured: visible with the overlay unscrolled.
 
 Version 7.11.0.
+
+### 10.12 The orphaned separator, third attempt
+
+v4 drew the separator after each item and left `1994 ·` dangling at the end of
+a line. v5 moved it to a `::before` on the following item — where it travels
+with that item and lands at the START of the next line instead, `· ★ 6.0`. Each
+attempt moved the orphan rather than removing it.
+
+**CSS cannot express the rule.** There is no selector for "is the first thing
+on its line": that is a fact about how a row wrapped, not about the tree, and
+it changes with the width of the card. So it is measured after layout —
+`offsetTop` per item, all reads in one pass and all class writes in another,
+because interleaving them makes every write invalidate layout and every
+following read recompute it. On a 120-row grid that is 120 forced reflows
+instead of one.
+
+**The measurement alone was not enough, and this is the part that mattered.**
+With the separator in flow it has width, so suppressing it on a wrapped item
+frees that width — and the item can then pull back onto the previous line,
+where it needs a separator again. Bistable: measured wrapped, unmarked it fits,
+marked it wraps. Caught by re-measuring the sweep's own output and finding one
+row that permanently disagreed with it —
+`2010 · Jean-Loup Felicioli, Alain Gagnol · ★ 6.5`.
+
+The separator is drawn **out of flow** now, absolutely positioned inside the
+column gap. It contributes nothing to any item's width, so hiding it cannot
+change where anything wraps, and one pass settles. Verified: three consecutive
+sweeps over 120 rows, 11 of them wrapping, with zero disagreement each time,
+and zero again after a resize to a different width.
+
+The sweep installs itself — a `MutationObserver` for repaints, a
+`ResizeObserver` for a rewrap that no DOM change caused — rather than being
+called from each view's `paint()`, because one of those calls eventually gets
+forgotten and that is exactly how a defect this cosmetic survives three
+versions. `childList` only, so writing classes cannot retrigger it.
+
+Version 7.12.0.

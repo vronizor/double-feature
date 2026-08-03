@@ -68,3 +68,57 @@ test('a node is passed through untouched rather than stringified', () => {
 test('a zero is kept, since it is a real value and not an absent one', () => {
   assert.deepEqual(metaLine(0, 'x').map(textOf), ['0', 'x']);
 });
+
+/**
+ * The orphaned separator, third attempt.
+ *
+ * `sweepMetaSeparators` is the only half of the fix that can be unit-tested:
+ * whether an item starts a line is a layout fact, so the test supplies the
+ * layout (offsetTop) rather than measuring one. What it pins down is the rule
+ * — first-on-a-line loses its separator, everything else keeps one — and the
+ * read-then-write ordering that keeps a hundred-card grid to one reflow.
+ */
+test('the item that starts a wrapped line loses its separator', async () => {
+  const { sweepMetaSeparators } = await import('../public/dom.js');
+
+  const order = [];
+  const item = (offsetTop) => ({
+    offsetTop,
+    classList: {
+      toggle(name, on) {
+        order.push(`write:${name}:${on}`);
+        this.value = on;
+      },
+    },
+    get offsetTopRead() {
+      return this.offsetTop;
+    },
+  });
+
+  // "1994 · Kurosawa" on line one, "★ 8.5" wrapped onto line two.
+  const items = [item(0), item(0), item(18)];
+  const row = { children: items };
+  const root = { querySelectorAll: () => [row] };
+
+  sweepMetaSeparators(root);
+
+  assert.equal(items[0].classList.value, true, 'the very first item always starts a line');
+  assert.equal(items[1].classList.value, false, 'mid-line items keep their separator');
+  assert.equal(items[2].classList.value, true, 'the wrapped item loses its separator');
+});
+
+test('a row that does not wrap is left entirely alone', async () => {
+  const { sweepMetaSeparators } = await import('../public/dom.js');
+  const writes = [];
+  const item = () => ({ offsetTop: 0, classList: { toggle: (n, on) => writes.push(on) } });
+  sweepMetaSeparators({ querySelectorAll: () => [{ children: [item(), item()] }] });
+  assert.deepEqual(writes, [true, false], 'only the first item is marked');
+});
+
+test('a single-item row is skipped — there is no separator to orphan', async () => {
+  const { sweepMetaSeparators } = await import('../public/dom.js');
+  const writes = [];
+  const row = { children: [{ offsetTop: 0, classList: { toggle: () => writes.push(1) } }] };
+  sweepMetaSeparators({ querySelectorAll: () => [row] });
+  assert.equal(writes.length, 0);
+});
