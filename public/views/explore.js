@@ -252,6 +252,7 @@ export async function renderExplore(container) {
         { class: 'movie-grid' },
         state.movies.map((movie) =>
           movieCard(movie, {
+            onChange: paint,
             extraAction: {
               label: lineup.has(movie.tmdb_id) ? 'In lineup ✓' : '+ Add to lineup',
               disabled: lineup.has(movie.tmdb_id),

@@ -21,6 +21,8 @@ import {
 import { prefs } from './prefs.js';
 import { api } from './api.js';
 import { poolState } from './pool-state.js';
+// lineup.js imports nothing at all, so there is no cycle to create here.
+import { lineup } from './lineup.js';
 import { applyVibe } from './vibes.js';
 
 // Re-exported so views can keep importing the filter shape from here alongside
@@ -1002,7 +1004,54 @@ export function renderFilterPanel(
  * `extraAction` (optional) adds one more button alongside Mark Watched —
  * "✕ Remove" on the Draw tab's Lineup cards, "+ Add to lineup" on Explore's.
  */
-export function movieCard(movie, { extraAction } = {}) {
+/**
+ * The two things you can do to a film, wherever it is being shown.
+ *
+ * Shared by the card and the detail overlay so they cannot drift: the overlay
+ * used to have NO actions at all, so the sequence was decide here, close it,
+ * find the card again, act there. `onChange` is the showing view's own repaint,
+ * because adding to the lineup changes a count and a grid that live outside
+ * this component.
+ */
+function watchedButton(movie) {
+  return h(
+    'button',
+    {
+      class: 'btn-sm',
+      onClick: async (event) => {
+        try {
+          await api.setWatched(movie.tmdb_id, !movie.watched);
+          movie.watched = !movie.watched;
+          // Written in place rather than repainted: the flag on the card is
+          // cosmetic, and a repaint here would close nothing and cost a flash.
+          event.target.textContent = movie.watched ? 'Watched ✓' : 'Mark watched';
+        } catch (error) {
+          toast(error.message, 'error');
+        }
+      },
+    },
+    movie.watched ? 'Watched ✓' : 'Mark watched',
+  );
+}
+
+function addToLineupButton(movie, onChange) {
+  const already = lineup.has(movie.tmdb_id);
+  return h(
+    'button',
+    {
+      class: 'btn-sm',
+      disabled: already,
+      onClick: () => {
+        if (!lineup.add(movie)) return;
+        toast(`Added ${movie.title}`, 'ok');
+        onChange?.();
+      },
+    },
+    already ? 'Already in lineup' : '+ Add to lineup',
+  );
+}
+
+export function movieCard(movie, { extraAction, onChange = null } = {}) {
   const poster = posterUrl(movie.poster_path);
   const awards = prefs.showAwards ? (movie.awards ?? []) : [];
 
@@ -1039,7 +1088,25 @@ export function movieCard(movie, { extraAction } = {}) {
       // of its own (contrast the vote screen, where the whole card is already
       // a tap target for ranking, so folding this into the title there would
       // put two different actions on the same touch surface).
-      h('button', { class: 'movie-title movie-title--link', onClick: () => openMovieModal(movie) }, movie.title),
+      h(
+        'button',
+        {
+          class: 'movie-title movie-title--link',
+          onClick: () =>
+            openMovieModal(movie, {
+              actions: (close) => [
+                watchedButton(movie),
+                // Adding from the overlay closes it: the decision is made, and
+                // leaving it up would just be asking to be dismissed.
+                addToLineupButton(movie, () => {
+                  close();
+                  onChange?.();
+                }),
+              ],
+            }),
+        },
+        movie.title,
+      ),
       originalTitleLine(movie),
       h(
         'div',
@@ -1068,22 +1135,7 @@ export function movieCard(movie, { extraAction } = {}) {
     h(
       'div',
       { class: 'movie-actions' },
-      h(
-        'button',
-        {
-          class: 'btn-sm',
-          onClick: async (event) => {
-            try {
-              await api.setWatched(movie.tmdb_id, !movie.watched);
-              movie.watched = !movie.watched;
-              event.target.textContent = movie.watched ? 'Watched ✓' : 'Mark watched';
-            } catch (error) {
-              toast(error.message, 'error');
-            }
-          },
-        },
-        movie.watched ? 'Watched ✓' : 'Mark watched',
-      ),
+      watchedButton(movie),
       extraAction
         ? h(
             'button',

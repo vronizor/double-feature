@@ -558,6 +558,13 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
   overflow-wrap: break-word; grid-column: 2; grid-row: 1;
 }
 .modal-overview { margin: 6px 0 0; font-size: 0.92rem; line-height: 1.55; color: var(--text); }
+/* Inside the info column, under the links — the last thing in the block you
+   actually read to decide, and above the trailer rather than after it. */
+.modal-actions {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+
 .modal-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 4px; }
 .modal-links a { font-size: 0.85rem; }
 .modal-trailer-row { grid-column: 1 / -1; grid-row: 2; margin-top: 6px; }

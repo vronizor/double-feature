@@ -2359,3 +2359,30 @@ document at rest, in the sheet, and after closing it, and the rail refilling on
 Escape. Draw kept its pills, its Draw button and its own sheet.
 
 Version 7.10.0.
+
+### 10.11 The modal earns its interruption
+
+The other half of the row whose focus bug closed in v7.5. The overlay had
+**zero** actions, so the sequence was: decide in here, close it, find the card
+again, act there.
+
+It has `Mark watched` and `+ Add to lineup` now, and the buttons are the same
+ones the card uses — one implementation, so they cannot drift.
+
+**The actions are passed in, never built in `dom.js`.** That module imports
+`prefs.js` and nothing else on purpose, and an overlay that could add to the
+lineup itself would have to reach for `lineup` and `api`. The overlay shows a
+film; what you can *do* with one belongs to whoever is showing it. `browse.js`
+supplies them, because that is where the card lives too.
+
+Adding from the overlay closes it — the decision is made, and leaving it up is
+just asking to be dismissed — and repaints the view behind, so the card
+underneath immediately reads `In lineup ✓`.
+
+**Placement was wrong first and worth recording.** Spanning the modal's full
+width under the trailer put the actions past a 315px video embed and off the
+bottom of the overlay: present, and unreachable without going looking for them.
+They sit in the info column under the links now, which is the end of the block
+you actually read to decide. Measured: visible with the overlay unscrolled.
+
+Version 7.11.0.

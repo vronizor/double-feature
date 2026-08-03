@@ -685,7 +685,7 @@ export function openOverlay({ label, cardClass = 'modal-card', render, onClose =
  * truncate the synopsis with a CSS line-clamp, so this is the only place the
  * untruncated text is shown.
  */
-export function openMovieModal(movie) {
+export function openMovieModal(movie, { actions = null } = {}) {
   const poster = posterUrl(movie.poster_path, 'w342');
 
   return openOverlay({
@@ -781,6 +781,20 @@ export function openMovieModal(movie) {
                 ),
               ],
         ),
+        // Built by the caller, never here. This module imports prefs.js and
+        // nothing else on purpose, and an overlay that could add to the lineup
+        // itself would have to reach for `lineup` and `api` — see the note at
+        // the top. The overlay shows a film; what you can DO with one belongs
+        // to whoever is showing it.
+        //
+        // Handed `close` because deciding in here and then having to find the
+        // card again was the whole complaint: the action that finishes the job
+        // should also finish the interruption.
+        //
+        // Beside the synopsis, NOT after the trailer. Below it they were past a
+        // 315px video embed and off the bottom of the overlay — present, and
+        // unreachable without scrolling for them.
+        actions ? h('div', { class: 'modal-actions' }, actions(close)) : null,
       ),
       h('div', { class: 'modal-trailer-row' }, trailerBlock(movie)),
     ],

@@ -1082,6 +1082,10 @@ export async function renderDraw(container) {
         { class: 'movie-grid is-lineup' },
         lineup.movies.map((movie) =>
           movieCard(movie, {
+            onChange: () => {
+              refreshCount();
+              paint();
+            },
             extraAction: {
               label: '✕ Remove',
               onClick: async () => {
