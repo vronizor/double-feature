@@ -8,12 +8,35 @@ globalThis.window = { addEventListener() {}, location: { hash: '', pathname: '/'
 globalThis.localStorage = { getItem: () => null, setItem() {} };
 globalThis.location = { hash: '', pathname: '/' };
 
-const { isGroupOpen, setGroupOpen } = await import('../public/browse.js');
+const { isGroupOpen, setGroupOpen, isPartiallySelected } = await import('../public/browse.js');
+const { poolState } = await import('../public/pool-state.js');
 
-test('a group with a selection defaults to open, one without defaults to closed', () => {
+test('a PART-selected group defaults to open; a uniform one defaults to closed', () => {
   const open = new Set();
   assert.equal(isGroupOpen(open, 'awards', true), true);
   assert.equal(isGroupOpen(open, 'canon', false), false);
+});
+
+/**
+ * The default used to be "any selection at all", and the intent was right —
+ * do not hide lists you are drawing from. But this app's default state is all
+ * twenty lists selected, so every group qualified, all eight opened at once,
+ * and a rule meant to say "look here" pointed at nothing.
+ *
+ * All-on and all-off are both uniform and the group header already says which
+ * one you are in. Part-selected is the only state you cannot read off the
+ * header, so it is the only one that opens itself.
+ */
+test('all-selected is NOT partial — which is what stopped every group opening', () => {
+  const lists = [{ id: 1 }, { id: 2 }, { id: 3 }];
+  poolState.setMany([1, 2, 3], true);
+  assert.equal(isPartiallySelected(lists), false, 'all on is uniform');
+
+  poolState.setMany([1, 2, 3], false);
+  assert.equal(isPartiallySelected(lists), false, 'all off is uniform');
+
+  poolState.setMany([2], true);
+  assert.equal(isPartiallySelected(lists), true, 'some on is the informative case');
 });
 
 test('collapsing a group that has a selection actually sticks', () => {

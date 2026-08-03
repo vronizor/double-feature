@@ -2477,3 +2477,23 @@ Animated Canon, Studio Ghibli, The Criterion Collection, and the four festival
 awards that are both `awards` and `festivals`.
 
 Version 7.14.0.
+
+### 10.15 A group opens when it has something to say
+
+A picker group defaulted to open if ANY list inside it was ticked. The intent
+was right — do not hide lists you are drawing from — and the default state of
+this app is all twenty lists ticked, so every one of the eight groups
+qualified. All eight opened on every fresh load, and a rule meant to say "look
+here" fired everywhere and therefore pointed at nothing: ~4,300px of rail,
+uniformly checked.
+
+It opens on a **partial** selection now. All-on and all-off are both uniform,
+and the group header already says which one you are in — `Awards 9 lists · 634
+films · 9 on`. Part-selected is the only state you cannot read off the header,
+so it is the only one that opens itself.
+
+The cost is honest and small: on a fresh load nothing is expanded, so "which
+lists are in Awards?" costs one click. Against scrolling 4,300px past 29 ticked
+boxes to reach the filters below, that is the better trade.
+
+Version 7.15.0.

@@ -26,7 +26,6 @@ expansion in place.**
 
 | Item | State | Where it stands |
 |---|---|---|
-| The picker's groups all default open | ⏳ ready | *(Found while collapsing the filter chips, 7.8.)* A picker group with a selection defaults to open, and the default state is all twenty lists selected — so a first load expands all eight groups and the rail is ~4,300px of mostly checked boxes. The rule is right where it came from (a group holding your selection should not hide it) and wrong at twenty-of-twenty, where it carries no information. **The question is what "has a selection" should mean when everything is selected**: possibly nothing, possibly a partial selection only |
 | Tap targets, and a real device check | 🗣 open | `.btn-sm` ~27px, `.chip` ~26px, `.vibe-edit` ~18px, `.modal-close` 30x30 — all under 44x44. **But every mobile claim in the evidence is derived from the stylesheet, not measured**: `resize_window` silently failed in two separate agents, so nothing was ever rendered at 390px. Check on a real phone before acting, because the fix list is guesswork until then |
 
 **Not in v7, deliberately.** The colour palette — liked as-is, and the amber does

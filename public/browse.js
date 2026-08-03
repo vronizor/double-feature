@@ -68,17 +68,35 @@ export function groupListsByTag(lists, vocabulary) {
  * Whether a picker group renders expanded.
  *
  * `openGroups` holds TWO kinds of marker, not one: `key` forces a group open,
- * `!key` forces it closed. Both are needed because a group containing a
- * selection defaults to open — without an explicit closed marker, collapsing
- * such a group would spring straight back open on the next repaint.
+ * `!key` forces it closed. Both are needed because a group can default to open
+ * — without an explicit closed marker, collapsing such a group would spring
+ * straight back open on the next repaint.
+ *
+ * The default is a PARTIAL selection, not any selection. It used to be any,
+ * and the intent was right — do not hide lists you are drawing from — but the
+ * default state of this app is all twenty lists selected, so every one of the
+ * eight groups qualified and all eight opened at once. A rule meant to say
+ * "look here" fired everywhere and therefore pointed at nothing, leaving a
+ * ~4,300px rail of uniformly ticked checkboxes.
+ *
+ * All-on and all-off are both uniform, and the group header already says which
+ * ("Awards 9 lists · 634 films · 9 on"), so neither needs opening to be
+ * understood. A group part-selected is the only one whose contents you cannot
+ * infer from its header, and it is the one that opens.
  *
  * Extracted because that rule is used in three places now (the per-group
  * toggle, expand/collapse-all, and this test) and is easy to get subtly wrong.
  */
-export function isGroupOpen(openGroups, key, hasSelection) {
+export function isGroupOpen(openGroups, key, isPartial) {
   if (openGroups.has(key)) return true;
   if (openGroups.has(`!${key}`)) return false;
-  return hasSelection;
+  return isPartial;
+}
+
+/** Some, but not all — the only state a group header cannot already tell you. */
+export function isPartiallySelected(lists) {
+  const on = lists.filter((list) => poolState.isSelected(list.id)).length;
+  return on > 0 && on < lists.length;
 }
 
 /** Sets a group's state, clearing the opposite marker so the two can't disagree. */
@@ -181,11 +199,7 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
     );
 
   const allOpen = groups.every((group) =>
-    isGroupOpen(
-      openGroups,
-      group.key,
-      group.lists.some((list) => poolState.isSelected(list.id)),
-    ),
+    isGroupOpen(openGroups, group.key, isPartiallySelected(group.lists)),
   );
 
   return h(
@@ -224,10 +238,10 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
       const ids = group.lists.map((list) => list.id);
       const selected = ids.filter((id) => poolState.isSelected(id)).length;
       const films = group.lists.reduce((sum, list) => sum + (list.resolved_count ?? 0), 0);
-      // A group the host is actually using stays open across repaints; the
-      // rest stay out of the way. With ~20 lists this is what keeps the panel
-      // readable at all.
-      const isOpen = isGroupOpen(openGroups, group.key, selected > 0);
+      // A group the host is actually part-way through stays open across
+      // repaints; the rest stay out of the way. With ~20 lists this is what
+      // keeps the panel readable at all.
+      const isOpen = isGroupOpen(openGroups, group.key, isPartiallySelected(group.lists));
 
       // Interacting with a group pins it open. Without this, unchecking the
       // last selected list in a group would drop `selected` to 0 and collapse
