@@ -2223,3 +2223,36 @@ nothing overflows horizontally. It is not 390px, and the sub-500px layout
 remains unobserved.
 
 Version 7.6.0.
+
+### 10.7 One string stopped setting the width of the page
+
+From field notes, and the fix is not where the symptom is.
+
+The vote panel prints what the vote was drawn from — every selected list joined
+with " + ", which at twenty lists is a **571-character** string — inside a
+`.badge`, and `.badge` is `white-space: nowrap` because a badge is normally two
+or three words. So the page gained a horizontal scrollbar and the nav, the QR
+panel and the poster strip all shifted with it.
+
+**Clamping the badge was necessary and not sufficient**, which is the part
+worth writing down. With the badge held to 52ch and ellipsised, the page still
+measured 3,586px against a 1,440px viewport. `.stack` — the app's default
+vertical layout, used by nearly every view — is a grid with no
+`grid-template-columns`, so its single column is `auto`, and **an auto grid
+column is max-content**. The track kept asking for the untruncated string
+regardless of what the badge was allowed to display, and every ancestor grew to
+match: `.app` correctly 1,100px with a 3,400px card inside it.
+
+`minmax(0, 1fr)` on `.stack`, and on the `1fr` half of `.publish`. Explicitly
+one column that is allowed to shrink, which is what both were always assumed to
+be.
+
+The string itself is untouched — it is the honest record of what a vote was
+drawn from, so it stays whole in the DOM, on hover, and in History where the
+layout can take it. Measured after: page scroll width equal to the viewport,
+badge 347px and ellipsised, all 571 characters still there.
+
+Checked across all four tabs, because `.stack` is everywhere: no overflow, no
+collapsed cards.
+
+Version 7.7.0.

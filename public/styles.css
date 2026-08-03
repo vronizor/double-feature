@@ -56,7 +56,14 @@ a { color: var(--accent); }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
 }
-.stack { display: grid; gap: 16px; }
+/* `minmax(0, 1fr)`, not the implicit `auto`. An auto-sized grid column is
+   max-content, so ONE unbreakable child sizes every ancestor: the vote panel's
+   list summary is a 571-character nowrap string, and it pushed this grid — and
+   therefore the card, the panel and the page — to 3,400px inside a 1,100px
+   `.app`, giving the whole document a horizontal scrollbar. Clamping the
+   summary alone was not enough, because the track was still asking for its
+   max-content contribution. Explicitly one column that may shrink. */
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .spacer { flex: 1; }
 
@@ -174,6 +181,21 @@ label { display: block; }
 .badge {
   font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
   background: var(--bg-sunken); color: var(--text-dim); border: 1px solid var(--border);
+}
+/* `.badge` is nowrap because a badge is two or three words. The pool summary is
+   one too, by styling, and a paragraph by length — every selected list joined
+   with " + ", which is ~400 characters at twenty lists. Nowrap meant it set the
+   page width: the WHOLE document gained a horizontal scrollbar and the nav, the
+   QR panel and the poster strip all shifted with it.
+
+   Clamped rather than shortened. The string is the honest record of what the
+   vote was drawn from, so it stays intact in the DOM and on hover, and History
+   still prints it in full where the layout can take it. `min-width: 0` because
+   a flex item will not shrink below its content without it, which is the whole
+   reason the ellipsis has something to do. */
+.badge--summary {
+  max-width: min(100%, 52ch); min-width: 0;
+  overflow: hidden; text-overflow: ellipsis;
 }
 .badge-warn { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 
@@ -565,7 +587,7 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
 
 /* --- Publish / QR ------------------------------------------------------- */
 
-.publish { display: grid; gap: 18px; grid-template-columns: minmax(200px, 260px) 1fr; align-items: start; }
+.publish { display: grid; gap: 18px; grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); align-items: start; }
 @media (max-width: 640px) { .publish { grid-template-columns: 1fr; } }
 
 .qr { background: #fff; padding: 12px; border-radius: var(--radius); }
