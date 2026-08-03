@@ -83,6 +83,28 @@ export function preserveFocus(root = document) {
   };
 }
 
+/**
+ * Capture how far a scrollable panel is scrolled, restore it after a repaint.
+ *
+ * Sibling of `preserveFocus`, and needed for the same reason: a view that
+ * rebuilds its subtree destroys the element the host was working in. The rail
+ * has its own `overflow-y`, so its scroll position lives on the node — rebuild
+ * it and the host is thrown back to the top of a list they had scrolled a long
+ * way down. Reported for the "only award winners" checkbox, which is simply
+ * the one that repaints; every full repaint did it.
+ *
+ * Keyed on a selector rather than a node, because the node itself is the thing
+ * about to be replaced.
+ */
+export function preserveScroll(root, selector) {
+  const before = root.querySelector(selector)?.scrollTop ?? 0;
+  return () => {
+    if (!before) return;
+    const after = root.querySelector(selector);
+    if (after) after.scrollTop = before;
+  };
+}
+
 export const POSTER_BASE = 'https://image.tmdb.org/t/p';
 
 export function posterUrl(path, size = 'w342') {

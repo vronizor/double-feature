@@ -10,6 +10,7 @@ import {
   topNLabel,
   drawnMessage,
   fill,
+  preserveScroll,
 } from '../dom.js';
 import { api } from '../api.js';
 import { renderSessionPanel } from './session.js';
@@ -1293,6 +1294,11 @@ export async function renderDraw(container) {
    * stale on a resize.
    */
   function paint() {
+    // The rail scrolls independently, and a repaint rebuilds it — so without
+    // this, ticking a checkbox two thirds of the way down threw the host back
+    // to the top of the list picker.
+    const restoreRail = preserveScroll(container, '.draw-rail-inner');
+
     clear(container).append(
       h(
         'div',
@@ -1317,6 +1323,7 @@ export async function renderDraw(container) {
       ),
     );
 
+    restoreRail();
     poolDestination.sync();
   }
 

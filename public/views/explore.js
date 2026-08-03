@@ -1,4 +1,4 @@
-import { h, clear, plural, toast, preserveFocus } from '../dom.js';
+import { h, clear, plural, toast, preserveFocus, preserveScroll } from '../dom.js';
 import { api } from '../api.js';
 import {
   renderFilterPanel,
@@ -277,6 +277,7 @@ export async function renderExplore(container) {
     // instead. Before this, typing "1960" into the year field landed the 1 and
     // sent "960" to `<body>`.
     const restoreFocus = preserveFocus(container);
+    const restoreRail = preserveScroll(container, '.draw-rail-inner');
 
     clear(container).append(
       h(
@@ -303,6 +304,7 @@ export async function renderExplore(container) {
       ),
     );
 
+    restoreRail();
     poolDestination.sync();
     restoreFocus();
   }

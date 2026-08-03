@@ -930,7 +930,14 @@ export function createPoolDestination({ content, repaint, label = 'Pool setup' }
     sync: () => {
       // Escape or a backdrop click can have closed the sheet without telling us.
       if (sheet && !document.contains(sheet.body)) sheet = null;
-      if (sheet) fill(sheet.body, content());
+      if (!sheet) return;
+      // Same reason the rail preserves its scroll: refilling the body shortens
+      // it for an instant, and the browser clamps the card's scrollTop to the
+      // new height — so a tap two thirds down the picker jumped to the top.
+      const card = sheet.body.closest('.sheet-card');
+      const top = card?.scrollTop ?? 0;
+      fill(sheet.body, content());
+      if (card && top) card.scrollTop = top;
     },
   };
 }

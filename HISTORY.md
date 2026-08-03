@@ -2620,3 +2620,27 @@ forward and then taken it at a moment nobody asked for. A microtask runs as
 soon as the paint that appended the node has finished, throttled by nothing.
 
 Version 7.19.0.
+
+### 10.21 The rail keeps its place
+
+Ticking "only films that won an award" threw the host back to the top of the
+rail. Self-inflicted, two versions earlier: 10.18 gave the filter checkboxes a
+full repaint so the "custom" label would stop lagging, and a repaint rebuilds
+the rail — which owns its own `overflow-y`, so its scroll position lives on the
+node being destroyed.
+
+Fixed as a class rather than as that checkbox. `preserveScroll` is the sibling
+of `preserveFocus` and works the same way: capture before, restore after, keyed
+on a SELECTOR rather than a node, because the node is the thing about to be
+replaced. Both views use it, so every full repaint keeps the rail where it was
+— the checkbox that was reported, a group's all/none, a list ticked two thirds
+of the way down.
+
+The sheet needed the same treatment for a different reason: refilling its body
+shortens it for an instant and the browser clamps the card's `scrollTop` to the
+momentary height, so the position is lost even though the card itself survives.
+
+Verified at scroll 900 across three separate repaint paths, and the "custom"
+label still lands immediately, which is what the repaint was for.
+
+Version 7.20.0.
