@@ -243,6 +243,20 @@ CREATE TABLE IF NOT EXISTS vibes (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   name         TEXT    NOT NULL UNIQUE,
   is_builtin   INTEGER NOT NULL DEFAULT 0,
+  -- Identity for a built-in, separate from its display name. NULL for the ones
+  -- a host makes themselves, which have no seed to be reconciled against.
+  --
+  -- The name used to be the identity, and that was a bug rather than a
+  -- shortcut: ensureBuiltinVibes asked "is there a vibe called Cinephile?", so
+  -- renaming one made it invisible to the seeder, which helpfully created it
+  -- again. Measured: rename plus a restart gave eight built-ins where there
+  -- were seven. It also meant every rename of a built-in needed its own
+  -- migration, because editing the seed array alone is a no-op on any database
+  -- that has already booted.
+  builtin_key  TEXT    UNIQUE,
+  -- Set the first time a host renames a built-in. After that the seed no
+  -- longer touches the name: the key is ours, the name is theirs.
+  name_custom  INTEGER NOT NULL DEFAULT 0,
   param_json   TEXT,
   filters_json TEXT,
   position     INTEGER NOT NULL DEFAULT 0,
@@ -368,6 +382,15 @@ export function migrate(target) {
   ensureColumn(target, 'lists', 'short_name', 'TEXT');
   ensureColumn(target, 'lists', 'hidden', 'INTEGER NOT NULL DEFAULT 0');
   ensureColumn(target, 'vibes', 'param_json', 'TEXT');
+  ensureColumn(target, 'vibes', 'builtin_key', 'TEXT');
+  ensureColumn(target, 'vibes', 'name_custom', 'INTEGER NOT NULL DEFAULT 0');
+  // Partial, so the many custom vibes with a NULL key do not collide. Created
+  // here rather than in SCHEMA for the reason given above the movies_imdb
+  // index: SCHEMA runs before migrate(), so an index over a column migrate()
+  // has not added yet cannot boot on an existing database.
+  target.exec(
+    'CREATE UNIQUE INDEX IF NOT EXISTS vibes_builtin_key ON vibes(builtin_key) WHERE builtin_key IS NOT NULL',
+  );
   // Populated from the seed files by scripts/backfill-ranks.mjs, NOT by a
   // re-run of the seeder: seed.mjs deliberately skips entries that already
   // landed, so rows seeded before this column existed would stay NULL forever.
@@ -381,6 +404,7 @@ export function migrate(target) {
   renameCrowdPleasers(target);
   retagDynamicAsModern(target);
   dropNationalCinemaVibe(target);
+  keyBuiltinVibes(target);
 }
 
 /**
@@ -638,19 +662,53 @@ function migrateCategoriesToTags(target) {
   for (const list of untagged) insert.run(list.id, list.category);
 }
 
+/**
+ * Gives the seven existing built-in vibes their stable key, once.
+ *
+ * Matched on the name they have TODAY, which is the only handle a database
+ * written before the column existed offers — and the last time that name is
+ * ever used as identity. After this, `builtin_key` is the identity and the
+ * name is free to change on either side: ours in the seed array, theirs
+ * through the rename route.
+ *
+ * Deliberately only fills a NULL key, so it cannot disturb a row that already
+ * has one, and only touches rows still carrying the original name — a host who
+ * renamed a built-in before this shipped has already been given a duplicate by
+ * the old behaviour, and guessing which of the two is "really" Cinephile is
+ * not something a migration should do. The duplicate stays visible for them to
+ * settle; from here the bug cannot recur.
+ */
+function keyBuiltinVibes(target) {
+  const ORIGINAL_NAMES = {
+    Cinephile: 'cinephile',
+    Awards: 'awards',
+    'Modern Classics': 'modern-classics',
+    Family: 'family',
+    'Box office': 'box-office',
+    'Director night': 'director-night',
+    "Actor's night": 'actor-night',
+  };
+  const claim = target.prepare(
+    `UPDATE vibes SET builtin_key = ?
+     WHERE name = ? AND is_builtin = 1 AND builtin_key IS NULL
+       AND NOT EXISTS (SELECT 1 FROM vibes WHERE builtin_key = ?)`,
+  );
+  for (const [name, key] of Object.entries(ORIGINAL_NAMES)) claim.run(key, name, key);
+}
+
 // The presets that used to be hardcoded in the frontend. Seeded as ordinary
 // rows so there is one mechanism for built-in and user-created alike.
 const BUILTIN_VIBES = [
-  { name: 'Cinephile', tags: ['canon'], position: 1 },
-  { name: 'Awards', tags: ['awards'], position: 2 },
+  { key: 'cinephile', name: 'Cinephile', tags: ['canon'], position: 1 },
+  { key: 'awards', name: 'Awards', tags: ['awards'], position: 2 },
   // Resolves on a family tag, not on 'dynamic' — see the TAGS comment. Being
   // tag-driven is still right: if a second recent-acclaim list is ever added
   // it should join this vibe on its own. What it must not do is absorb every
   // list that merely happens to be query-backed.
-  { name: 'Modern Classics', tags: ['modern'], position: 3 },
+  { key: 'modern-classics', name: 'Modern Classics', tags: ['modern'], position: 3 },
   // The one built-in carrying a filter as well as a selection — which is what
   // makes it a vibe rather than just a tag shortcut.
-  { name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },
+  { key: 'family', name: 'Family', tags: ['family'], position: 4, excludeGenreNames: ['Horror'] },
   // Gathers France, Espana and the US the way Awards gathers the award lists.
   //
   // The cut is the point, not decoration, and the reason is SIZE and EVENNESS
@@ -661,11 +719,14 @@ const BUILTIN_VIBES = [
   // 1950s to the 2010s lands within two films of 149, against a 386-to-514
   // spread uncut. The 1940s are thinner because coverage starts around 1945,
   // and the 2020s because the decade is not over.
-  { name: 'Box office', tags: ['box-office'], position: 7, topN: 5 },
+  { key: 'box-office', name: 'Box office', tags: ['box-office'], position: 7, topN: 5 },
   // The first parametric vibe. It resolves to nothing until a person is
   // chosen, which is why it carries neither tags nor lists.
   {
-    name: 'Director night',
+    key: 'director-night',
+    // Renamed in v7.9 from "Director night" — a one-word edit here, which is
+    // the entire point of `builtin_key`. Before it, this needed a migration.
+    name: "Director's night",
     tags: [],
     position: 5,
     param: { kind: 'person', job: 'Director', label: 'Director' },
@@ -674,6 +735,7 @@ const BUILTIN_VIBES = [
   // the job here selects a different TMDB read rather than a different filter
   // over the same one. See getActingCredits in tmdb.js.
   {
+    key: 'actor-night',
     name: "Actor's night",
     tags: [],
     position: 6,
@@ -702,7 +764,30 @@ export function ensureBuiltinVibes(target) {
     target.prepare('SELECT id FROM genres WHERE name = ? COLLATE NOCASE').get(name)?.id ?? null;
 
   for (const vibe of BUILTIN_VIBES) {
-    if (target.prepare('SELECT 1 FROM vibes WHERE name = ?').get(vibe.name)) continue;
+    // By KEY, never by name. See the column comment in SCHEMA: matching on the
+    // name meant a renamed built-in looked absent and was recreated beside
+    // itself, and it made every rename a migration.
+    const existing = target
+      .prepare('SELECT id, name, name_custom FROM vibes WHERE builtin_key = ?')
+      .get(vibe.key);
+
+    if (existing) {
+      // The seed owns the name until a host takes it over. `name_custom` is
+      // the whole reason this can be an UPDATE rather than a no-op: without
+      // it, shipping a better name would silently overwrite theirs.
+      if (!existing.name_custom && existing.name !== vibe.name) {
+        const clash = target
+          .prepare('SELECT 1 FROM vibes WHERE name = ? AND id != ?')
+          .get(vibe.name, existing.id);
+        // `name` is UNIQUE, so a host who has already given some other vibe
+        // the name we are about to move to would otherwise crash the boot.
+        // Leaving the old name is survivable; refusing to start is not.
+        if (!clash) {
+          target.prepare('UPDATE vibes SET name = ? WHERE id = ?').run(vibe.name, existing.id);
+        }
+      }
+      continue;
+    }
 
     // Resolved from the genres table rather than hardcoded, with TMDB's real
     // id as a fallback for a database seeded before the genre list landed.
@@ -721,9 +806,16 @@ export function ensureBuiltinVibes(target) {
 
     const { lastInsertRowid } = target
       .prepare(
-        'INSERT INTO vibes (name, is_builtin, param_json, filters_json, position) VALUES (?, 1, ?, ?, ?)',
+        `INSERT INTO vibes (name, is_builtin, builtin_key, param_json, filters_json, position)
+         VALUES (?, 1, ?, ?, ?, ?)`,
       )
-      .run(vibe.name, vibe.param ? JSON.stringify(vibe.param) : null, filtersJson, vibe.position);
+      .run(
+        vibe.name,
+        vibe.key,
+        vibe.param ? JSON.stringify(vibe.param) : null,
+        filtersJson,
+        vibe.position,
+      );
 
     for (const tag of vibe.tags) {
       target

@@ -178,7 +178,13 @@ export function updateVibe(db, id, patch) {
         .prepare('SELECT 1 FROM vibes WHERE name = ? COLLATE NOCASE AND id <> ?')
         .get(cleanName, id);
       if (clash) throw fail(`There is already a vibe called "${cleanName}"`);
-      db.prepare('UPDATE vibes SET name = ? WHERE id = ?').run(cleanName, id);
+      // Renaming a built-in hands its name to the host for good. The seed
+      // keeps the key and stops touching the name — see ensureBuiltinVibes.
+      // Only when the name actually CHANGES: a PATCH that happens to resend
+      // the current name should not quietly opt them out of future renames.
+      const takesOver = existing.is_builtin && cleanName !== existing.name;
+      db.prepare(`UPDATE vibes SET name = ?${takesOver ? ', name_custom = 1' : ''} WHERE id = ?`)
+        .run(cleanName, id);
     }
 
     if (patch.filters !== undefined) {

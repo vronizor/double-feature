@@ -2284,3 +2284,51 @@ expanded on a first load. The chip groups were the reported problem and are
 fixed; the picker's default is a separate question and is now in `ROADMAP.md`.
 
 Version 7.8.0.
+
+### 10.9 A built-in vibe's identity stops being its name
+
+Asked as a design question — must renaming a built-in really be a migration
+every time? — and the answer turned out to be that the current arrangement is
+not merely inconvenient, it is broken.
+
+**Measured before touching anything.** `ensureBuiltinVibes` asked "is there a
+vibe called `Cinephile`?", and `PATCH /api/vibes/:id` already accepts a name.
+So renaming `Cinephile` to `Film buff` through the real route and restarting
+produced **eight** built-ins: the renamed one, and a freshly re-seeded
+`Cinephile` beside it. Reachable today; the only reason nobody had hit it is
+that the UI does not expose renaming yet.
+
+The cause is that the name was doing two jobs. `builtin_key` splits them: a
+stable slug is identity, the name is data. One migration claims a key for each
+of the seven existing built-ins by the name it has today — the last time a name
+is ever used as a handle — and from there:
+
+- Renaming a built-in in `BUILTIN_VIBES` is a **one-word edit**, and it reaches
+  databases that have already booted. `Director night` became `Director's night`
+  that way, which is what prompted the question.
+- Renaming one through the API no longer duplicates it. Verified end to end on
+  a copy of the real database: rename, restart, still seven.
+- `name_custom` records that a host has taken the name over, so a later seed
+  change cannot overwrite a name they chose. The key is ours, the name is theirs.
+
+Three things worth keeping about the edges. The backfill only fills a NULL key
+and only matches the original name, so it cannot disturb a database where
+someone has *already* been given a duplicate by the old behaviour — deciding
+which of two rows is "really" Cinephile is not a migration's business. The
+rename-on-seed checks for a name clash first, because `name` is UNIQUE and a
+host who has given some other vibe the name we are moving to would otherwise
+crash the boot; leaving the old name is survivable, refusing to start is not.
+And the unique index on the key is partial, since every custom vibe has NULL.
+
+**A second inconsistency fell out of it.** Slot lists are named from
+`param.label`, independently of the vibe, so they read `Director night —
+Kurosawa` and `Actor night — Bruce Willis` beside vibes called `Director's
+night` and `Actor's night`. That reached the vote panel, where the summary is
+what a published vote records itself as drawn from. The template is possessive
+now; slot lists are found through their `vibe_lists` link and never by name, so
+existing ones simply take the new name on their next apply.
+
+`lists` still identifies by name, and `DECISIONS.md` has said so since v4. The
+same shape would fix it; not done here.
+
+Version 7.9.0.

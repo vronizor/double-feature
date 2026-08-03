@@ -185,6 +185,18 @@ that tightening to exact matching then silently emptied 1976–1982, because tho
 years write `Entrées<ref>…</ref>` and stripping the tags glues the footnote to
 the column name.
 
+**A built-in vibe's identity is `builtin_key`, never its name.** The name was
+the identity until v7.9, and that was a bug rather than a shortcut:
+`ensureBuiltinVibes` asked "is there a vibe called Cinephile?", so renaming one
+made it invisible to the seeder, which created it again alongside. Measured
+against the real route — rename, restart, eight built-ins where there were
+seven. It also made every rename of a built-in its own migration, because
+editing the seed array alone is a no-op on any database that has already
+booted. With a key, a rename is a one-word edit to `BUILTIN_VIBES` and
+`name_custom` stops the seed overwriting a name the host chose themselves.
+**`lists` still has this disease** — see the next entry — and the same shape
+would fix it.
+
 **`seed.mjs` matches lists by NAME.** Renaming a list in its seed file alone
 creates a *second* list beside the old one rather than renaming it. A rename
 needs a migration.

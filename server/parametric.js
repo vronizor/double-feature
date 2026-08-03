@@ -66,9 +66,21 @@ async function filmsFor(param, value) {
   return credits(value.id);
 }
 
-/** The name a slot list wears while it holds this value. */
+/**
+ * The name a slot list wears while it holds this value.
+ *
+ * Possessive, to match the vibes themselves: the built-ins are "Director's
+ * night" and "Actor's night", and this produced "Director night — Kurosawa"
+ * and "Actor night — Bruce Willis" beside them. The mismatch reached the vote
+ * panel, where the list summary is what a published vote records itself as
+ * having been drawn from.
+ *
+ * Safe to change: a slot list is found through its `vibe_lists` link and never
+ * by name — see slotList below — so existing ones simply take the new name the
+ * next time they are applied.
+ */
 function slotName(param, value) {
-  return `${param.label ?? 'Vibe'} night — ${value.name}`;
+  return `${param.label ?? 'Vibe'}'s night — ${value.name}`;
 }
 
 /**
