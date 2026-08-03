@@ -2332,3 +2332,30 @@ existing ones simply take the new name on their next apply.
 same shape would fix it; not done here.
 
 Version 7.9.0.
+
+### 10.10 Explore puts its library first, and the rail becomes a component
+
+~1,600px of controls stood between the heading "Explore the library" and the
+first poster. The tab is now title, subtitle, search, sort, grid — the first
+poster sits **311px** down — with the same pool controls in the same rail the
+Draw tab uses.
+
+**The rail was extracted rather than copied**, which is what the roadmap
+predicted would make it worth building: `createPoolDestination` owns the rail,
+the sheet, the opener button and the one rule that keeps them honest — only one
+copy of the controls may be live, because `rangeInputs` gives its fields fixed
+ids and `display: none` hides an element without removing it. Draw was moved
+onto it in the same change, so there is one implementation and not two.
+
+It also erases an inconsistency the tab's own subtitle was carrying. "Same
+filters as Draw" was true of the filters and false of the chrome: Explore laid
+its picker out flat and permanently expanded while Draw had folded the same
+picker away. Both now show the same controls in the same place, and Explore
+gains the tag filter it never had.
+
+Verified in the browser on both tabs after the extraction: rail present with
+picker and filters and no overflow, exactly one `#filter-year-min` in the
+document at rest, in the sheet, and after closing it, and the rail refilling on
+Escape. Draw kept its pills, its Draw button and its own sheet.
+
+Version 7.10.0.

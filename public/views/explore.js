@@ -6,6 +6,8 @@ import {
   renderListPicker,
   renderAwardsToggle,
   renderRatingToggle,
+  createPoolDestination,
+  renderTagFilter,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -107,6 +109,31 @@ export async function renderExplore(container) {
       { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
     );
   }
+
+  /**
+   * The pool controls, for the rail or the sheet. Same three panels the Draw
+   * tab shows, in the same order — which is what its own subtitle has always
+   * promised and the chrome did not deliver: Explore laid its picker out flat
+   * and expanded while Draw had folded it away behind a summary.
+   */
+  function poolSetupContent() {
+    return h(
+      'div',
+      { class: 'stack' },
+      h('div', { class: 'field-label' }, 'Lists in play'),
+      renderTagFilter(state.vocabulary, state.tagFilter, (tag) => {
+        state.tagFilter = tag;
+        paint();
+      }),
+      listPicker(),
+      filterPanel(),
+    );
+  }
+
+  const poolDestination = createPoolDestination({
+    content: () => poolSetupContent(),
+    repaint: () => paint(),
+  });
 
   let searchDebounce = null;
   function searchBox() {
@@ -259,21 +286,29 @@ export async function renderExplore(container) {
     clear(container).append(
       h(
         'div',
-        { class: 'stack' },
-        h('h2', {}, 'Explore the library'),
+        { class: 'draw-shell' },
         h(
-          'p',
-          { class: 'muted' },
-          'Browse every film across your active lists — same filters as Draw, no voting involved.',
+          'div',
+          { class: 'stack draw-main' },
+          h('h2', {}, 'Explore the library'),
+          h(
+            'p',
+            { class: 'muted' },
+            'Browse every film across your active lists — same filters as Draw, no voting involved.',
+          ),
+          // The controls left the column entirely: there used to be ~1,600px of
+          // them above the first poster, on a tab whose heading is an
+          // instruction to look at the library.
+          poolDestination.opener(),
+          searchBox(),
+          sortControl(),
+          resultsGrid(),
         ),
-        listPicker(),
-        searchBox(),
-        filterPanel(),
-        sortControl(),
-        resultsGrid(),
+        poolDestination.rail(),
       ),
     );
 
+    poolDestination.sync();
     restoreFocus();
   }
 

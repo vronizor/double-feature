@@ -7,7 +7,6 @@ import {
   tmdbUrl,
   parseTmdbInput,
   openMovieModal,
-  openOverlay,
   topNLabel,
   drawnMessage,
   fill,
@@ -22,6 +21,7 @@ import {
   renderTagFilter,
   renderAwardsToggle,
   renderRatingToggle,
+  createPoolDestination,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -94,10 +94,12 @@ export async function renderDraw(container) {
     liveSession: null,
   };
 
-  // The pool sheet, while it is up. Held so `paint()` can refresh its contents:
-  // every control inside it calls paint(), which would otherwise update only
-  // the page behind the sheet.
-  let poolSheet = null;
+  // Rail on a wide screen, full-screen sheet on a narrow one — the same
+  // component Explore uses, which is the whole reason it is a component.
+  const poolDestination = createPoolDestination({
+    content: () => poolSetupContent(),
+    repaint: () => paint(),
+  });
 
   let sessionTeardown = null;
   const stopSession = () => {
@@ -375,48 +377,6 @@ export async function renderDraw(container) {
     );
   }
 
-  /**
-   * The sheet: the same controls, as a destination, for screens too narrow to
-   * carry a rail beside the content.
-   *
-   * It repaints from `paint()` rather than owning its own render loop, because
-   * every control inside it already calls `paint()` — see the `poolSheet` hook
-   * there. Without that, picking a list inside the sheet updated the page
-   * behind it and left the sheet showing the state before the tap.
-   */
-  function openPoolSheet() {
-    const body = h('div');
-    const overlay = openOverlay({
-      label: 'Pool setup',
-      cardClass: 'modal-card sheet-card',
-      render: (close) => [
-        h(
-          'div',
-          { class: 'row sheet-head' },
-          h('h2', {}, 'Pool setup'),
-          h('span', { class: 'spacer' }),
-          h('button', { class: 'btn-sm', onClick: close }, 'Done'),
-        ),
-        body,
-      ],
-      // Escape and a backdrop click do not go through any closer of ours, so
-      // the overlay reports every exit here instead.
-      onClose: () => {
-        poolSheet = null;
-        // Repaint, or the rail stays empty behind a sheet that is gone.
-        paint();
-        // And only now can focus go home: the overlay restores it to the node
-        // that opened the sheet, which the repaint above has just replaced.
-        document.getElementById('pool-setup-open')?.focus();
-      },
-    });
-    poolSheet = { body, close: overlay.close };
-    // Immediately, not on the next repaint. paint() is what moves the controls
-    // out of the rail and into the sheet, and until it runs BOTH exist — which
-    // is the duplicate-id state this arrangement is meant to prevent.
-    paint();
-  }
-
   // --- Vibes ----------------------------------------------------------------
 
   async function saveCurrentAsVibe() {
@@ -611,20 +571,7 @@ export async function renderDraw(container) {
       // button below — but reading the pool should never require opening
       // anything, which is what the old accordion demanded.
       poolSummaryPills(),
-      h(
-        'div',
-        { class: 'row pool-sheet-row' },
-        h(
-          'button',
-          // Stable id, which is this codebase's standing contract for anything
-          // that has to survive a repaint (see `preserveFocus`). Closing the
-          // sheet repaints the tab, so the button focus should return to is
-          // never the same node that opened it.
-          { id: 'pool-setup-open', class: 'btn-sm', onClick: openPoolSheet },
-          'Pool setup',
-        ),
-        h('span', { class: 'faint' }, 'lists, filters and the top-N cut'),
-      ),
+      poolDestination.opener(),
       h(
         'div',
         { class: 'row' },
@@ -1313,9 +1260,6 @@ export async function renderDraw(container) {
    * stale on a resize.
    */
   function paint() {
-    // Escape or a backdrop click can have closed the sheet without telling us.
-    if (poolSheet && !document.contains(poolSheet.body)) poolSheet = null;
-
     clear(container).append(
       h(
         'div',
@@ -1336,32 +1280,11 @@ export async function renderDraw(container) {
           ),
           lineupGrid(),
         ),
-        h(
-          'aside',
-          { class: 'draw-rail', 'aria-label': 'Pool setup' },
-          h(
-            'div',
-            { class: 'card stack draw-rail-inner' },
-            h('div', { class: 'row' }, h('h3', {}, 'Pool setup')),
-            // No pills here: they are already in the main column, which is
-            // where the draw decision is made. Two copies of one summary a few
-            // hundred pixels apart is the reader's problem, not their comfort.
-            //
-            // And EMPTY while the sheet is up. Only one copy of these controls
-            // may exist at a time: `rangeInputs` gives its year and runtime
-            // fields fixed ids so focus can be restored across a repaint, and
-            // two panels in one document means `getElementById` answers with
-            // whichever came first — which, below the rail's breakpoint, is the
-            // `display:none` one nobody can see. `display:none` hides an
-            // element; it does not take it out of the document.
-            poolSheet ? null : poolSetupContent(),
-          ),
-        ),
+        poolDestination.rail(),
       ),
     );
 
-    // Same controls, refreshed in place, when the sheet is the one on screen.
-    if (poolSheet) clear(poolSheet.body).append(poolSetupContent());
+    poolDestination.sync();
   }
 
   await refreshData();

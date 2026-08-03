@@ -6,6 +6,8 @@
 import {
   h,
   clear,
+  fill,
+  openOverlay,
   posterUrl,
   toast,
   ratingLine,
@@ -739,6 +741,98 @@ function rangeInputs(filters, key, unit, bounds, onChange) {
  *                     (repaint NOT expected — just re-fetch a count/page)
  *   onClear()       — "Clear filters" was clicked
  */
+/**
+ * Pool setup as a destination, for any view that has one.
+ *
+ * Built for the Draw tab and reused unchanged by Explore, which is the whole
+ * argument for it existing: both tabs need the same controls out of the reading
+ * column, and both need the same two presentations of them — a sticky rail
+ * where there is room beside the content, a full-screen sheet where there is
+ * not. Which one is live is decided in CSS by width; both are in the DOM.
+ *
+ * `content()` builds the controls, fresh, each time it is asked. `repaint()` is
+ * the caller's own paint — the sheet does not own a render loop, because every
+ * control inside it already triggers one.
+ */
+export function createPoolDestination({ content, repaint, label = 'Pool setup' }) {
+  let sheet = null;
+
+  function open() {
+    const body = h('div');
+    const overlay = openOverlay({
+      label,
+      cardClass: 'modal-card sheet-card',
+      render: (close) => [
+        h(
+          'div',
+          { class: 'row sheet-head' },
+          h('h2', {}, label),
+          h('span', { class: 'spacer' }),
+          h('button', { class: 'btn-sm', onClick: close }, 'Done'),
+        ),
+        body,
+      ],
+      // Escape and a backdrop click do not go through any closer of ours, so
+      // the overlay reports every exit here.
+      onClose: () => {
+        sheet = null;
+        // Or the rail stays empty behind a sheet that is gone.
+        repaint();
+        // And only now can focus go home: the overlay restores it to the node
+        // that opened the sheet, which the repaint above has just replaced.
+        document.getElementById('pool-setup-open')?.focus();
+      },
+    });
+    sheet = { body, close: overlay.close };
+    // Immediately, not on the next repaint. repaint() is what moves the
+    // controls out of the rail and into the sheet, and until it runs BOTH
+    // exist — which is the duplicate-id state this arrangement prevents.
+    repaint();
+  }
+
+  return {
+    /** The rail. Empty while the sheet is up: only one copy may be live. */
+    rail: () =>
+      h(
+        'aside',
+        { class: 'draw-rail', 'aria-label': label },
+        h(
+          'div',
+          { class: 'card stack draw-rail-inner' },
+          h('div', { class: 'row' }, h('h3', {}, label)),
+          // `rangeInputs` gives its fields fixed ids so focus survives a
+          // repaint, so two panels in one document means getElementById
+          // answers with whichever came first — which, below the rail's
+          // breakpoint, is the `display:none` one nobody can see.
+          sheet ? null : content(),
+        ),
+      ),
+
+    /** The button that opens the sheet. Hidden by CSS wherever the rail shows. */
+    opener: () =>
+      h(
+        'div',
+        { class: 'row pool-sheet-row' },
+        h(
+          'button',
+          // Stable id, this codebase's standing contract for anything that has
+          // to survive a repaint — closing the sheet repaints, so the button
+          // focus returns to is never the node that opened it.
+          { id: 'pool-setup-open', class: 'btn-sm', onClick: open },
+          label,
+        ),
+        h('span', { class: 'faint' }, 'lists, filters and the top-N cut'),
+      ),
+
+    /** Called from the caller's paint(), after it has rebuilt its own DOM. */
+    sync: () => {
+      // Escape or a backdrop click can have closed the sheet without telling us.
+      if (sheet && !document.contains(sheet.body)) sheet = null;
+      if (sheet) fill(sheet.body, content());
+    },
+  };
+}
+
 /**
  * Which chip groups the host opened by hand, this session.
  *
