@@ -163,6 +163,30 @@ disambiguation page does the same. Key pageviews on a **QID sitelink**, never
 on a title. Series are also truncated by article renames, so compare rates,
 not totals.
 
+**At equal CSS specificity, source order decides — and `.modal-card` sits near
+the bottom of `styles.css`.** It silently beat three separate modifiers in v7:
+`max-height: 90vh` capped the pool sheet at 631px of a 701px viewport, and its
+`190px 1fr` poster grid was inherited by both the sheet and the shortcuts card,
+rendering a sticky header a third of the card wide and squeezing a table into
+the second column. A modifier on a long-established class must be written
+`.base.modifier`.
+
+**A hidden browser tab does not run `requestAnimationFrame`, cannot take focus,
+and does not animate a smooth scroll.** Three behaviours in v7 appeared broken
+only because the automation tab was in the background — a focus call that never
+fired, a scroll that never moved, an animation that never ran. **"It did not
+happen in my check" is not evidence in this repo.** Establish whether the tab is
+at fault before changing code; `document.visibilityState` and `document.hasFocus()`
+answer it in one line.
+
+**Restoring a scroll position clamps it against the container's height at that
+moment.** Set the height first, then the scroll. Reversed, the rail crept upward
+on every repaint, far enough to hide the group just clicked.
+
+**`clear(node).append(...)` is not `h(...)`.** `h` drops null children; `append`
+is the raw DOM method and stringifies them, so a conditional child renders the
+word "null" on the page. Shipped once, under the search box. Use `fill`.
+
 **`grep` treats `scripts/seed.mjs` as binary**, because its progress bar uses
 box-drawing characters — so `grep -rn` finds *nothing* there and silently drops
 the matches in a pipeline. **Use `grep -a` when sweeping this repo.** This nearly

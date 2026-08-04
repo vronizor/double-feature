@@ -13,25 +13,19 @@ themselves.
 | ⏳ **ready** | Decided. Anyone can pick it up from what is written here **without asking another question** — if a row is ⏳ and its section ends in a question, the row is lying |
 | 🔨 **doing** | In progress right now. Three at most |
 
-## v7 — the UI version
+## v8 — the bug-fix version, and the Pi
 
-Every previous version added data. **This one changes only how it is shown**, and
-the evidence for all of it is [docs/evidence/ui-review.md](docs/evidence/ui-review.md)
-— four independent passes over the running app, three of which converged on the
-same three problems without seeing each other's output. Read that before
-proposing anything here.
-
-The shape of the answer, in one line: **disclosure by destination, not
-expansion in place.**
+v7 changed only how things are shown, and it was the first version tested by
+someone *using* it rather than by an agent driving a browser. That produced two
+dozen fixes and a working loop: report from a phone, fix, refresh. **v8 keeps
+that loop and adds nothing structural** — bugs found in use, plus getting it
+onto the Pi.
 
 | Item | State | Where it stands |
 |---|---|---|
-| Tap targets, and a real device check | 🗣 open | `.btn-sm` ~27px, `.chip` ~26px, `.vibe-edit` ~18px, `.modal-close` 30x30 — all under 44x44. **But every mobile claim in the evidence is derived from the stylesheet, not measured**: `resize_window` silently failed in two separate agents, so nothing was ever rendered at 390px. Check on a real phone before acting, because the fix list is guesswork until then |
-
-**Not in v7, deliberately.** The colour palette — liked as-is, and the amber does
-exactly one job. Another Impeccable pass: the detector produced one actionable
-finding across the whole UI and missed a WCAG failure, and `/polish` cannot be
-scoped below one file. Both recorded in `BACKLOG.md`.
+| **`DB_PATH` must be unset on the Pi** | ⏳ ready | **Read this before deploying, not after.** `docker-compose` bind-mounts `./data:/app/data` and passes `.env` into the container, and the working `.env` here carries `DB_PATH=/Users/…/double-feature-data/…` — an absolute macOS path the container has no way to reach. Recorded since v6 as the one thing to re-read before the Pi. The database itself is **never committed**: it holds guests' names against their ballots, and the IMDb-derived numbers are licensed for use and not redistribution |
+| Tap targets | ⏳ ready | **Measured on a real phone at last, and the stylesheet guesses were pessimistic**: `.chip` is 35px and `.tab` 36px, not the ~26px the evidence claimed. Still under 44 though, and `.vibe-edit` ("Edit") is **16px** — the worst by far, and it is the control that deletes a saved vibe. Raise the small ones toward 44 with padding rather than font size, starting there |
+| Whatever the next night turns up | ⏳ ready | The v7 loop found more in an evening of real use than four review passes found in a day. Keep `NOTES.md` as the inbox and fix from it |
 
 Deferred, so they are not re-proposed early: **Unscheduled** — cultness,
 household memory, nominees as well as winners, box office beyond
@@ -41,26 +35,25 @@ Letterboxd is not deferred but **closed** — an explicit published refusal, not
 
 ---
 
-### 1. Traps carried into v7
+### 1. Traps carried into v8
 
-Read `DECISIONS.md` §3 first. The three data traps below still apply to any
-fetcher work, but **v7 is a UI version and its traps are different in kind** —
-they are about believing a tool or a reviewer rather than misreading a source.
+Read `DECISIONS.md` §3 first. The three v7 traps below were all paid for twice,
+which is why they are here rather than in a comment.
 
-- **A clean report from a deterministic scanner is not evidence.** The UI
-  scanner run in v6 passed this app while it was failing WCAG AA at 3.66:1, and
-  said nothing at all about the panel density that prompted the exercise. It did
-  catch every defect on a deliberately-bad control page, so it was working. A
-  scan is a floor. **Always run a control before believing a clean result.**
-- **A reviewer's specific claim can be confidently wrong.** Of the defects
-  reported across four passes, one was backwards — the QR was blamed for a fault
-  that belonged to the link beside it — and one was overstated until real
-  screenshots settled it. Every claim acted on in v6 was verified in source or
-  by calculation first, and that is the only reason the fixes were right.
-- **A browser tool can report success and do nothing.** `resize_window`
-  returned success in two separate agents and never reflowed the window, so
-  every mobile finding in the evidence is derived from the stylesheet rather
-  than seen. **Nothing about the phone layout has actually been observed.**
+- **At equal specificity, source order decides — and `.modal-card` is near the
+  bottom of `styles.css`.** It silently won three times in one version: capping
+  the pool sheet at `90vh` (631px of a 701px viewport), keeping its own
+  `190px 1fr` poster grid so the sheet's sticky header rendered a third of the
+  card wide, and doing the same to the shortcuts table. A modifier on a
+  long-established class needs `.base.modifier`, not `.modifier`.
+- **A hidden browser tab does not run `requestAnimationFrame`, cannot take
+  focus, and does not animate a smooth scroll.** Three separate behaviours in
+  v7 "failed" only because the automation tab was in the background. **"It did
+  not happen in my check" is not evidence here** — confirm the tab is the thing
+  at fault before changing code.
+- **Restoring a scroll position clamps it against the container's height AT
+  THAT MOMENT.** Set the height first, then the scroll. Reversed, the rail crept
+  upward on every repaint.
 
 Carried forward, unchanged, for any work that touches a source:
 

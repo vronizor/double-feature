@@ -2748,3 +2748,36 @@ disconnected before it could be confirmed in the page; everything else here was
 measured.
 
 Version 7.23.0.
+
+### 10.25 Closing v7
+
+Twenty-three chunks. Every roadmap row shipped, and the version's own thesis —
+*disclosure by destination, not expansion in place* — survived contact: Pool
+setup is a rail beside the content and a sheet or a wide card where there is no
+room for one, and the Draw button never moves.
+
+**The evidence pack was worth what it cost, and its limits showed.** Four
+independent passes named the three biggest problems and every one of them was
+real. But every mobile claim in it was derived from the stylesheet, and the
+numbers were wrong in the app's favour — `.chip` measured 35px against a
+claimed 26. The passes could not see what an evening of real use saw.
+
+**The loop that actually found bugs was a person on a phone.** Once the app was
+on the LAN, reports arrived faster than a browser check could produce them, and
+they were of a different kind: a sticky header you could read the ballot
+through, a Draw button that went dead after Clear all, a rail that crept upward
+on every click, a chip that forgot which director it was set to. **Six of the
+defects fixed in v7 were reported by the owner and none of them by an agent.**
+Several were regressions from earlier chunks *of the same version*, caught
+within the hour because someone was using it.
+
+Three habits are worth carrying, and all three are recorded as traps rather
+than as prose: check whether a browser tool is lying before believing it, put
+a modifier on `.base.modifier` when the base class is old, and set a height
+before restoring a scroll.
+
+**One thing did not get done and is not hidden.** The tap targets were measured
+but not raised — `.vibe-edit` is 16px and it deletes a saved vibe. It leads v8.
+
+Version 8.0.0. **The MAJOR is bumped at the close this time**, which v6 forgot,
+leaving `package.json` a version behind its own roadmap for a whole cycle.
