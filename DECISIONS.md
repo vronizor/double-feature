@@ -403,13 +403,23 @@ is a lie that survives every guard.
   usually one commit. So v4.12 means twelve pieces of work have landed in v4,
   which is countable from the log rather than a judgement call. It replaces
   "decision rounds", which nobody could count the same way twice.
-- **Every version bump is a tagged GitHub release, from v8.1.0 on.** Started
+- **Every MAJOR close is a tagged GitHub release — not every chunk.** Started
   2026-08-04, on the owner's request, after noticing the practice was missing.
-  Not backfilled — a tag can be pointed at a past commit, but it would carry
-  today's date rather than the real one, and how far back to go is the owner's
-  call, not a default to assume. Going forward the mapping is direct: MINOR
-  already counts chunks landed, so every version bump is already a tested,
-  working state, which is exactly what a release is for.
+  Chunk-level tagging was tried first and dropped the same day: this app has
+  one audience, its own household, and `HISTORY.md` already gives every chunk
+  a prose write-up — a release at that grain would mostly restate it. A MAJOR
+  close already gets a real closing section (`HISTORY.md` §8.14, §9.8, §10.25)
+  that reads as release notes without editing, and at the pace this project
+  moves — 23 chunks in v7 alone — chunk-level releases would have buried the
+  moments actually worth finding again under the ones that were not.
+
+  Backfilled for v5.0.0, v6.0.0 and v8.0.0 — the only commits in this repo's
+  history where `package.json` ever actually read a clean MAJOR.0.0. v1–v3
+  never carried a real version (`package.json` stayed `1.0.0` throughout), and
+  v6's close forgot to bump MAJOR, so `7.0.0` was never written anywhere — it
+  is not a gap in the backfill, it is a gap in the history. Each tag points at
+  the true historical commit; only the release's own "created" timestamp says
+  today, which is the one part of this that genuinely cannot be backdated.
 - **A status of "ready" must not end in a question.** Three items were once
   marked ready while their own sections each ended with an open question. A
   state that overstates readiness is worse than no state, because the gap is
