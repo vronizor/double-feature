@@ -56,6 +56,16 @@ npm install
 npm start
 ```
 
+> **⚠️ On the Pi, leave `DB_PATH` unset.** `docker-compose` bind-mounts
+> `./data:/app/data` and passes `.env` straight into the container, so an
+> absolute path copied from a development machine sends the container looking
+> for a directory it has no way to reach. If you have been running the app
+> elsewhere, delete that line before copying `.env` across.
+>
+> The database is **never committed**, whichever way it is configured: it holds
+> guests' names against their ballots, and the IMDb-derived ratings in it are
+> licensed for use and not for redistribution.
+
 Open `http://<pi-lan-ip>:8080` on the host machine.
 
 ### 4. Load the built-in lists
@@ -76,11 +86,22 @@ add a film, then publish it as a vote once you're happy with it:
 
 - **Draw random films** — start from a **"Tonight is…"** vibe (Cinephile,
   Awards, Modern Classics, Family — each sets both the lists and the filters
-  that go with it), or tick lists by hand in the collapsible **Pool setup**
-  section. Lists carry **tags**, so the picker groups them and a tag filter row
-  narrows sixteen lists to four; a list appears under every tag it carries.
-  Groups collapse and expand individually or all at once, separately from
-  selecting — opening a group to look inside never changes what you draw from.
+  that go with it), or tick lists by hand in **Pool setup**.
+
+  Pool setup is a **destination, not a panel that pushes the page down**: a
+  sticky rail beside the content on a wide screen, a full-screen sheet on a
+  phone, and a wide overlaid card on desktop when you want room to work (`p`,
+  or the `⤢` in the rail's header). Whichever it is, the Draw button stays
+  where it was. What the pool currently *is* reads back as a row of removable
+  pills next to the Draw button — `20 lists · top 5 per year · Drama` — so you
+  never have to open anything to see what you are drawing from.
+
+  Lists carry **tags**, so the picker groups them; a list appears under every
+  tag it carries, and the header says how many do (`20 of 20 lists selected ·
+  7 appear under more than one tag`). A group opens itself when it is
+  *part*-selected — the only state its header cannot already tell you — and
+  expanding is separate from selecting, so opening a group to look inside never
+  changes what you draw from.
   Vibes are yours to add: set the pool up how you like it and hit
   **+ Save current…**. Narrow further by genre, language, year or runtime;
   ranked lists (TSPDT, Sight & Sound) also get a **Top N** control, so "draw from the TSPDT top 100" is a
@@ -97,10 +118,13 @@ add a film, then publish it as a vote once you're happy with it:
   Drew something you don't fancy? **Replace N** swaps out only the films that
   were *drawn*, leaving anything you added deliberately alone, and it remembers
   what it has already shown you so pressing it again moves forward.
-- **Add a specific film** — search TMDB by title, or paste a TMDB URL/id
-  directly for the rare title search won't surface (some films — like Godard's
-  *Histoire(s) du cinéma* — are catalogued on TMDB as a TV series rather than a
-  movie; pasting the link handles that automatically).
+- **Add a specific film** — one button that expands to a single box taking all
+  three forms. Type a title to search TMDB; paste a TMDB URL to add that film
+  outright, which is the way in for titles catalogued as a TV series rather
+  than a movie (Godard's *Histoire(s) du cinéma*, for one). Bare digits are
+  *searched*, not treated as an id — `1917`, `300` and `2012` are all real
+  titles — and the id reading is offered beside the results instead of being
+  chosen for you.
 - **Add it manually** — for the rarer case still: a film not on TMDB at all.
   Give it a title and, optionally, a year, and it joins the lineup with no
   poster or metadata attached.
@@ -108,7 +132,9 @@ add a film, then publish it as a vote once you're happy with it:
 However a film got there, drawing or searching again just adds more — nothing
 is discarded until you remove it (or hit "Clear all"), and nothing is saved
 until you publish. Click any title to see the full synopsis and, when TMDB has
-one, an embedded trailer (or a one-tap YouTube search link when it doesn't).
+one, an embedded trailer (or a one-tap YouTube search link when it doesn't) —
+and to act on it without closing first: the overlay carries **Mark watched**
+and **+ Add to lineup**.
 
 Award winners carry a 🏆 badge on the poster and a line naming what they won
 and when — *Palme d'Or 2024 · Oscar 2025*. The **🏆 Awards** switch above the
@@ -117,12 +143,18 @@ source doesn't record a ceremony year the badge simply names the award; see
 `BACKLOG.md` for why some are missing and what it'd take to fill them in.
 
 **Explore tab** — browse the whole active library outside of building a vote:
-the same filters as the Lineup tab, sortable, paginated, with a search box.
+the same filters as the Lineup tab, in the same rail, sortable, paginated, with
+a search box. The library leads — the controls are beside it, not stacked above
+it.
 Useful for settling "wait, do we even have that?" arguments, and every card
 here can also be added straight to the Lineup with one click.
 
 **Publish** — turns the lineup into a vote session at an unguessable URL like
-`/vote/x7f2k9`. The host screen shows a QR code, the same URL as plain
+`/vote/x7f2k9`. **Only one vote can be open at a time**: the guest link and the
+QR are both simply "the vote", so a second one would replace the first for
+anyone scanning after that point while the ballots already cast sat somewhere
+unreachable. If a vote is already open, the Lineup tab says so and offers a way
+back to it — close it or cancel it first. The host screen shows a QR code, the same URL as plain
 selectable text with a copy button, and a one-tap "Open" link for the host's
 own phone (no need to scan your own QR code). Guests scan, rank by tapping
 (first tap = #1, tapping a ranked film again removes it and renumbers the
@@ -136,6 +168,26 @@ was started by mistake.
 
 **History tab** — every published vote, with its date, the filters applied, the
 films, the vote count and the winner. Click any row for its full results.
+
+### Keyboard shortcuts
+
+The `⌨` beside the tabs lists whatever the current tab offers, and `?` opens the
+same card. On the Lineup tab:
+
+| Key | |
+|---|---|
+| `p` | Open or close Pool setup |
+| `d` | Draw |
+| `r` | Replace the drawn films |
+| `c` | Clear the lineup |
+| `l` | Select all lists, or none |
+| `a` or `/` | Add a specific film |
+| `⇧↑` `⇧↓` | Draw one more, or one fewer |
+| `←` `→` | Move between vibe chips, once one is focused |
+| `Esc` | Close whatever is open |
+
+Keys are ignored while you are typing, so a title with a `d` in it stays a
+title. `Tab` is deliberately left alone — it is how you reach everything else.
 
 ### Anonymous voting
 
@@ -302,9 +354,14 @@ and don't have a re-fetch script — updating them means repeating that by hand.
 
 ```bash
 npm install
-npm test          # Borda scoring, ranking, parsing, filters, full API pass
+npm test          # 344 tests: Borda scoring, ranking, parsing, filters, full API pass
 npm run dev       # auto-restarting server
 ```
+
+**After touching anything in `public/`, load every frontend module under a
+stubbed DOM.** `node --check` is a syntax check, so a symbol that is used but
+never imported passes it and only fails in the browser — this has bitten the
+project more than once. There is a stub recipe in `.claude/CLAUDE.md`.
 
 **`npm test` needs no credentials and touches no network.** A fresh clone with
 no `.env` passes everything.

@@ -4,8 +4,8 @@ How Double Feature works, end to end. Written for someone who directs this
 project but doesn't write web applications: it assumes you're fluent in SQL,
 pipelines and data modelling, and explains the web-specific machinery instead.
 
-Numbers in this document are real, measured against `data/double-feature.db`
-on 2026-07-30.
+Numbers in this document are real, measured on 2026-08-04 at the close of v7
+(`v8.0.0`).
 
 > **Not startup reading, on purpose.** This is a plain-language tour for
 > someone who directs this project without writing it, and a public-facing
@@ -14,9 +14,9 @@ on 2026-07-30.
 > out of date. `DECISIONS.md` wins for decisions, `ROADMAP.md` for what is
 > being built, and the code wins for what the code does.
 
-> **This is a snapshot, not a living document.** Numbers refreshed 2026-07-31
-> against the real database at the close of v4. Originally written 2026-07-30
-> against commit `93bf402`. Nothing keeps it in step with the code — unlike
+> **This is a snapshot, not a living document.** Refreshed 2026-08-04 at the
+> close of v7. Previously refreshed 2026-07-31 at the close of v4; originally
+> written 2026-07-30 against commit `93bf402`. Nothing keeps it in step with the code — unlike
 > `ROADMAP.md` and `BACKLOG.md`, which are updated as decisions land and are
 > the authority when they disagree with this file. Re-generating it is cheap;
 > quietly trusting a stale copy is not. If you are reading this long after that
@@ -140,8 +140,9 @@ back but a reload.
 | `public/views/` | One file per screen. Each exports a `render…(container)` function | `draw.js`, `vote.js`, `session.js` |
 | `scripts/` | Offline ETL. Run by hand, never by the server | `fetch-seed-lists.mjs`, `seed.mjs` |
 | `seeds/` | The extracted lists, committed as JSON. The output of `fetch-seed-lists.mjs`, the input to `seed.mjs` | any file — they share one shape |
-| `test/` | `node:test` suites, run with `npm test` | `pool.test.js`, `api.test.js` |
-| `data/` | The SQLite file (4.0 MB) plus its WAL and pre-migration snapshots. Gitignored, bind-mounted in Docker | — |
+| `test/` | 26 `node:test` suites (344 tests), run with `npm test`. Hermetic: no credentials, no network | `pool.test.js`, `api.test.js` |
+| `docs/evidence/` | The long measurement write-ups behind decisions, including `ui-review.md`, the four-pass review v7 was built from | only when reopening that question |
+| `data/` | The SQLite file (5.6 MB) plus its WAL and pre-migration snapshots. Gitignored, bind-mounted in Docker | — |
 | `.cache/` | Raw Wikipedia wikitext saved by the fetcher so re-running the parser costs no network | — |
 
 **What actually matters vs what's plumbing:**
@@ -493,9 +494,9 @@ a JSON 404 instead of silently returning the app's HTML.
 
 | File | Screen | What it does |
 |---|---|---|
-| `views/draw.js` (891 lines) | **Lineup** | The main host screen. Pool setup, vibe chips, filters, draw/replace, TMDB search, manual entry, publish |
-| `views/explore.js` | **Explore** | Browse the whole library — same filters and cards, but sorted and paginated instead of a random sample |
-| `views/lists.js` (664) | **Lists** | Create lists, import by paste/upload, reconcile unmatched entries, set `is_active` and tags |
+| `views/draw.js` (1,503 lines) | **Lineup** | The main host screen. Vibe chips, pool pills, draw/replace, TMDB search, manual entry, publish, and the tab's keyboard shortcuts |
+| `views/explore.js` (317) | **Explore** | Browse the whole library — same filters and cards, but sorted and paginated instead of a random sample. Shares the pool rail with Draw |
+| `views/lists.js` (771) | **Lists** | Create lists, import by paste/upload, reconcile unmatched entries, set `is_active` and tags |
 | `views/history.js` | **History** | Every published vote, newest first |
 | `views/session.js` | *(shared)* | The host's live panel — QR code, tally, close/cancel — **and** the results screen. Reused read-only by History |
 | `views/vote.js` | **Guest** | The phone screen: tap to rank, name, submit |
@@ -566,6 +567,28 @@ skipping the clause.
 
 ---
 
+### Shared machinery, and why it is shared
+
+v7 pulled four things out of the views because two screens needed each of them,
+and a second copy is how two screens drift apart.
+
+| In | What | Why it is not in a view |
+|---|---|---|
+| `browse.js` | `createPoolDestination` | Pool setup is a sticky **rail** beside the content on a wide screen, a full-screen **sheet** on a phone, and a wide overlaid **card** on desktop (`p`). Draw and Explore both mount it. It also enforces the rule that only one copy of the controls may be live at a time, because `rangeInputs` gives its fields fixed ids and two panels in one document make `getElementById` ambiguous |
+| `dom.js` | `openOverlay` | Focus in, Tab trapped, focus restored to whatever opened it, page behind held still. These belong to *being* an overlay, not to showing a film — the movie modal announced `aria-modal` while never taking focus until this existed |
+| `dom.js` | `setShortcuts` / `showShortcuts` | The keys belong to a view; the way in belongs to the app. A view publishes its table on mount and clears it on teardown, so the `⌨` in the masthead can never list a key that is not live |
+| `dom.js` | `preserveFocus`, `preserveScroll`, `sweepMetaSeparators` | Three facts a repaint destroys: where the caret was, how far an inner panel was scrolled, and which meta items begin a wrapped line. All are measured after layout, because none is expressible in CSS or recoverable from the tree |
+
+**`sweepMetaSeparators` is the interesting one.** A card's meta line wraps, and
+the separator between items must not appear at the start of a line — but there
+is no CSS selector for "is first on its line", because that is a fact about how
+the row wrapped, not about the tree. So it is measured: all `offsetTop` reads in
+one pass, then all class writes in another, or a 120-row grid forces 120
+reflows instead of one. The separator is drawn **out of flow** in the column
+gap, which is what makes the measurement stable — in flow it has width, so
+hiding it frees that width and the item can pull back onto the previous line
+where it needs the separator again.
+
 ## 5b. What v4 added
 
 Four things that change how the pieces above fit together, rather than adding
@@ -583,6 +606,9 @@ So rather than teach four places (the query, the facet counts, the match
 counter, the published summary) a second way to be in the pool, a parametric
 vibe **owns one list and rewrites it**. Pick Kurosawa and it holds his 32 films;
 pick Ozu and it holds his 54. One row per parametric vibe, forever.
+
+(Two more columns arrived on `vibes` in v7 — `builtin_key` and `name_custom`.
+§5c explains why.)
 
 `vibes.param_json` marks a vibe as parametric and says what it asks for
 (`{kind: 'person', job: 'Director'}`). `lists.hidden` marks the slot list, which
@@ -620,6 +646,56 @@ here — seeds can be re-fetched, but the watched set, saved vibes and every
 ballot exist nowhere else. `VACUUM INTO` takes a consistent snapshot of a live
 WAL database (a file copy does not), three are kept, and a fresh install makes
 none.
+
+## 5c. What v5–v7 added
+
+### One vote at a time (v7)
+
+`POST /api/sessions` had no guard against an already-open session, so a second
+vote could be published over a live one — for six versions. The guest link and
+the QR are both just "the vote" with nothing identifying which, so the second
+does not compete with the first: it *replaces* it for anyone scanning from that
+moment, while the ballots already cast sit on a session nobody can reach. The
+route refuses now rather than resolving, because **close** (keep it, compute the
+result) and **cancel** (throw it away) mean different things and neither is
+inferable from "publish this other lineup". A banner on the Draw tab names the
+live vote and routes back to it, derived from history rather than remembered —
+the case it exists for is precisely the one where nothing was remembered.
+
+### A built-in vibe's identity is a key, not its name (v7)
+
+`ensureBuiltinVibes` used to ask "is there a vibe called `Cinephile`?", and the
+PATCH route already accepted a rename — so renaming one made it invisible to
+the seeder, which created it again alongside. Measured against the real route:
+a rename plus a restart gave **eight** built-ins where there were seven. It also
+made every rename of a built-in its own migration.
+
+`vibes.builtin_key` is the identity now and the name is data. One migration
+claimed a key for each of the seven by the name it had that day — the last time
+a name is ever used as a handle — and a rename in the seed array is a one-word
+edit that reaches databases which have already booted. `vibes.name_custom`
+records that a host has taken the name over, so a later seed change cannot
+overwrite their choice. **The key is ours, the name is theirs.**
+
+`lists` still identifies by name; `DECISIONS.md` has said so since v4, and the
+same shape would fix it.
+
+### Disclosure by destination (v7)
+
+The whole of v7's UI thesis, in one line: a panel that triples the page when
+opened has not deferred its complexity, it has relocated it into the middle of
+the primary flow. Measured at its worst, Pool setup open put the Draw button
+~2,900px down a ~3,600px page — four viewport heights below the vibe chips that
+had just changed the pool. It is a destination now (see `createPoolDestination`
+above), and the Draw button never moves.
+
+### A parametric list can be ranked (v6)
+
+By rating, with a vote floor. A slot list is wiped and rewritten on every apply,
+so it has none of the stale-rank hazard a query-backed list has — ranks are
+recomputed by construction. Chronological rank was the blocker and it was a
+question of meaning, not mechanism: "his first ten films" is not what "top 10"
+means to anyone.
 
 ## 6. The voting mechanism
 
