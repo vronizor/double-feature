@@ -2781,3 +2781,43 @@ but not raised — `.vibe-edit` is 16px and it deletes a saved vibe. It leads v8
 
 Version 8.0.0. **The MAJOR is bumped at the close this time**, which v6 forgot,
 leaving `package.json` a version behind its own roadmap for a whole cycle.
+
+## 11. v8
+
+### 11.1 A guest arriving late gets somewhere, not a dead end
+
+Raised as a question — do voters see the result when a vote closes? — that
+turned into two real gaps once checked rather than assumed.
+
+**Yes, for the guest already on the page.** The poll that watches for the host
+closing voting flips straight to results on the next cycle (≤3.5s), unchanged.
+
+**But every terminal state on the standalone `/vote/:slug` page dropped the
+header entirely.** Results, a dropped connection, all of it — `renderResults`
+and the error paths wrote straight into the bare container, so a guest who
+reached any of them had no way back to the app except the browser's own back
+button. There is no persistent chrome around this page the way there is for
+the host inside the SPA. Fixed with one `shell()` wrapper reused by every
+screen in the file, whose masthead is now a real link to `/`.
+
+**And a vote that is simply gone was diagnosed as a network problem.**
+Cancelling a session deletes the row outright, so a stale or cancelled link
+resolves to a 404 — indistinguishable, from a fetch failure, without the status
+code. The poll loop treated both the same: four silent retries (~14 seconds),
+then "Lost contact with the server — No such vote session," which blames the
+server for something it answered correctly. `public/api.js` now carries
+`error.status` on every thrown error, and a 404 fails fast with its own page —
+"This vote isn't here" — and two links, to a new lineup and to History.
+
+Verified in a browser against a running server, not assumed: a cancelled
+session's link resolves to the not-found page in under 1.5 seconds; a closed
+session opened **cold** — no live transition, the same shape as a guest's phone
+reloading the tab — renders full results with a winner, the points table and
+the ballot list; and the masthead link on both navigates to the host app.
+
+No new unit tests: neither `public/api.js` nor `public/views/vote.js` has any
+existing coverage, and building fetch/timer-mocking infrastructure from scratch
+for a status-code passthrough was judged not proportionate next to a live
+browser check against the real server.
+
+Version 8.1.0.

@@ -20,7 +20,14 @@ async function request(path, { method = 'GET', body, raw = false } = {}) {
     data = { error: text };
   }
 
-  if (!response.ok) throw new Error(data?.error || `Request failed (${response.status})`);
+  if (!response.ok) {
+    // Carried so callers can tell "the server said no" from "the server
+    // didn't answer" — a 404 is permanent and a dropped request might not be,
+    // and those two want different handling (see vote.js's poll loop).
+    const error = new Error(data?.error || `Request failed (${response.status})`);
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }
 
