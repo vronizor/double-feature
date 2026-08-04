@@ -403,6 +403,13 @@ is a lie that survives every guard.
   usually one commit. So v4.12 means twelve pieces of work have landed in v4,
   which is countable from the log rather than a judgement call. It replaces
   "decision rounds", which nobody could count the same way twice.
+- **Every version bump is a tagged GitHub release, from v8.1.0 on.** Started
+  2026-08-04, on the owner's request, after noticing the practice was missing.
+  Not backfilled — a tag can be pointed at a past commit, but it would carry
+  today's date rather than the real one, and how far back to go is the owner's
+  call, not a default to assume. Going forward the mapping is direct: MINOR
+  already counts chunks landed, so every version bump is already a tested,
+  working state, which is exactly what a release is for.
 - **A status of "ready" must not end in a question.** Three items were once
   marked ready while their own sections each ended with an open question. A
   state that overstates readiness is worse than no state, because the gap is
