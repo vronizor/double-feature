@@ -844,6 +844,46 @@ function rangeInputs(filters, key, unit, bounds, onChange) {
  *   onClear()       — "Clear filters" was clicked
  */
 /**
+ * Sizes the rail to the space actually left below it.
+ *
+ * `max-height: calc(100dvh - 32px)` is right only once the rail has stuck to
+ * the top. Before that it begins ~170px down, under the masthead, so a full
+ * viewport of height runs off the bottom of the screen — you scroll the rail to
+ * its end and the end is not there, then scrolling the PAGE reveals it. The
+ * height depends on where the element currently is, which is a fact about
+ * layout and scroll position, so CSS cannot state it.
+ *
+ * One listener for the whole app, reading whichever rail is currently mounted,
+ * because the views rebuild theirs on every repaint and per-node listeners
+ * would accumulate one per paint.
+ */
+let railFitInstalled = false;
+function fitRails() {
+  for (const rail of document.querySelectorAll('.draw-rail-inner')) {
+    const { top } = rail.getBoundingClientRect();
+    // 16px to match the sticky offset, so the gap above and below match.
+    rail.style.maxHeight = `${Math.max(220, Math.round(window.innerHeight - top - 16))}px`;
+  }
+}
+
+export function fitRailToViewport() {
+  fitRails();
+  if (railFitInstalled) return;
+  railFitInstalled = true;
+  let queued = false;
+  const schedule = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      fitRails();
+    });
+  };
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+}
+
+/**
  * Pool setup as a destination, for any view that has one.
  *
  * Built for the Draw tab and reused unchanged by Explore, which is the whole
@@ -898,8 +938,10 @@ export function createPoolDestination({ content, repaint, label = 'Pool setup' }
     toggle: () => (sheet ? sheet.close() : open()),
 
     /** The rail. Empty while the sheet is up: only one copy may be live. */
-    rail: () =>
-      h(
+    rail: () => {
+      // Measured after this paint has appended it — see fitRailToViewport.
+      queueMicrotask(fitRailToViewport);
+      return h(
         'aside',
         { class: 'draw-rail', 'aria-label': label },
         h(
@@ -931,8 +973,8 @@ export function createPoolDestination({ content, repaint, label = 'Pool setup' }
           // breakpoint, is the `display:none` one nobody can see.
           sheet ? null : content(),
         ),
-      ),
-
+      );
+    },
     /** The button that opens the sheet. Hidden by CSS wherever the rail shows. */
     opener: () =>
       h(

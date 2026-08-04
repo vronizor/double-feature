@@ -2681,3 +2681,36 @@ recording because it is the third time this file's source order has decided a
 rule — see also `max-height: 90vh` capping the sheet at 631px.
 
 Version 7.21.0.
+
+### 10.23 Four from real use, on two devices
+
+**The rail could not be seen to its end without scrolling the page.** Reported
+on desktop and correct: `max-height: calc(100dvh - 32px)` is only right once
+the rail has STUCK. Before that it begins ~170px down, under the masthead, so a
+full viewport of height from there runs off the bottom of the screen — you
+scroll the rail to its end, the end is not there, and scrolling the page then
+reveals it. The height depends on where the element currently is, which is a
+fact about layout and scroll position that CSS cannot state, so it is measured.
+One listener for the app rather than one per rail, because the views rebuild
+theirs on every repaint. Verified with the page at 0, 300 and 900: the rail's
+bottom lands on screen every time.
+
+**A guest tapping the name field was thrown to the top of the ballot.** The
+poll rebuilds the whole view every 3.5 seconds, and emptying the container
+collapses the document to nothing for an instant — the browser clamps the
+scroll to fit, and refilling cannot undo it. The focus was already preserved
+across that rebuild; the scroll position was the half nobody had needed until
+the ballot got long enough to scroll. Verified across a full poll with the
+caret in the field: 251 before, 251 after, still focused.
+
+**The sticky bars were see-through, and the ballot showed through them.** The
+background was the fade itself — a gradient transparent for its top 28% — so on
+a phone, where cards run right up to the bar, "2 of 2 ranked" sat on top of a
+director's name and Reset over a runtime. A guest reading two overlaid
+sentences cannot tell which one is the control. The bars are solid now and the
+fade is a strip above them, which is what the gradient was reaching for.
+
+**The live-vote banner was as tall as a panel.** It is one line of notice, so
+it no longer takes `.card`'s 16px all round.
+
+Version 7.22.0.

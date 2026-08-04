@@ -178,6 +178,13 @@ export async function renderVote(container, slug) {
         ? { selectionStart: active.selectionStart, selectionEnd: active.selectionEnd }
         : null;
 
+    // The PAGE's scroll position, for the same reason and it was the half that
+    // was missing. Emptying the container collapses the document to nothing for
+    // an instant, the browser clamps the scroll to fit, and refilling it cannot
+    // undo that — so a guest who tapped the name field was thrown to the top of
+    // the ballot by the next 3.5s poll, mid-typing. Reported from a phone.
+    const scrollY = window.scrollY;
+
     clear(container).append(
       h(
         'div',
@@ -272,6 +279,7 @@ export async function renderVote(container, slug) {
     );
 
     if (focusedName) {
+      if (scrollY) window.scrollTo(0, scrollY);
       const input = container.querySelector(`#${NAME_INPUT_ID}`);
       input?.focus();
       input?.setSelectionRange(focusedName.selectionStart, focusedName.selectionEnd);
