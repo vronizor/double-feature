@@ -54,6 +54,20 @@ CREATE TABLE IF NOT EXISTS lists (
   -- NULL is fine and common: only award lists need one, and the UI falls back
   -- to stripping the qualifier off the full name.
   short_name      TEXT,
+  -- The stable identity of a seed list: its seed filename, which is also the
+  -- slug fetch-seed-lists.mjs writes it under. The NAME is not identity and
+  -- never was. seed.mjs used to look a list up by name, so renaming one in its
+  -- seed file created a SECOND list beside the old one, and every rename of a
+  -- shipped list needed a migration of its own. That is the same disease vibes
+  -- had before builtin_key, and this is the same cure.
+  --
+  -- NULL for every custom list, which is why the unique index over it is
+  -- partial.
+  seed_key        TEXT,
+  -- Set when a HOST renames a seed list from the Lists tab, after which the
+  -- seed keeps the key and stops touching the name. Without it, shipping a
+  -- better name would silently overwrite one they chose themselves.
+  name_custom     INTEGER NOT NULL DEFAULT 0,
   -- A slot list: rewritten wholesale each time a parametric vibe is given a
   -- value, and kept out of the picker because it is not a list anyone curates.
   -- It is an ordinary list in every other respect, which is the point -- the
@@ -381,6 +395,13 @@ export function migrate(target) {
   ensureColumn(target, 'lists', 'materialised_at', 'TEXT');
   ensureColumn(target, 'lists', 'short_name', 'TEXT');
   ensureColumn(target, 'lists', 'hidden', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(target, 'lists', 'seed_key', 'TEXT');
+  ensureColumn(target, 'lists', 'name_custom', 'INTEGER NOT NULL DEFAULT 0');
+  // Partial, so the custom lists with a NULL key do not collide. Created here
+  // rather than in SCHEMA for the reason given above the movies_imdb index.
+  target.exec(
+    'CREATE UNIQUE INDEX IF NOT EXISTS lists_seed_key ON lists(seed_key) WHERE seed_key IS NOT NULL',
+  );
   ensureColumn(target, 'vibes', 'param_json', 'TEXT');
   ensureColumn(target, 'vibes', 'builtin_key', 'TEXT');
   ensureColumn(target, 'vibes', 'name_custom', 'INTEGER NOT NULL DEFAULT 0');
@@ -405,6 +426,7 @@ export function migrate(target) {
   retagDynamicAsModern(target);
   dropNationalCinemaVibe(target);
   keyBuiltinVibes(target);
+  keySeedLists(target);
 }
 
 /**
@@ -692,6 +714,58 @@ function keyBuiltinVibes(target) {
     `UPDATE vibes SET builtin_key = ?
      WHERE name = ? AND is_builtin = 1 AND builtin_key IS NULL
        AND NOT EXISTS (SELECT 1 FROM vibes WHERE builtin_key = ?)`,
+  );
+  for (const [name, key] of Object.entries(ORIGINAL_NAMES)) claim.run(key, name, key);
+}
+
+/**
+ * Gives the twenty existing seed lists their stable key, once.
+ *
+ * The same shape as keyBuiltinVibes, and for the same reason: matched on the
+ * name each list has TODAY, which is the only handle a database written before
+ * the column existed offers, and the last time that name is ever used as
+ * identity. After this, seed_key is the identity and the name is free to
+ * change on either side — ours in the seed file, theirs through the Lists tab.
+ *
+ * The key is the seed FILENAME, so this map has to be read against seeds/ and
+ * not invented. A list added after this ships is keyed on insert and never
+ * comes near here.
+ *
+ * Deliberately only fills a NULL key, only on a seed list, and only where no
+ * row has claimed that key already — so it cannot disturb a keyed row, and a
+ * host who renamed a seed list before this shipped keeps their name and simply
+ * goes unkeyed. That last case is the one to understand: the old behaviour has
+ * already given them a duplicate on the next re-seed, and picking which of the
+ * two is "really" the Criterion Collection is not a migration's call. From
+ * here the bug cannot recur.
+ */
+function keySeedLists(target) {
+  const ORIGINAL_NAMES = {
+    'BAFTA — Best Film': 'award-bafta-best-film',
+    'Grand Prix (Cannes)': 'award-cannes-grand-prix',
+    'César — Meilleur Film': 'award-cesar-best-film',
+    'Golden Bear (Berlin)': 'award-golden-bear',
+    'Golden Lion (Venice)': 'award-golden-lion',
+    'Goya — Mejor Película': 'award-goya-best-film',
+    'Oscar — Best Picture': 'award-oscar-best-picture',
+    'Oscar — Best International Feature': 'award-oscar-international',
+    'Palme d’Or (Cannes)': 'award-palme-dor',
+    'BFI: Films to See by Age 15': 'bfi-films-by-15',
+    'Box-office France': 'box-office-france',
+    'Box-office España': 'box-office-spain',
+    'Box-office US': 'box-office-us',
+    'The Criterion Collection': 'criterion-collection',
+    'Disney Animated Canon': 'disney-animated-canon',
+    'Modern Classics (last 10 years)': 'modern-classics',
+    'Family Films (Ages 6+)': 'senscritique-family-films',
+    'Sight & Sound Greatest Films (2022 critics’ poll)': 'sight-and-sound',
+    'Studio Ghibli': 'studio-ghibli',
+    'TSPDT 1,000 Greatest Films': 'tspdt-1000',
+  };
+  const claim = target.prepare(
+    `UPDATE lists SET seed_key = ?
+     WHERE name = ? AND origin = 'seed' AND seed_key IS NULL
+       AND NOT EXISTS (SELECT 1 FROM lists WHERE seed_key = ?)`,
   );
   for (const [name, key] of Object.entries(ORIGINAL_NAMES)) claim.run(key, name, key);
 }
