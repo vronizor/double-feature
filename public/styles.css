@@ -75,6 +75,10 @@ a { color: var(--accent); }
   border-bottom: 1px solid var(--border);
 }
 .masthead h1 span { color: var(--accent); }
+/* The guest's standalone /vote/:slug page has no persistent app chrome the way
+   the host's SPA does, so this is the only way home once a ballot resolves to
+   results, a 404, or a dropped connection. */
+.masthead-brand { text-decoration: none; color: inherit; display: block; }
 
 .tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
 .tab {

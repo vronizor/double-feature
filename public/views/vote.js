@@ -31,6 +31,72 @@ export async function renderVote(container, slug) {
 
   let consecutiveFailures = 0;
 
+  /**
+   * The one piece of chrome every screen in this file shares: a masthead that
+   * is also the way home. Every terminal state used to build its own bare
+   * `<div>` straight into `container`, so a guest who reached results, a 404,
+   * or "lost contact" had no path back to the app except the browser's own
+   * back button — there is no persistent shell around this standalone page
+   * the way there is for the host inside the SPA.
+   */
+  function shell(...body) {
+    return h(
+      'div',
+      { class: 'vote-shell stack' },
+      h(
+        'header',
+        { class: 'masthead' },
+        h(
+          'a',
+          { href: '/', class: 'masthead-brand' },
+          h('h1', {}, 'Double ', h('span', {}, 'Feature')),
+        ),
+      ),
+      ...body,
+    );
+  }
+
+  /**
+   * A slug that resolves to nothing — a typo, or a vote the host cancelled.
+   * Cancelling deletes the row outright (see `DELETE /api/sessions/:slug`), so
+   * this is not rare: it is the ordinary shape of "that link doesn't work
+   * anymore," and it deserves a page that says so, not a spinner that times out.
+   */
+  function renderGone() {
+    clear(container).append(
+      shell(
+        h(
+          'div',
+          { class: 'card stack' },
+          h('h2', {}, 'This vote isn’t here'),
+          h(
+            'p',
+            { class: 'muted' },
+            'The link may be old, or the host cancelled this vote before it closed.',
+          ),
+          h(
+            'div',
+            { class: 'row' },
+            h('a', { class: 'btn btn-primary', href: '/' }, 'Start a new lineup'),
+            h('a', { class: 'btn', href: '/#history' }, 'See past votes'),
+          ),
+        ),
+      ),
+    );
+  }
+
+  function renderLostContact(error) {
+    clear(container).append(
+      shell(
+        h(
+          'div',
+          { class: 'empty error' },
+          `Lost contact with the server — ${error.message}. Reload to try again.`,
+        ),
+      ),
+    );
+  }
+
   async function poll() {
     if (stopped) return;
     try {
@@ -43,25 +109,34 @@ export async function renderVote(container, slug) {
       if (session.status === 'closed') {
         clearInterval(timer);
         const results = await api.results(slug);
-        if (!stopped) renderResults(container, results);
+        if (!stopped) {
+          const body = h('div');
+          clear(container).append(shell(body));
+          renderResults(body, results);
+        }
         return;
       }
       paint();
     } catch (error) {
       if (stopped) return;
+
+      // A 404 means the slug is wrong or the vote is gone — permanent either
+      // way, so there is nothing to gain by retrying it. Treating it as a
+      // dropped request cost a guest ~14 seconds of silence before telling
+      // them, wrongly, that the SERVER was unreachable.
+      if (error.status === 404) {
+        clearInterval(timer);
+        renderGone();
+        return;
+      }
+
       consecutiveFailures += 1;
       // Never throw away a ballot in progress over one dropped request. The
       // guest's ranking lives in `state.ranked` and is still submittable; only
       // the "has the host closed voting yet" check is stale.
       if (consecutiveFailures < MAX_POLL_FAILURES) return;
       clearInterval(timer);
-      clear(container).append(
-        h(
-          'div',
-          { class: 'empty error' },
-          `Lost contact with the server — ${error.message}. Reload to try again.`,
-        ),
-      );
+      renderLostContact(error);
     }
   }
 
@@ -186,15 +261,7 @@ export async function renderVote(container, slug) {
     const scrollY = window.scrollY;
 
     clear(container).append(
-      h(
-        'div',
-        { class: 'vote-shell stack' },
-        h(
-          'header',
-          { class: 'masthead' },
-          h('h1', {}, 'Double ', h('span', {}, 'Feature')),
-        ),
-
+      shell(
         state.submitted
           ? h(
               'div',
