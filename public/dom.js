@@ -28,6 +28,27 @@ export function clear(node) {
   return node;
 }
 
+/**
+ * Empty a node and refill it, with `h`'s child rules.
+ *
+ * `clear(node).append(...)` reads like the same thing and is not: `append` is
+ * the raw DOM method, which stringifies whatever it is given, so a `null` from
+ * a conditional child renders the WORD "null" on the page. `h` has always
+ * filtered those out, which is exactly why the difference is easy to miss —
+ * the same expression is safe inside `h(...)` and not safe after `clear(...)`.
+ *
+ * Shipped once: a `null` sat under the search box in v7.3 wherever the id
+ * offer was absent.
+ */
+export function fill(node, ...children) {
+  clear(node);
+  for (const child of children.flat(Infinity)) {
+    if (child === null || child === undefined || child === false) continue;
+    node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
+  return node;
+}
+
 // setSelectionRange throws InvalidStateError on input types that have no text
 // selection model — number is the one that matters here, since every filter
 // range input is one.
@@ -59,6 +80,28 @@ export function preserveFocus(root = document) {
     if (!next) return;
     next.focus();
     if (selection) next.setSelectionRange(selection.start, selection.end);
+  };
+}
+
+/**
+ * Capture how far a scrollable panel is scrolled, restore it after a repaint.
+ *
+ * Sibling of `preserveFocus`, and needed for the same reason: a view that
+ * rebuilds its subtree destroys the element the host was working in. The rail
+ * has its own `overflow-y`, so its scroll position lives on the node — rebuild
+ * it and the host is thrown back to the top of a list they had scrolled a long
+ * way down. Reported for the "only award winners" checkbox, which is simply
+ * the one that repaints; every full repaint did it.
+ *
+ * Keyed on a selector rather than a node, because the node itself is the thing
+ * about to be replaced.
+ */
+export function preserveScroll(root, selector) {
+  const before = root.querySelector(selector)?.scrollTop ?? 0;
+  return () => {
+    if (!before) return;
+    const after = root.querySelector(selector);
+    if (after) after.scrollTop = before;
   };
 }
 
@@ -112,11 +155,53 @@ export async function copyText(text) {
   return copied;
 }
 
+/**
+ * One persistent live region, written into — NOT a `role="status"` on the
+ * toast itself. A live region has to be in the document BEFORE its text
+ * changes for screen readers to reliably announce it; a node that arrives
+ * already carrying both the role and the text is announced by some and
+ * silently ignored by others. So the region is created once, empty, and
+ * every later message is a text change inside it.
+ */
+let liveRegion = null;
+
+export function announce(message) {
+  if (!message) return;
+  if (!liveRegion) {
+    liveRegion = h('div', { class: 'sr-only', role: 'status', 'aria-live': 'polite' });
+    document.body.appendChild(liveRegion);
+  }
+  // Same text twice running is not a change, so it would not be announced.
+  liveRegion.textContent = '';
+  liveRegion.textContent = message;
+}
+
 export function toast(message, kind = 'info') {
   const el = h('div', { class: `toast toast--${kind}` }, message);
   document.body.appendChild(el);
+  announce(message);
   setTimeout(() => el.classList.add('is-leaving'), 2600);
   setTimeout(() => el.remove(), 3200);
+}
+
+/**
+ * What a draw actually put on the table. Drawing was the one place the app
+ * did its work in silence: the lineup grew somewhere below the fold and
+ * nothing said so.
+ *
+ * Names the films rather than counting them — "Drew 2 films" is a fact the
+ * host can already see, while the titles are the thing they clicked for. Two
+ * is the default draw size, so the two-title form is the one that matters;
+ * beyond three the list stops being readable at a glance and becomes a count.
+ */
+export function drawnMessage(movies) {
+  const titles = (movies ?? []).map((movie) => movie?.title).filter(Boolean);
+  if (titles.length === 0) return null;
+  if (titles.length === 1) return `Drew ${titles[0]}`;
+  if (titles.length <= 3) {
+    return `Drew ${titles.slice(0, -1).join(', ')} and ${titles[titles.length - 1]}`;
+  }
+  return `Drew ${titles[0]}, ${titles[1]} and ${titles.length - 2} more`;
 }
 
 export const formatDate = (value) => {
@@ -308,6 +393,71 @@ export function topNLabel(topN, { ranked, perYear }) {
   if (perYear === 0) return `top ${topN}`;
   if (perYear === ranked) return `top ${topN} per year`;
   return `top ${topN}, per year on some lists`;
+}
+
+/**
+ * Removes the separator from any meta item that STARTS a wrapped line.
+ *
+ * Third attempt at this, and the first two each moved the orphan rather than
+ * removing it: v4 drew the separator after each item and left `1994 ·`
+ * dangling at the end of a line; v5 moved it to a `::before` on the following
+ * item, which travels with that item and so lands at the START of the next
+ * line instead — `· ★ 6.0`.
+ *
+ * **CSS cannot express the rule.** There is no selector for "is the first thing
+ * on its line": that is a fact about layout, not about the tree, and it changes
+ * with the width of the card. So it has to be measured after the browser has
+ * laid the row out, which is what this does.
+ *
+ * ALL reads happen before ANY writes. Interleaving them makes each write
+ * invalidate layout and each following read recompute it, which on a hundred-
+ * card grid is a hundred forced reflows instead of one.
+ */
+export function sweepMetaSeparators(root = document) {
+  const pending = [];
+
+  // Read pass. Nothing here mutates the DOM.
+  for (const row of root.querySelectorAll('.movie-meta')) {
+    const items = [...row.children];
+    if (items.length < 2) continue;
+    let lineTop = null;
+    for (const item of items) {
+      const top = item.offsetTop;
+      const startsLine = lineTop === null || top > lineTop;
+      if (startsLine) lineTop = top;
+      pending.push([item, startsLine]);
+    }
+  }
+
+  // Write pass.
+  for (const [item, startsLine] of pending) item.classList.toggle('starts-line', startsLine);
+}
+
+// Coalesced to one pass per frame: a repaint can replace a hundred cards, and
+// each replacement would otherwise ask for its own sweep.
+let sweepScheduled = false;
+function scheduleMetaSweep() {
+  if (sweepScheduled) return;
+  sweepScheduled = true;
+  requestAnimationFrame(() => {
+    sweepScheduled = false;
+    sweepMetaSeparators();
+  });
+}
+
+/**
+ * Self-installing, because the alternative is a call at the end of every view's
+ * paint() and one of them eventually gets forgotten — which is exactly how a
+ * defect this cosmetic survives three versions.
+ *
+ * `childList` only: the sweep writes CLASSES, which are attribute mutations, so
+ * it cannot retrigger itself. The ResizeObserver covers the case the observer
+ * cannot see at all — nothing in the DOM changed, the window merely got
+ * narrower and the row rewrapped.
+ */
+if (typeof window !== 'undefined' && typeof ResizeObserver === 'function' && document.body) {
+  new ResizeObserver(scheduleMetaSweep).observe(document.documentElement);
+  new MutationObserver(scheduleMetaSweep).observe(document.body, { childList: true, subtree: true });
 }
 
 export function metaLine(...parts) {
@@ -527,22 +677,71 @@ function trailerBlock(movie) {
 }
 
 /**
- * Full-detail overlay for a movie card's "Read more" — cards themselves
- * truncate the synopsis with a CSS line-clamp, so this is the only place the
- * untruncated text is shown. Closes on backdrop click, the close button, or
- * Escape.
+ * One overlay, for anything that has to interrupt.
+ *
+ * Extracted from `openMovieModal`, which had grown the only implementation of
+ * this in the app — and an incomplete one. It closed on Escape and on a
+ * backdrop click, and stopped there: it announced `aria-modal="true"` while
+ * never taking focus, so Tab from an open dialog walked the page behind it and
+ * a keyboard user could neither reach the close button nor tell what had
+ * changed. It also left the page behind free to scroll.
+ *
+ * All four behaviours belong to *being an overlay*, not to showing a film, so
+ * they live here once: focus in on open, Tab trapped inside, focus restored to
+ * whatever opened it on close, and the body held still while it is up.
+ *
+ * `render(close)` builds the card's contents and is handed the closer, since
+ * most overlays want a control of their own that dismisses them.
  */
-export function openMovieModal(movie) {
-  const poster = posterUrl(movie.poster_path, 'w342');
+export function openOverlay({ label, cardClass = 'modal-card', render, onClose = null }) {
+  // Restoring focus matters more than it looks: without it, closing drops the
+  // caret back to the top of the document, so a keyboard user who opened this
+  // from the tenth card has to walk back down to it.
+  const opener = document.activeElement;
 
   const onKeydown = (event) => {
-    if (event.key === 'Escape') close();
+    if (event.key === 'Escape') {
+      close();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    // Query on every Tab rather than once on open — an overlay whose contents
+    // change (the pool sheet repaints itself as filters are picked) would
+    // otherwise trap focus against a list of nodes that no longer exist.
+    const focusable = card.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   };
 
   function close() {
     backdrop.remove();
     document.removeEventListener('keydown', onKeydown);
+    document.body.style.overflow = previousOverflow;
+    if (opener instanceof HTMLElement && document.contains(opener)) opener.focus();
+    // Fires for EVERY exit — the caller's own control, Escape, and a backdrop
+    // click all end up here. An owner that only cleaned up on its own button
+    // would be wrong two-thirds of the time.
+    onClose?.();
   }
+
+  const card = h('div', {
+    class: cardClass,
+    role: 'dialog',
+    'aria-modal': 'true',
+    'aria-label': label,
+  });
+  card.append(...[render(close)].flat(Infinity).filter(Boolean));
 
   const backdrop = h(
     'div',
@@ -552,9 +751,89 @@ export function openMovieModal(movie) {
         if (event.target === backdrop) close();
       },
     },
-    h(
-      'div',
-      { class: 'modal-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': movie.title },
+    card,
+  );
+
+  const previousOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  document.body.appendChild(backdrop);
+  document.addEventListener('keydown', onKeydown);
+
+  // Focus the card itself rather than its first control: a dialog that opens
+  // with the close button focused reads as "the action here is to leave".
+  card.setAttribute('tabindex', '-1');
+  card.focus();
+
+  return { close, card };
+}
+
+/**
+ * Full-detail overlay for a movie card's "Read more" — cards themselves
+ * truncate the synopsis with a CSS line-clamp, so this is the only place the
+ * untruncated text is shown.
+ */
+/**
+ * The shortcut table for whatever view is mounted.
+ *
+ * A registry rather than a constant, because the keys belong to a view — the
+ * Draw tab has a dozen, History has none — while the way IN to them belongs to
+ * the app: the keyboard symbol lives in the masthead beside the tabs, which is
+ * where you look for something that applies to the whole thing. A view sets
+ * this on mount and clears it on teardown, so the card can never list a key
+ * that is not live.
+ */
+let shortcutTable = [];
+
+export function setShortcuts(rows) {
+  shortcutTable = rows ?? [];
+}
+
+export function showShortcuts() {
+  return openOverlay({
+    label: 'Keyboard shortcuts',
+    cardClass: 'modal-card shortcuts-card',
+    render: (close) => [
+      h(
+        'div',
+        { class: 'row' },
+        h('h2', {}, 'Keyboard shortcuts'),
+        h('span', { class: 'spacer' }),
+        h('button', { class: 'btn-sm', onClick: close }, 'Close'),
+      ),
+      shortcutTable.length === 0
+        ? h('p', { class: 'muted' }, 'This tab has no shortcuts of its own.')
+        : h(
+            'dl',
+            { class: 'shortcut-list' },
+            ...shortcutTable.flatMap((row) => [
+              h(
+                'dt',
+                {},
+                ...row.keys.flatMap((key, i) => [
+                  i ? h('span', { class: 'faint' }, row.join ?? ' ') : null,
+                  h('kbd', {}, key),
+                ]),
+              ),
+              h('dd', {}, row.what),
+            ]),
+          ),
+      shortcutTable.length
+        ? h(
+            'p',
+            { class: 'faint' },
+            'Keys are ignored while you are typing, so a title with a "d" in it stays a title.',
+          )
+        : null,
+    ],
+  });
+}
+
+export function openMovieModal(movie, { actions = null } = {}) {
+  const poster = posterUrl(movie.poster_path, 'w342');
+
+  return openOverlay({
+    label: movie.title,
+    render: (close) => [
       h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: close }, '✕'),
       poster
         ? h('img', { class: 'modal-poster', src: poster, alt: '' })
@@ -645,11 +924,22 @@ export function openMovieModal(movie) {
                 ),
               ],
         ),
+        // Built by the caller, never here. This module imports prefs.js and
+        // nothing else on purpose, and an overlay that could add to the lineup
+        // itself would have to reach for `lineup` and `api` — see the note at
+        // the top. The overlay shows a film; what you can DO with one belongs
+        // to whoever is showing it.
+        //
+        // Handed `close` because deciding in here and then having to find the
+        // card again was the whole complaint: the action that finishes the job
+        // should also finish the interruption.
+        //
+        // Beside the synopsis, NOT after the trailer. Below it they were past a
+        // 315px video embed and off the bottom of the overlay — present, and
+        // unreachable without scrolling for them.
+        actions ? h('div', { class: 'modal-actions' }, actions(close)) : null,
       ),
       h('div', { class: 'modal-trailer-row' }, trailerBlock(movie)),
-    ),
-  );
-
-  document.addEventListener('keydown', onKeydown);
-  document.body.appendChild(backdrop);
+    ],
+  });
 }

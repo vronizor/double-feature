@@ -1930,3 +1930,854 @@ The next version is the first that adds no data at all. Its evidence is
 [docs/evidence/ui-review.md](docs/evidence/ui-review.md).
 
 Version 6.12.0.
+
+---
+
+## 10. v7
+
+### 10.1 The lineup stops looking like a truncated search
+
+Four small changes with nothing structural between them, taken first because
+none of them is invalidated by the rail that follows — and because the version
+that changes only how things look should show something on its first day.
+
+**`auto-fill` was keeping the columns it could not fill.** The default draw is
+two films, so the payoff screen rendered as two cards in the first two of five
+slots with three empty columns after them: the shape of a search that returned
+too little, not of tonight's lineup. `auto-fit` collapses the empty tracks, and
+centring the row finishes it.
+
+It is one property in the roadmap and two in the end, because the obvious
+version is wrong. Uncapped `1fr` tracks give two cards the whole width —
+~525px each — and the poster is `aspect-ratio: 2/3` at full width, so a double
+feature would have stood two 790px-tall posters on the page. Capping the track
+at 260px trades column count for card size: five columns become three at full
+width, on the one grid meant to be looked at rather than scanned. Explore keeps
+`auto-fill` for exactly the opposite reason, so the change is scoped to a
+lineup-only class rather than made to the shared grid.
+
+**The draw was mute.** The app's one moment of theatre added films below the
+fold and said nothing, on a page tall enough that nothing visibly moved. It now
+names them — `Drew Sound of Freedom and Fort Apache` — and scrolls the first
+one into view.
+
+Naming rather than counting is the point: the count is already on screen in the
+heading, and the titles are what the host clicked for. Past three the list stops
+being readable at a glance and becomes `and 3 more`.
+
+**Every path emits exactly one toast, and that is a constraint rather than a
+style.** Toasts are all `position: fixed` at the same offset, so a second one
+lands underneath the first and neither can be read. When the pool comes up
+short that single toast is the shortfall, which is the thing the host can act
+on; the draw still announces itself by scrolling.
+
+**The announcement is a persistent live region, not a `role` on the toast.** A
+live region has to be in the document before its text changes to be reliably
+announced; a node arriving with both the role and the text already on it is
+announced by some screen readers and silently ignored by others. One empty
+region is created on first use and every later message is a text change inside
+it — which also means every existing toast in the app became audible, not just
+this one.
+
+**`.chip` had no `:hover` at all** — the most-clicked control in the app was
+inert until clicked. Behind `@media (hover: hover)` so a touch screen does not
+strand the last-tapped chip in a hover state it can never leave, and ordered
+before the active-state rules so an active chip keeps its own colours and gets
+a brightened variant instead.
+
+Verified in the running app rather than reasoned about: the lineup grid computes
+`260px 260px 0px` with `justify-content: center`, the live region carries the
+drawn message, and the hover is visibly distinct. One thing could **not** be
+observed — the smooth scroll animation never runs in an automation tab, because
+`document.visibilityState` is `hidden` there and animations are throttled. The
+target and the destination were verified instead, by scrolling to the same
+element with `behavior: 'auto'`.
+
+Version 7.1.0.
+
+### 10.2 A live vote is visible, and unrepeatable
+
+Two halves. The server half is the one that mattered: `POST /api/sessions`
+checked the lineup and the films and never asked whether a vote was already
+open, so publishing a second one over a live one worked for six versions and
+nothing anywhere said no.
+
+**Why that is worse than it sounds.** The guest link and the QR are both just
+"the vote" — neither carries anything identifying which. A second open session
+does not compete with the first; it *replaces* it for everyone who scans from
+that moment, while the ballots already cast sit on a session nobody can reach
+any more. The failure is silent on both sides: the host sees a working QR, the
+guests see a working ballot, and two groups vote on different things.
+
+It refuses rather than resolving. The host has exactly two ways past, and both
+are deliberate acts with different meanings — **close**, which keeps the vote
+and computes its result, or **cancel**, which throws it away. Neither is
+inferable from "publish this other lineup", so picking one on the host's behalf
+would be guessing at the more destructive kind of decision.
+
+**The client half is why the guard is livable.** Publishing swapped the whole
+Draw tab for the session panel and nothing persisted that view, so a host who
+reloaded — or opened the app on the kitchen tablet instead — got an empty
+lineup and no trace that voting was open. A guard alone would have turned that
+into a refusal they could not act on. A banner above the tab now names the live
+vote and routes back to it, derived from `api.history()` rather than remembered,
+because the case it exists for is precisely the one where nothing was
+remembered. A failed lookup shows no banner rather than a guess: the guard is
+the guarantee, the banner is the convenience.
+
+**`onClosed` became `onEnded(outcome)`.** The panel had no hook at all for
+cancellation, so a cancelled vote would have left the banner claiming a vote
+was live. Making it one callback carrying its outcome rather than two callbacks
+also settled something the old name had blurred: a **closed** vote spends the
+lineup that produced it, while a **cancelled** one leaves that lineup the single
+thing worth keeping, since republishing it is the likely next move. The History
+tab still passes nothing, so opening last week's result cannot touch tonight's
+lineup.
+
+One existing test had to give a session back at the end. It published and never
+closed, which was invisible while a second open vote was legal.
+
+Verified against a throwaway copy of the real database, driven in a browser: the
+banner appears on a cold load of a tab that has never seen the vote, publishing
+a second is refused with the lineup left intact, "Go to it" reaches the live
+panel, leaving by "← New lineup" brings the banner back, and cancelling clears
+it. The confirm dialogs were stubbed rather than clicked — a real modal blocks
+the automation channel outright.
+
+Version 7.2.0.
+
+### 10.3 Publish stops being the last thing on the page
+
+Publish had been the last thing after every card in the lineup — four screens
+down on a phone with five films staged, which is a strange place to put the
+point of the screen. It sits in a `.lineup-sticky` now, the same shape the
+guest's Submit already used.
+
+**A wrong explanation was committed here and then withdrawn; this paragraph is
+the correction.** The bar was first measured sitting 2,578px down the page with
+`position: sticky` computed and doing nothing, and that was blamed on its parent
+being a grid — the theory being that a grid item's containing block is its own
+area, leaving no room to travel. A block wrapper was added on that basis.
+
+**The theory was wrong and the wrapper was a no-op.** Tested by flipping the
+same page between the two wrappers and measuring: the bar pins identically as a
+grid item and as a block child, and in the original conditions *neither* pins.
+The guest screen settled it independently — `.vote-sticky` has had a grid parent
+the whole time and pins correctly across a ten-film ballot.
+
+What is actually true is a plain property of `position: sticky`: it cannot pull
+an element beyond its own containing block. A two-film lineup gives the bar only
+its own ~440px of travel, so sitting 2,578px down a 3,297px page it cannot reach
+the viewport until the lineup nearly does. With eight films it pins from the
+first pixel. **That is the behaviour to want, not a bug to route around** — a
+Publish button hovering over a lineup nobody can see is worse than one that
+arrives together with it.
+
+The lesson is the one `DECISIONS.md` §3 already records in another form: a note
+written to prevent a bug can cause one. The first measurement was real, the
+inference from it was invented, and only a controlled A/B — same page, same
+scroll, one variable — separated them.
+
+**"Add a specific film" stopped claiming half the tab.** It sat in a `1fr 1fr`
+grid beside the draw controls on the reasoning that neither had priority, and
+that was wrong in both directions at once: half the screen stood empty on the
+many nights nobody adds a named film, and a 480px column crushed the search
+results on the nights they do. One permanent secondary button that expands to
+full width lets the two states stop sharing a size. As a side effect the vibe
+chips now fit on one row instead of three.
+
+Its three inputs became one box, and the interesting part is what that
+required. A themoviedb.org URL is unambiguous and adds the film outright. **Bare
+digits are not**: 1917, 300, 2012 and 1408 are all real titles AND plausible
+TMDB ids, so letting `parseTmdbInput` read them as an id would have quietly put
+the wrong film on somebody's night — searching `1917` returns the Sam Mendes
+film first, and the id reading would have skipped it. Bare digits therefore
+search like any other text, and the id reading is *offered* above the results
+rather than chosen. The panel's open state moved into view state so that adding
+one film does not close the panel on a host part-way through adding a second.
+
+**One defect fixed rather than reported, deliberately.** `candidate.lists` is an
+array of membership objects and the search card interpolated it into a string,
+so every film already on one of your lists read `Already on: [object Object]`.
+It was in the panel this chunk rebuilt, it was one line, and shipping the
+rebuilt panel with that on screen was not defensible. Named as an exception
+here because the standing rule is that findings are reported, not folded in.
+The same line also treated an empty array as truthy, printing nothing after the
+colon for a film known to the library but on no list.
+
+Verified in a browser against a copy of the real database: the bar pins across
+an eight-film lineup at every scroll position, a URL adds outright ("Added 12
+Angry Men"), `1917` returns the film with the id offered beside it, and the
+membership line reads `Already on: BAFTA — Best Film, Modern Classics (last 10
+years)`.
+
+Version 7.3.0, corrected in 7.4.0.
+
+### 10.4 The guest's sticky bar was never broken
+
+Raised as a suspicion off the back of 10.3 and closed by measuring it: a
+ten-film ballot on a 2,628px page keeps the Submit bar pinned to the viewport
+bottom at every scroll position. No change was needed and none was made.
+
+Worth the round trip anyway, because chasing it is what exposed the wrong
+explanation in 10.3 — the guest bar has had a grid parent since it was written,
+so "a grid parent breaks sticky" could not survive it working. **A suspicion
+that a second surface shares a defect is a cheap thing to check and a very
+expensive thing to assume.**
+
+Version 7.4.0.
+
+### 10.5 Pool setup leaves the flow
+
+The keystone of v7, and the one all four review passes converged on: opening
+Pool setup pushed the whole tab down, at its worst leaving the Draw button
+~2,900px down a ~3,600px page — four viewport heights below the vibe chips that
+had just changed the pool. It is a destination now rather than an accordion: a
+sticky rail where there is room beside the content, a full-screen sheet where
+there is not, and neither can displace the Draw button because neither is in
+the same column as it.
+
+**The reuse held.** `renderTagFilter`, `renderListPicker` and
+`renderFilterPanel` all moved unchanged, which is what kept this a day's work.
+The entire cost of that reuse was two CSS lines: both panels size themselves
+against the *viewport* — the filters by a media query, the picker by a 280px
+track minimum — so on a wide screen they laid out for a wide screen and
+overflowed a 300px rail.
+
+**Pool state is read back as removable pills.** The string they replace read
+`20 lists · top 5 per year · Drama · 1960–1969` and could only be acted on by
+opening the panel and hunting for whichever control had produced the clause you
+wanted gone. Every pill now carries its own undo. The list count deliberately
+does not: "no lists" is not a narrowing of the pool, it is an empty pool.
+
+They repaint on their own, like the pool count already did, because the value
+inputs deliberately do not call `paint()` — a repaint on every keystroke throws
+the caret out of the number field being typed in. Verified: typing `1960` adds
+the pill while the caret stays in the field.
+
+**An overlay helper came out of `openMovieModal`, and it was incomplete.** The
+modal closed on Escape and on a backdrop click and stopped there: it announced
+`aria-modal="true"` while never taking focus, so Tab from an open dialog walked
+the page behind it, and the page behind stayed scrollable. Focus-in, Tab
+trapped, focus restored to whatever opened it, and a scroll lock all belong to
+*being* an overlay rather than to showing a film, so they now live in
+`openOverlay` and the modal gets them for free. **That closes the focus half of
+the modal row in `ROADMAP.md`** — what remains there is its lack of actions.
+
+The trap list is queried on every Tab rather than once on open, because the
+sheet repaints its own contents as filters are picked and a list captured at
+open time would trap focus against nodes that no longer exist.
+
+**One defect found by building it: duplicate element ids.** `rangeInputs` gives
+its year and runtime fields fixed ids so focus survives a repaint, so rendering
+the filter panel in both the rail and the sheet put two `#filter-year-min` in
+one document — and `display: none` hides an element without removing it, so
+below the rail's breakpoint `getElementById` would answer with the copy nobody
+can see. The rail renders empty while the sheet is up; only one copy is ever
+live.
+
+Verified in a browser against a copy of the real database: the rail pins at
+`top: 16` through a long scroll and does not overflow, the sheet opens with
+focus inside it and the page behind locked, typing inside the sheet updates the
+pills in the column behind, and removing a pill clears the underlying filter.
+
+⚠️ **Two things are NOT verified.** The duplicate-id fix landed after the
+browser extension disconnected, so it is reasoned and not seen. And **no part
+of this has been rendered at phone width** — the sheet was exercised by calling
+its opener directly, which proves it works and says nothing about how it looks
+at 390px. That is the standing v7 gap, not a new one.
+
+Version 7.5.0.
+
+### 10.6 Finishing the keystone against a real narrow window
+
+Everything 10.5 left unverified, plus what verifying it found.
+
+**The sheet was never full-screen.** `.modal-card` sets `max-height: 90vh` and
+is defined further down the stylesheet, so at equal specificity it beat
+`.sheet-card` on source order and capped the sheet at 631px of a 701px viewport
+— the same 90% every time, which is what gave it away. The backdrop also
+centres its child inside 20px of padding, right for a film's detail card and
+wrong for a destination. Both fixed; the sheet now fills the viewport exactly,
+scrolls internally, and keeps its header pinned.
+
+**Focus did not come home.** Closing the sheet repaints the tab, which destroys
+the very button the overlay had just restored focus to. The opener carries a
+stable id now and is re-focused after the repaint — the same contract
+`preserveFocus` already states for anything that must survive one.
+
+**The duplicate ids were only half prevented.** Opening the sheet set the owner
+but did not repaint, so both copies of the filter panel existed until something
+else happened to repaint. Opening now repaints immediately, and `openOverlay`
+reports *every* exit — its own control, Escape, and a backdrop click — so the
+rail is refilled however the sheet is dismissed. Measured at each step: exactly
+one `#filter-year-min` in the document throughout.
+
+**A narrow window was finally rendered.** `resize_window` was asked for 390×844
+and produced 614px of inner width — Chrome's minimum, reported as success,
+which is the recorded trap doing exactly what the trap list says it does. 614px
+is still below the rail's breakpoint, so **for the first time in this project
+the responsive switch has been seen rather than reasoned about**: the rail is
+`display: none`, the sheet's opener is visible, the sheet fills the screen, and
+nothing overflows horizontally. It is not 390px, and the sub-500px layout
+remains unobserved.
+
+Version 7.6.0.
+
+### 10.7 One string stopped setting the width of the page
+
+From field notes, and the fix is not where the symptom is.
+
+The vote panel prints what the vote was drawn from — every selected list joined
+with " + ", which at twenty lists is a **571-character** string — inside a
+`.badge`, and `.badge` is `white-space: nowrap` because a badge is normally two
+or three words. So the page gained a horizontal scrollbar and the nav, the QR
+panel and the poster strip all shifted with it.
+
+**Clamping the badge was necessary and not sufficient**, which is the part
+worth writing down. With the badge held to 52ch and ellipsised, the page still
+measured 3,586px against a 1,440px viewport. `.stack` — the app's default
+vertical layout, used by nearly every view — is a grid with no
+`grid-template-columns`, so its single column is `auto`, and **an auto grid
+column is max-content**. The track kept asking for the untruncated string
+regardless of what the badge was allowed to display, and every ancestor grew to
+match: `.app` correctly 1,100px with a 3,400px card inside it.
+
+`minmax(0, 1fr)` on `.stack`, and on the `1fr` half of `.publish`. Explicitly
+one column that is allowed to shrink, which is what both were always assumed to
+be.
+
+The string itself is untouched — it is the honest record of what a vote was
+drawn from, so it stays whole in the DOM, on hover, and in History where the
+layout can take it. Measured after: page scroll width equal to the viewport,
+badge 347px and ellipsised, all 571 characters still there.
+
+Checked across all four tabs, because `.stack` is everywhere: no overflow, no
+collapsed cards.
+
+Version 7.7.0.
+
+### 10.8 The filter chips fold away
+
+From field notes, raised as soon as the rail made it visible: Genres, Country
+and Language are about forty chips between them, so the rail was one long
+scroll with the year and runtime controls stranded below all of it. The panel
+was always that long — the rail simply put it somewhere you look.
+
+`<details>` and `<summary>`, not a button and a class. It is a disclosure
+widget, the element exists, and the keyboard behaviour and screen reader
+announcement come with it.
+
+**A group with a selection is always open**, because you must be able to see
+what is narrowing your pool without hunting for it, and the summary carries a
+count when it is shut. Groups opened merely to browse are remembered separately
+for the session — every chip click repaints the panel, and without that the
+group would fold shut under the host mid-decision. Verified: opening Genres by
+hand, then picking a chip, leaves it open with a "1" against it and an
+`Action ×` pill in the column beside it.
+
+**It did not shorten the rail much, and that is worth recording rather than
+claiming otherwise.** Collapsed, the three groups save ~360px of a ~4,300px
+rail. The rest is the list picker: all twenty lists are selected by default, a
+group with a selection defaults to open, so every one of the eight groups is
+expanded on a first load. The chip groups were the reported problem and are
+fixed; the picker's default is a separate question and is now in `ROADMAP.md`.
+
+Version 7.8.0.
+
+### 10.9 A built-in vibe's identity stops being its name
+
+Asked as a design question — must renaming a built-in really be a migration
+every time? — and the answer turned out to be that the current arrangement is
+not merely inconvenient, it is broken.
+
+**Measured before touching anything.** `ensureBuiltinVibes` asked "is there a
+vibe called `Cinephile`?", and `PATCH /api/vibes/:id` already accepts a name.
+So renaming `Cinephile` to `Film buff` through the real route and restarting
+produced **eight** built-ins: the renamed one, and a freshly re-seeded
+`Cinephile` beside it. Reachable today; the only reason nobody had hit it is
+that the UI does not expose renaming yet.
+
+The cause is that the name was doing two jobs. `builtin_key` splits them: a
+stable slug is identity, the name is data. One migration claims a key for each
+of the seven existing built-ins by the name it has today — the last time a name
+is ever used as a handle — and from there:
+
+- Renaming a built-in in `BUILTIN_VIBES` is a **one-word edit**, and it reaches
+  databases that have already booted. `Director night` became `Director's night`
+  that way, which is what prompted the question.
+- Renaming one through the API no longer duplicates it. Verified end to end on
+  a copy of the real database: rename, restart, still seven.
+- `name_custom` records that a host has taken the name over, so a later seed
+  change cannot overwrite a name they chose. The key is ours, the name is theirs.
+
+Three things worth keeping about the edges. The backfill only fills a NULL key
+and only matches the original name, so it cannot disturb a database where
+someone has *already* been given a duplicate by the old behaviour — deciding
+which of two rows is "really" Cinephile is not a migration's business. The
+rename-on-seed checks for a name clash first, because `name` is UNIQUE and a
+host who has given some other vibe the name we are moving to would otherwise
+crash the boot; leaving the old name is survivable, refusing to start is not.
+And the unique index on the key is partial, since every custom vibe has NULL.
+
+**A second inconsistency fell out of it.** Slot lists are named from
+`param.label`, independently of the vibe, so they read `Director night —
+Kurosawa` and `Actor night — Bruce Willis` beside vibes called `Director's
+night` and `Actor's night`. That reached the vote panel, where the summary is
+what a published vote records itself as drawn from. The template is possessive
+now; slot lists are found through their `vibe_lists` link and never by name, so
+existing ones simply take the new name on their next apply.
+
+`lists` still identifies by name, and `DECISIONS.md` has said so since v4. The
+same shape would fix it; not done here.
+
+Version 7.9.0.
+
+### 10.10 Explore puts its library first, and the rail becomes a component
+
+~1,600px of controls stood between the heading "Explore the library" and the
+first poster. The tab is now title, subtitle, search, sort, grid — the first
+poster sits **311px** down — with the same pool controls in the same rail the
+Draw tab uses.
+
+**The rail was extracted rather than copied**, which is what the roadmap
+predicted would make it worth building: `createPoolDestination` owns the rail,
+the sheet, the opener button and the one rule that keeps them honest — only one
+copy of the controls may be live, because `rangeInputs` gives its fields fixed
+ids and `display: none` hides an element without removing it. Draw was moved
+onto it in the same change, so there is one implementation and not two.
+
+It also erases an inconsistency the tab's own subtitle was carrying. "Same
+filters as Draw" was true of the filters and false of the chrome: Explore laid
+its picker out flat and permanently expanded while Draw had folded the same
+picker away. Both now show the same controls in the same place, and Explore
+gains the tag filter it never had.
+
+Verified in the browser on both tabs after the extraction: rail present with
+picker and filters and no overflow, exactly one `#filter-year-min` in the
+document at rest, in the sheet, and after closing it, and the rail refilling on
+Escape. Draw kept its pills, its Draw button and its own sheet.
+
+Version 7.10.0.
+
+### 10.11 The modal earns its interruption
+
+The other half of the row whose focus bug closed in v7.5. The overlay had
+**zero** actions, so the sequence was: decide in here, close it, find the card
+again, act there.
+
+It has `Mark watched` and `+ Add to lineup` now, and the buttons are the same
+ones the card uses — one implementation, so they cannot drift.
+
+**The actions are passed in, never built in `dom.js`.** That module imports
+`prefs.js` and nothing else on purpose, and an overlay that could add to the
+lineup itself would have to reach for `lineup` and `api`. The overlay shows a
+film; what you can *do* with one belongs to whoever is showing it. `browse.js`
+supplies them, because that is where the card lives too.
+
+Adding from the overlay closes it — the decision is made, and leaving it up is
+just asking to be dismissed — and repaints the view behind, so the card
+underneath immediately reads `In lineup ✓`.
+
+**Placement was wrong first and worth recording.** Spanning the modal's full
+width under the trailer put the actions past a 315px video embed and off the
+bottom of the overlay: present, and unreachable without going looking for them.
+They sit in the info column under the links now, which is the end of the block
+you actually read to decide. Measured: visible with the overlay unscrolled.
+
+Version 7.11.0.
+
+### 10.12 The orphaned separator, third attempt
+
+v4 drew the separator after each item and left `1994 ·` dangling at the end of
+a line. v5 moved it to a `::before` on the following item — where it travels
+with that item and lands at the START of the next line instead, `· ★ 6.0`. Each
+attempt moved the orphan rather than removing it.
+
+**CSS cannot express the rule.** There is no selector for "is the first thing
+on its line": that is a fact about how a row wrapped, not about the tree, and
+it changes with the width of the card. So it is measured after layout —
+`offsetTop` per item, all reads in one pass and all class writes in another,
+because interleaving them makes every write invalidate layout and every
+following read recompute it. On a 120-row grid that is 120 forced reflows
+instead of one.
+
+**The measurement alone was not enough, and this is the part that mattered.**
+With the separator in flow it has width, so suppressing it on a wrapped item
+frees that width — and the item can then pull back onto the previous line,
+where it needs a separator again. Bistable: measured wrapped, unmarked it fits,
+marked it wraps. Caught by re-measuring the sweep's own output and finding one
+row that permanently disagreed with it —
+`2010 · Jean-Loup Felicioli, Alain Gagnol · ★ 6.5`.
+
+The separator is drawn **out of flow** now, absolutely positioned inside the
+column gap. It contributes nothing to any item's width, so hiding it cannot
+change where anything wraps, and one pass settles. Verified: three consecutive
+sweeps over 120 rows, 11 of them wrapping, with zero disagreement each time,
+and zero again after a resize to a different width.
+
+The sweep installs itself — a `MutationObserver` for repaints, a
+`ResizeObserver` for a rewrap that no DOM change caused — rather than being
+called from each view's `paint()`, because one of those calls eventually gets
+forgotten and that is exactly how a defect this cosmetic survives three
+versions. `childList` only, so writing classes cannot retrigger it.
+
+Version 7.12.0.
+
+### 10.13 One control shape stops meaning four things
+
+Vibe presets, list-group jump chips, genre/country/language filters and display
+toggles were all fully-round pills that turned solid yellow when active, sitting
+in four rows within ~600px — and four of the seven vibe names recurred verbatim
+in the rows below them. With `Cinephile` applied, the group row still painted
+`All` in that same active yellow, so two unrelated "selected" states stacked in
+one column saying different things.
+
+**The tag-filter row is deleted outright.** It narrowed which lists the picker
+showed, which the group headers already do by collapsing — a second mechanism
+over the first, and the one carrying the contradictory `All`.
+
+What is left is two kinds of control that now look like two kinds of control: a
+**pill** is a preset you apply, a **token** is a value you include or exclude.
+Tokens are square-cornered and carry an explicit `+` or `−`, so the tri-state
+stops resting on colour alone — include and exclude were yellow, and red with a
+strikethrough, and nothing else.
+
+This answers a question `DECISIONS.md` had deliberately left open since v5,
+where the entry said the row should not be changed on the strength of a code
+read and that the real question was whether the two rows had ever actually been
+confused. Four independent review passes converging on it is that evidence.
+
+**One defect hardened while in there.** The tri-state advanced from a state
+captured at render time and pushed with no guard, so a click landing on a node
+a repaint had already replaced could add a key the group already held.
+Demonstrated: two entries for Comedy made the pool summary read
+`Action/Comedy/Comedy` — corrupt state and a sentence describing it wrongly in
+the same breath. It now reads the group itself and never pushes a duplicate.
+Not reachable by ordinary clicking, which is why it had survived; a real
+double-click was measured and is correct either way.
+
+Version 7.13.0.
+
+### 10.14 The picker's counts stop contradicting themselves
+
+"20 of 20 lists selected", with 29 checkboxes underneath it. Both numbers were
+true — a list appears under every tag it carries, and seven of the twenty carry
+more than one — and nothing reconciled them, so the header read as a bug.
+
+**Decided in favour of keeping the repetition and saying so.** A list genuinely
+belongs to several tags: Studio Ghibli is animation, a collection, and family
+viewing, and hiding two of those to make an arithmetic tidy would be answering
+a display question by deleting information. The header now says
+`20 of 20 lists selected · 7 appear under more than one tag`, and names them on
+hover.
+
+Measured rather than assumed: 20 lists, 29 rows, and the seven are Disney
+Animated Canon, Studio Ghibli, The Criterion Collection, and the four festival
+awards that are both `awards` and `festivals`.
+
+Version 7.14.0.
+
+### 10.15 A group opens when it has something to say
+
+A picker group defaulted to open if ANY list inside it was ticked. The intent
+was right — do not hide lists you are drawing from — and the default state of
+this app is all twenty lists ticked, so every one of the eight groups
+qualified. All eight opened on every fresh load, and a rule meant to say "look
+here" fired everywhere and therefore pointed at nothing: ~4,300px of rail,
+uniformly checked.
+
+It opens on a **partial** selection now. All-on and all-off are both uniform,
+and the group header already says which one you are in — `Awards 9 lists · 634
+films · 9 on`. Part-selected is the only state you cannot read off the header,
+so it is the only one that opens itself.
+
+The cost is honest and small: on a fresh load nothing is expanded, so "which
+lists are in Awards?" costs one click. Against scrolling 4,300px past 29 ticked
+boxes to reach the filters below, that is the better trade.
+
+Version 7.15.0.
+
+### 10.16 Three things the rail only revealed on a phone
+
+All three reported from real use within minutes of the app going on the LAN,
+and all three are the rail meeting a 300px column for the first time.
+
+**A summary that grew wrapped its controls into a ragged third line.** Adding
+"· 7 appear under more than one tag" pushed the picker's header to two lines,
+which shunted "Deselect all" onto a line of its own under the other two. The
+summary is a sentence and the buttons are controls, so they get a line each
+now.
+
+**"all" and "none" are one control in two halves.** Left to wrap
+independently in a group header, "none" stranded itself under "all" and read
+as a stray button. Both pairs — the group's and the picker's — wrap as a unit
+or not at all.
+
+**Turning a group off used to fling it open.** Clicking `none` on a COLLAPSED
+group pinned it open and expanded it. The pin exists for a good reason —
+unchecking the last list in a group you are looking at would otherwise collapse
+it instantly, yanking the checkbox out from under the cursor — but it was
+ungated, and nothing about "I do not want these" asks to see them. It now pins
+only a group that is already open. Verified all four ways: `none` and `all` on
+a collapsed group leave it collapsed, and a group opened by hand stays open
+even when every list in it is unchecked.
+
+Version 7.16.0.
+
+### 10.17 Three more from the phone, and one of them was mine
+
+**The sheet's sticky header was see-through.** Reported with a screenshot of
+"The canon · 3 lists · 2,442 films" reading straight through the "Pool setup"
+bar. `.modal-card` carries 24px of padding, so a sticky header inset by it
+leaves a 24px strip above and beside it that its own background never covers.
+Negative margins pull the header out to the card's edges — and `top: -24px`,
+not `0`, because the sticky offset still resolves against the card's CONTENT
+box, so `top: 0` pinned it 24px down and left the strip. Measured both times:
+header top 24 against card top 0 before, 0 and 0 after, with the topmost pixel
+belonging to the header at every scroll position.
+
+**A parametric vibe forgot its value the moment anything else changed.** Pick
+Director's night → Steven Spielberg → top 10, and the chip fell back to a bare
+"Director's night ▾" while the Top-N caption two panels away still read "of
+Director's night — Steven Spielberg". One screen saying both things.
+
+The chip read back its value only while the vibe LABEL was applied, and any
+hand-edit clears that label to Custom — deliberately, and the Top-N cut counts.
+The original rule existed to stop a chip claiming "Robert Eggers" when nothing
+of his was in play, which is right; `active` was simply the wrong test for it.
+The chip now reads back its value while its **slot list is in the pool**, which
+is the honest condition and still reverts on its own when you switch vibes. The
+label continues to say Custom, because the pool as a whole genuinely is.
+
+**The draw button lied about its own number.** Typing 5 into the size field left
+a button reading "Draw 2" beside a count that had already updated to "fewer than
+the 5 you're drawing". The field deliberately does not repaint — a repaint per
+keystroke throws the caret out of the field being typed in, the same reason the
+filter value inputs don't — so the label was rendered once and never again. It
+repaints on its own now, like the pool count, and so does the film/films word
+beside it.
+
+Version 7.17.0.
+
+### 10.18 One stale render, reported three different ways
+
+All three came from one sequence — Spielberg, then award winners, then draw,
+then Clear all — and all three are the same shape: something rendered once from
+state that changed afterwards.
+
+**The Draw button died and stayed dead.** After "Clear all" the count read
+"1 new film matches" beside a Draw button that could not be clicked. The button's
+`disabled` came from `state.poolCount` at paint time, and `refreshCount` is
+async — "Clear all" did not await it, so the repaint used the previous count of
+zero and nothing re-evaluated the button when the real number arrived. Removing
+the same film from its card worked, and that is the tell: that path awaited the
+count before painting. `paintCount` now refreshes the button's disabled state
+too, which fixes every path rather than the one that was reported.
+
+**The "custom" label lagged a whole interaction behind.** Ticking "only films
+that won an award" demoted the pool but left the label claiming the vibe until
+something else repainted — usually the next draw, which is why it looked like
+drawing had caused it. The range inputs deliberately do not repaint, because a
+repaint per keystroke throws the caret out of the field; a checkbox holds no
+caret, so it gets the full repaint and the label is honest immediately.
+
+**The parametric chip went grey while still being what was drawn.** v7.17 made
+it keep its VALUE when the pool is hand-edited, and stopped there — so it read
+"Director: Steven Spielberg" in the unselected grey while that was exactly what
+the pool was drawing from. The highlight now follows the same condition as the
+value: this vibe's slot list is in play. The "custom" note on the label above is
+what says the pool has been edited since.
+
+### 10.19 Two columns on a phone
+
+A 390px screen leaves ~358px of content, and a 190px track minimum needs 396px
+for two — so every grid collapsed to a single full-width card, one ~537px
+poster per screen, on a tab whose job is browsing. Below 560px the minimum
+drops to 150px, which measures `171px 171px` against the old rule's single
+`358px`. The lineup is included: a double feature is two films and seeing both
+at once is the point of the screen.
+
+**Deliberately a media query and nothing else**, so reverting is deleting one
+block — it is an experiment, and the phone is the only place it can be judged.
+
+Version 7.18.0.
+
+### 10.20 The person picker takes the caret with it
+
+Opening Director's night or Actor's night has exactly one possible next move —
+type a name — and it took a second tap to reach the only input on offer. The box
+is focused as it appears now, so a phone brings the keyboard up with the picker
+rather than after it.
+
+**A microtask, not `requestAnimationFrame`**, and that was worth finding out.
+The node is not in the document when it is built — it is returned into a paint
+that appends it, and `focus()` on a detached element does nothing — so the call
+has to be deferred. rAF was the first attempt and never ran: **Chrome does not
+run rAF at all in a background tab.** Harmless for a host, who is by definition
+looking at the page, but it would have parked the focus until the tab came
+forward and then taken it at a moment nobody asked for. A microtask runs as
+soon as the paint that appended the node has finished, throttled by nothing.
+
+Version 7.19.0.
+
+### 10.21 The rail keeps its place
+
+Ticking "only films that won an award" threw the host back to the top of the
+rail. Self-inflicted, two versions earlier: 10.18 gave the filter checkboxes a
+full repaint so the "custom" label would stop lagging, and a repaint rebuilds
+the rail — which owns its own `overflow-y`, so its scroll position lives on the
+node being destroyed.
+
+Fixed as a class rather than as that checkbox. `preserveScroll` is the sibling
+of `preserveFocus` and works the same way: capture before, restore after, keyed
+on a SELECTOR rather than a node, because the node is the thing about to be
+replaced. Both views use it, so every full repaint keeps the rail where it was
+— the checkbox that was reported, a group's all/none, a list ticked two thirds
+of the way down.
+
+The sheet needed the same treatment for a different reason: refilling its body
+shortens it for an instant and the browser clamps the card's `scrollTop` to the
+momentary height, so the position is lost even though the card itself survives.
+
+Verified at scroll 900 across three separate repaint paths, and the "custom"
+label still lands immediately, which is what the repaint was for.
+
+Version 7.20.0.
+
+### 10.22 Keyboard shortcuts, and a wide Pool setup
+
+Asked for. `p` opens or closes Pool setup, `d` draws, `r` replaces the drawn
+films, `c` clears the lineup, `l` selects all lists or none, `a` and `/` reach
+the add-a-film box, shift with the arrows changes the draw size, `?` shows the
+card that lists all of it — rendered from the same array the handler switches
+on, so a key that works and a key that is documented cannot drift apart.
+
+**Tab was asked for and deliberately not taken.** Cycling the vibe chips with
+Tab means hijacking the one key the platform reserves for reaching everything
+else: no keyboard route to Publish, to the tabs, to the browser's own chrome,
+and screen readers broken outright. `←`/`→` cycle the chips once focus is in
+that row, which is the ARIA toolbar pattern, and Tab still gets you there and
+Enter still selects. Raised before building; the owner agreed.
+
+Two rules keep the handler out of the way: never while the caret is in a field
+— otherwise typing "Indiana Jones" would draw, clear the lineup and open the
+pool setup on the way past — and never while an overlay is up, since whatever
+is open owns the keyboard. With one exception, because "p toggles" would
+otherwise be a lie: `p` closes the pool sheet it opened.
+
+**Pool setup gained a wide overlaid form on desktop**, opened by `p` or by a
+`⤢` in the rail's own header — a shortcut nobody can see is not a way in. Same
+component and the same one-copy rule as the phone sheet; only the shape
+differs. At 1040px the picker lays out two columns and the filter groups sit
+three across, which is the fiddling room a 300px rail cannot give.
+
+**The same specificity trap caught twice.** `.modal-card` is defined further
+down the stylesheet than either `.sheet-card` or `.shortcuts-card`, so at equal
+specificity its `190px 1fr` poster grid won: the sheet's sticky header rendered
+a third of the card wide with content showing beside it, and the shortcut table
+was squeezed into the second column. Both are `.modal-card.x` now. Worth
+recording because it is the third time this file's source order has decided a
+rule — see also `max-height: 90vh` capping the sheet at 631px.
+
+Version 7.21.0.
+
+### 10.23 Four from real use, on two devices
+
+**The rail could not be seen to its end without scrolling the page.** Reported
+on desktop and correct: `max-height: calc(100dvh - 32px)` is only right once
+the rail has STUCK. Before that it begins ~170px down, under the masthead, so a
+full viewport of height from there runs off the bottom of the screen — you
+scroll the rail to its end, the end is not there, and scrolling the page then
+reveals it. The height depends on where the element currently is, which is a
+fact about layout and scroll position that CSS cannot state, so it is measured.
+One listener for the app rather than one per rail, because the views rebuild
+theirs on every repaint. Verified with the page at 0, 300 and 900: the rail's
+bottom lands on screen every time.
+
+**A guest tapping the name field was thrown to the top of the ballot.** The
+poll rebuilds the whole view every 3.5 seconds, and emptying the container
+collapses the document to nothing for an instant — the browser clamps the
+scroll to fit, and refilling cannot undo it. The focus was already preserved
+across that rebuild; the scroll position was the half nobody had needed until
+the ballot got long enough to scroll. Verified across a full poll with the
+caret in the field: 251 before, 251 after, still focused.
+
+**The sticky bars were see-through, and the ballot showed through them.** The
+background was the fade itself — a gradient transparent for its top 28% — so on
+a phone, where cards run right up to the bar, "2 of 2 ranked" sat on top of a
+director's name and Reset over a runtime. A guest reading two overlaid
+sentences cannot tell which one is the control. The bars are solid now and the
+fade is a strip above them, which is what the gradient was reaching for.
+
+**The live-vote banner was as tall as a panel.** It is one line of notice, so
+it no longer takes `.card`'s 16px all round.
+
+Version 7.22.0.
+
+### 10.24 Undoing a stretch, and moving the shortcuts up a level
+
+**Every box on the page grew vertically.** Reported as "scrolling down stretches
+all boxes", and self-inflicted by the keystone: 10.5 removed `align-items:
+start` from the shell so the rail's aside would be tall enough for its sticky
+child to travel. That stretched the MAIN column too — and `.stack` is a grid
+whose auto rows absorb spare height, so every card in it grew to fill a column
+made tall by the rail beside it. `align-items: start` on the shell with
+`align-self: stretch` on the rail alone: only the rail needs the height.
+
+**The keyboard symbol moved to the masthead.** It sat in the Draw card's
+header, which made a general affordance look like a property of one panel. The
+shortcuts themselves still belong to a view — Draw has a dozen, History none —
+so they are a registry now: a view sets its table on mount and clears it on
+teardown, and the card cannot list a key that is not live. A tab with none says
+so rather than showing an empty table.
+
+**The live-vote banner is one line.** Stacking the counts under the heading made
+a notice as tall as the panels above it.
+
+**The footer version was stale.** Not a bug: the server reads `package.json`
+once at boot, so a long-running process reports the version it started with. A
+restart, not a change.
+
+⚠️ **One fix in this chunk is reasoned and not seen.** The rail crept upward on
+repaint — far enough to hide the group just clicked — because `paint()`
+restored the scroll position before `fitRailToViewport` set the measured
+height, so the restore clamped against a client height that was about to
+change. Height is set before scroll now, in both views. The browser extension
+disconnected before it could be confirmed in the page; everything else here was
+measured.
+
+Version 7.23.0.
+
+### 10.25 Closing v7
+
+Twenty-three chunks. Every roadmap row shipped, and the version's own thesis —
+*disclosure by destination, not expansion in place* — survived contact: Pool
+setup is a rail beside the content and a sheet or a wide card where there is no
+room for one, and the Draw button never moves.
+
+**The evidence pack was worth what it cost, and its limits showed.** Four
+independent passes named the three biggest problems and every one of them was
+real. But every mobile claim in it was derived from the stylesheet, and the
+numbers were wrong in the app's favour — `.chip` measured 35px against a
+claimed 26. The passes could not see what an evening of real use saw.
+
+**The loop that actually found bugs was a person on a phone.** Once the app was
+on the LAN, reports arrived faster than a browser check could produce them, and
+they were of a different kind: a sticky header you could read the ballot
+through, a Draw button that went dead after Clear all, a rail that crept upward
+on every click, a chip that forgot which director it was set to. **Six of the
+defects fixed in v7 were reported by the owner and none of them by an agent.**
+Several were regressions from earlier chunks *of the same version*, caught
+within the hour because someone was using it.
+
+Three habits are worth carrying, and all three are recorded as traps rather
+than as prose: check whether a browser tool is lying before believing it, put
+a modifier on `.base.modifier` when the base class is old, and set a height
+before restoring a scroll.
+
+**One thing did not get done and is not hidden.** The tap targets were measured
+but not raised — `.vibe-edit` is 16px and it deletes a saved vibe. It leads v8.
+
+Version 8.0.0. **The MAJOR is bumped at the close this time**, which v6 forgot,
+leaving `package.json` a version behind its own roadmap for a whole cycle.

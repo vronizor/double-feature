@@ -43,7 +43,7 @@ const guestBaseReady = api
  * The host's view of one vote session: QR code, link, live tally, close button,
  * and the results once it's closed. Reused read-only by the history tab.
  */
-export function renderSessionPanel(container, slug, { host = false, onClosed = null } = {}) {
+export function renderSessionPanel(container, slug, { host = false, onEnded = null } = {}) {
   let timer = null;
   let stopped = false;
 
@@ -74,7 +74,12 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
           // session it just published. The History tab renders closed sessions
           // through this same function and passes nothing — without that gate,
           // opening last week's result would wipe the lineup being built now.
-          onClosed?.();
+          //
+          // The outcome is passed because the two endings mean different things
+          // to that caller: a closed vote produced a result and spends the
+          // lineup, a cancelled one throws the vote away and leaves the lineup
+          // worth republishing. Both end the "a vote is live" state.
+          onEnded?.('closed');
           renderResults(container, results);
         }
         return;
@@ -139,7 +144,16 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
                 // the QR code meant for guests.
                 h('a', { href: `/vote/${slug}`, target: '_blank', rel: 'noopener noreferrer', class: 'btn btn-sm' }, 'Open ↗'),
                 session.anonymous ? h('span', { class: 'badge badge-warn' }, 'anonymous') : null,
-                session.filter_summary ? h('span', { class: 'badge' }, session.filter_summary) : null,
+                // A badge by styling and a paragraph by length: twenty lists is a
+                // ~400-character string. Clamped rather than shortened, with the
+                // whole thing on hover — see `.badge--summary`.
+                session.filter_summary
+                  ? h(
+                      'span',
+                      { class: 'badge badge--summary', title: session.filter_summary },
+                      session.filter_summary,
+                    )
+                  : null,
               ),
             ),
           ),
@@ -171,6 +185,7 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
                       try {
                         await api.cancelSession(slug);
                         stop();
+                        onEnded?.('cancelled');
                         clear(container).append(
                           h('div', { class: 'empty' }, 'Voting cancelled — this vote was thrown away.'),
                         );
@@ -196,7 +211,7 @@ export function renderSessionPanel(container, slug, { host = false, onClosed = n
                         stop();
                         // Closing by hand skips the poll path above, so the
                         // hook has to fire here too.
-                        onClosed?.();
+                        onEnded?.('closed');
                         renderResults(container, results);
                       } catch (error) {
                         toast(error.message, 'error');

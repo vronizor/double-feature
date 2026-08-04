@@ -49,7 +49,21 @@ a { color: var(--accent); }
 .muted { color: var(--text-dim); }
 .faint { color: var(--text-faint); font-size: 0.85rem; }
 .error { color: var(--danger); }
-.stack { display: grid; gap: 16px; }
+/* Read by screen readers, never drawn. `display:none` and `visibility:hidden`
+   would take it out of the accessibility tree with everything else, so a live
+   region hidden that way announces nothing at all. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+/* `minmax(0, 1fr)`, not the implicit `auto`. An auto-sized grid column is
+   max-content, so ONE unbreakable child sizes every ancestor: the vote panel's
+   list summary is a 571-character nowrap string, and it pushed this grid — and
+   therefore the card, the panel and the page — to 3,400px inside a 1,100px
+   `.app`, giving the whole document a horizontal scrollbar. Clamping the
+   summary alone was not enough, because the track was still asking for its
+   max-content contribution. Explicitly one column that may shrink. */
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .spacer { flex: 1; }
 
@@ -138,6 +152,16 @@ label { display: block; }
 
 /* The Draw tab's list picker is just a checkbox + name + two badges per row —
    full page width is wasted on it once there's room for more than one column. */
+/* Summary on its own line, controls on theirs. In a 300px rail the summary is
+   two lines of text, and sharing a flex row with three buttons pushed the last
+   one onto a ragged line of its own. */
+.picker-head { display: grid; gap: 8px; }
+.picker-head .row { gap: 8px; }
+/* "all"/"none" and "Select all"/"Deselect all" are one control in two halves;
+   they wrap as a unit or not at all. Letting them wrap independently left the
+   second half alone on the next line, which reads as a stray button. */
+.bulk-pair { display: flex; gap: 6px; flex: none; }
+
 .list-picker-grid { display: grid; gap: 8px; }
 @media (min-width: 820px) {
   .list-picker-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
@@ -167,6 +191,21 @@ label { display: block; }
 .badge {
   font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
   background: var(--bg-sunken); color: var(--text-dim); border: 1px solid var(--border);
+}
+/* `.badge` is nowrap because a badge is two or three words. The pool summary is
+   one too, by styling, and a paragraph by length — every selected list joined
+   with " + ", which is ~400 characters at twenty lists. Nowrap meant it set the
+   page width: the WHOLE document gained a horizontal scrollbar and the nav, the
+   QR panel and the poster strip all shifted with it.
+
+   Clamped rather than shortened. The string is the honest record of what the
+   vote was drawn from, so it stays intact in the DOM and on hover, and History
+   still prints it in full where the layout can take it. `min-width: 0` because
+   a flex item will not shrink below its content without it, which is the whole
+   reason the ellipsis has something to do. */
+.badge--summary {
+  max-width: min(100%, 52ch); min-width: 0;
+  overflow: hidden; text-overflow: ellipsis;
 }
 .badge-warn { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 
@@ -212,15 +251,45 @@ label { display: block; }
 .chip {
   font-size: 0.82rem; padding: 4px 10px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--border-strong); background: var(--bg-sunken); color: var(--text-dim);
+  transition: background-color 120ms, border-color 120ms, color 120ms;
+}
+/* The most-clicked control in the app had no hover state at all — inert until
+   clicked, which reads as decoration rather than a control. Behind
+   `hover: hover` so a touch screen does not leave the last-tapped chip stuck
+   in a hover it can never leave, and BEFORE the state rules below so an
+   active chip keeps its own colours; it gets its brightened variant instead. */
+@media (hover: hover) {
+  .chip:hover { background: var(--bg-raised); border-color: var(--text-faint); color: var(--text); }
 }
 .chip[data-state="include"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+@media (hover: hover) {
+  .chip[data-state="include"]:hover {
+    background: color-mix(in srgb, var(--accent) 82%, white);
+    border-color: color-mix(in srgb, var(--accent) 82%, white);
+  }
+}
 .chip[data-state="exclude"] {
   background: color-mix(in srgb, var(--danger) 22%, transparent);
   color: var(--danger); border-color: var(--danger); text-decoration: line-through;
 }
+@media (hover: hover) {
+  .chip[data-state="exclude"]:hover { background: color-mix(in srgb, var(--danger) 32%, transparent); }
+}
 /* Vibe chips read as presets rather than filter toggles, so they're a
    little larger than the include/exclude chips they sit above. */
 .chip--vibe { font-size: 0.88rem; padding: 6px 14px; }
+
+/* One shape used to mean four things: vibe presets, list-group jump chips,
+   genre/country/language filters and display toggles were all fully-round
+   pills that turned solid yellow when active, and four of the seven vibe names
+   recurred verbatim in the rows below. The jump chips are deleted (see
+   renderListPicker) and what remains is two kinds of control that now LOOK
+   like two kinds of control: a pill is a preset you apply, a token is a value
+   you include or exclude. */
+.chip--filter { border-radius: 6px; }
+.chip-mark {
+  font-weight: 700; margin-right: 0.3em; font-variant-numeric: tabular-nums;
+}
 .chip--save { border-style: dashed; color: var(--text-dim); }
 
 .vibe-chip-wrap { display: inline-flex; align-items: center; gap: 2px; }
@@ -243,13 +312,208 @@ label { display: block; }
 .range { display: flex; align-items: center; gap: 8px; }
 .range input { width: 100%; }
 
+/* Sits above everything on the Draw tab when a vote is live. Coloured by the
+   accent rather than by --danger: nothing is wrong, there is simply something
+   already running that the host has lost sight of. */
+.live-banner {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-raised));
+  /* A one-line notice, not a card of content — `.card`'s 16px all round made
+     it as tall as the panels it sits above. */
+  padding: 9px 14px;
+}
+
 .pool-count { font-variant-numeric: tabular-nums; }
 .pool-count strong { color: var(--accent); font-size: 1.05rem; }
 
-/* The Draw tab's two ways to add a film to the lineup — random draw and a
-   specific search — side by side, since neither has priority over the other. */
-.tools-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-@media (max-width: 780px) { .tools-row { grid-template-columns: 1fr; } }
+/* The two ways to add a film used to sit in a `1fr 1fr` grid "since neither
+   has priority over the other". They do: a draw is the tab's whole purpose and
+   a named add is occasional, and equal billing sized the second one wrong in
+   both directions at once — half the screen empty when unused, a 480px column
+   crushing search results when used. It is a full-width disclosure now, so the
+   row is gone rather than restyled. */
+
+/* Reads as a control rather than a card, so it does not compete with the draw
+   panel above it while it is closed. */
+.add-film-toggle { border-style: dashed; color: var(--text-dim); }
+
+/* --- The Draw tab: main column + pool rail ------------------------------- */
+
+/* One column by default, so the phone case needs no undoing. The rail appears
+   only where there is genuinely room beside the content — below that width the
+   same controls are a full-screen sheet instead, and BOTH are always in the
+   DOM. Which one is live is decided here, by width, rather than by measuring
+   the viewport in JavaScript and going stale on the next resize. */
+.draw-shell { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.draw-rail { display: none; }
+.pool-sheet-row { margin-top: 2px; }
+
+@media (min-width: 1000px) {
+  /* `align-items: start` for the SHELL, `align-self: stretch` for the rail
+     alone — and the split matters.
+
+     Stretch is what a sticky child needs: it cannot travel further than its
+     parent, so the aside has to be as tall as the lineup beside it. But
+     stretching BOTH columns stretched the main one too, and `.stack` is a grid
+     whose auto rows absorb spare height — so every box on the page grew
+     vertically to fill a column made tall by the rail. Reported as "scrolling
+     down stretches all boxes", which is exactly what it looked like.
+
+     Only the rail needs the height. The main column takes its own. */
+  .draw-shell { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
+  .draw-rail { display: block; align-self: stretch; }
+  /* The button that opens the sheet is the same control as the rail; showing
+     both would be two doors to one room. */
+  .pool-sheet-row { display: none; }
+
+  /* Sticky so the pool controls stay put while the lineup scrolls past them —
+     this is the half of "disclosure by destination" that a phone cannot have.
+     Its own scrollbar, because the list picker is taller than any viewport. */
+  .draw-rail-inner {
+    position: sticky; top: 16px;
+    /* A starting value only. The real height is measured — see
+       `fitRailToViewport` — because before the rail sticks it begins under the
+       masthead, and a full viewport of height from there runs off the bottom
+       of the screen. */
+    max-height: calc(100dvh - 32px); overflow-y: auto;
+  }
+}
+
+/* Both of these size themselves against the VIEWPORT — the filter panel by a
+   media query, the picker by a 280px track minimum — so on a wide screen they
+   lay out for a wide screen and overflow a 300px rail. Inside the rail they are
+   one column, whatever the window is doing. This is the whole cost of reusing
+   the two panels unchanged, and it is two lines. */
+.draw-rail .filters,
+.draw-rail .list-picker-grid { grid-template-columns: 1fr; }
+/* Grid and flex children default to min-width:auto, so a long list name would
+   push the rail wider than its track rather than ellipsing inside it. */
+.draw-rail .list-pick, .draw-rail .list-group, .draw-rail .row { min-width: 0; }
+
+/* Full-screen rather than a centred card: this is a destination, not an
+   interruption, and it holds a list picker that will always want the height.
+
+   The backdrop centres its child inside 20px of padding, which is right for a
+   film's detail card and wrong for this — measured at 614px wide it left the
+   sheet 631px tall in a 701px viewport, inset and floating, which reads as a
+   dialog you dismiss rather than a place you have gone. `:has()` turns the
+   padding off for this one child instead of giving `openOverlay` a second
+   class to thread through for a purely visual difference. */
+.modal-backdrop:has(> .sheet-card) { padding: 0; align-items: stretch; }
+/* Height comes from stretching to the backdrop, which is `position: fixed;
+   inset: 0` and therefore the viewport by definition. `height: 100dvh` was
+   measured resolving 70px short of `window.innerHeight` in a 701px window and
+   left the sheet floating with 35px above and below it. Stretching cannot
+   disagree with the viewport, because it is not measuring one. */
+/* `.modal-card.sheet-card`, not `.sheet-card`: the base class sets
+   `max-height: 90vh` and is defined further down this file, so at equal
+   specificity it won on source order and capped the sheet at 631px of a 701px
+   viewport — the same 90% every time, which is what gave it away. */
+.modal-card.sheet-card {
+  /* BLOCK, not the modal's `190px 1fr` grid. That grid exists to stand a
+     poster beside a film's details; inherited here it put the sticky header in
+     the 190px column, so on a wide screen its background stopped a third of
+     the way across and "LISTS IN PLAY" showed through beside it. */
+  display: block;
+  max-width: 640px; width: 100%; max-height: none;
+  border-radius: 0; overflow-y: auto;
+}
+/* On a wide screen the sheet is a WIDE overlaid card rather than a phone
+   sheet: opened deliberately with "p" for a proper session of fiddling, so it
+   gets room the 300px rail cannot give — the list picker goes multi-column and
+   the filter panel lays out in its natural three. The rail empties while it is
+   up, which is the same one-copy rule that keeps the element ids unique. */
+@media (min-width: 1000px) {
+  .modal-backdrop:has(> .sheet-card) { padding: 24px; align-items: center; }
+  .modal-card.sheet-card {
+    max-width: min(1040px, 92vw); height: auto; max-height: 88vh;
+    border-radius: var(--radius);
+  }
+}
+
+/* Bleeds to the card's edges, and that is the point.
+
+   `.modal-card` has 24px of padding, so a sticky header inset by it leaves a
+   24px strip above and beside it that the header's background never covers —
+   and content scrolling underneath shows through the gap. Reported from a
+   phone: "The canon · 3 lists · 2,442 films" reading straight through the
+   "Pool setup" bar. Negative margins pull the header out to the card edges and
+   the padding puts its content back where it was, so the background spans the
+   whole width and the full height of the strip. */
+.sheet-head {
+  /* `top: -24px`, not 0. The negative margins pull the header's box out to the
+     card's edges, but the sticky offset still resolves against the card's
+     CONTENT box — so `top: 0` pinned it 24px down and left a strip of scrolling
+     content showing above it. Measured: header top 24, card top 0. */
+  position: sticky; top: -24px; z-index: 2;
+  background: var(--bg-raised);
+  margin: -24px -24px 0; padding: 24px 24px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Genres, Country and Language are ~40 chips between them, which made the rail
+   one long scroll with the year and runtime controls stranded below all of it.
+   A group with a selection is always open — you must be able to see what is
+   narrowing your pool without hunting for it. */
+.filter-group summary {
+  cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px;
+  padding: 2px 0;
+}
+.filter-group summary::-webkit-details-marker { display: none; }
+.filter-group summary .field-label { margin-bottom: 0; }
+/* The marker is drawn rather than inherited, so it points the same way as the
+   list picker's groups, which use text arrows rather than a native marker. */
+.filter-group summary::before { content: '\25b8'; color: var(--text-faint); font-size: 0.7rem; }
+.filter-group[open] summary::before { content: '\25be'; }
+@media (hover: hover) { .filter-group summary:hover .field-label { color: var(--text); } }
+.filter-group[open] > .chips { margin-top: 6px; }
+
+/* Quiet in the corner of the rail until wanted, like the keyboard hint. */
+.rail-expand {
+  background: none; border: 1px solid transparent; color: var(--text-faint);
+  padding: 1px 7px; font-size: 1rem; line-height: 1.2; cursor: pointer;
+}
+@media (hover: hover) {
+  .rail-expand:hover { color: var(--text); border-color: var(--border-strong); }
+}
+
+/* A door for people who already want one: quiet until you look for it. */
+.kbd-hint {
+  background: none; border: 1px solid transparent; color: var(--text-faint);
+  padding: 2px 8px; font-size: 1.05rem; line-height: 1.2; cursor: pointer;
+  align-self: center; margin-left: 4px;
+}
+@media (hover: hover) {
+  .kbd-hint:hover { color: var(--text); border-color: var(--border-strong); }
+}
+
+/* `.modal-card.shortcuts-card`, for the same reason as the sheet: the base
+   class is defined further down and wins at equal specificity, so a bare
+   `.shortcuts-card` kept the modal's `190px 1fr` poster grid and squeezed the
+   whole table into the second column. */
+.modal-card.shortcuts-card { display: block; max-width: 460px; }
+.shortcut-list {
+  display: grid; grid-template-columns: auto 1fr; gap: 8px 16px;
+  margin: 14px 0; align-items: baseline;
+}
+.shortcut-list dt { display: flex; align-items: baseline; gap: 4px; }
+.shortcut-list dd { margin: 0; color: var(--text-dim); font-size: 0.9rem; }
+kbd {
+  font: inherit; font-size: 0.78rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--bg-sunken); border: 1px solid var(--border-strong);
+  border-bottom-width: 2px; border-radius: 5px; padding: 2px 7px; color: var(--text);
+  white-space: nowrap;
+}
+
+/* Pool state, read back as facts you can strike out one at a time. */
+.pool-pills { align-items: center; }
+.chip--static { cursor: default; border-style: dashed; }
+.chip--removable { display: inline-flex; align-items: center; gap: 6px; }
+.chip-x { color: var(--text-faint); font-size: 0.95em; line-height: 1; }
+@media (hover: hover) {
+  .chip--removable:hover { border-color: var(--danger); color: var(--danger); }
+  .chip--removable:hover .chip-x { color: var(--danger); }
+}
 
 /* --- Movie grid --------------------------------------------------------- */
 
@@ -258,6 +522,35 @@ label { display: block; }
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
 }
 .movie-grid.is-vote { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+
+/* The lineup is the payoff, not a library, and the default draw is TWO films.
+   `auto-fill` keeps the empty columns it could not fill, so a double feature
+   rendered as two cards in the first two of five slots with the rest blank —
+   which reads as a search that returned too little, not as tonight's lineup.
+   `auto-fit` collapses the empty tracks and centring the row finishes the job.
+
+   The 260px cap is load-bearing: the poster is `aspect-ratio: 2/3` at 100%
+   width, so uncapped `1fr` tracks would stretch two cards to ~525px each and
+   stand a 790px-tall poster on the page. Capped, the columns go 5 → 3 at full
+   width, which is the intended trade — fewer, larger cards on the one grid
+   that is meant to be looked at rather than scanned. Explore keeps `auto-fill`
+   for exactly the opposite reason. */
+.movie-grid.is-lineup {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 260px));
+  justify-content: center;
+}
+
+/* TWO COLUMNS ON A PHONE — a deliberate experiment, easy to revert by deleting
+   this block. A 390px screen leaves ~358px of content, and a 190px minimum
+   needs 396px for two tracks, so every grid fell to a single full-width card:
+   one poster per screen, ~537px tall, on a tab whose job is browsing. 150px
+   fits two at ~171px each. The lineup is included because a double feature is
+   two films and seeing both at once is the whole point of the screen. */
+@media (max-width: 560px) {
+  .movie-grid,
+  .movie-grid.is-vote { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .movie-grid.is-lineup { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
 
 .movie {
   position: relative; background: var(--bg-raised); border: 1px solid var(--border);
@@ -303,10 +596,32 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
    card's edge and clipped, which is how a long director's name used to leave a
    bare star with no number. */
 .movie-meta {
-  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.32em;
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  /* Wide enough to hold the separator, which now lives IN the gap rather than
+     in the flow — see below. */
+  column-gap: 0.85em;
   font-size: 0.78rem; color: var(--text-dim); overflow-wrap: break-word;
 }
-.movie-meta > * + *::before { content: '·'; margin-right: 0.32em; color: var(--text-faint); }
+/* The separator is drawn OUT OF FLOW, and that is the whole trick.
+
+   In flow it has width, so suppressing it on a wrapped item frees that width
+   and the item can pull back onto the previous line — where it then needs the
+   separator again. Bistable: measured wrapped, unmarked it fits, marked it
+   wraps. Observed on "2010 · Jean-Loup Felicioli, Alain Gagnol · ★ 6.5", where
+   the sweep and a re-measurement of its own result disagreed permanently.
+
+   Absolutely positioned in the gap, the dot contributes nothing to the item's
+   width, so hiding it cannot change where anything wraps and one pass settles. */
+.movie-meta > * { position: relative; }
+.movie-meta > * + *::before {
+  content: '·'; position: absolute; left: -0.425em; transform: translateX(-50%);
+  color: var(--text-faint);
+}
+/* Written by `sweepMetaSeparators` after layout. There is no CSS selector for
+   "starts a line" — it is a fact about how the row wrapped, not about the tree
+   — so the separator is suppressed from the measured side. Higher specificity
+   than the rule above, so no !important is needed. */
+.movie-meta > .starts-line::before { content: none; }
 /* nowrap keeps "★ 7.9" from splitting between star and number. Safe now that
    the rating is a flex item: the line breaks BEFORE it rather than through it. */
 .movie-rating { color: var(--accent); font-weight: 620; white-space: nowrap; }
@@ -385,6 +700,13 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
   overflow-wrap: break-word; grid-column: 2; grid-row: 1;
 }
 .modal-overview { margin: 6px 0 0; font-size: 0.92rem; line-height: 1.55; color: var(--text); }
+/* Inside the info column, under the links — the last thing in the block you
+   actually read to decide, and above the trailer rather than after it. */
+.modal-actions {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+
 .modal-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 4px; }
 .modal-links a { font-size: 0.85rem; }
 .modal-trailer-row { grid-column: 1 / -1; grid-row: 2; margin-top: 6px; }
@@ -431,7 +753,7 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
 
 /* --- Publish / QR ------------------------------------------------------- */
 
-.publish { display: grid; gap: 18px; grid-template-columns: minmax(200px, 260px) 1fr; align-items: start; }
+.publish { display: grid; gap: 18px; grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); align-items: start; }
 @media (max-width: 640px) { .publish { grid-template-columns: 1fr; } }
 
 .qr { background: #fff; padding: 12px; border-radius: var(--radius); }
@@ -491,9 +813,52 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 /* --- Vote screen -------------------------------------------------------- */
 
 .vote-shell { width: min(680px, 100%); margin: 0 auto; }
+/* SOLID, with the fade moved above it as a separate strip.
+
+   It used to be the gradient itself, which is transparent for its top 28% —
+   so on a phone, where the cards run right up to the bar, the ballot's poster
+   text showed through it: "2 of 2 ranked" sitting on top of a director's name,
+   and Reset over a runtime. Reported from a real ballot. A guest reading two
+   overlaid sentences cannot tell which is the control. */
 .vote-sticky {
   position: sticky; bottom: 0; z-index: 5; padding: 12px 0 max(12px, env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--bg) 72%, transparent);
+  background: var(--bg);
+}
+.vote-sticky::before, .lineup-sticky::before {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 20px;
+  background: linear-gradient(to top, var(--bg), transparent);
+  pointer-events: none;
+}
+
+/* The host's half of the same idea: Publish sat below every card in the lineup,
+   which put it four screens down on a phone with five films staged. Same
+   treatment as the guest's Submit, for the same reason — the primary action of
+   a screen must not be pushed off it by the content it acts on.
+
+   Deliberately NOT sharing one class with .vote-sticky. They are the same shape
+   today and have no reason to stay that way: one carries a checkbox and a count
+   of films, the other a running rank total, and merging them would make every
+   later change to either a change to both.
+
+   What sticky does NOT do, measured rather than assumed: it cannot pull the bar
+   further than its own containing block, so with a two-film lineup 2,578px down
+   a long page the bar stays put until the lineup itself is nearly on screen. It
+   pins from the first pixel once the lineup is tall enough to have travel. That
+   is the behaviour we want and not a bug to route around — a Publish button
+   hovering over a lineup nobody can see would be worse than one that arrives
+   with it. An earlier note here blamed the grid parent and was simply wrong:
+   the bar pins identically as a grid item and as a block child. */
+.lineup-sticky {
+  position: sticky; bottom: 0; z-index: 5; padding: 12px 0 max(12px, env(safe-area-inset-bottom));
+  background: var(--bg);
+}
+
+
+/* Bare digits are both a plausible title and a plausible id, so the search
+   offers the second reading here instead of guessing between them. */
+.id-offer {
+  border: 1px dashed var(--border-strong); border-radius: 8px;
+  padding: 8px 10px; font-size: 0.85rem;
 }
 
 /* --- Toast -------------------------------------------------------------- */

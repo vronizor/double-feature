@@ -55,6 +55,20 @@ router.post('/', (req, res) => {
 
   if (tmdbIds.length === 0) throw fail('Publish a vote with at least one movie', 400);
 
+  // One vote at a time. Guests reach a session by a link and a QR that are both
+  // "the vote" with no year on them, so a second open session does not compete
+  // with the first — it silently replaces it for anyone who scans after that
+  // point, while the ballots already cast stay on a session nobody can find.
+  //
+  // The host has two ways past this and both are deliberate acts: close the
+  // vote, which keeps it and its result, or cancel it, which throws it away.
+  // Neither is inferable from "publish this other lineup", which is why this
+  // refuses rather than picking one.
+  const live = db.prepare("SELECT slug FROM sessions WHERE status = 'open' LIMIT 1").get();
+  if (live) {
+    throw fail('A vote is already open — close or cancel it before publishing another', 409);
+  }
+
   const known = db
     .prepare(
       `SELECT tmdb_id FROM movies WHERE tmdb_id IN (${tmdbIds.map(() => '?').join(', ')})`,

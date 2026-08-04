@@ -7,7 +7,12 @@ import {
   tmdbUrl,
   parseTmdbInput,
   openMovieModal,
+  showShortcuts,
+  setShortcuts,
   topNLabel,
+  drawnMessage,
+  fill,
+  preserveScroll,
 } from '../dom.js';
 import { api } from '../api.js';
 import { renderSessionPanel } from './session.js';
@@ -16,9 +21,10 @@ import {
   renderListPicker,
   renderVibeChips,
   renderParamPicker,
-  renderTagFilter,
   renderAwardsToggle,
   renderRatingToggle,
+  createPoolDestination,
+  fitRailToViewport,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -53,14 +59,12 @@ export async function renderDraw(container) {
   const state = {
     lists: [],
     facets: null,
-    poolSetupOpen: false,
     // Which picker categories are expanded. Lives here (not in poolState)
     // because it's presentation, not pool definition — but it must outlive a
     // repaint, which is why it isn't a local in the render function.
     openGroups: new Set(),
     // Which tag the picker is narrowed to, and the vocabulary/vibes fetched
     // from the server. Presentation + server data, so not in poolState.
-    tagFilter: null,
     vocabulary: [],
     vibes: [],
     // Edit mode for the vibe row: chips delete instead of applying. Presentation
@@ -69,11 +73,35 @@ export async function renderDraw(container) {
     // about by the time you come back.
     editingVibes: false,
     size: 2,
+    // Adding a named film is discoverable-but-rare: wanted often enough to
+    // deserve a permanent button, not often enough to deserve half the screen
+    // standing empty. Open state lives here rather than in the render closure
+    // so adding one film does not close the panel on the host mid-way through
+    // adding a second.
+    addFilmOpen: false,
     searchResults: [],
+    // Set when the search box was given bare digits, which are ambiguous —
+    // 1917, 300, 2012 and 1408 are all films AND all plausible TMDB ids. The
+    // search runs, and this offers the id reading alongside it rather than
+    // choosing one silently.
+    idOffer: null,
     anonymous: false,
     poolCount: null,
     busy: false,
+    // The vote that is open right now, if there is one. Nothing on this tab
+    // used to know: publishing swapped the whole view for the session panel,
+    // so a host who reloaded got a blank lineup and no trace that guests were
+    // still voting — and the server would happily have opened a second vote
+    // over the first.
+    liveSession: null,
   };
+
+  // Rail on a wide screen, full-screen sheet on a narrow one — the same
+  // component Explore uses, which is the whole reason it is a component.
+  const poolDestination = createPoolDestination({
+    content: () => poolSetupContent(),
+    repaint: () => paint(),
+  });
 
   let sessionTeardown = null;
   const stopSession = () => {
@@ -81,12 +109,32 @@ export async function renderDraw(container) {
     sessionTeardown = null;
   };
 
+  /**
+   * Is a vote live? Asked of the server rather than remembered, because the
+   * case this exists for is the one where nothing was remembered — a reload,
+   * or a different browser on the same house network.
+   *
+   * A failure leaves the banner off rather than guessing. The publish route
+   * refuses a second open vote on its own, so the banner is the convenience
+   * and the guard is the guarantee; getting it wrong here costs a missing
+   * banner, never a lost vote.
+   */
+  async function refreshLiveSession() {
+    try {
+      const { sessions } = await api.history();
+      state.liveSession = sessions.find((session) => session.status === 'open') ?? null;
+    } catch {
+      state.liveSession = null;
+    }
+  }
+
   async function refreshData() {
     const [{ lists }, facets, { tags }, { vibes }] = await Promise.all([
       api.lists(),
       api.facets(poolState.selectedLists()),
       api.tags(),
       api.vibes(),
+      refreshLiveSession(),
     ]);
     state.lists = lists;
     state.facets = facets;
@@ -137,12 +185,35 @@ export async function renderDraw(container) {
       if (token === countToken) {
         state.poolCount = count;
         paintCount();
+        paintDrawButton();
       }
     } catch {
       // A failed count is not worth interrupting the host over.
     }
   }
 
+  // The draw button's label carries the size, and the size input deliberately
+  // does NOT repaint — a repaint per keystroke would throw the caret out of the
+  // field being typed in, the same reason the filter value inputs don't. So the
+  // label was rendered once and then lied: typing 5 left a button reading
+  // "Draw 2" beside a count that had already updated to "fewer than the 5
+  // you're drawing". Repainted on its own, like the count.
+  let drawButtonNode = null;
+  function paintDrawButton() {
+    if (!drawButtonNode) return;
+    drawButtonNode.textContent = lineup.movies.length
+      ? `Draw ${state.size} more`
+      : `Draw ${state.size}`;
+    // The DISABLED state too, and that is the important half. `refreshCount`
+    // is async; paths that do not await it — "Clear all" was one — repaint with
+    // the previous count and render the button dead, then update the number
+    // beside it and leave the button dead. Observed: "1 new film matches" next
+    // to a Draw button that could not be clicked, while removing the same film
+    // from its card worked, because THAT path awaited the count first.
+    drawButtonNode.disabled = state.busy || state.poolCount === 0;
+  }
+
+  let unitNode = null;
   let countNode = null;
   function paintCount() {
     if (!countNode) return;
@@ -167,13 +238,25 @@ export async function renderDraw(container) {
 
   // A compact one-line readout of the pool config, shown next to the
   // collapsed toggle so it's still visible at a glance without expanding it.
-  function poolSetupSummary() {
+  /**
+   * What the pool is, as a list of removable facts rather than one run-on
+   * string.
+   *
+   * The string it replaces read `20 lists · top 5 per year · Drama · 1960–1969`
+   * and could only be acted on by opening the panel and hunting for whichever
+   * control had produced the clause you wanted gone. Every clause here carries
+   * the undo for itself, which is the whole point of moving pool state out to a
+   * place you read rather than a form you fill in.
+   *
+   * The list count is deliberately NOT removable: "no lists" is not a narrowing
+   * of the pool, it is an empty pool, and the picker is right there.
+   */
+  function poolSetupPills() {
     const selected = poolState.selectedLists();
     const count = selected === null ? state.lists.filter((l) => l.is_active).length : selected.length;
-    if (count === 0) return 'No lists selected — tap to choose';
-
-    const parts = [`${plural(count, 'list')}`];
+    const pills = [];
     const { topN, filters: f } = poolState.setup;
+
     const inPlay =
       selected === null
         ? state.lists.filter((l) => l.is_active)
@@ -183,71 +266,135 @@ export async function renderDraw(container) {
       ranked: ranked.length,
       perYear: ranked.filter((l) => l.ranks_by_year).length,
     });
-    if (label) parts.push(label);
+
+    pills.push({ label: count === 0 ? 'No lists selected' : plural(count, 'list'), fixed: true });
+    if (label) pills.push({ label, remove: () => poolState.setTopN(null) });
+
     const genreName = (id) => state.facets?.genres.find((g) => g.id === id)?.name ?? `#${id}`;
     const langName = (code) => state.facets?.languages.find((l) => l.code === code)?.name ?? code;
 
-    if (f.genres.include.length) parts.push(f.genres.include.map(genreName).join('/'));
-    if (f.genres.exclude.length) parts.push(`no ${f.genres.exclude.map(genreName).join('/')}`);
-    if (f.languages.include.length) parts.push(f.languages.include.map(langName).join('/'));
-    if (f.languages.exclude.length) parts.push(`no ${f.languages.exclude.map(langName).join('/')}`);
-    if (f.year.min !== null || f.year.max !== null) parts.push(`${f.year.min ?? '…'}–${f.year.max ?? '…'}`);
-    if (f.runtime.min !== null || f.runtime.max !== null) {
-      parts.push(`${f.runtime.min ?? 0}–${f.runtime.max ?? '…'} min`);
+    if (f.genres.include.length) {
+      pills.push({
+        label: f.genres.include.map(genreName).join('/'),
+        remove: () => f.genres.include.splice(0),
+      });
     }
-    if (f.awardWinners) parts.push('award winners');
-    if (!f.includeWatched) parts.push('unwatched only');
+    if (f.genres.exclude.length) {
+      pills.push({
+        label: `no ${f.genres.exclude.map(genreName).join('/')}`,
+        remove: () => f.genres.exclude.splice(0),
+      });
+    }
+    if (f.languages.include.length) {
+      pills.push({
+        label: f.languages.include.map(langName).join('/'),
+        remove: () => f.languages.include.splice(0),
+      });
+    }
+    if (f.languages.exclude.length) {
+      pills.push({
+        label: `no ${f.languages.exclude.map(langName).join('/')}`,
+        remove: () => f.languages.exclude.splice(0),
+      });
+    }
+    if (f.year.min !== null || f.year.max !== null) {
+      pills.push({
+        label: `${f.year.min ?? '\u2026'}\u2013${f.year.max ?? '\u2026'}`,
+        remove: () => {
+          f.year.min = null;
+          f.year.max = null;
+        },
+      });
+    }
+    if (f.runtime.min !== null || f.runtime.max !== null) {
+      pills.push({
+        label: `${f.runtime.min ?? 0}\u2013${f.runtime.max ?? '\u2026'} min`,
+        remove: () => {
+          f.runtime.min = null;
+          f.runtime.max = null;
+        },
+      });
+    }
+    if (f.awardWinners) pills.push({ label: 'award winners', remove: () => { f.awardWinners = false; } });
+    if (!f.includeWatched) {
+      pills.push({ label: 'unwatched only', remove: () => { f.includeWatched = true; } });
+    }
 
-    return parts.join(' · ');
+    return pills;
   }
 
-  // Collapsed by default: which lists/filters the pool draws from is only a
-  // dependency of the random draw below, not of the whole tab, so it
-  // shouldn't default to taking up the most visual space. `state.poolSetupOpen`
-  // (not a local closure var) so it survives the repaints that filter chips
-  // and list checkboxes already trigger while it's open.
-  function poolSetup() {
-    return h(
-      'div',
-      {},
-      h(
-        'div',
-        { class: 'row' },
-        h(
-          'button',
-          {
-            class: 'expand-link',
-            onClick: () => {
-              state.poolSetupOpen = !state.poolSetupOpen;
-              paint();
-            },
-          },
-          state.poolSetupOpen ? '▾ Pool setup' : '▸ Pool setup',
-        ),
-        h('span', { class: 'faint' }, poolSetupSummary()),
-      ),
-      state.poolSetupOpen
-        ? h(
-            'div',
-            { class: 'stack', style: 'margin-top:10px' },
-            h('div', { class: 'field-label' }, 'Lists in play'),
-            renderTagFilter(state.vocabulary, state.tagFilter, (tag) => {
-              state.tagFilter = tag;
-              paint();
-            }),
-            renderListPicker(
-              state.lists,
-              state.openGroups,
-              () => {
+  /**
+   * The pool, read back. Removing a pill demotes the vibe to Custom for the
+   * same reason editing any filter does — the chip would otherwise keep
+   * claiming a vibe the pool no longer matches.
+   */
+  // Repainted on its own, the way the pool count already is. The value inputs
+  // (year, runtime, top-N) deliberately do NOT call paint() — a repaint on
+  // every keystroke would throw the caret out of the number field being typed
+  // in — so a summary that only refreshed with the page would have sat there
+  // describing the pool as it was before the host started typing.
+  let pillsNode = null;
+  function paintPills() {
+    if (!pillsNode) return;
+    clear(pillsNode).append(...pillChips());
+  }
+
+  function pillChips() {
+    return poolSetupPills().map((pill) =>
+      pill.fixed
+        ? h('span', { class: 'chip chip--static' }, pill.label)
+        : h(
+            'button',
+            {
+              class: 'chip chip--removable',
+              title: `Remove: ${pill.label}`,
+              onClick: () => {
+                pill.remove();
+                poolState.markCustom();
                 refreshCount();
                 refreshFacets();
                 paint();
               },
-              { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
-            ),
-            state.facets ? filterPanel() : null,
-          )
-        : null,
+            },
+            pill.label,
+            h('span', { class: 'chip-x', 'aria-hidden': 'true' }, '\u00d7'),
+          ),
+    );
+  }
+
+  function poolSummaryPills() {
+    pillsNode = h(
+      'div',
+      { class: 'chips pool-pills' },
+      ...pillChips(),
+    );
+    return pillsNode;
+  }
+
+  /**
+   * The pool controls themselves, built once and shown in two places: a sticky
+   * rail on a wide screen, and a full-screen sheet on anything narrower.
+   *
+   * `renderListPicker` and `renderFilterPanel` are reused
+   * completely unchanged — that reuse is the entire reason this is a small
+   * change rather than a rewrite of the pool UI.
+   */
+  function poolSetupContent() {
+    return h(
+      'div',
+      { class: 'stack' },
+      h('div', { class: 'field-label' }, 'Lists in play'),
+      renderListPicker(
+        state.lists,
+        state.openGroups,
+        () => {
+          refreshCount();
+          refreshFacets();
+          paint();
+        },
+        { vocabulary: state.vocabulary },
+      ),
+      state.facets ? filterPanel() : null,
     );
   }
 
@@ -306,7 +453,10 @@ export async function renderDraw(container) {
   function filterPanel() {
     return renderFilterPanel(poolState.filters, state.facets, {
       lists: state.lists,
-      onTopNChange: () => refreshCount(),
+      onTopNChange: () => {
+        refreshCount();
+        paintPills();
+      },
       onChipChange: () => {
         poolState.markCustom();
         refreshCount();
@@ -315,6 +465,17 @@ export async function renderDraw(container) {
       onValueChange: () => {
         poolState.markCustom();
         refreshCount();
+        paintPills();
+      },
+      // Checkboxes, unlike the range inputs beside them, hold no caret — so
+      // they can afford the full repaint that keeps the "custom" label honest.
+      // Without it, ticking "only award winners" demoted the pool while the
+      // label went on claiming the vibe until something else happened to
+      // repaint, which was usually the next draw.
+      onToggleChange: () => {
+        poolState.markCustom();
+        refreshCount();
+        paint();
       },
       onClear: () => {
         poolState.clearFilters();
@@ -323,6 +484,156 @@ export async function renderDraw(container) {
       },
     });
   }
+
+
+  // --- Keyboard ---------------------------------------------------------------
+
+  /**
+   * The shortcut table, and the only place it is written down — the help card
+   * renders from this array, so a key that works and a key that is documented
+   * cannot drift apart.
+   */
+  const SHORTCUTS = [
+    { keys: ['p'], what: 'Open or close Pool setup' },
+    { keys: ['d'], what: 'Draw' },
+    { keys: ['r'], what: 'Replace the drawn films' },
+    { keys: ['c'], what: 'Clear the lineup' },
+    { keys: ['l'], what: 'Select all lists, or none' },
+    { keys: ['a'], what: 'Add a specific film' },
+    { keys: ['/'], what: 'Search for a film by name' },
+    { keys: ['\u21e7', '\u2191'], what: 'Draw one more film', join: ' + ' },
+    { keys: ['\u21e7', '\u2193'], what: 'Draw one fewer', join: ' + ' },
+    { keys: ['\u2190', '\u2192'], what: 'Move between vibe chips, once one is focused', join: ' / ' },
+    { keys: ['Enter'], what: 'Apply the focused vibe' },
+    { keys: ['Esc'], what: 'Close whatever is open' },
+    { keys: ['?'], what: 'This card' },
+  ];
+
+  /**
+   * One handler for the tab's shortcuts.
+   *
+   * Two rules keep it out of the way. It never fires while the caret is in a
+   * field — otherwise typing "Indiana Jones" would draw, clear the lineup and
+   * open the pool setup on the way past — and it never fires while an overlay
+   * is up, because whatever is open owns the keyboard until it closes.
+   */
+  function onKeydown(event) {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+    const el = event.target;
+    const typing =
+      el instanceof HTMLElement &&
+      (el.matches('input, textarea, select') || el.isContentEditable);
+
+    // Arrow-cycling the vibe row is the exception to "not while typing": the
+    // chips are buttons, so focus is on one of them, not in a field.
+    if (!typing && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+      const chips = [...container.querySelectorAll('.chip--vibe')];
+      const at = chips.indexOf(document.activeElement);
+      if (at !== -1) {
+        event.preventDefault();
+        const step = event.key === 'ArrowRight' ? 1 : -1;
+        chips[(at + step + chips.length) % chips.length].focus();
+        return;
+      }
+    }
+
+    if (typing) return;
+
+    // An overlay owns the keyboard while it is up — with two exceptions: the
+    // key that says what the keys are, and the key that OPENED the pool sheet,
+    // which has to be able to close it again or "p toggles" is a lie.
+    const overlay = document.querySelector('.modal-backdrop');
+    if (overlay) {
+      const isPoolSheet = Boolean(overlay.querySelector('.sheet-card'));
+      if (event.key === 'p' && isPoolSheet) {
+        event.preventDefault();
+        poolDestination.toggle();
+        return;
+      }
+      if (event.key !== '?') return;
+    }
+
+    const bump = (by) => {
+      state.size = Math.min(MAX_DRAW_SIZE, Math.max(MIN_DRAW_SIZE, state.size + by));
+      const field = container.querySelector('input[type=number]');
+      if (field) field.value = String(state.size);
+      paintCount();
+      paintDrawButton();
+      if (unitNode) unitNode.textContent = state.size === 1 ? 'film' : 'films';
+    };
+
+    const press = (label) => {
+      const button = [...container.querySelectorAll('button')].find(
+        (b) => !b.disabled && b.textContent.trim().startsWith(label),
+      );
+      button?.click();
+      return Boolean(button);
+    };
+
+    if (event.shiftKey) {
+      if (event.key === 'ArrowUp') return event.preventDefault(), bump(1);
+      if (event.key === 'ArrowDown') return event.preventDefault(), bump(-1);
+    }
+
+    switch (event.key) {
+      case '?':
+        event.preventDefault();
+        showShortcuts();
+        break;
+      case 'p':
+        event.preventDefault();
+        poolDestination.toggle();
+        break;
+      case 'd':
+        event.preventDefault();
+        if (!state.busy && state.poolCount !== 0) doDraw();
+        break;
+      case 'r':
+        event.preventDefault();
+        if (!state.busy && lineup.drawn().length) doReplace();
+        break;
+      case 'c':
+        event.preventDefault();
+        press('Clear all');
+        break;
+      case 'l': {
+        event.preventDefault();
+        // One key, both directions: anything less than everything selects all,
+        // and everything selects none. A second key for "none" would be a key
+        // nobody remembers the difference of.
+        const ids = state.lists.filter((list) => !list.hidden).map((list) => list.id);
+        const allOn = ids.every((id) => poolState.isSelected(id));
+        poolState.setMany(ids, !allOn);
+        refreshCount();
+        refreshFacets();
+        paint();
+        break;
+      }
+      case 'a':
+        event.preventDefault();
+        if (!state.addFilmOpen) {
+          state.addFilmOpen = true;
+          paint();
+        }
+        document.getElementById('add-film-search')?.focus();
+        break;
+      case '/':
+        event.preventDefault();
+        if (!state.addFilmOpen) {
+          state.addFilmOpen = true;
+          paint();
+        }
+        document.getElementById('add-film-search')?.focus();
+        break;
+      default:
+        break;
+    }
+  }
+
+  // The masthead's keyboard symbol reads this; the view owns the list.
+  setShortcuts(SHORTCUTS);
+  document.addEventListener('keydown', onKeydown);
 
   // --- Random draw ----------------------------------------------------------
 
@@ -436,7 +747,12 @@ export async function renderDraw(container) {
             },
           })
         : null,
-      poolSetup(),
+      // What the pool is, in the main column, where the decision is made. The
+      // controls that change it live in the rail beside this or behind the
+      // button below — but reading the pool should never require opening
+      // anything, which is what the old accordion demanded.
+      poolSummaryPills(),
+      poolDestination.opener(),
       h(
         'div',
         { class: 'row' },
@@ -455,16 +771,18 @@ export async function renderDraw(container) {
             );
             event.target.value = String(state.size);
             paintCount();
+            paintDrawButton();
+            if (unitNode) unitNode.textContent = state.size === 1 ? 'film' : 'films';
           },
         }),
-        h('span', { class: 'muted' }, state.size === 1 ? 'film' : 'films'),
+        (unitNode = h('span', { class: 'muted' }, state.size === 1 ? 'film' : 'films')),
         h('span', { class: 'spacer' }),
         countNode,
       ),
       h(
         'div',
         { class: 'row' },
-        h(
+        (drawButtonNode = h(
           'button',
           {
             class: 'btn-primary',
@@ -472,7 +790,7 @@ export async function renderDraw(container) {
             onClick: doDraw,
           },
           lineup.movies.length ? `Draw ${state.size} more` : `Draw ${state.size}`,
-        ),
+        )),
         // Only offered when there is something drawn to replace — with a
         // hand-picked lineup this button would do nothing.
         lineup.drawn().length
@@ -500,6 +818,40 @@ export async function renderDraw(container) {
     );
   }
 
+  /**
+   * Bring a just-drawn film into view, after the repaint that put it there.
+   *
+   * The lineup sits below the draw controls, so on anything but a tall screen
+   * a draw scrolled nothing and the page looked unchanged — the one moment
+   * this app has that is worth watching happened off-screen. Silent when the
+   * card cannot be found: a missed scroll is not worth an error, and it never
+   * runs on the vote or Explore grids, only the lineup's own.
+   */
+  function revealDrawn(movie) {
+    if (!movie) return;
+    const card = container.querySelector(
+      `.movie-grid.is-lineup > [data-tmdb-id="${movie.tmdb_id}"]`,
+    );
+    if (!card?.scrollIntoView) return;
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    card.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });
+  }
+
+  /**
+   * Toasts stack on top of one another — they are all `position: fixed` at the
+   * same offset — so every path here emits exactly ONE. When the pool came up
+   * short that is the shortfall, which is the thing the host needs to act on;
+   * the draw still announces itself by scrolling.
+   */
+  function reportDraw(movies, shortfallMessage) {
+    if (shortfallMessage) {
+      toast(shortfallMessage, 'error');
+      return;
+    }
+    const message = drawnMessage(movies);
+    if (message) toast(message, 'ok');
+  }
+
   // Everything discarded by Replace this session. Passed as `exclude` so
   // repeated Replaces cycle through fresh options instead of handing back the
   // film rejected two clicks ago — the draw otherwise only knows to avoid
@@ -518,6 +870,7 @@ export async function renderDraw(container) {
 
     state.busy = true;
     paint();
+    let firstNew = null;
     try {
       for (const movie of drawn) rejected.add(movie.tmdb_id);
       // Exclude what stays in the lineup, what we're about to drop, and
@@ -532,37 +885,46 @@ export async function renderDraw(container) {
       }
       for (const movie of drawn) lineup.remove(movie.tmdb_id);
       lineup.addAll(result.movies, 'draw');
+      firstNew = result.movies[0] ?? null;
 
-      if (result.movies.length < drawn.length) {
-        toast(`Only ${plural(result.movies.length, 'new film')} left to swap in`, 'error');
-      }
+      reportDraw(
+        result.movies,
+        result.movies.length < drawn.length
+          ? `Only ${plural(result.movies.length, 'new film')} left to swap in`
+          : null,
+      );
       await refreshCount();
     } catch (error) {
       toast(error.message, 'error');
     } finally {
       state.busy = false;
       paint();
+      revealDrawn(firstNew);
     }
   }
 
   async function doDraw() {
     state.busy = true;
     paint();
+    let firstNew = null;
     try {
       const result = await api.draw(state.size, poolState.setup, lineup.ids());
       lineup.addAll(result.movies, 'draw');
-      if (result.shortfall > 0) {
-        toast(
-          `Only ${plural(result.available, 'new film')} matched — asked for ${result.requested} more`,
-          'error',
-        );
-      }
+      firstNew = result.movies[0] ?? null;
+
+      reportDraw(
+        result.movies,
+        result.shortfall > 0
+          ? `Only ${plural(result.available, 'new film')} matched — asked for ${result.requested} more`
+          : null,
+      );
       await refreshCount();
     } catch (error) {
       toast(error.message, 'error');
     } finally {
       state.busy = false;
       paint();
+      revealDrawn(firstNew);
     }
   }
 
@@ -630,8 +992,21 @@ export async function renderDraw(container) {
         ),
         // Search hits your own curated lists just as often as it hits
         // something nobody's imported — worth knowing which before adding.
-        candidate.lists
-          ? h('div', { class: 'faint' }, `Already on: ${candidate.lists}`)
+        // `lists` is an array of membership OBJECTS ({ name, rank, year,
+        // by_year }), not the comma-joined string this once interpolated —
+        // which rendered "Already on: [object Object]" for every film that was
+        // on one. Names only here: the ranks belong in the detail overlay,
+        // where there is room to say what a rank is of.
+        //
+        // Length, not truthiness: a film known to the library but on no list
+        // comes back as an empty array, which is truthy and printed nothing
+        // after the colon.
+        candidate.lists?.length
+          ? h(
+              'div',
+              { class: 'faint' },
+              `Already on: ${candidate.lists.map((entry) => entry.name).join(', ')}`,
+            )
           : h('div', { class: 'faint' }, 'Not on any of your lists'),
         candidate.overview ? h('p', { class: 'candidate-overview' }, candidate.overview) : null,
         h(
@@ -665,27 +1040,120 @@ export async function renderDraw(container) {
     }
   }
 
+  /**
+   * Adding a film by name, behind one permanent secondary button.
+   *
+   * It used to sit in a `1fr 1fr` grid beside the draw controls, which sized it
+   * wrong in both directions at once: half the screen standing empty on the
+   * many nights nobody uses it, and a 480px column crushing the search results
+   * on the nights they do. Demoting it to a button that expands to full width
+   * fixes both, because the two states no longer have to share a size.
+   */
   function addFilmPanel() {
+    const toggle = h(
+      'button',
+      {
+        class: state.addFilmOpen ? 'btn-sm' : 'btn-sm add-film-toggle',
+        'aria-expanded': state.addFilmOpen ? 'true' : 'false',
+        onClick: () => {
+          state.addFilmOpen = !state.addFilmOpen;
+          if (!state.addFilmOpen) {
+            state.searchResults = [];
+            state.idOffer = null;
+          }
+          paint();
+        },
+      },
+      state.addFilmOpen ? 'Hide' : '+ Add a specific film',
+    );
+
+    const row = h(
+      'div',
+      { class: 'row' },
+      toggle,
+      state.addFilmOpen
+        ? null
+        : h('span', { class: 'faint' }, 'someone already has a proposal — no draw required'),
+    );
+
+    if (!state.addFilmOpen) return row;
+
     const results = h('div', { class: 'candidate-list' });
     const renderResults = () => {
-      clear(results).append(...state.searchResults.map((candidate) => searchResultCard(candidate)));
+      fill(
+        results,
+        // The bare-digits offer, when there is one, sits ABOVE the search hits:
+        // it is the reading the host had to type an id to get, so burying it
+        // under a title match would defeat the point of offering it.
+        state.idOffer
+          ? h(
+              'div',
+              { class: 'row id-offer' },
+              h(
+                'span',
+                { class: 'muted' },
+                `“${state.idOffer.raw}” could also be a TMDB id.`,
+              ),
+              h('span', { class: 'spacer' }),
+              h(
+                'button',
+                {
+                  class: 'btn-sm',
+                  onClick: () => addToLineup(state.idOffer.tmdbId, 'movie'),
+                },
+                `Add movie id ${state.idOffer.tmdbId}`,
+              ),
+            )
+          : null,
+        ...state.searchResults.map((candidate) => searchResultCard(candidate)),
+      );
     };
     renderResults();
 
+    /**
+     * One box for all three ways in, because they were never really different
+     * questions — "which film" was just being asked three times.
+     *
+     * A URL is unambiguous and adds the film outright. Bare digits are NOT:
+     * every one of 1917, 300, 2012 and 1408 is both a real title and a
+     * plausible id, so `parseTmdbInput` reading them as an id would quietly
+     * add the wrong film to somebody's night. Those search like anything else
+     * and get the id reading offered beside the results instead.
+     */
     const searchInput = h('input', {
+      // Stable id so the "/" and "a" shortcuts can find this box and not the
+      // person picker's, which is also a search input on the same screen.
+      id: 'add-film-search',
       type: 'search',
-      placeholder: 'Search TMDB…',
-      style: 'max-width:320px',
+      placeholder: 'Search TMDB, or paste a URL or id…',
       onKeydown: async (event) => {
         if (event.key !== 'Enter') return;
-        const { results: found } = await api.searchTmdb(event.target.value);
-        state.searchResults = found;
-        renderResults();
+        const raw = event.target.value.trim();
+        if (!raw) return;
+
+        const parsed = parseTmdbInput(raw);
+        const bareDigits = /^\d+$/.test(raw);
+        if (parsed && !bareDigits) {
+          // No need to clear the box on success: adding repaints the panel, and
+          // a failed add is one the host will want to edit rather than retype.
+          await addToLineup(parsed.tmdbId, parsed.mediaType);
+          return;
+        }
+
+        try {
+          const { results: found } = await api.searchTmdb(raw);
+          state.searchResults = found;
+          state.idOffer = bareDigits ? { raw, tmdbId: Number(raw) } : null;
+          if (found.length === 0 && !bareDigits) toast(`Nothing found for “${raw}”`, 'error');
+          renderResults();
+        } catch (error) {
+          toast(error.message, 'error');
+        }
       },
     });
 
-    // Collapsed by default — genuinely rare (a proposal not on TMDB at all),
-    // so it shouldn't compete for attention with search, the normal path.
+    // Genuinely rare — a proposal not on TMDB at all — so it stays folded even
+    // inside a panel the host has already opened deliberately.
     let manualOpen = false;
     let manualTitle = '';
     let manualYear = '';
@@ -732,70 +1200,51 @@ export async function renderDraw(container) {
 
     return h(
       'div',
-      { class: 'card stack' },
-      h('h2', {}, 'Add a specific film'),
-      h(
-        'p',
-        { class: 'muted' },
-        'For when someone already has a proposal — search TMDB directly, no draw required.',
-      ),
+      { class: 'stack' },
+      row,
       h(
         'div',
-        { class: 'row' },
-        searchInput,
-        h('span', { class: 'faint' }, 'press Enter'),
+        { class: 'card stack' },
         h(
-          'button',
-          {
-            class: 'btn-sm',
-            onClick: () => {
-              searchInput.value = '';
-              state.searchResults = [];
-              renderResults();
-              searchInput.focus();
+          'div',
+          { class: 'row' },
+          searchInput,
+          h(
+            'button',
+            {
+              class: 'btn-sm',
+              onClick: () => {
+                searchInput.value = '';
+                state.searchResults = [];
+                state.idOffer = null;
+                renderResults();
+                searchInput.focus();
+              },
             },
-          },
-          'Clear',
+            'Clear',
+          ),
         ),
-      ),
-      results,
-      h(
-        'div',
-        { class: 'row' },
-        h('input', {
-          type: 'text',
-          placeholder: 'Or paste a TMDB URL or id (movie or TV)…',
-          style: 'max-width:340px',
-          onKeydown: async (event) => {
-            if (event.key !== 'Enter') return;
-            const parsed = parseTmdbInput(event.target.value);
-            if (!parsed) {
-              toast('Paste a themoviedb.org/movie/… or /tv/… URL, or a bare numeric id', 'error');
-              return;
-            }
-            await addToLineup(parsed.tmdbId, parsed.mediaType);
-            event.target.value = '';
-          },
-        }),
         h(
           'span',
           { class: 'faint' },
-          'press Enter — for TV-catalogued titles search can’t find',
+          'press Enter — a themoviedb.org URL adds the film outright, ' +
+            'which is the way in for TV-catalogued titles search cannot find',
         ),
-      ),
-      h(
-        'button',
-        {
-          class: 'expand-link',
-          style: 'margin:4px 0 0',
-          onClick: () => {
-            manualOpen = !manualOpen;
-            renderManual();
+        results,
+        h(
+          'button',
+          {
+            class: 'expand-link',
+            style: 'margin:4px 0 0',
+            onClick: () => {
+              manualOpen = !manualOpen;
+              renderManual();
+            },
           },
-        },
-        manualOpen ? 'Hide manual entry' : 'Still can’t find it? Add it manually',
+          'Still can’t find it? Add it manually',
+        ),
+        manualBody,
       ),
-      manualBody,
     );
   }
 
@@ -816,9 +1265,13 @@ export async function renderDraw(container) {
       { class: 'stack' },
       h(
         'div',
-        { class: 'movie-grid' },
+        { class: 'movie-grid is-lineup' },
         lineup.movies.map((movie) =>
           movieCard(movie, {
+            onChange: () => {
+              refreshCount();
+              paint();
+            },
             extraAction: {
               label: '✕ Remove',
               onClick: async () => {
@@ -830,47 +1283,83 @@ export async function renderDraw(container) {
           }),
         ),
       ),
+      // Publish is the point of the screen and it used to sit under every card
+      // in the lineup — four screens down on a phone with five films staged.
+      // Sticky, in the same shape the vote screen already uses for the same
+      // reason: the primary action does not get pushed off the page by the
+      // content it acts on.
       h(
         'div',
-        { class: 'card stack' },
-        h(
-          'label',
-          { class: 'check' },
-          h('input', {
-            type: 'checkbox',
-            checked: state.anonymous,
-            onChange: (event) => {
-              state.anonymous = event.target.checked;
-              paint();
-            },
-          }),
-          h(
-            'span',
-            {},
-            'Anonymous voting',
-            h(
-              'span',
-              { class: 'faint' },
-              ' — once closed, individual ballots stay hidden from everyone, including you. ' +
-                'Only totals are shown.',
-            ),
-          ),
-        ),
+        { class: 'lineup-sticky' },
         h(
           'div',
-          { class: 'row' },
+          { class: 'card stack' },
           h(
-            'button',
-            {
-              class: 'btn-primary',
-              disabled: state.busy || lineup.movies.length === 0,
-              onClick: doPublish,
-            },
-            'Publish & open voting',
+            'label',
+            { class: 'check' },
+            h('input', {
+              type: 'checkbox',
+              checked: state.anonymous,
+              onChange: (event) => {
+                state.anonymous = event.target.checked;
+                paint();
+              },
+            }),
+            h(
+              'span',
+              {},
+              'Anonymous voting',
+              h(
+                'span',
+                { class: 'faint' },
+                ' — once closed, individual ballots stay hidden from everyone, including you. ' +
+                  'Only totals are shown.',
+              ),
+            ),
           ),
-          h('span', { class: 'faint' }, `${plural(lineup.movies.length, 'film')} on the ballot`),
+          h(
+            'div',
+            { class: 'row' },
+            h(
+              'button',
+              {
+                class: 'btn-primary',
+                disabled: state.busy || lineup.movies.length === 0,
+                onClick: doPublish,
+              },
+              'Publish & open voting',
+            ),
+            h('span', { class: 'faint' }, `${plural(lineup.movies.length, 'film')} on the ballot`),
+          ),
         ),
       ),
+    );
+  }
+
+  /**
+   * The way back to a vote that is already running.
+   *
+   * Rendered above everything else on the tab, because the alternative it
+   * replaces is a host staring at an empty lineup while guests are voting on
+   * a session they can no longer reach.
+   */
+  function liveSessionBanner() {
+    const live = state.liveSession;
+    if (!live) return null;
+
+    return h(
+      'div',
+      { class: 'card row live-banner' },
+      // One line, not two stacked: it is a notice, and stacking the counts
+      // under the heading made it as tall as the panels it sits above.
+      h('strong', {}, 'A vote is open'),
+      h(
+        'span',
+        { class: 'faint' },
+        `${plural(live.movie_count, 'film')} · ${plural(live.ballot_count, 'ballot')} in`,
+      ),
+      h('span', { class: 'spacer' }),
+      h('button', { class: 'btn-primary btn-sm', onClick: () => showSession(live.slug) }, 'Go to it'),
     );
   }
 
@@ -882,6 +1371,10 @@ export async function renderDraw(container) {
       showSession(session.slug);
     } catch (error) {
       toast(error.message, 'error');
+      // The most likely reason a publish is refused is that a vote is already
+      // open, and the host cannot see one from here. Re-deriving it puts the
+      // banner — and the route back — on screen with the error.
+      await refreshLiveSession();
       state.busy = false;
       paint();
     }
@@ -899,12 +1392,17 @@ export async function renderDraw(container) {
           'button',
           {
             class: 'btn-sm',
-            onClick: () => {
+            onClick: async () => {
               stopSession();
               lineup.clear();
               state.searchResults = [];
               state.busy = false;
               refreshCount();
+              paint();
+              // Leaving the panel does not end the vote. Re-derive it so the
+              // banner comes back with real counts rather than the stale ones
+              // this tab was carrying before the vote was published.
+              await refreshLiveSession();
               paint();
             },
           },
@@ -915,35 +1413,79 @@ export async function renderDraw(container) {
     );
     sessionTeardown = renderSessionPanel(panel, slug, {
       host: true,
-      // The vote is over, so the lineup that produced it is spent. Clearing it
-      // here means switching back to this tab starts fresh rather than showing
-      // last night's films as though they were still staged. Scoped to THIS
-      // session: the History tab renders closed sessions through the same
-      // panel and passes no callback.
-      onClosed: () => {
-        lineup.clear();
-        refreshCount();
+      // Scoped to THIS session: the History tab renders closed sessions through
+      // the same panel and passes no callback, so opening last week's result
+      // cannot wipe the lineup being built now.
+      onEnded: (outcome) => {
+        // Either ending means no vote is live, so the banner must go.
+        state.liveSession = null;
+        // But only a CLOSED vote spends the lineup that produced it — switching
+        // back should start fresh rather than show last night's films as though
+        // they were still staged. A cancelled vote was thrown away on purpose,
+        // and its lineup is the one thing worth keeping to publish again.
+        if (outcome === 'closed') {
+          lineup.clear();
+          refreshCount();
+        }
       },
     });
   }
 
+  /**
+   * The tab, as a main column and a rail.
+   *
+   * Pool setup used to be an accordion inside the flow, and opening it pushed
+   * everything below it down — measured at its worst with the Draw button
+   * ~2,900px down a ~3,600px page, four viewport heights below the vibe chips
+   * that had just changed the pool. The controls are a destination now:
+   * a sticky rail where there is room beside the content, and a full-screen
+   * sheet where there is not. Neither can displace the Draw button, because
+   * neither is in the same column as it.
+   *
+   * Which one is on screen is decided in CSS, by width. Both are in the DOM;
+   * the rail is hidden below the breakpoint and the button that opens the sheet
+   * is hidden above it, so there is no viewport measuring in JavaScript to go
+   * stale on a resize.
+   */
   function paint() {
+    // The rail scrolls independently, and a repaint rebuilds it — so without
+    // this, ticking a checkbox two thirds of the way down threw the host back
+    // to the top of the list picker.
+    const restoreRail = preserveScroll(container, '.draw-rail-inner');
+
     clear(container).append(
       h(
         'div',
-        { class: 'stack' },
-        h('div', { class: 'tools-row' }, drawControls(), addFilmPanel()),
+        { class: 'draw-shell' },
         h(
           'div',
-          { class: 'row' },
-          h('h2', {}, `Your lineup${lineup.movies.length ? ` (${lineup.movies.length})` : ''}`),
-          h('span', { class: 'spacer' }),
-          renderAwardsToggle(paint),
-          renderRatingToggle(paint),
+          { class: 'stack draw-main' },
+          liveSessionBanner(),
+          drawControls(),
+          addFilmPanel(),
+          h(
+            'div',
+            { class: 'row' },
+            h('h2', {}, `Your lineup${lineup.movies.length ? ` (${lineup.movies.length})` : ''}`),
+            h('span', { class: 'spacer' }),
+            renderAwardsToggle(paint),
+            renderRatingToggle(paint),
+          ),
+          lineupGrid(),
         ),
-        lineupGrid(),
+        poolDestination.rail(),
       ),
     );
+
+    // Height BEFORE scroll, and the order is the bug this fixes. Restoring a
+    // scroll position clamps it against the container's current client height,
+    // and the rail arrives from `rail()` with only its CSS fallback height —
+    // the measured one lands a microtask later. Restoring first therefore
+    // clamped against a height that was about to change, and the rail crept
+    // upward on every repaint, far enough to hide the group just clicked.
+    fitRailToViewport();
+    restoreRail();
+    poolDestination.sync();
   }
 
   await refreshData();
@@ -954,6 +1496,8 @@ export async function renderDraw(container) {
 
   return () => {
     countToken += 1;
+    setShortcuts([]);
+    document.removeEventListener('keydown', onKeydown);
     stopSession();
   };
 }

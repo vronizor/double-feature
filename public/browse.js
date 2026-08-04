@@ -6,6 +6,8 @@
 import {
   h,
   clear,
+  fill,
+  openOverlay,
   posterUrl,
   toast,
   ratingLine,
@@ -19,6 +21,8 @@ import {
 import { prefs } from './prefs.js';
 import { api } from './api.js';
 import { poolState } from './pool-state.js';
+// lineup.js imports nothing at all, so there is no cycle to create here.
+import { lineup } from './lineup.js';
 import { applyVibe } from './vibes.js';
 
 // Re-exported so views can keep importing the filter shape from here alongside
@@ -64,17 +68,35 @@ export function groupListsByTag(lists, vocabulary) {
  * Whether a picker group renders expanded.
  *
  * `openGroups` holds TWO kinds of marker, not one: `key` forces a group open,
- * `!key` forces it closed. Both are needed because a group containing a
- * selection defaults to open — without an explicit closed marker, collapsing
- * such a group would spring straight back open on the next repaint.
+ * `!key` forces it closed. Both are needed because a group can default to open
+ * — without an explicit closed marker, collapsing such a group would spring
+ * straight back open on the next repaint.
+ *
+ * The default is a PARTIAL selection, not any selection. It used to be any,
+ * and the intent was right — do not hide lists you are drawing from — but the
+ * default state of this app is all twenty lists selected, so every one of the
+ * eight groups qualified and all eight opened at once. A rule meant to say
+ * "look here" fired everywhere and therefore pointed at nothing, leaving a
+ * ~4,300px rail of uniformly ticked checkboxes.
+ *
+ * All-on and all-off are both uniform, and the group header already says which
+ * ("Awards 9 lists · 634 films · 9 on"), so neither needs opening to be
+ * understood. A group part-selected is the only one whose contents you cannot
+ * infer from its header, and it is the one that opens.
  *
  * Extracted because that rule is used in three places now (the per-group
  * toggle, expand/collapse-all, and this test) and is easy to get subtly wrong.
  */
-export function isGroupOpen(openGroups, key, hasSelection) {
+export function isGroupOpen(openGroups, key, isPartial) {
   if (openGroups.has(key)) return true;
   if (openGroups.has(`!${key}`)) return false;
-  return hasSelection;
+  return isPartial;
+}
+
+/** Some, but not all — the only state a group header cannot already tell you. */
+export function isPartiallySelected(lists) {
+  const on = lists.filter((list) => poolState.isSelected(list.id)).length;
+  return on > 0 && on < lists.length;
 }
 
 /** Sets a group's state, clearing the opposite marker so the two can't disagree. */
@@ -115,7 +137,7 @@ export function selectionLabel(lists) {
   return `${selected.length} lists`;
 }
 
-export function renderListPicker(lists, openGroups, onChange, { vocabulary = [], tagFilter = null } = {}) {
+export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] } = {}) {
   // A slot list is hidden while it is not in play — it belongs to a
   // parametric vibe and is not something anyone curates. But hiding one that
   // IS selected makes the picker lie: every checkbox unticked while films are
@@ -132,15 +154,16 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
     );
   }
 
-  // Narrowing by tag is what keeps this usable as the library grows: at thirty
-  // lists you tap "family" and see four, instead of scrolling past everything.
-  const visible = tagFilter
-    ? lists.filter((list) => (list.tags ?? []).includes(tagFilter))
-    : lists;
-
-  const groups = groupListsByTag(visible, vocabulary);
-  const allIds = visible.map((list) => list.id);
+  // The tag-filter chip row above this used to narrow which lists were shown.
+  // It was deleted in v7.13: it is a second narrowing mechanism stacked on
+  // group headers that already narrow, and its "All" chip painted itself in
+  // the same active yellow as the vibe row above, so two unrelated "selected"
+  // states sat in one column saying different things.
+  const groups = groupListsByTag(lists, vocabulary);
+  const allIds = lists.map((list) => list.id);
   const selectedCount = lists.filter((list) => poolState.isSelected(list.id)).length;
+  const multiTaggedNames = lists.filter((list) => (list.tags ?? []).length > 1).map((l) => l.name);
+  const multiTagged = multiTaggedNames.length;
 
   const bulk = (label, ids, on) =>
     h(
@@ -176,41 +199,80 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
     );
 
   const allOpen = groups.every((group) =>
-    isGroupOpen(
-      openGroups,
-      group.key,
-      group.lists.some((list) => poolState.isSelected(list.id)),
-    ),
+    isGroupOpen(openGroups, group.key, isPartiallySelected(group.lists)),
   );
 
   return h(
     'div',
     { class: 'stack', style: 'gap:10px' },
+    // The summary is a SENTENCE and the buttons are controls, so they get a
+    // line each. Sharing one `.row` worked while the summary was three words;
+    // once it grew it wrapped to two lines and shunted "Deselect all" onto a
+    // third, ragged, line of its own.
     h(
       'div',
-      { class: 'row' },
-      h('span', { class: 'faint' }, `${selectedCount} of ${lists.length} lists selected`),
-      h('span', { class: 'spacer' }),
-      // One toggle rather than two buttons: with every group already open,
-      // "Expand all" is a no-op that looks like it should do something.
-      groups.length > 1 ? expandAll(!allOpen) : null,
-      bulk('Select all', allIds, true),
-      bulk('Deselect all', allIds, false),
+      { class: 'picker-head' },
+      // "20 of 20 lists selected" is true, and you can count 29 checkboxes
+      // underneath it, because a list appears under every tag it carries —
+      // Studio Ghibli under Animation, Collections AND Family. Both numbers
+      // are honest and nothing reconciled them, so the header read as a bug.
+      //
+      // Said out loud rather than fixed by hiding the repetition: a list
+      // genuinely belongs to several tags, which is the whole point of tags.
+      h(
+        'span',
+        { class: 'faint' },
+        `${selectedCount} of ${lists.length} lists selected`,
+        multiTagged
+          ? h(
+              'span',
+              { title: multiTaggedNames.join(', ') },
+              ` · ${multiTagged} appear under more than one tag`,
+            )
+          : null,
+      ),
+      h(
+        'div',
+        { class: 'row' },
+        // One toggle rather than two buttons: with every group already open,
+        // "Expand all" is a no-op that looks like it should do something.
+        //
+        // It sits apart from the pair beside it because it is a different kind
+        // of action — expanding changes what you can SEE, selecting changes
+        // what you DRAW FROM — which this file already keeps deliberately
+        // separate. In a narrow rail that distinction is also what stops three
+        // buttons breaking 2+1.
+        groups.length > 1 ? expandAll(!allOpen) : null,
+        h('span', { class: 'spacer' }),
+        h(
+          'div',
+          { class: 'bulk-pair' },
+          bulk('Select all', allIds, true),
+          bulk('Deselect all', allIds, false),
+        ),
+      ),
     ),
     ...groups.map((group) => {
       const ids = group.lists.map((list) => list.id);
       const selected = ids.filter((id) => poolState.isSelected(id)).length;
       const films = group.lists.reduce((sum, list) => sum + (list.resolved_count ?? 0), 0);
-      // A group the host is actually using stays open across repaints; the
-      // rest stay out of the way. With ~20 lists this is what keeps the panel
-      // readable at all.
-      const isOpen = isGroupOpen(openGroups, group.key, selected > 0);
+      // A group the host is actually part-way through stays open across
+      // repaints; the rest stay out of the way. With ~20 lists this is what
+      // keeps the panel readable at all.
+      const isOpen = isGroupOpen(openGroups, group.key, isPartiallySelected(group.lists));
 
-      // Interacting with a group pins it open. Without this, unchecking the
-      // last selected list in a group would drop `selected` to 0 and collapse
-      // the group instantly — yanking the very checkbox being clicked out from
-      // under the cursor.
-      const pinOpen = () => setGroupOpen(openGroups, group.key, true);
+      // Interacting with a group you are LOOKING AT pins it open. Without this,
+      // unchecking the last selected list would drop the group out of the
+      // part-selected state and collapse it instantly — yanking the very
+      // checkbox being clicked out from under the cursor.
+      //
+      // Gated on it already being open, which the first version was not: from
+      // a collapsed group, "none" pinned it open and then expanded it, so
+      // turning a group off flung its contents into your face. Nothing about
+      // "I do not want these" asks to see them.
+      const pinOpen = () => {
+        if (isOpen) setGroupOpen(openGroups, group.key, true);
+      };
 
       const groupBulk = (label, on) =>
         h(
@@ -229,29 +291,36 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
       return h(
         'div',
         { class: `list-group${selected > 0 ? ' is-active' : ''}` },
+        // Two lines by construction, not by wrapping. In a 300px rail the
+        // label, the stats and two buttons cannot share one line, and a plain
+        // flex row broke them 3+1 — leaving "none" stranded on a line of its
+        // own under "all". The pair is kept together as its own unit instead.
         h(
           'div',
-          { class: 'row list-group-head' },
+          { class: 'list-group-head' },
           h(
-            'button',
-            {
-              class: 'expand-link',
-              onClick: () => {
-                setGroupOpen(openGroups, group.key, !isOpen);
-                onChange();
+            'div',
+            { class: 'row' },
+            h(
+              'button',
+              {
+                class: 'expand-link',
+                onClick: () => {
+                  setGroupOpen(openGroups, group.key, !isOpen);
+                  onChange();
+                },
               },
-            },
-            `${isOpen ? '▾' : '▸'} ${group.label}`,
+              `${isOpen ? '▾' : '▸'} ${group.label}`,
+            ),
+            h(
+              'span',
+              { class: 'faint' },
+              `${group.lists.length} ${group.lists.length === 1 ? 'list' : 'lists'} · ${films.toLocaleString()} films` +
+                (selected > 0 ? ` · ${selected} on` : ''),
+            ),
+            h('span', { class: 'spacer' }),
+            h('div', { class: 'bulk-pair' }, groupBulk('all', true), groupBulk('none', false)),
           ),
-          h(
-            'span',
-            { class: 'faint' },
-            `${group.lists.length} ${group.lists.length === 1 ? 'list' : 'lists'} · ${films.toLocaleString()} films` +
-              (selected > 0 ? ` · ${selected} on` : ''),
-          ),
-          h('span', { class: 'spacer' }),
-          groupBulk('all', true),
-          groupBulk('none', false),
         ),
         isOpen
           ? h(
@@ -303,33 +372,6 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [],
  * Renders nothing when no vibe can produce a pool — on a fresh install
  * with no lists, an empty row of dead chips would be worse than no row.
  */
-/**
- * Tag filter chips above the picker. Narrowing to one tag is what stops the
- * picker becoming a scroll as the library grows — the whole reason lists carry
- * tags rather than a single category.
- */
-export function renderTagFilter(vocabulary, active, onChange) {
-  const withLists = vocabulary.filter((entry) => entry.count > 0);
-  if (withLists.length <= 1) return null;
-
-  const chip = (label, tag) =>
-    h(
-      'button',
-      {
-        class: 'chip',
-        dataset: { state: active === tag ? 'include' : 'off' },
-        onClick: () => onChange(active === tag ? null : tag),
-      },
-      label,
-    );
-
-  return h(
-    'div',
-    { class: 'chips' },
-    chip('All', null),
-    ...withLists.map((entry) => chip(`${entry.label} ${entry.count}`, entry.tag)),
-  );
-}
 
 /**
  * The parameter picker for a parametric vibe — "director night, but who?".
@@ -425,6 +467,24 @@ function renderParamPicker(vibe, { onChosen, onCancel, onClear = null }) {
   // A country list is short and closed, so show all of it immediately rather
   // than making the host guess what is in there. A person search cannot.
   if (isCountry) search();
+
+  // Focus the box as soon as it is on the page. Opening this picker has one
+  // possible next move — type a name — and asking for a second tap to reach
+  // the only input on offer is a tap for nothing. On a phone it also brings
+  // the keyboard up with the picker instead of after it.
+  //
+  // A microtask, because this node is not in the document yet: it is returned
+  // into a paint that appends it, and focus() on a detached element does
+  // nothing. Queuing runs this once that whole paint has finished.
+  //
+  // Deliberately NOT requestAnimationFrame, which was the first attempt:
+  // Chrome does not run rAF at all in a background tab, so the focus silently
+  // never happened. Nobody is typing into a background tab, so it would not
+  // have mattered to a host — but it would have deferred the focus until the
+  // tab came forward, stealing it at some later moment nobody asked for.
+  queueMicrotask(() => {
+    if (input.isConnected) input.focus();
+  });
   return h(
     'div',
     { class: 'param-picker card' },
@@ -493,7 +553,18 @@ export function renderVibeChips(
             'button',
             {
               class: `chip chip--vibe${editing ? ' chip--deleting' : ''}`,
-              dataset: { state: active && !editing ? 'include' : 'off' },
+              // Highlighted on the same condition that shows the value, or the
+              // chip contradicts itself: reading "Director: Steven Spielberg"
+              // in the unselected grey while that is exactly what the pool is
+              // drawing from. The "custom" note on the label above is what says
+              // the pool has been hand-edited since; the chip only claims that
+              // its own list is in play.
+              dataset: {
+                state:
+                  !editing && (active || (vibe.slot?.value && poolState.isSelected(vibe.slot.list_id)))
+                    ? 'include'
+                    : 'off',
+              },
               title: editing
                 ? `Delete the "${vibe.name}" vibe`
                 : active && !vibe.param
@@ -518,13 +589,24 @@ export function renderVibeChips(
                 onApply();
               },
             },
-            // Reads back the value only while this vibe is actually applied.
-            // A chip showing "Robert Eggers" when nothing is selected is
-            // claiming a pool that is not in play — the state says Custom and
-            // the chip says otherwise. The label stays in front of the value
-            // so it is clear WHAT was chosen, not just who.
+            // Reads back the value while this vibe's SLOT LIST is in the pool
+            // — not while the vibe label happens to be applied.
+            //
+            // The original rule was `active`, to stop a chip claiming "Robert
+            // Eggers" when nothing of his was in play, and that concern is
+            // right and still met: switching to another vibe deselects the
+            // slot list, so the chip reverts on its own.
+            //
+            // But `active` was the wrong test for it. Any hand-edit clears the
+            // vibe label to Custom — including the Top-N cut, deliberately —
+            // so picking Spielberg and then asking for his top 10 blanked the
+            // chip back to "Director's night ▾" while the pool was still
+            // exactly Spielberg, and the Top-N caption two panels away still
+            // read "of Director's night — Steven Spielberg". One screen saying
+            // both things. The pool is the honest test, and the label already
+            // says Custom for the pool as a whole.
             vibe.param
-              ? active && vibe.slot?.value
+              ? vibe.slot?.value && poolState.isSelected(vibe.slot.list_id)
                 ? `${vibe.param.label ?? 'Value'}: ${vibe.slot.value} ▾`
                 : `${vibe.name} ▾`
               : vibe.name,
@@ -671,7 +753,10 @@ function chipToggleGroup(items, group, getKey, getLabel, onChange, getTitle = nu
       return h(
         'button',
         {
-          class: 'chip',
+          // `chip--filter`, not a bare `.chip`. A vibe pill and a filter token
+          // are different kinds of thing and stopped looking alike in v7.13 —
+          // see the shape note in styles.css.
+          class: 'chip chip--filter',
           dataset: { state: chipState },
           // The full name leads when the label is an abbreviation — a chip
           // reading "USA" should say what it stands for before it explains
@@ -679,17 +764,36 @@ function chipToggleGroup(items, group, getKey, getLabel, onChange, getTitle = nu
           title: getTitle
             ? `${getTitle(item)} — click to include, again to exclude, again to clear`
             : 'Click to include, again to exclude, again to clear',
+          // Reads the group rather than the captured `chipState`, and never
+          // pushes a key it already holds. The captured value is correct for
+          // the node it was rendered on, but a click that lands on a node the
+          // repaint has already replaced would advance the state machine from
+          // where it USED to be — and `push` with no guard turns that into a
+          // duplicate. Demonstrated: two entries for Comedy made the pool
+          // summary read "Action/Comedy/Comedy", so the state was corrupt and
+          // the sentence describing it was wrong in the same breath.
           onClick: () => {
-            if (chipState === 'off') group.include.push(key);
-            else if (chipState === 'include') {
-              group.include.splice(group.include.indexOf(key), 1);
-              group.exclude.push(key);
+            const drop = (list) => {
+              const at = list.indexOf(key);
+              if (at !== -1) list.splice(at, 1);
+            };
+            if (group.include.includes(key)) {
+              drop(group.include);
+              if (!group.exclude.includes(key)) group.exclude.push(key);
+            } else if (group.exclude.includes(key)) {
+              drop(group.exclude);
             } else {
-              group.exclude.splice(group.exclude.indexOf(key), 1);
+              group.include.push(key);
             }
             onChange();
           },
         },
+        // The state is spelled as well as coloured. Include and exclude were
+        // yellow and red-with-a-strikethrough and nothing else, which asks the
+        // reader to hold a colour key in their head — and fails outright for
+        // anyone who cannot separate the two.
+        chipState === 'include' ? h('span', { class: 'chip-mark' }, '+') : null,
+        chipState === 'exclude' ? h('span', { class: 'chip-mark' }, '−') : null,
         getLabel(item),
         h('span', { class: 'faint' }, ` ${item.count}`),
       );
@@ -739,10 +843,214 @@ function rangeInputs(filters, key, unit, bounds, onChange) {
  *                     (repaint NOT expected — just re-fetch a count/page)
  *   onClear()       — "Clear filters" was clicked
  */
+/**
+ * Sizes the rail to the space actually left below it.
+ *
+ * `max-height: calc(100dvh - 32px)` is right only once the rail has stuck to
+ * the top. Before that it begins ~170px down, under the masthead, so a full
+ * viewport of height runs off the bottom of the screen — you scroll the rail to
+ * its end and the end is not there, then scrolling the PAGE reveals it. The
+ * height depends on where the element currently is, which is a fact about
+ * layout and scroll position, so CSS cannot state it.
+ *
+ * One listener for the whole app, reading whichever rail is currently mounted,
+ * because the views rebuild theirs on every repaint and per-node listeners
+ * would accumulate one per paint.
+ */
+let railFitInstalled = false;
+function fitRails() {
+  for (const rail of document.querySelectorAll('.draw-rail-inner')) {
+    const { top } = rail.getBoundingClientRect();
+    // 16px to match the sticky offset, so the gap above and below match.
+    rail.style.maxHeight = `${Math.max(220, Math.round(window.innerHeight - top - 16))}px`;
+  }
+}
+
+export function fitRailToViewport() {
+  fitRails();
+  if (railFitInstalled) return;
+  railFitInstalled = true;
+  let queued = false;
+  const schedule = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      fitRails();
+    });
+  };
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+}
+
+/**
+ * Pool setup as a destination, for any view that has one.
+ *
+ * Built for the Draw tab and reused unchanged by Explore, which is the whole
+ * argument for it existing: both tabs need the same controls out of the reading
+ * column, and both need the same two presentations of them — a sticky rail
+ * where there is room beside the content, a full-screen sheet where there is
+ * not. Which one is live is decided in CSS by width; both are in the DOM.
+ *
+ * `content()` builds the controls, fresh, each time it is asked. `repaint()` is
+ * the caller's own paint — the sheet does not own a render loop, because every
+ * control inside it already triggers one.
+ */
+export function createPoolDestination({ content, repaint, label = 'Pool setup' }) {
+  let sheet = null;
+
+  function open() {
+    const body = h('div');
+    const overlay = openOverlay({
+      label,
+      cardClass: 'modal-card sheet-card',
+      render: (close) => [
+        h(
+          'div',
+          { class: 'row sheet-head' },
+          h('h2', {}, label),
+          h('span', { class: 'spacer' }),
+          h('button', { class: 'btn-sm', onClick: close }, 'Done'),
+        ),
+        body,
+      ],
+      // Escape and a backdrop click do not go through any closer of ours, so
+      // the overlay reports every exit here.
+      onClose: () => {
+        sheet = null;
+        // Or the rail stays empty behind a sheet that is gone.
+        repaint();
+        // And only now can focus go home: the overlay restores it to the node
+        // that opened the sheet, which the repaint above has just replaced.
+        document.getElementById('pool-setup-open')?.focus();
+      },
+    });
+    sheet = { body, close: overlay.close };
+    // Immediately, not on the next repaint. repaint() is what moves the
+    // controls out of the rail and into the sheet, and until it runs BOTH
+    // exist — which is the duplicate-id state this arrangement prevents.
+    repaint();
+  }
+
+  return {
+    /** Open it if closed, close it if open — one key for both, see the tab's
+     *  shortcut table. */
+    toggle: () => (sheet ? sheet.close() : open()),
+
+    /** The rail. Empty while the sheet is up: only one copy may be live. */
+    rail: () => {
+      // Measured after this paint has appended it — see fitRailToViewport.
+      queueMicrotask(fitRailToViewport);
+      return h(
+        'aside',
+        { class: 'draw-rail', 'aria-label': label },
+        h(
+          'div',
+          { class: 'card stack draw-rail-inner' },
+          h(
+            'div',
+            { class: 'row' },
+            h('h3', {}, label),
+            h('span', { class: 'spacer' }),
+            // The rail is 300px and deliberately so; this is the way out of it
+            // when the job at hand wants room — the same panel, overlaid wide,
+            // where the picker goes multi-column. Also on "p", but a shortcut
+            // nobody can see is not a way in.
+            h(
+              'button',
+              {
+                class: 'rail-expand',
+                title: 'Expand to a wide card (p)',
+                'aria-label': 'Expand pool setup',
+                onClick: open,
+              },
+              '\u2921',
+            ),
+          ),
+          // `rangeInputs` gives its fields fixed ids so focus survives a
+          // repaint, so two panels in one document means getElementById
+          // answers with whichever came first — which, below the rail's
+          // breakpoint, is the `display:none` one nobody can see.
+          sheet ? null : content(),
+        ),
+      );
+    },
+    /** The button that opens the sheet. Hidden by CSS wherever the rail shows. */
+    opener: () =>
+      h(
+        'div',
+        { class: 'row pool-sheet-row' },
+        h(
+          'button',
+          // Stable id, this codebase's standing contract for anything that has
+          // to survive a repaint — closing the sheet repaints, so the button
+          // focus returns to is never the node that opened it.
+          { id: 'pool-setup-open', class: 'btn-sm', onClick: open },
+          label,
+        ),
+        h('span', { class: 'faint' }, 'lists, filters and the top-N cut'),
+      ),
+
+    /** Called from the caller's paint(), after it has rebuilt its own DOM. */
+    sync: () => {
+      // Escape or a backdrop click can have closed the sheet without telling us.
+      if (sheet && !document.contains(sheet.body)) sheet = null;
+      if (!sheet) return;
+      // Same reason the rail preserves its scroll: refilling the body shortens
+      // it for an instant, and the browser clamps the card's scrollTop to the
+      // new height — so a tap two thirds down the picker jumped to the top.
+      const card = sheet.body.closest('.sheet-card');
+      const top = card?.scrollTop ?? 0;
+      fill(sheet.body, content());
+      if (card && top) card.scrollTop = top;
+    },
+  };
+}
+
+/**
+ * Which chip groups the host opened by hand, this session.
+ *
+ * A group with a selection is open regardless — you should always be able to
+ * see what is narrowing your pool. This remembers the ones opened merely to
+ * browse, so a repaint (every chip click causes one) does not fold them shut
+ * again mid-decision. Module-level because the panel is rebuilt from scratch
+ * on every paint and shared between Draw and Explore, and because it is
+ * presentation state that deliberately does not outlive a reload.
+ */
+const openFilterGroups = new Set();
+
+/**
+ * One collapsible group of filter chips.
+ *
+ * `<details>` rather than a button and a class: it is a disclosure widget, the
+ * element exists, and it comes with the keyboard behaviour and the screen
+ * reader announcement already correct.
+ */
+function collapsibleChips(label, selectedCount, chips) {
+  const el = h(
+    'details',
+    { class: 'filter-group', open: selectedCount > 0 || openFilterGroups.has(label) },
+    h(
+      'summary',
+      {},
+      h('span', { class: 'field-label' }, label),
+      selectedCount ? h('span', { class: 'badge' }, String(selectedCount)) : null,
+    ),
+    chips,
+  );
+  el.addEventListener('toggle', () => {
+    if (el.open) openFilterGroups.add(label);
+    else openFilterGroups.delete(label);
+  });
+  return el;
+}
+
+const chosen = (group) => (group?.include?.length ?? 0) + (group?.exclude?.length ?? 0);
+
 export function renderFilterPanel(
   filters,
   facets,
-  { onChipChange, onValueChange, onClear, lists = null, onTopNChange = null },
+  { onChipChange, onValueChange, onClear, lists = null, onTopNChange = null, onToggleChange = null },
 ) {
   return h(
     'div',
@@ -757,24 +1065,23 @@ export function renderFilterPanel(
     h(
       'div',
       { class: 'filters' },
-      h(
-        'div',
-        {},
-        h('div', { class: 'field-label' }, 'Genres'),
+      collapsibleChips(
+        'Genres',
+        chosen(filters.genres),
         chipToggleGroup(facets.genres, filters.genres, (g) => g.id, (g) => g.name, onChipChange),
       ),
-      h(
-        'div',
-        {},
-        // Countries behave exactly like languages here: a fixed vocabulary of
-        // the commonest, as toggle chips. The long tail is deliberately not
-        // offered -- 96 countries as chips is not a control, it is a wall.
-        h('div', { class: 'field-label' }, 'Country'),
-        // The real object, never a copy: chipToggleGroup mutates include and
-        // exclude in place, so a synthesised group would swallow every click.
-        // Label is shortened, key is not: the filter still sends the full
-        // name, which is what movies.countries stores and what the pool query
-        // matches on. Full name on hover, so nothing is actually hidden.
+      // Countries behave exactly like languages here: a fixed vocabulary of
+      // the commonest, as toggle chips. The long tail is deliberately not
+      // offered -- 96 countries as chips is not a control, it is a wall.
+      //
+      // The real object, never a copy: chipToggleGroup mutates include and
+      // exclude in place, so a synthesised group would swallow every click.
+      // Label is shortened, key is not: the filter still sends the full
+      // name, which is what movies.countries stores and what the pool query
+      // matches on. Full name on hover, so nothing is actually hidden.
+      collapsibleChips(
+        'Country',
+        chosen(filters.countries),
         chipToggleGroup(
           facets.countries ?? [],
           filters.countries,
@@ -784,10 +1091,9 @@ export function renderFilterPanel(
           (c) => c.country,
         ),
       ),
-      h(
-        'div',
-        {},
-        h('div', { class: 'field-label' }, 'Language'),
+      collapsibleChips(
+        'Language',
+        chosen(filters.languages),
         chipToggleGroup(
           facets.languages.slice(0, 14),
           filters.languages,
@@ -840,7 +1146,7 @@ export function renderFilterPanel(
         checked: filters.includeWatched,
         onChange: (event) => {
           filters.includeWatched = event.target.checked;
-          onValueChange();
+          (onToggleChange ?? onValueChange)();
         },
       }),
       h('span', {}, 'Include films already marked watched (allow rewatches)'),
@@ -854,7 +1160,7 @@ export function renderFilterPanel(
         checked: filters.awardWinners,
         onChange: (event) => {
           filters.awardWinners = event.target.checked;
-          onValueChange();
+          (onToggleChange ?? onValueChange)();
         },
       }),
       h('span', {}, '🏆 Only films that won an award'),
@@ -870,13 +1176,64 @@ export function renderFilterPanel(
  * `extraAction` (optional) adds one more button alongside Mark Watched —
  * "✕ Remove" on the Draw tab's Lineup cards, "+ Add to lineup" on Explore's.
  */
-export function movieCard(movie, { extraAction } = {}) {
+/**
+ * The two things you can do to a film, wherever it is being shown.
+ *
+ * Shared by the card and the detail overlay so they cannot drift: the overlay
+ * used to have NO actions at all, so the sequence was decide here, close it,
+ * find the card again, act there. `onChange` is the showing view's own repaint,
+ * because adding to the lineup changes a count and a grid that live outside
+ * this component.
+ */
+function watchedButton(movie) {
+  return h(
+    'button',
+    {
+      class: 'btn-sm',
+      onClick: async (event) => {
+        try {
+          await api.setWatched(movie.tmdb_id, !movie.watched);
+          movie.watched = !movie.watched;
+          // Written in place rather than repainted: the flag on the card is
+          // cosmetic, and a repaint here would close nothing and cost a flash.
+          event.target.textContent = movie.watched ? 'Watched ✓' : 'Mark watched';
+        } catch (error) {
+          toast(error.message, 'error');
+        }
+      },
+    },
+    movie.watched ? 'Watched ✓' : 'Mark watched',
+  );
+}
+
+function addToLineupButton(movie, onChange) {
+  const already = lineup.has(movie.tmdb_id);
+  return h(
+    'button',
+    {
+      class: 'btn-sm',
+      disabled: already,
+      onClick: () => {
+        if (!lineup.add(movie)) return;
+        toast(`Added ${movie.title}`, 'ok');
+        onChange?.();
+      },
+    },
+    already ? 'Already in lineup' : '+ Add to lineup',
+  );
+}
+
+export function movieCard(movie, { extraAction, onChange = null } = {}) {
   const poster = posterUrl(movie.poster_path);
   const awards = prefs.showAwards ? (movie.awards ?? []) : [];
 
   return h(
     'article',
-    { class: 'movie' },
+    // The id is on the card so a caller can find one again after a repaint —
+    // the lineup scrolls to the film it just drew. By id rather than by
+    // position, because the grid is rebuilt from scratch on every paint and
+    // "the nth child" would keep working right up until an entry moved.
+    { class: 'movie', dataset: { tmdbId: movie.tmdb_id } },
     movie.watched ? h('span', { class: 'watched-flag' }, 'watched') : null,
     // Top-LEFT: the watched flag already owns top-right. The count only
     // appears when there's more than one, which is 88% of the time it isn't
@@ -903,7 +1260,25 @@ export function movieCard(movie, { extraAction } = {}) {
       // of its own (contrast the vote screen, where the whole card is already
       // a tap target for ranking, so folding this into the title there would
       // put two different actions on the same touch surface).
-      h('button', { class: 'movie-title movie-title--link', onClick: () => openMovieModal(movie) }, movie.title),
+      h(
+        'button',
+        {
+          class: 'movie-title movie-title--link',
+          onClick: () =>
+            openMovieModal(movie, {
+              actions: (close) => [
+                watchedButton(movie),
+                // Adding from the overlay closes it: the decision is made, and
+                // leaving it up would just be asking to be dismissed.
+                addToLineupButton(movie, () => {
+                  close();
+                  onChange?.();
+                }),
+              ],
+            }),
+        },
+        movie.title,
+      ),
       originalTitleLine(movie),
       h(
         'div',
@@ -932,22 +1307,7 @@ export function movieCard(movie, { extraAction } = {}) {
     h(
       'div',
       { class: 'movie-actions' },
-      h(
-        'button',
-        {
-          class: 'btn-sm',
-          onClick: async (event) => {
-            try {
-              await api.setWatched(movie.tmdb_id, !movie.watched);
-              movie.watched = !movie.watched;
-              event.target.textContent = movie.watched ? 'Watched ✓' : 'Mark watched';
-            } catch (error) {
-              toast(error.message, 'error');
-            }
-          },
-        },
-        movie.watched ? 'Watched ✓' : 'Mark watched',
-      ),
+      watchedButton(movie),
       extraAction
         ? h(
             'button',

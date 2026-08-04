@@ -163,6 +163,30 @@ disambiguation page does the same. Key pageviews on a **QID sitelink**, never
 on a title. Series are also truncated by article renames, so compare rates,
 not totals.
 
+**At equal CSS specificity, source order decides — and `.modal-card` sits near
+the bottom of `styles.css`.** It silently beat three separate modifiers in v7:
+`max-height: 90vh` capped the pool sheet at 631px of a 701px viewport, and its
+`190px 1fr` poster grid was inherited by both the sheet and the shortcuts card,
+rendering a sticky header a third of the card wide and squeezing a table into
+the second column. A modifier on a long-established class must be written
+`.base.modifier`.
+
+**A hidden browser tab does not run `requestAnimationFrame`, cannot take focus,
+and does not animate a smooth scroll.** Three behaviours in v7 appeared broken
+only because the automation tab was in the background — a focus call that never
+fired, a scroll that never moved, an animation that never ran. **"It did not
+happen in my check" is not evidence in this repo.** Establish whether the tab is
+at fault before changing code; `document.visibilityState` and `document.hasFocus()`
+answer it in one line.
+
+**Restoring a scroll position clamps it against the container's height at that
+moment.** Set the height first, then the scroll. Reversed, the rail crept upward
+on every repaint, far enough to hide the group just clicked.
+
+**`clear(node).append(...)` is not `h(...)`.** `h` drops null children; `append`
+is the raw DOM method and stringifies them, so a conditional child renders the
+word "null" on the page. Shipped once, under the search box. Use `fill`.
+
 **`grep` treats `scripts/seed.mjs` as binary**, because its progress bar uses
 box-drawing characters — so `grep -rn` finds *nothing* there and silently drops
 the matches in a pipeline. **Use `grep -a` when sweeping this repo.** This nearly
@@ -184,6 +208,18 @@ matching accepted as the title column. Match column names exactly. But note
 that tightening to exact matching then silently emptied 1976–1982, because those
 years write `Entrées<ref>…</ref>` and stripping the tags glues the footnote to
 the column name.
+
+**A built-in vibe's identity is `builtin_key`, never its name.** The name was
+the identity until v7.9, and that was a bug rather than a shortcut:
+`ensureBuiltinVibes` asked "is there a vibe called Cinephile?", so renaming one
+made it invisible to the seeder, which created it again alongside. Measured
+against the real route — rename, restart, eight built-ins where there were
+seven. It also made every rename of a built-in its own migration, because
+editing the seed array alone is a no-op on any database that has already
+booted. With a key, a rename is a one-word edit to `BUILTIN_VIBES` and
+`name_custom` stops the seed overwriting a name the host chose themselves.
+**`lists` still has this disease** — see the next entry — and the same shape
+would fix it.
 
 **`seed.mjs` matches lists by NAME.** Renaming a list in its seed file alone
 creates a *second* list beside the old one rather than renaming it. A rename
@@ -332,8 +368,12 @@ is a lie that survives every guard.
   and one active colour. Four of seven vibe names recur verbatim in the row
   below, and with `Cinephile` selected the group row still paints `All` in the
   same active yellow, so two contradictory "this is selected" states stack in
-  one column. The fix is a deletion: the tag-filter row is a second narrowing
-  mechanism over group headers that already narrow. See
+  one column. **Deleted in v7.13**: the tag-filter row was a second narrowing
+  mechanism over group headers that already narrow, and it carried the
+  contradictory `All`. What remains is two kinds of control that look like two
+  kinds of control — a **pill** is a preset you apply, a **token** is a value
+  you include or exclude. Tokens are square-cornered and carry an explicit `+`
+  or `−`, so the tri-state no longer rests on colour alone. See
   [the UI review](docs/evidence/ui-review.md).
 - **Disclosure by destination, not expansion in place.** A panel that triples
   the page when opened has not deferred its complexity, it has relocated it into

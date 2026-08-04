@@ -136,7 +136,7 @@ test('built-in vibes are seeded idempotently, and a deleted one COMES BACK', () 
     'Awards',
     'Box office',
     'Cinephile',
-    'Director night',
+    "Director's night",
     'Family',
     'Modern Classics',
   ]);
@@ -191,7 +191,7 @@ test('a corrupt filters blob degrades to no filters instead of throwing', () => 
 test('a parametric vibe carries its parameter and resolves to nothing until given one', () => {
   const db = seed();
   ensureBuiltinVibes(db);
-  const director = allVibes(db).find((v) => v.name === 'Director night');
+  const director = allVibes(db).find((v) => v.name === "Director's night");
 
   assert.deepEqual(director.param, { kind: 'person', job: 'Director', label: 'Director' });
   // No tags, no lists: until a person is chosen there is nothing to draw from,
@@ -208,7 +208,7 @@ test('an ordinary vibe has no parameter', () => {
 test('applying a parameter fills one slot list, and re-applying replaces it', async () => {
   const db = seed();
   ensureBuiltinVibes(db);
-  const vibe = allVibes(db).find((v) => v.name === 'Director night');
+  const vibe = allVibes(db).find((v) => v.name === "Director's night");
 
   const realFetch = globalThis.fetch;
   const credits = (films) => ({
@@ -233,10 +233,10 @@ test('applying a parameter fills one slot list, and re-applying replaces it', as
   const first = await applyParameter(db, vibe, { id: 5026, name: 'Akira Kurosawa' });
 
   assert.equal(first.count, 2);
-  assert.equal(first.name, 'Director night — Akira Kurosawa');
+  assert.equal(first.name, "Director's night — Akira Kurosawa");
   assert.equal(
     db.prepare('SELECT name FROM lists WHERE id = ?').get(first.list_id).name,
-    'Director night — Akira Kurosawa',
+    "Director's night — Akira Kurosawa",
   );
   // Hidden, so it never appears in the picker.
   assert.equal(db.prepare('SELECT hidden FROM lists WHERE id = ?').get(first.list_id).hidden, 1);
@@ -258,7 +258,7 @@ test('applying a parameter fills one slot list, and re-applying replaces it', as
   );
   assert.equal(
     db.prepare('SELECT name FROM lists WHERE id = ?').get(second.list_id).name,
-    'Director night — Yasujiro Ozu',
+    "Director's night — Yasujiro Ozu",
   );
 
   globalThis.fetch = realFetch;
@@ -282,7 +282,7 @@ test('a vibe that takes no parameter refuses one', async () => {
 test('a slot list is ranked by rating, and every film gets a rank', async () => {
   const db = seed();
   ensureBuiltinVibes(db);
-  const vibe = allVibes(db).find((v) => v.name === 'Director night');
+  const vibe = allVibes(db).find((v) => v.name === "Director's night");
 
   const realFetch = globalThis.fetch;
   const films = [
@@ -331,4 +331,56 @@ test('a slot list is ranked by rating, and every film gets a rank', async () => 
   );
 
   globalThis.fetch = realFetch;
+});
+
+/**
+ * The key is identity, the name is data.
+ *
+ * Before `builtin_key`, `ensureBuiltinVibes` asked "is there a vibe called
+ * Cinephile?" — so renaming one made it invisible to the seeder, which created
+ * it again alongside. Measured against the real route before the fix: a rename
+ * plus a restart gave eight built-ins where there were seven. It also made
+ * every rename of a built-in a migration, because editing the seed array alone
+ * is a no-op on any database that has already booted.
+ */
+test('renaming a built-in does not duplicate it on the next boot', () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+  const before = allVibes(db).filter((v) => v.is_builtin).length;
+  const cinephile = allVibes(db).find((v) => v.name === 'Cinephile');
+
+  updateVibe(db, cinephile.id, { name: 'Film buff' });
+  ensureBuiltinVibes(db);
+
+  const after = allVibes(db).filter((v) => v.is_builtin);
+  assert.equal(after.length, before, 'no second copy was seeded');
+  assert.ok(after.some((v) => v.name === 'Film buff'));
+  assert.ok(!after.some((v) => v.name === 'Cinephile'));
+});
+
+// `builtin_key` is deliberately NOT exposed by allVibes: it is the seeder's
+// handle, and no client has any use for it. Read straight off the row.
+const byKey = (db, key) => db.prepare('SELECT * FROM vibes WHERE builtin_key = ?').get(key);
+
+test('a seed rename reaches a database that has already booted', () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+  // Stand in for "the seed array said something else last release".
+  db.prepare('UPDATE vibes SET name = ? WHERE builtin_key = ?').run('Old name', 'cinephile');
+
+  ensureBuiltinVibes(db);
+
+  assert.equal(byKey(db, 'cinephile').name, 'Cinephile', 'the seed owns the name until a host takes it');
+  assert.equal(allVibes(db).filter((v) => v.is_builtin).length, 7);
+});
+
+test('but a host who renamed it keeps their name for good', () => {
+  const db = seed();
+  ensureBuiltinVibes(db);
+  updateVibe(db, byKey(db, 'cinephile').id, { name: 'Film buff' });
+
+  ensureBuiltinVibes(db);
+
+  assert.equal(byKey(db, 'cinephile').name, 'Film buff');
+  assert.equal(byKey(db, 'cinephile').name_custom, 1);
 });

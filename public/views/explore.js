@@ -1,4 +1,4 @@
-import { h, clear, plural, toast, preserveFocus } from '../dom.js';
+import { h, clear, plural, toast, preserveFocus, preserveScroll } from '../dom.js';
 import { api } from '../api.js';
 import {
   renderFilterPanel,
@@ -6,6 +6,8 @@ import {
   renderListPicker,
   renderAwardsToggle,
   renderRatingToggle,
+  createPoolDestination,
+  fitRailToViewport,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -37,7 +39,6 @@ export async function renderExplore(container) {
     // a title here silently shrank the Draw pool with no visible cause.
     search: '',
     openGroups: new Set(),
-    tagFilter: null,
     vocabulary: [],
     sort: 'title',
     movies: [],
@@ -104,9 +105,30 @@ export async function renderExplore(container) {
         refreshFacets();
         loadPage({ reset: true });
       },
-      { vocabulary: state.vocabulary, tagFilter: state.tagFilter },
+      { vocabulary: state.vocabulary },
     );
   }
+
+  /**
+   * The pool controls, for the rail or the sheet. Same three panels the Draw
+   * tab shows, in the same order — which is what its own subtitle has always
+   * promised and the chrome did not deliver: Explore laid its picker out flat
+   * and expanded while Draw had folded it away behind a summary.
+   */
+  function poolSetupContent() {
+    return h(
+      'div',
+      { class: 'stack' },
+      h('div', { class: 'field-label' }, 'Lists in play'),
+      listPicker(),
+      filterPanel(),
+    );
+  }
+
+  const poolDestination = createPoolDestination({
+    content: () => poolSetupContent(),
+    repaint: () => paint(),
+  });
 
   let searchDebounce = null;
   function searchBox() {
@@ -225,6 +247,7 @@ export async function renderExplore(container) {
         { class: 'movie-grid' },
         state.movies.map((movie) =>
           movieCard(movie, {
+            onChange: paint,
             extraAction: {
               label: lineup.has(movie.tmdb_id) ? 'In lineup ✓' : '+ Add to lineup',
               disabled: lineup.has(movie.tmdb_id),
@@ -255,25 +278,37 @@ export async function renderExplore(container) {
     // instead. Before this, typing "1960" into the year field landed the 1 and
     // sent "960" to `<body>`.
     const restoreFocus = preserveFocus(container);
+    const restoreRail = preserveScroll(container, '.draw-rail-inner');
 
     clear(container).append(
       h(
         'div',
-        { class: 'stack' },
-        h('h2', {}, 'Explore the library'),
+        { class: 'draw-shell' },
         h(
-          'p',
-          { class: 'muted' },
-          'Browse every film across your active lists — same filters as Draw, no voting involved.',
+          'div',
+          { class: 'stack draw-main' },
+          h('h2', {}, 'Explore the library'),
+          h(
+            'p',
+            { class: 'muted' },
+            'Browse every film across your active lists — same filters as Draw, no voting involved.',
+          ),
+          // The controls left the column entirely: there used to be ~1,600px of
+          // them above the first poster, on a tab whose heading is an
+          // instruction to look at the library.
+          poolDestination.opener(),
+          searchBox(),
+          sortControl(),
+          resultsGrid(),
         ),
-        listPicker(),
-        searchBox(),
-        filterPanel(),
-        sortControl(),
-        resultsGrid(),
+        poolDestination.rail(),
       ),
     );
 
+    // Height before scroll — see the note in draw.js's paint().
+    fitRailToViewport();
+    restoreRail();
+    poolDestination.sync();
     restoreFocus();
   }
 
