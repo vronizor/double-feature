@@ -7,7 +7,8 @@ import {
   tmdbUrl,
   parseTmdbInput,
   openMovieModal,
-  openOverlay,
+  showShortcuts,
+  setShortcuts,
   topNLabel,
   drawnMessage,
   fill,
@@ -23,6 +24,7 @@ import {
   renderAwardsToggle,
   renderRatingToggle,
   createPoolDestination,
+  fitRailToViewport,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -507,42 +509,6 @@ export async function renderDraw(container) {
     { keys: ['?'], what: 'This card' },
   ];
 
-  function showShortcuts() {
-    openOverlay({
-      label: 'Keyboard shortcuts',
-      cardClass: 'modal-card shortcuts-card',
-      render: (close) => [
-        h(
-          'div',
-          { class: 'row' },
-          h('h2', {}, 'Keyboard shortcuts'),
-          h('span', { class: 'spacer' }),
-          h('button', { class: 'btn-sm', onClick: close }, 'Close'),
-        ),
-        h(
-          'dl',
-          { class: 'shortcut-list' },
-          ...SHORTCUTS.flatMap((row) => [
-            h(
-              'dt',
-              {},
-              ...row.keys.flatMap((key, i) => [
-                i ? h('span', { class: 'faint' }, row.join ?? ' ') : null,
-                h('kbd', {}, key),
-              ]),
-            ),
-            h('dd', {}, row.what),
-          ]),
-        ),
-        h(
-          'p',
-          { class: 'faint' },
-          'Keys are ignored while you are typing, so a title with a "d" in it stays a title.',
-        ),
-      ],
-    });
-  }
-
   /**
    * One handler for the tab's shortcuts.
    *
@@ -665,6 +631,8 @@ export async function renderDraw(container) {
     }
   }
 
+  // The masthead's keyboard symbol reads this; the view owns the list.
+  setShortcuts(SHORTCUTS);
   document.addEventListener('keydown', onKeydown);
 
   // --- Random draw ----------------------------------------------------------
@@ -676,23 +644,7 @@ export async function renderDraw(container) {
     return h(
       'div',
       { class: 'card stack' },
-      h(
-        'div',
-        { class: 'row' },
-        h('h2', {}, 'Draw random films'),
-        h('span', { class: 'spacer' }),
-        // Discreet on purpose: it is a door for people who already want one.
-        h(
-          'button',
-          {
-            class: 'kbd-hint',
-            title: 'Keyboard shortcuts (?)',
-            'aria-label': 'Keyboard shortcuts',
-            onClick: showShortcuts,
-          },
-          '\u2328',
-        ),
-      ),
+      h('h2', {}, 'Draw random films'),
       // Vibe chips sit inside this card, immediately above Pool setup,
       // because that is exactly what they configure — "Add a specific film"
       // next door is deliberately untouched by them.
@@ -1398,15 +1350,13 @@ export async function renderDraw(container) {
     return h(
       'div',
       { class: 'card row live-banner' },
+      // One line, not two stacked: it is a notice, and stacking the counts
+      // under the heading made it as tall as the panels it sits above.
+      h('strong', {}, 'A vote is open'),
       h(
-        'div',
-        {},
-        h('strong', {}, 'A vote is open'),
-        h(
-          'div',
-          { class: 'faint' },
-          `${plural(live.movie_count, 'film')} · ${plural(live.ballot_count, 'ballot')} in`,
-        ),
+        'span',
+        { class: 'faint' },
+        `${plural(live.movie_count, 'film')} · ${plural(live.ballot_count, 'ballot')} in`,
       ),
       h('span', { class: 'spacer' }),
       h('button', { class: 'btn-primary btn-sm', onClick: () => showSession(live.slug) }, 'Go to it'),
@@ -1527,6 +1477,13 @@ export async function renderDraw(container) {
       ),
     );
 
+    // Height BEFORE scroll, and the order is the bug this fixes. Restoring a
+    // scroll position clamps it against the container's current client height,
+    // and the rail arrives from `rail()` with only its CSS fallback height —
+    // the measured one lands a microtask later. Restoring first therefore
+    // clamped against a height that was about to change, and the rail crept
+    // upward on every repaint, far enough to hide the group just clicked.
+    fitRailToViewport();
     restoreRail();
     poolDestination.sync();
   }
@@ -1539,6 +1496,7 @@ export async function renderDraw(container) {
 
   return () => {
     countToken += 1;
+    setShortcuts([]);
     document.removeEventListener('keydown', onKeydown);
     stopSession();
   };

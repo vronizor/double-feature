@@ -349,13 +349,19 @@ label { display: block; }
 .pool-sheet-row { margin-top: 2px; }
 
 @media (min-width: 1000px) {
-  /* NO `align-items: start`. It would shrink the rail's own column to its
-     content, and a sticky child cannot travel further than its parent — the
-     same rule that decides how far the publish bar can pin. Stretched, the
-     aside is as tall as the lineup beside it, which is exactly the distance
-     the rail needs to stay put through. */
-  .draw-shell { grid-template-columns: minmax(0, 1fr) 300px; }
-  .draw-rail { display: block; }
+  /* `align-items: start` for the SHELL, `align-self: stretch` for the rail
+     alone — and the split matters.
+
+     Stretch is what a sticky child needs: it cannot travel further than its
+     parent, so the aside has to be as tall as the lineup beside it. But
+     stretching BOTH columns stretched the main one too, and `.stack` is a grid
+     whose auto rows absorb spare height — so every box on the page grew
+     vertically to fill a column made tall by the rail. Reported as "scrolling
+     down stretches all boxes", which is exactly what it looked like.
+
+     Only the rail needs the height. The main column takes its own. */
+  .draw-shell { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
+  .draw-rail { display: block; align-self: stretch; }
   /* The button that opens the sheet is the same control as the rail; showing
      both would be two doors to one room. */
   .pool-sheet-row { display: none; }
@@ -475,6 +481,7 @@ label { display: block; }
 .kbd-hint {
   background: none; border: 1px solid transparent; color: var(--text-faint);
   padding: 2px 8px; font-size: 1.05rem; line-height: 1.2; cursor: pointer;
+  align-self: center; margin-left: 4px;
 }
 @media (hover: hover) {
   .kbd-hint:hover { color: var(--text); border-color: var(--border-strong); }

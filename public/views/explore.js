@@ -7,6 +7,7 @@ import {
   renderAwardsToggle,
   renderRatingToggle,
   createPoolDestination,
+  fitRailToViewport,
   movieCard,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
@@ -304,6 +305,8 @@ export async function renderExplore(container) {
       ),
     );
 
+    // Height before scroll — see the note in draw.js's paint().
+    fitRailToViewport();
     restoreRail();
     poolDestination.sync();
     restoreFocus();

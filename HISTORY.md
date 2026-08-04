@@ -2714,3 +2714,37 @@ fade is a strip above them, which is what the gradient was reaching for.
 it no longer takes `.card`'s 16px all round.
 
 Version 7.22.0.
+
+### 10.24 Undoing a stretch, and moving the shortcuts up a level
+
+**Every box on the page grew vertically.** Reported as "scrolling down stretches
+all boxes", and self-inflicted by the keystone: 10.5 removed `align-items:
+start` from the shell so the rail's aside would be tall enough for its sticky
+child to travel. That stretched the MAIN column too — and `.stack` is a grid
+whose auto rows absorb spare height, so every card in it grew to fill a column
+made tall by the rail beside it. `align-items: start` on the shell with
+`align-self: stretch` on the rail alone: only the rail needs the height.
+
+**The keyboard symbol moved to the masthead.** It sat in the Draw card's
+header, which made a general affordance look like a property of one panel. The
+shortcuts themselves still belong to a view — Draw has a dozen, History none —
+so they are a registry now: a view sets its table on mount and clears it on
+teardown, and the card cannot list a key that is not live. A tab with none says
+so rather than showing an empty table.
+
+**The live-vote banner is one line.** Stacking the counts under the heading made
+a notice as tall as the panels above it.
+
+**The footer version was stale.** Not a bug: the server reads `package.json`
+once at boot, so a long-running process reports the version it started with. A
+restart, not a change.
+
+⚠️ **One fix in this chunk is reasoned and not seen.** The rail crept upward on
+repaint — far enough to hide the group just clicked — because `paint()`
+restored the scroll position before `fitRailToViewport` set the measured
+height, so the restore clamped against a client height that was about to
+change. Height is set before scroll now, in both views. The browser extension
+disconnected before it could be confirmed in the page; everything else here was
+measured.
+
+Version 7.23.0.

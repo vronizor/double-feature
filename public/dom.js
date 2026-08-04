@@ -772,6 +772,62 @@ export function openOverlay({ label, cardClass = 'modal-card', render, onClose =
  * truncate the synopsis with a CSS line-clamp, so this is the only place the
  * untruncated text is shown.
  */
+/**
+ * The shortcut table for whatever view is mounted.
+ *
+ * A registry rather than a constant, because the keys belong to a view — the
+ * Draw tab has a dozen, History has none — while the way IN to them belongs to
+ * the app: the keyboard symbol lives in the masthead beside the tabs, which is
+ * where you look for something that applies to the whole thing. A view sets
+ * this on mount and clears it on teardown, so the card can never list a key
+ * that is not live.
+ */
+let shortcutTable = [];
+
+export function setShortcuts(rows) {
+  shortcutTable = rows ?? [];
+}
+
+export function showShortcuts() {
+  return openOverlay({
+    label: 'Keyboard shortcuts',
+    cardClass: 'modal-card shortcuts-card',
+    render: (close) => [
+      h(
+        'div',
+        { class: 'row' },
+        h('h2', {}, 'Keyboard shortcuts'),
+        h('span', { class: 'spacer' }),
+        h('button', { class: 'btn-sm', onClick: close }, 'Close'),
+      ),
+      shortcutTable.length === 0
+        ? h('p', { class: 'muted' }, 'This tab has no shortcuts of its own.')
+        : h(
+            'dl',
+            { class: 'shortcut-list' },
+            ...shortcutTable.flatMap((row) => [
+              h(
+                'dt',
+                {},
+                ...row.keys.flatMap((key, i) => [
+                  i ? h('span', { class: 'faint' }, row.join ?? ' ') : null,
+                  h('kbd', {}, key),
+                ]),
+              ),
+              h('dd', {}, row.what),
+            ]),
+          ),
+      shortcutTable.length
+        ? h(
+            'p',
+            { class: 'faint' },
+            'Keys are ignored while you are typing, so a title with a "d" in it stays a title.',
+          )
+        : null,
+    ],
+  });
+}
+
 export function openMovieModal(movie, { actions = null } = {}) {
   const poster = posterUrl(movie.poster_path, 'w342');
 

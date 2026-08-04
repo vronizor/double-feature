@@ -1,5 +1,5 @@
 import { api } from './api.js';
-import { h, clear } from './dom.js';
+import { h, clear, showShortcuts } from './dom.js';
 import { renderDraw } from './views/draw.js';
 import { renderExplore } from './views/explore.js';
 import { renderLists } from './views/lists.js';
@@ -49,6 +49,20 @@ async function renderHost() {
             entry.label,
           ),
         ),
+      ),
+      // App-level, beside the tabs. The shortcuts themselves belong to whichever
+      // view is mounted, but the way in belongs to the whole app — it sat in the
+      // Draw card's header first, which made a general affordance look like a
+      // property of one panel.
+      h(
+        'button',
+        {
+          class: 'kbd-hint',
+          title: 'Keyboard shortcuts (?)',
+          'aria-label': 'Keyboard shortcuts',
+          onClick: showShortcuts,
+        },
+        '\u2328',
       ),
     ),
     body,
