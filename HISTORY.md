@@ -2874,50 +2874,58 @@ problem was simply that the window had not resized yet.
 
 Version 8.5.0.
 
-### 11.3 A wider body, and holding the lineup at three
+### 11.3 A wider body, spent on the rail
 
 Two requests that turned out to be one change: widen the page, and show three
 films per line in the lineup. `.app` went from `min(1100px, 100%)` to
-`min(1240px, 100%)`.
+`min(1240px, 100%)`. Where the extra 140px went took two attempts.
 
-The second half is not what it looks like. The lineup was **already** three
-across — the request was really about size, and about what widening the body
-would have done to it. `.movie-grid.is-lineup` is
-`repeat(auto-fit, minmax(190px, 260px))`, and the extra 140px of body is enough
-to fit a fourth 260px track. Widening alone would have quietly turned the one
-grid meant to be looked at into a four-up scanning grid. So the cap moves with
-the width — `minmax(300px, 340px)` above 1000px — which holds the count at
-three and spends the new space on the cards instead: 260px wide becomes 340px,
-and the poster goes from ~390px tall to ~510px.
+**The first attempt spent it on the cards** — the lineup cap went from 260px to
+340px — and it was rejected on sight, correctly. The poster is
+`aspect-ratio: 2/3`, so a 340px card stands a 510px poster, and the title, year
+and rating slid below the fold. A card you have to scroll to read is not a
+bigger card; it is a poster with a caption somewhere underneath. The 260px cap
+turns out to be doing a job nobody had written down: it is what keeps a whole
+card on screen at once. That is now recorded where the cap is set.
+
+Worse, it spent the width on the half of the screen that did not need it. The
+rail was the cramped half — a 300px column holding the list picker, eight
+collapsible groups and the filter panel, all forced to a single column because
+they do not fit otherwise — while the lineup beside it was fine.
+
+**So the width went to the rail.** `.draw-shell` goes from
+`minmax(0, 1fr) 300px` to `minmax(0, 1fr) 376px`.
+
+376px is not a preference, it is the arithmetic of the two things sharing that
+row. The body is 1240px, so 1208px of content, less the 20px gap. The lineup
+wants three 260px cards — `3x260 + 2x16 = 812` — and whatever it does not take,
+the rail gets: 376px exactly. One pixel more and the lineup drops to two per
+line. So the rail is as wide as three-per-line allows, and going wider means
+widening `.app` as well, not just editing that number. 1320px would buy a
+440px rail. Both numbers now say so beside themselves.
+
+The lineup was **already** three across at the old body width, which is worth
+knowing: the request was really about the rail all along. What this change
+prevents is the wider body silently making it four.
 
 **A correction, because it was written down wrong first and acted on.** The
-plan for this work claimed the lineup showed *five* per line and that the
-comment above the rule — which said the 260px cap took it "5 → 3" — was stale.
-Both claims were wrong, and the arithmetic behind them was the reason:
+plan claimed the lineup showed *five* per line and that the comment above the
+rule — which said the 260px cap took it "5 → 3" — was stale. Both wrong.
 `repeat(auto-fit, minmax(a, b))` decides how many tracks to lay down using **b**
 when b is a definite length, and only falls back to **a** when b is indefinite.
-The count for this grid therefore repeats on 260px, not 190px. Explore, whose
-`b` is `1fr`, does repeat on its 190px minimum, which is exactly why the two
-grids differ. The old comment had been right all along and was briefly
-"corrected" into being wrong.
-
-Caught by measuring the old stylesheet rather than trusting the calculation:
-at a 1400px window the 1100px body computed `260px 260px 260px`, three tracks,
-against a prediction of five. The rule is now written into the comment above
-the base rule, since it is easy to get backwards and costs a real mistake each
-time.
+This grid therefore repeats on 260px, not 190px. Explore, whose `b` is `1fr`,
+does repeat on its 190px minimum, which is exactly why the two grids differ.
+The old comment had been right all along and was briefly "corrected" into being
+wrong. Caught by measuring the old stylesheet instead of trusting the
+calculation: at a 1400px window the 1100px body computed `260px 260px 260px`,
+three tracks, against a prediction of five. The rule now sits in the comment
+above the base rule, since it is easy to get backwards.
 
 Verified by running two servers against the same page at the same window,
-differing only in the stylesheet — the same A/B used for the overlay fix in
-11.2, and against a copy of the database rather than the live one. At a 1400px
-window: the body measures 1240px, the lineup computes `340px 340px 340px`, and
-seven cards land three-then-three-then-one. A two-film lineup still centres —
-the third track collapses to `0px` and the pair sits centred in the row, which
-is why the grid stays `auto-fit` rather than becoming `repeat(3, ...)`.
-
-One claim here is derived rather than measured, and is marked as such in the
-comment: that widening to 1240px with the *old* cap would have produced four
-tracks. It follows from the repetition rule confirmed above, but the browser
-extension disconnected before the counterfactual could be run.
+differing only in the stylesheet, and against a copy of the database rather
+than the live one. At a 1400px window the shell computes `812px 376px`: the
+rail measures 376, the main column 812, and the lineup inside it computes
+`260px 260px 260px` with three cards on the first row and a 390px poster — the
+same card size as before any of this, which is the point.
 
 Version 8.6.0.
