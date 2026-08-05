@@ -1461,6 +1461,29 @@ const SOURCES = [
   // BAFTA, César and Goya come from Wikipedia categories instead — see
   // fetchWikipediaCategoryAward for why (Wikidata's P166 has 32/26/12 films
   // for them; the categories have 79/51/41).
+  //
+  // NAMING. Every award list is "Ceremony — Prize", both halves in the
+  // ceremony's own language:
+  //
+  //     Oscar — Best Picture          Cannes  — Palme d’Or
+  //     BAFTA — Best Film             Venezia — Leone d’Oro
+  //     César — Meilleur Film         Berlin  — Goldener Bär
+  //
+  // Left is the ceremony it comes from, right is which prize. There used to be
+  // two grammars in this column — academies as "Body — Category" and festivals
+  // as "Prize (City)" — which is what put "Golden Lion (Venice) 1987" next to
+  // "César — Meilleur Film 1988" in the same overlay. Adding an award list
+  // means picking a side of the dash, not inventing a shape.
+  //
+  // The `short_name` names the AWARD ITSELF, in the same language — which is
+  // the LEFT of the dash for an academy (the statuette, or the body: Oscar,
+  // César, Goya, BAFTA) and the RIGHT for a festival (the prize: Palme d’Or,
+  // Leone d’Oro). So it is not derivable from the full name by any rule a
+  // regex can hold, which is exactly why it is stored rather than parsed.
+  //
+  // What it is NOT is the ceremony: "Venezia" and "Cannes" are places, and a
+  // card reading "Venezia 1987" would name where the film went rather than
+  // what it won.
   {
     label: 'Oscar Best Picture',
     run: () =>
@@ -1491,7 +1514,7 @@ const SOURCES = [
       fetchWikidataAward('Q179808', {
         slug: 'award-palme-dor',
         short_name: 'Palme d’Or',
-        name: 'Palme d’Or (Cannes)',
+        name: 'Cannes — Palme d’Or',
         tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Palme d’Or (Q179808)',
         source_url: 'https://en.wikipedia.org/wiki/Palme_d%27Or',
@@ -1534,7 +1557,7 @@ const SOURCES = [
       fetchWikidataAward('Q844804', {
         slug: 'award-cannes-grand-prix',
         short_name: 'Grand Prix',
-        name: 'Grand Prix (Cannes)',
+        name: 'Cannes — Grand Prix',
         tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Cannes Film Festival Grand Prix (Q844804)',
         source_url: 'https://en.wikipedia.org/wiki/Grand_Prix_(Cannes_Film_Festival)',
@@ -1553,8 +1576,8 @@ const SOURCES = [
     run: () =>
       fetchWikidataAward('Q209459', {
         slug: 'award-golden-lion',
-        short_name: 'Golden Lion',
-        name: 'Golden Lion (Venice)',
+        short_name: 'Leone d’Oro',
+        name: 'Venezia — Leone d’Oro',
         tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Golden Lion (Q209459)',
         source_url: 'https://en.wikipedia.org/wiki/Golden_Lion',
@@ -1565,8 +1588,8 @@ const SOURCES = [
     run: () =>
       fetchWikidataAward('Q154590', {
         slug: 'award-golden-bear',
-        short_name: 'Golden Bear',
-        name: 'Golden Bear (Berlin)',
+        short_name: 'Goldener Bär',
+        name: 'Berlin — Goldener Bär',
         tags: ['awards', 'festivals'],
         source: 'Wikidata — award received (P166), Golden Bear (Q154590)',
         source_url: 'https://en.wikipedia.org/wiki/Golden_Bear',

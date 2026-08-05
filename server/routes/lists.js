@@ -115,7 +115,13 @@ router.patch('/:id', (req, res) => {
     if (db.prepare('SELECT 1 FROM lists WHERE name = ? AND id != ?').get(name, id)) {
       throw badRequest(`A list named "${name}" already exists`);
     }
-    db.prepare('UPDATE lists SET name = ? WHERE id = ?').run(name, id);
+    // Renaming a seed list hands its name to the host for good: the seed keeps
+    // the key and stops touching the name — see upsertList in scripts/seed.mjs.
+    // Only when the name actually CHANGES, so a PATCH that resends the current
+    // name does not quietly opt them out of future renames.
+    const takesOver = list.seed_key !== null && name !== list.name;
+    db.prepare(`UPDATE lists SET name = ?${takesOver ? ', name_custom = 1' : ''} WHERE id = ?`)
+      .run(name, id);
   }
   if (req.body?.is_active !== undefined) {
     db.prepare('UPDATE lists SET is_active = ? WHERE id = ?').run(

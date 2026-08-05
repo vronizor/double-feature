@@ -1293,10 +1293,19 @@ export function movieCard(movie, { extraAction, onChange = null } = {}) {
       // Two at most, then "+N" — three award names would take four lines on a
       // 190px card and crowd out the synopsis. The full set is one tap away in
       // the overlay.
+      //
+      // The line shows SHORT names ("Leone d’Oro"), so `title` carries the full
+      // ones ("Venezia — Leone d’Oro") on hover — the short name is the prize
+      // alone, so the ceremony it came from is genuinely missing here and worth
+      // revealing. Same treatment the poster badge already gets, and it costs
+      // nothing on a phone, where the overlay is the answer instead.
       awards.length
         ? h(
             'div',
-            { class: 'movie-awards' },
+            {
+              class: 'movie-awards',
+              title: awards.map((award) => awardLabel(award, { short: false })).join('\n'),
+            },
             '🏆 ',
             awards.slice(0, 2).map((award) => awardLabel(award)).join(' · '),
             awards.length > 2 ? ` +${awards.length - 2}` : '',
