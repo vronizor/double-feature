@@ -37,7 +37,11 @@ html, body {
 
 body { min-height: 100dvh; display: flex; flex-direction: column; }
 
-.app { flex: 1; width: min(1100px, 100%); margin: 0 auto; padding: 20px 16px 40px; }
+/* 1240px, not 1100. Widened on request, and the extra 140px is SPOKEN FOR: it
+   went to the pool rail, not to the cards. See `.draw-shell`, where the rail's
+   width and the lineup's three-per-line both fall out of this number. Change
+   this and re-check that. */
+.app { flex: 1; width: min(1240px, 100%); margin: 0 auto; padding: 20px 16px 40px; }
 
 h1, h2, h3 { line-height: 1.2; margin: 0; font-weight: 650; }
 h1 { font-size: 1.5rem; letter-spacing: -0.02em; }
@@ -156,7 +160,7 @@ label { display: block; }
 
 /* The Draw tab's list picker is just a checkbox + name + two badges per row —
    full page width is wasted on it once there's room for more than one column. */
-/* Summary on its own line, controls on theirs. In a 300px rail the summary is
+/* Summary on its own line, controls on theirs. In a 376px rail the summary is
    two lines of text, and sharing a flex row with three buttons pushed the last
    one onto a ragged line of its own. */
 .picker-head { display: grid; gap: 8px; }
@@ -364,7 +368,18 @@ label { display: block; }
      down stretches all boxes", which is exactly what it looked like.
 
      Only the rail needs the height. The main column takes its own. */
-  .draw-shell { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
+  /* 376px, and the number is not a preference — it is the arithmetic of the
+     two things that share this row.
+
+     The body is 1240px, so 1208px of content, less the 20px gap. Whatever the
+     rail takes, the main column gets the rest, and the lineup wants three
+     260px cards in it: 3x260 + 2x16 = 812. That leaves the rail 376px exactly.
+     One pixel more and the lineup drops to two per line.
+
+     So the rail is as wide as three-per-line allows, which is where the extra
+     140px of body went. Widening it further means widening `.app` too — 1320px
+     would buy the full 440px rail — not just editing this number. */
+  .draw-shell { grid-template-columns: minmax(0, 1fr) 376px; align-items: start; }
   .draw-rail { display: block; align-self: stretch; }
   /* The button that opens the sheet is the same control as the rail; showing
      both would be two doors to one room. */
@@ -385,7 +400,7 @@ label { display: block; }
 
 /* Both of these size themselves against the VIEWPORT — the filter panel by a
    media query, the picker by a 280px track minimum — so on a wide screen they
-   lay out for a wide screen and overflow a 300px rail. Inside the rail they are
+   lay out for a wide screen and overflow a 376px rail. Inside the rail they are
    one column, whatever the window is doing. This is the whole cost of reusing
    the two panels unchanged, and it is two lines. */
 .draw-rail .filters,
@@ -424,7 +439,7 @@ label { display: block; }
 }
 /* On a wide screen the sheet is a WIDE overlaid card rather than a phone
    sheet: opened deliberately with "p" for a proper session of fiddling, so it
-   gets room the 300px rail cannot give — the list picker goes multi-column and
+   gets room the 376px rail cannot give — the list picker goes multi-column and
    the filter panel lays out in its natural three. The rail empties while it is
    up, which is the same one-copy rule that keeps the element ids unique. */
 @media (min-width: 1000px) {
@@ -538,7 +553,15 @@ kbd {
    stand a 790px-tall poster on the page. Capped, the columns go 5 → 3 at full
    width, which is the intended trade — fewer, larger cards on the one grid
    that is meant to be looked at rather than scanned. Explore keeps `auto-fill`
-   for exactly the opposite reason. */
+   for exactly the opposite reason.
+
+   WHY a cap changes the COUNT and not just the size, since it reads like it
+   should do neither: `repeat(auto-fit, minmax(a, b))` decides how many tracks
+   to lay down using b when b is a definite length, and only falls back to a
+   when b is indefinite. So this grid repeats on 260px and Explore, whose b is
+   `1fr`, repeats on 190px. That is the whole difference between three cards
+   and five, and it is easy to get backwards — measure before trusting the
+   arithmetic. */
 .movie-grid.is-lineup {
   grid-template-columns: repeat(auto-fit, minmax(190px, 260px));
   justify-content: center;
@@ -555,6 +578,17 @@ kbd {
   .movie-grid.is-vote { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   .movie-grid.is-lineup { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 }
+
+/* NO desktop override here, deliberately, and it was tried the other way once.
+ *
+ * The wider body first went into a bigger cap — 340px cards on the Draw
+ * screen. Rejected on sight: the poster is `aspect-ratio: 2/3`, so a 340px
+ * card stands a 510px poster and pushes the title, year and rating BELOW THE
+ * FOLD. A card you have to scroll to read is not a bigger card, it is a
+ * poster with a caption somewhere. The 260px cap is what keeps a whole card
+ * on screen, which is the reason it exists.
+ *
+ * The width went to the rail instead — see `.draw-shell`. */
 
 .movie {
   position: relative; background: var(--bg-raised); border: 1px solid var(--border);
@@ -683,12 +717,6 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
      own aspect-ratio height instead of being stretched to match a taller
      info column, which would over-crop it via object-fit:cover. */
 }
-@media (max-width: 620px) {
-  .modal-card { grid-template-columns: 1fr; }
-  .modal-poster, .modal-poster--empty { grid-column: 1; grid-row: 1; }
-  .modal-info { grid-column: 1; grid-row: 2; padding-right: 0; }
-  .modal-trailer-row { grid-column: 1; grid-row: 3; }
-}
 .modal-close {
   position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
   border-radius: 50%; padding: 0; display: grid; place-items: center; line-height: 1;
@@ -719,6 +747,36 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
   overflow: hidden; background: var(--bg-sunken);
 }
 .modal-trailer iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* ONE COLUMN ON A PHONE.
+ *
+ * This block must stay BELOW every rule it overrides, and that placement is
+ * the bug it fixes rather than a tidiness preference. It used to sit directly
+ * under `.modal-card` and ABOVE `.modal-poster`, `.modal-info` and
+ * `.modal-trailer-row` — all single-class selectors, so all equal specificity,
+ * so the later base rules won and this block did nothing at all.
+ *
+ * Measured at a 500px viewport, both states on the same page, changing only
+ * this file. Above the base rules: the card computes two tracks and
+ * `.modal-info` keeps `grid-column: 2 / grid-row: 1` and its 24px right
+ * padding. Below them: one track, and the info moves to `grid-column: 1 /
+ * grid-row: 2` with the padding cleared, so poster, info and trailer stack.
+ *
+ * On a real phone the broken state put the poster left and the text in a
+ * column running past the card's edge — the title clipped under the close
+ * button, the synopsis and "Where to watch" cut off mid-word, and the trailer
+ * stranded at the bottom of an otherwise empty poster column. One dead media
+ * query, four symptoms that each look like a separate bug.
+ *
+ * Third time this trap has been paid for here — see DECISIONS.md §3. Note that
+ * a hidden automation tab CAN answer this one: computed styles and layout
+ * boxes are valid there. It is rAF, focus and smooth scrolling that are not. */
+@media (max-width: 620px) {
+  .modal-card { grid-template-columns: 1fr; }
+  .modal-poster, .modal-poster--empty { grid-column: 1; grid-row: 1; }
+  .modal-info { grid-column: 1; grid-row: 2; padding-right: 0; }
+  .modal-trailer-row { grid-column: 1; grid-row: 3; }
+}
 
 /* Tap-to-rank */
 .movie--tappable { cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }

@@ -291,7 +291,7 @@ export function renderListPicker(lists, openGroups, onChange, { vocabulary = [] 
       return h(
         'div',
         { class: `list-group${selected > 0 ? ' is-active' : ''}` },
-        // Two lines by construction, not by wrapping. In a 300px rail the
+        // Two lines by construction, not by wrapping. In a 376px rail the
         // label, the stats and two buttons cannot share one line, and a plain
         // flex row broke them 3+1 — leaving "none" stranded on a line of its
         // own under "all". The pair is kept together as its own unit instead.
@@ -952,7 +952,7 @@ export function createPoolDestination({ content, repaint, label = 'Pool setup' }
             { class: 'row' },
             h('h3', {}, label),
             h('span', { class: 'spacer' }),
-            // The rail is 300px and deliberately so; this is the way out of it
+            // The rail is 376px and deliberately so; this is the way out of it
             // when the job at hand wants room — the same panel, overlaid wide,
             // where the picker goes multi-column. Also on "p", but a shortcut
             // nobody can see is not a way in.
