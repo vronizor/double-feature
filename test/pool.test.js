@@ -462,7 +462,7 @@ function seedWithAwards() {
   const db = createTestDb();
   db.exec(`INSERT INTO lists (id, name, origin, is_active) VALUES
     (1, 'Canon', 'seed', 1),
-    (2, 'Palme d’Or (Cannes)', 'seed', 1),
+    (2, 'Cannes — Palme d’Or', 'seed', 1),
     (3, 'Stale Category Award', 'seed', 1)`);
   // List 2 is tagged; list 3 carries only the dead `category` column.
   db.exec(`INSERT INTO list_tags (list_id, tag) VALUES (1, 'canon'), (2, 'awards')`);

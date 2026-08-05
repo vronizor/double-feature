@@ -218,12 +218,11 @@ seven. It also made every rename of a built-in its own migration, because
 editing the seed array alone is a no-op on any database that has already
 booted. With a key, a rename is a one-word edit to `BUILTIN_VIBES` and
 `name_custom` stops the seed overwriting a name the host chose themselves.
-**`lists` still has this disease** — see the next entry — and the same shape
-would fix it.
-
-**`seed.mjs` matches lists by NAME.** Renaming a list in its seed file alone
-creates a *second* list beside the old one rather than renaming it. A rename
-needs a migration.
+**`lists` had the same disease and was cured the same way in v8**, by
+`lists.seed_key` — the seed filename, which is also the slug the fetcher writes
+the file under — plus `lists.name_custom`. The nine award lists were renamed in
+one commit immediately afterwards, which is the thing that used to cost a
+hand-written migration each.
 
 **`renderSessionPanel` is shared between the host screen and the History tab.**
 Anything that clears state on close must be gated to the host's own live
@@ -297,6 +296,23 @@ is a lie that survives every guard.
   to.
 - **Provenance, not `source`** — `source` meant both where a list came from and
   how a lineup film got there.
+- **An award list is named "Ceremony — Prize", both halves in the ceremony's own
+  language.** `Oscar — Best Picture`, `César — Meilleur Film`,
+  `Cannes — Palme d’Or`, `Venezia — Leone d’Oro`, `Berlin — Goldener Bär`. Left
+  is the ceremony it comes from, right is which prize. Two grammars used to
+  share the column — academies as "Body — Category" and festivals as
+  "Prize (City)" — which is what put *Golden Lion (Venice) 1987* directly above
+  *César — Meilleur Film 1988* in one overlay. Adding an award list means
+  picking a side of the dash, not inventing a shape.
+- **A `short_name` is the token a reader recognises fastest, and is deliberately
+  NOT derivable from the full name.** The list named `Venezia — Leone d’Oro`
+  still shows "Golden Lion" on a card, with the full name on hover. This was
+  chosen over making the short name consistent with the long one, because no
+  syntactic rule survives contact with the set: Cannes awards two prizes, so
+  "the ceremony" does not identify a list, and three academies award "best
+  film", so "the prize" does not either. The consequence worth knowing is that
+  an award list shipped without an explicit `short_name` falls back to
+  stripping the qualifier and reads as a **city**.
 - **Watched films are INCLUDED in draws by default.** The README said the
   opposite for two versions while the UI shipped this, and the UI was right: a
   household rewatches, and a film you loved is a good thing to draw again.

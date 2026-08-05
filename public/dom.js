@@ -550,6 +550,14 @@ export function parseTmdbInput(value) {
 // It is deliberately not clever — two lists that both shorten to "Oscar" is
 // exactly the collision the explicit value exists to prevent, and Parasite
 // would read "Oscar 2020 · Oscar 2020".
+//
+// Since v8 the fallback CANNOT stand in for the real short name on the award
+// lists, and it is worth knowing why. Full names are now "Ceremony — Prize" in
+// the ceremony's own language, so stripping the qualifier off
+// "Venezia — Leone d’Oro" yields "Venezia" — a place, not an award. The short
+// name is a different word ("Golden Lion"), chosen for what a reader
+// recognises fastest rather than derived from the long one. An award list
+// shipped without an explicit short_name will therefore read as a city.
 export const shortAwardName = (award) => {
   if (typeof award === 'object' && award?.short_name) return award.short_name;
   const name = typeof award === 'object' ? award?.name : award;

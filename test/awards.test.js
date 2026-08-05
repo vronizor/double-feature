@@ -1,16 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
+import { ROOT } from '../server/config.js';
 import { createTestDb } from '../server/db.js';
 import { awardsByTmdbId, recordEntry } from '../server/movies.js';
 import { awardLabel, awardYearLabel, shortAwardName } from '../public/dom.js';
+
+const SEEDS = join(ROOT, 'seeds');
 
 function seed() {
   const db = createTestDb();
   // Deliberately NO `category` on any of these: category is the legacy column
   // and nothing added after v2 sets it. Awards must resolve on the tag alone.
   db.exec(`INSERT INTO lists (id, name, origin, is_active, short_name) VALUES
-    (1, 'Palme d’Or (Cannes)', 'seed', 1, 'Palme d’Or'),
+    (1, 'Cannes — Palme d’Or', 'seed', 1, 'Palme d’Or'),
     (2, 'Oscar — Best Picture', 'seed', 1, 'Oscar'),
     (3, 'BAFTA — Best Film', 'seed', 1, 'BAFTA'),
     (4, 'TSPDT 1,000 Greatest Films', 'seed', 1, NULL)`);
@@ -107,7 +112,7 @@ test('awardsByTmdbId tolerates an empty id list', () => {
 test('unresolved memberships never count as awards', () => {
   const db = createTestDb();
   db.exec(`INSERT INTO lists (id, name, origin, category, is_active)
-           VALUES (1, 'Palme d’Or (Cannes)', 'seed', 'awards', 1)`);
+           VALUES (1, 'Cannes — Palme d’Or', 'seed', 'awards', 1)`);
   db.prepare('INSERT INTO movies (tmdb_id, title, year) VALUES (7, ?, 2000)').run('Pending');
   db.prepare(
     `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, award_year, status)
@@ -142,7 +147,7 @@ test('a bare string is still accepted, so the fallback path cannot crash', () =>
 });
 
 test('awardLabel omits the year entirely when it is unknown', () => {
-  assert.equal(awardLabel({ name: 'Palme d’Or (Cannes)', short_name: 'Palme d’Or', year: 2019 }), 'Palme d’Or 2019');
+  assert.equal(awardLabel({ name: 'Cannes — Palme d’Or', short_name: 'Palme d’Or', year: 2019 }), 'Palme d’Or 2019');
   assert.equal(awardLabel({ name: 'César — Meilleur Film', short_name: 'César', year: null }), 'César');
   // The 2020 ceremony honoured 2019 films — Parasite — so the full-name form
   // shifts too. It also proves the rule matches through the short-name
@@ -245,4 +250,85 @@ test('an unknown award labels by its ceremony year rather than guessing', () => 
   // The safer default: a new festival list added without touching the rules is
   // correct, and only a new academy award would need a line adding.
   assert.equal(awardYearLabel(award('Locarno', 2019)), 2019);
+});
+
+// --- The seed files, read from disk ----------------------------------------
+//
+// Two things about the award seeds cannot fail loudly on their own, and both
+// are the shape DECISIONS.md §3 collects: they produce a wrong answer without
+// throwing.
+//
+// 1. The year rules are keyed on the SHORT name. Change "Goya" to "Goya Award"
+//    in a seed file and nothing breaks — the lookup simply misses, the rule
+//    defaults to no shift, and every Goya silently starts printing its
+//    ceremony year instead of its film year. One year out, on every row, with
+//    a green test suite.
+// 2. Since the full names became "Ceremony — Prize", an award list shipped
+//    without a short_name falls back to stripping the qualifier and reads as a
+//    CITY: "Venezia", not "Golden Lion".
+//
+// Hermetic — this reads the repo's own seed files, no network and no database.
+const awardSeeds = readdirSync(SEEDS)
+  .filter((file) => file.endsWith('.json'))
+  .map((file) => ({ file, ...JSON.parse(readFileSync(join(SEEDS, file), 'utf8')) }))
+  .filter((seed) => seed.category === 'awards');
+
+test('there are award seeds to check at all', () => {
+  // Guards the guard: a filter that quietly matches nothing would make every
+  // assertion below vacuously true.
+  assert.ok(awardSeeds.length >= 9, `expected the award seeds, found ${awardSeeds.length}`);
+});
+
+test('every award seed carries a short name', () => {
+  for (const seed of awardSeeds) {
+    assert.ok(seed.short_name, `${seed.file} has no short_name, so its card would read as a city`);
+  }
+});
+
+test('every award seed is named "Ceremony — Prize"', () => {
+  for (const seed of awardSeeds) {
+    assert.match(
+      seed.name,
+      /^[^—()]+ — [^—()]+$/u,
+      `${seed.file}: "${seed.name}" is not "Ceremony — Prize"`,
+    );
+  }
+});
+
+/**
+ * What each award seed must print for a ceremony held in 2000.
+ *
+ * Written out per file rather than derived from the tags, because the obvious
+ * derivation is WRONG and this is where that gets recorded: the César is an
+ * academy by every structural test — it is not tagged "festivals" — and it
+ * still must not shift, since French usage names the César for its ceremony.
+ * A rule of "academies shift" would silently move all 51 of them by a year.
+ *
+ * Known limit, stated rather than papered over: the César's correct answer IS
+ * the no-rule default, so renaming its short_name cannot be caught here. The
+ * other four academies are caught, which is where the loss would be silent.
+ */
+const CEREMONY_2000_PRINTS = {
+  'award-oscar-best-picture.json': 1999,
+  'award-oscar-international.json': 1999,
+  'award-bafta-best-film.json': 1999,
+  'award-goya-best-film.json': 1999,
+  'award-cesar-best-film.json': 2000,
+  'award-palme-dor.json': 2000,
+  'award-cannes-grand-prix.json': 2000,
+  'award-golden-lion.json': 2000,
+  'award-golden-bear.json': 2000,
+};
+
+test('every award seed still prints the year it is naturally called by', () => {
+  for (const seed of awardSeeds) {
+    const expected = CEREMONY_2000_PRINTS[seed.file];
+    assert.ok(expected, `${seed.file} is a new award list — add it to CEREMONY_2000_PRINTS`);
+    assert.equal(
+      awardYearLabel(award(seed.short_name, 2000)),
+      expected,
+      `${seed.file}: short_name "${seed.short_name}" no longer matches its year rule, so every ` +
+        'one of its films is printing the wrong year',
+    );
+  }
 });
