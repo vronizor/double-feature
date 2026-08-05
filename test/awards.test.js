@@ -221,7 +221,7 @@ test('an academy is named for the films, not the ceremony', () => {
 
 test('a festival is named for its own year', () => {
   // No gap to close: the Palme awarded at the 2019 festival is the 2019 Palme.
-  for (const name of ['Palme d’Or', 'Golden Lion', 'Golden Bear', 'Grand Prix']) {
+  for (const name of ['Palme d’Or', 'Leone d’Oro', 'Goldener Bär', 'Grand Prix']) {
     assert.equal(awardYearLabel(award(name, 2019)), 2019, name);
   }
 });
@@ -265,7 +265,7 @@ test('an unknown award labels by its ceremony year rather than guessing', () => 
 //    a green test suite.
 // 2. Since the full names became "Ceremony — Prize", an award list shipped
 //    without a short_name falls back to stripping the qualifier and reads as a
-//    CITY: "Venezia", not "Golden Lion".
+//    CITY: "Venezia", not "Leone d’Oro".
 //
 // Hermetic — this reads the repo's own seed files, no network and no database.
 const awardSeeds = readdirSync(SEEDS)

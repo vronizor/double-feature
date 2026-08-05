@@ -553,11 +553,11 @@ export function parseTmdbInput(value) {
 //
 // Since v8 the fallback CANNOT stand in for the real short name on the award
 // lists, and it is worth knowing why. Full names are now "Ceremony — Prize" in
-// the ceremony's own language, so stripping the qualifier off
-// "Venezia — Leone d’Oro" yields "Venezia" — a place, not an award. The short
-// name is a different word ("Golden Lion"), chosen for what a reader
-// recognises fastest rather than derived from the long one. An award list
-// shipped without an explicit short_name will therefore read as a city.
+// the ceremony's own language, and the short name is the award's own name — so
+// it is the LEFT half for an academy ("Oscar", "César") and the RIGHT half for
+// a festival ("Leone d’Oro"). Stripping the qualifier always takes the left,
+// so "Venezia — Leone d’Oro" falls back to "Venezia": a place, not an award.
+// An award list shipped without an explicit short_name reads as a city.
 export const shortAwardName = (award) => {
   if (typeof award === 'object' && award?.short_name) return award.short_name;
   const name = typeof award === 'object' ? award?.name : award;

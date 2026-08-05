@@ -304,15 +304,19 @@ is a lie that survives every guard.
   "Prize (City)" — which is what put *Golden Lion (Venice) 1987* directly above
   *César — Meilleur Film 1988* in one overlay. Adding an award list means
   picking a side of the dash, not inventing a shape.
-- **A `short_name` is the token a reader recognises fastest, and is deliberately
-  NOT derivable from the full name.** The list named `Venezia — Leone d’Oro`
-  still shows "Golden Lion" on a card, with the full name on hover. This was
-  chosen over making the short name consistent with the long one, because no
-  syntactic rule survives contact with the set: Cannes awards two prizes, so
-  "the ceremony" does not identify a list, and three academies award "best
-  film", so "the prize" does not either. The consequence worth knowing is that
-  an award list shipped without an explicit `short_name` falls back to
-  stripping the qualifier and reads as a **city**.
+- **A `short_name` names the AWARD ITSELF, in the same language as the full
+  name.** That is the LEFT of the dash for an academy — the statuette or the
+  body: `Oscar`, `César`, `Goya`, `BAFTA` — and the RIGHT for a festival — the
+  prize: `Palme d’Or`, `Leone d’Oro`, `Goldener Bär`. Never the ceremony:
+  "Venezia" and "Cannes" are places, and a card reading *Venezia 1987* would
+  name where a film went rather than what it won. **Recognisability lost to
+  consistency here, deliberately and on a second look**: the first pass kept
+  English "Golden Lion" against a native `Venezia — Leone d’Oro` on the grounds
+  that it is the token an English reader knows fastest, and the card then
+  disagreed with the overlay it opens. One award, one name. Two consequences
+  worth knowing: no regex can derive this (which is why it is stored, not
+  parsed), and an award list shipped without an explicit `short_name` falls
+  back to stripping the qualifier and so reads as a **city**.
 - **Watched films are INCLUDED in draws by default.** The README said the
   opposite for two versions while the UI shipped this, and the UI was right: a
   household rewatches, and a film you loved is a good thing to draw again.

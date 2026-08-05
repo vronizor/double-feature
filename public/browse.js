@@ -1294,10 +1294,10 @@ export function movieCard(movie, { extraAction, onChange = null } = {}) {
       // 190px card and crowd out the synopsis. The full set is one tap away in
       // the overlay.
       //
-      // The line shows SHORT names ("Golden Lion"), so `title` carries the full
-      // ones ("Venezia — Leone d’Oro") on hover — the two are deliberately
-      // different words now, not just longer ones, so there is something to
-      // reveal. Same treatment the poster badge already gets, and it costs
+      // The line shows SHORT names ("Leone d’Oro"), so `title` carries the full
+      // ones ("Venezia — Leone d’Oro") on hover — the short name is the prize
+      // alone, so the ceremony it came from is genuinely missing here and worth
+      // revealing. Same treatment the poster badge already gets, and it costs
       // nothing on a phone, where the overlay is the answer instead.
       awards.length
         ? h(
