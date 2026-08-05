@@ -37,7 +37,11 @@ html, body {
 
 body { min-height: 100dvh; display: flex; flex-direction: column; }
 
-.app { flex: 1; width: min(1100px, 100%); margin: 0 auto; padding: 20px 16px 40px; }
+/* 1240px, not 1100. Widened on request, and the number is not free: it is what
+   the lineup's three-per-line rule is sized against, since a wider body fits a
+   fourth track. Changing one means re-checking the other — see the
+   three-per-line block further down. */
+.app { flex: 1; width: min(1240px, 100%); margin: 0 auto; padding: 20px 16px 40px; }
 
 h1, h2, h3 { line-height: 1.2; margin: 0; font-weight: 650; }
 h1 { font-size: 1.5rem; letter-spacing: -0.02em; }
@@ -538,7 +542,15 @@ kbd {
    stand a 790px-tall poster on the page. Capped, the columns go 5 → 3 at full
    width, which is the intended trade — fewer, larger cards on the one grid
    that is meant to be looked at rather than scanned. Explore keeps `auto-fill`
-   for exactly the opposite reason. */
+   for exactly the opposite reason.
+
+   WHY a cap changes the COUNT and not just the size, since it reads like it
+   should do neither: `repeat(auto-fit, minmax(a, b))` decides how many tracks
+   to lay down using b when b is a definite length, and only falls back to a
+   when b is indefinite. So this grid repeats on 260px and Explore, whose b is
+   `1fr`, repeats on 190px. That is the whole difference between three cards
+   and five, and it is easy to get backwards — measure before trusting the
+   arithmetic. */
 .movie-grid.is-lineup {
   grid-template-columns: repeat(auto-fit, minmax(190px, 260px));
   justify-content: center;
@@ -554,6 +566,32 @@ kbd {
   .movie-grid,
   .movie-grid.is-vote { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   .movie-grid.is-lineup { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
+
+/* THREE PER LINE ON DESKTOP — which is what the WIDER BODY costs.
+ *
+ * This block exists because `.app` went to 1240px, not because the lineup was
+ * wrong before. It was already three across at the old 1100px body. But the
+ * count repeats on the CAP (see the note above the base rule), so widening the
+ * body alone takes 1208px of content and fits a FOURTH 260px track —
+ * floor(1224 / 276) = 4. Three per line was asked for, so the cap moves with
+ * the width to hold it: floor(1224 / 356) = 3.
+ *
+ * The width and this block are therefore one change, not two. Move either
+ * number and re-check the other, or the lineup quietly gains a column.
+ *
+ * Still `auto-fit`, so the usual two-film lineup is two centred cards rather
+ * than two cards and a hole — measured, the third track collapses to 0px and
+ * the pair stays centred. That is why this is not `repeat(3, ...)`.
+ *
+ * 340px is a judgement and the one number to change if it reads wrong: three
+ * cards then sit at 340px with a ~78px gutter each side, and a 510px poster.
+ * Filling the row edge to edge means a 392px cap and a 588px poster, closer to
+ * the 790px the base comment set out to avoid than it sounds.
+ *
+ * Below 1000px the base rule takes over, and below 560px the phone block. */
+@media (min-width: 1000px) {
+  .movie-grid.is-lineup { grid-template-columns: repeat(auto-fit, minmax(300px, 340px)); }
 }
 
 .movie {

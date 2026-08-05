@@ -2873,3 +2873,51 @@ this session was abandoned on the strength of that warning when the real
 problem was simply that the window had not resized yet.
 
 Version 8.5.0.
+
+### 11.3 A wider body, and holding the lineup at three
+
+Two requests that turned out to be one change: widen the page, and show three
+films per line in the lineup. `.app` went from `min(1100px, 100%)` to
+`min(1240px, 100%)`.
+
+The second half is not what it looks like. The lineup was **already** three
+across — the request was really about size, and about what widening the body
+would have done to it. `.movie-grid.is-lineup` is
+`repeat(auto-fit, minmax(190px, 260px))`, and the extra 140px of body is enough
+to fit a fourth 260px track. Widening alone would have quietly turned the one
+grid meant to be looked at into a four-up scanning grid. So the cap moves with
+the width — `minmax(300px, 340px)` above 1000px — which holds the count at
+three and spends the new space on the cards instead: 260px wide becomes 340px,
+and the poster goes from ~390px tall to ~510px.
+
+**A correction, because it was written down wrong first and acted on.** The
+plan for this work claimed the lineup showed *five* per line and that the
+comment above the rule — which said the 260px cap took it "5 → 3" — was stale.
+Both claims were wrong, and the arithmetic behind them was the reason:
+`repeat(auto-fit, minmax(a, b))` decides how many tracks to lay down using **b**
+when b is a definite length, and only falls back to **a** when b is indefinite.
+The count for this grid therefore repeats on 260px, not 190px. Explore, whose
+`b` is `1fr`, does repeat on its 190px minimum, which is exactly why the two
+grids differ. The old comment had been right all along and was briefly
+"corrected" into being wrong.
+
+Caught by measuring the old stylesheet rather than trusting the calculation:
+at a 1400px window the 1100px body computed `260px 260px 260px`, three tracks,
+against a prediction of five. The rule is now written into the comment above
+the base rule, since it is easy to get backwards and costs a real mistake each
+time.
+
+Verified by running two servers against the same page at the same window,
+differing only in the stylesheet — the same A/B used for the overlay fix in
+11.2, and against a copy of the database rather than the live one. At a 1400px
+window: the body measures 1240px, the lineup computes `340px 340px 340px`, and
+seven cards land three-then-three-then-one. A two-film lineup still centres —
+the third track collapses to `0px` and the pair sits centred in the row, which
+is why the grid stays `auto-fit` rather than becoming `repeat(3, ...)`.
+
+One claim here is derived rather than measured, and is marked as such in the
+comment: that widening to 1240px with the *old* cap would have produced four
+tracks. It follows from the repetition rule confirmed above, but the browser
+extension disconnected before the counterfactual could be run.
+
+Version 8.6.0.
