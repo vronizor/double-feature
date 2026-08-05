@@ -683,12 +683,6 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
      own aspect-ratio height instead of being stretched to match a taller
      info column, which would over-crop it via object-fit:cover. */
 }
-@media (max-width: 620px) {
-  .modal-card { grid-template-columns: 1fr; }
-  .modal-poster, .modal-poster--empty { grid-column: 1; grid-row: 1; }
-  .modal-info { grid-column: 1; grid-row: 2; padding-right: 0; }
-  .modal-trailer-row { grid-column: 1; grid-row: 3; }
-}
 .modal-close {
   position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
   border-radius: 50%; padding: 0; display: grid; place-items: center; line-height: 1;
@@ -719,6 +713,36 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
   overflow: hidden; background: var(--bg-sunken);
 }
 .modal-trailer iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* ONE COLUMN ON A PHONE.
+ *
+ * This block must stay BELOW every rule it overrides, and that placement is
+ * the bug it fixes rather than a tidiness preference. It used to sit directly
+ * under `.modal-card` and ABOVE `.modal-poster`, `.modal-info` and
+ * `.modal-trailer-row` — all single-class selectors, so all equal specificity,
+ * so the later base rules won and this block did nothing at all.
+ *
+ * Measured at a 500px viewport, both states on the same page, changing only
+ * this file. Above the base rules: the card computes two tracks and
+ * `.modal-info` keeps `grid-column: 2 / grid-row: 1` and its 24px right
+ * padding. Below them: one track, and the info moves to `grid-column: 1 /
+ * grid-row: 2` with the padding cleared, so poster, info and trailer stack.
+ *
+ * On a real phone the broken state put the poster left and the text in a
+ * column running past the card's edge — the title clipped under the close
+ * button, the synopsis and "Where to watch" cut off mid-word, and the trailer
+ * stranded at the bottom of an otherwise empty poster column. One dead media
+ * query, four symptoms that each look like a separate bug.
+ *
+ * Third time this trap has been paid for here — see DECISIONS.md §3. Note that
+ * a hidden automation tab CAN answer this one: computed styles and layout
+ * boxes are valid there. It is rAF, focus and smooth scrolling that are not. */
+@media (max-width: 620px) {
+  .modal-card { grid-template-columns: 1fr; }
+  .modal-poster, .modal-poster--empty { grid-column: 1; grid-row: 1; }
+  .modal-info { grid-column: 1; grid-row: 2; padding-right: 0; }
+  .modal-trailer-row { grid-column: 1; grid-row: 3; }
+}
 
 /* Tap-to-rank */
 .movie--tappable { cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }

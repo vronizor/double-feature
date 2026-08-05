@@ -2821,3 +2821,55 @@ for a status-code passthrough was judged not proportionate next to a live
 browser check against the real server.
 
 Version 8.1.0.
+
+### 11.2 The detail overlay, on a phone
+
+Reported from a phone with two screenshots: the film overlay rendering its
+desktop two-column layout on a ~390px screen, the poster on the left and the
+text in a column running off the right edge of the card. The title was clipped
+under the close button, "The Criterion Collectio" lost its last letters, every
+line of the synopsis was cut mid-word, "Where to watch" lost its arrow, and the
+trailer sat at the very bottom of an otherwise empty poster column with a
+screen-tall void above it.
+
+Four symptoms, one cause, and it is the trap `DECISIONS.md` §3 already
+collects for the third time: **at equal specificity, source order decides.**
+The `@media (max-width: 620px)` block that collapses the overlay to one column
+sat directly beneath `.modal-card` — and therefore ABOVE `.modal-poster`,
+`.modal-info` and `.modal-trailer-row`. Every one of those is a single-class
+selector, so every one of them is the same specificity as the rule inside the
+media query, and being later in the file they won. The responsive block was
+dead code. It had presumably never worked.
+
+What made it survive review is that it looks correct: the media query exists,
+its declarations are right, and the viewport meta is present and correct too.
+Reading the file top to bottom, nothing is wrong. Only the order is.
+
+The fix is to move the block below every rule it overrides. No specificity was
+added — raising it to `.modal-card .modal-info` would have worked equally well
+and would have left the next person the same puzzle one level further in.
+
+**Measured rather than reasoned about**, because the first explanation was
+wrong. Two servers were run against the same page at the same 500px viewport,
+differing only in this file. Before: the card computes two tracks and
+`.modal-info` holds `grid-column: 2 / grid-row: 1` with its 24px right padding
+intact. After: one track, and the info moves to `grid-column: 1 / grid-row: 2`
+with the padding cleared — poster, then info, then trailer, each the full width
+of the card and none of it overflowing. The CSSOM was also read directly to
+confirm the media rule was present and matching in both, so the failure was
+the cascade rather than a cached stylesheet.
+
+One correction worth recording, since it was written into a comment before it
+was checked: the first draft claimed the card's own template *did* collapse and
+that only the children were stranded. The measurement says otherwise — the card
+computes two tracks in the broken state — so the comment now states what was
+observed and stops short of explaining the track arithmetic it cannot support.
+
+A second note for whoever next reaches for browser automation here: a hidden
+tab **can** answer a layout question. Computed styles and layout boxes are
+valid in one. It is `requestAnimationFrame`, focus and smooth scrolling that
+are not, which is what §3's warning is actually about. An earlier attempt in
+this session was abandoned on the strength of that warning when the real
+problem was simply that the window had not resized yet.
+
+Version 8.5.0.
