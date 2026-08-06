@@ -73,6 +73,27 @@ CREATE TABLE IF NOT EXISTS lists (
   -- It is an ordinary list in every other respect, which is the point -- the
   -- draw, the filters, Top-N and publishing need no new code path to use it.
   hidden          INTEGER NOT NULL DEFAULT 0,
+  -- Whose watchlist this is. NULL -- the overwhelming majority -- means the
+  -- list belongs to the household rather than to a person, which is every
+  -- seed list and every custom list anyone curates for the house.
+  --
+  -- A WATCHLIST IS owner IS NOT NULL, and that is the whole discriminator. It
+  -- deliberately mirrors how a dynamic list is query_json IS NOT NULL: there
+  -- is no third origin value, because widening the origin CHECK would mean
+  -- SQLite's full table-rebuild dance under a populated production table --
+  -- the same reason media_type was left alone above.
+  --
+  -- This is the IDENTITY, and the name is display only. The name was the
+  -- identity twice in this project's life, for built-in vibes and then for
+  -- seed lists, and both times a rename silently detached the row from
+  -- whatever was looking for it. A device finds its own watchlist by owner,
+  -- so renaming "Alice's watchlist" to anything at all keeps working.
+  --
+  -- Not a foreign key to a people table, because there is no people table and
+  -- adding one would be the account system this app is designed around not
+  -- having. It is a plain string the device chose. See DECISIONS.md section 2
+  -- for where that line sits and why a watchlist stays on the safe side of it.
+  owner           TEXT,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -397,6 +418,7 @@ export function migrate(target) {
   ensureColumn(target, 'lists', 'hidden', 'INTEGER NOT NULL DEFAULT 0');
   ensureColumn(target, 'lists', 'seed_key', 'TEXT');
   ensureColumn(target, 'lists', 'name_custom', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(target, 'lists', 'owner', 'TEXT');
   // Partial, so the custom lists with a NULL key do not collide. Created here
   // rather than in SCHEMA for the reason given above the movies_imdb index.
   target.exec(

@@ -85,9 +85,14 @@ a { color: var(--accent); }
 .masthead-brand { text-decoration: none; color: inherit; display: block; }
 
 .tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+/* Padding, not font-size, is what raises these toward the 44px touch target.
+   Measured on a real phone in v8: .tab was 36px and .chip 35px, against a
+   stylesheet-derived guess of ~26 that was wrong in the app's favour. Growing
+   the text instead would have re-laid out four pill rows to fix a thumb
+   problem. */
 .tab {
   background: none; border: 1px solid transparent; color: var(--text-dim);
-  padding: 6px 12px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.9rem;
+  padding: 10px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.9rem;
 }
 .tab:hover { color: var(--text); background: var(--bg-raised); }
 .tab[aria-current="true"] { color: var(--accent); border-color: var(--border-strong); background: var(--bg-raised); }
@@ -257,7 +262,7 @@ label { display: block; }
 @media (max-width: 780px) { .filters { grid-template-columns: 1fr; } }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
-  font-size: 0.82rem; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  font-size: 0.82rem; padding: 9px 12px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--border-strong); background: var(--bg-sunken); color: var(--text-dim);
   transition: background-color 120ms, border-color 120ms, color 120ms;
 }
@@ -306,8 +311,12 @@ label { display: block; }
    chip, where it read as "clear this selection". In that mode every chip is a
    delete button, so the whole row is coloured as one — a single chip styled as
    dangerous inside a row of ordinary ones would be the same trap again. */
+/* The worst target in the app at 16px, and it is the control that deletes a
+   saved vibe. The padding does the work; the text stays small on purpose,
+   because this is a secondary action sitting beside a chip and making it read
+   as loud as one would be the wrong fix to the right problem. */
 .vibe-edit {
-  background: none; border: none; padding: 2px 8px; cursor: pointer; line-height: 1;
+  background: none; border: none; padding: 13px 12px; cursor: pointer; line-height: 1;
   color: var(--text-faint); font-size: 0.78rem; text-decoration: underline; align-self: center;
 }
 .vibe-edit:hover { color: var(--text); }
@@ -594,10 +603,33 @@ kbd {
   position: relative; background: var(--bg-raised); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column;
 }
+/* Exists only so .save-toggle has something to sit in the corner of. The
+   award and watched flags stay positioned against .movie, where they already
+   were — they belong to the top of the card, which is the top of the poster
+   either way. */
+.movie-poster-frame { position: relative; display: block; }
 .movie-poster {
   aspect-ratio: 2 / 3; width: 100%; object-fit: cover; display: block;
   background: var(--bg-sunken); color: transparent;
 }
+/* Bottom-right, because both top corners are taken and a film can be a
+   watched, award-winning, saved film all at once.
+
+   44x44 is the touch target, and it is the SIZE OF THE BUTTON rather than of
+   the glyph — the star renders around 20px and the rest is padding, which is
+   the way to reach 44 without a control that looks shouted. */
+.save-toggle {
+  position: absolute; right: 6px; bottom: 6px; z-index: 2;
+  width: 44px; height: 44px; padding: 0; line-height: 1;
+  display: grid; place-items: center; cursor: pointer;
+  font-size: 1.25rem; font-family: inherit;
+  border: 1px solid color-mix(in srgb, var(--border-strong) 70%, transparent);
+  border-radius: 999px; background: rgb(0 0 0 / 62%); color: var(--text-dim);
+  transition: color 120ms, background-color 120ms, border-color 120ms;
+}
+.save-toggle:hover { color: var(--text); background: rgb(0 0 0 / 80%); }
+.save-toggle.is-saved { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+.save-toggle:disabled { opacity: 0.55; cursor: progress; }
 .movie-poster--empty {
   display: grid; place-items: center; color: var(--text-faint);
   font-size: 0.8rem; text-align: center; padding: 10px;
@@ -717,6 +749,17 @@ button.movie-title:hover, button.movie-title:focus-visible { color: var(--accent
      own aspect-ratio height instead of being stretched to match a taller
      info column, which would over-crop it via object-fit:cover. */
 }
+/* `.base.modifier`, NOT `.modal-card--prompt` on its own — see DECISIONS §3.
+   At equal specificity source order decides, and `.modal-card` sits near the
+   bottom of this file, so a single-class modifier would inherit that
+   `190px 1fr` poster grid and render a one-field prompt a third of the card
+   wide. That exact mistake was made three times in v7. */
+.modal-card.modal-card--prompt {
+  grid-template-columns: 1fr; max-width: 420px; gap: 12px;
+}
+.modal-card--prompt h2 { margin: 0; font-size: 1.05rem; }
+.modal-card--prompt p { margin: 0; font-size: 0.88rem; line-height: 1.5; }
+.modal-card--prompt .modal-actions { justify-content: flex-end; }
 .modal-close {
   position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
   border-radius: 50%; padding: 0; display: grid; place-items: center; line-height: 1;

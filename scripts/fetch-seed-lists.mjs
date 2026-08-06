@@ -556,8 +556,14 @@ const BOLD_ITALIC_FILM = /'''''\[\[(?!Fichier:|File:|Image:|Catégorie:|Category
  * article title — never a year off the page.
  */
 export const CEREMONY_ANCHORS = {
-  // Winners are single-"*" list items; nominees use "**".
-  cesar: /^\*[^*\n].*?\[\[([^\]|\n]*?cérémonie[^\]|\n]*?)\|[^\]\n]*\]\]/gim,
+  // Winners are single-"*" list items; nominees use "**". A LOOKAHEAD is what
+  // rejects a nominee, and consuming that character instead was the bug: the
+  // two newest lines are written "*[[50e cérémonie…" with no space after the
+  // bullet, so [^*\n] ate the first "[" and the "[[" it then looked for was no
+  // longer there. Two ceremonies went missing and the run still reported
+  // success, because the only loud path here is parsing NOTHING — an award
+  // list grows by one film a year, so no proportional guard can see 49 of 51.
+  cesar: /^\*(?!\*).*?\[\[([^\]|\n]*?cérémonie[^\]|\n]*?)\|[^\]\n]*\]\]/gim,
   // The year cell rowspans the winner and its nominees.
   bafta: /\{\{center\|'''\d{4}'''.*?\[\[([^\]|\n]*?British Academy Film Awards)(?:\|[^\]\n]*)?\]\]/g,
   // A full-width header row introduces each ceremony.

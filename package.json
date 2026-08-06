@@ -1,6 +1,6 @@
 {
   "name": "double-feature",
-  "version": "8.6.0",
+  "version": "9.8.0",
   "description": "Self-hosted movie-night app: draw random films from curated lists, then pick one by ranked-choice vote.",
   "type": "module",
   "private": true,
@@ -17,6 +17,7 @@
     "backfill-lists": "node scripts/backfill-list-fields.mjs",
     "backfill-imdb-ids": "node scripts/backfill-imdb-ids.mjs",
     "imdb-ratings": "node scripts/imdb-ratings.mjs",
+    "audit-matches": "node --env-file-if-exists=.env scripts/audit-matches.mjs",
     "refresh-dynamic": "node -e \"import('./server/refresh.js').then(async m => { const r = await m.refreshDynamicLists(); console.log(JSON.stringify(r.results ?? r, null, 2)); process.exit(0); })\""
   },
   "dependencies": {

@@ -20,7 +20,8 @@
  */
 
 import { readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { ROOT } from '../server/config.js';
 import { getDb, closeDb } from '../server/db.js';
@@ -35,13 +36,29 @@ const FIELDS = [
   { key: 'award_year', column: 'award_year' },
 ];
 
+/**
+ * The list a seed file describes, found the way the SEEDER finds it.
+ *
+ * Exported so the one decision that broke this script can be tested without a
+ * seed file or a TMDB call — the same reason `upsertList` is exported.
+ */
+export function findSeededList(db, seedKey) {
+  return db.prepare('SELECT id, name FROM lists WHERE seed_key = ?').get(seedKey) ?? null;
+}
+
 async function backfillList(db, file) {
   const payload = JSON.parse(await readFile(join(SEEDS, file), 'utf8'));
   const entries = payload.entries ?? [];
   const present = FIELDS.filter((f) => entries.some((e) => Number.isInteger(e[f.key])));
   if (present.length === 0) return null;
 
-  const list = db.prepare('SELECT id FROM lists WHERE name = ?').get(payload.name);
+  // Keyed on seed_key — the seed filename — for exactly the reason the column
+  // exists: the seeder finds its list that way and honours name_custom, so a
+  // list the host renamed from the Lists tab still has its original seed_key
+  // and a NEW name. Looking it up by payload.name therefore found nothing and
+  // reported "not seeded yet" for a list sitting right there, fully populated,
+  // and skipped the repair this script exists to do. Nothing failed.
+  const list = findSeededList(db, basename(file, '.json'));
   if (!list) return { name: payload.name, missing: true };
 
   // Same identity the seeder writes rows under, and it has to STAY the same:
@@ -88,7 +105,9 @@ async function backfillList(db, file) {
     }
   }
 
-  return { name: payload.name, stats };
+  // The list's own name, not the seed file's — if the host renamed it, the
+  // report should say what they see in the Lists tab.
+  return { name: list.name, stats };
 }
 
 async function main() {
@@ -142,4 +161,9 @@ async function main() {
   closeDb();
 }
 
-main();
+// Only when invoked as a script. Importing this module for a unit test must
+// not open the real database and walk every seed file — same guard, and same
+// reason, as `seed.mjs` and `fetch-seed-lists.mjs`.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}

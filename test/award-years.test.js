@@ -22,6 +22,27 @@ test('César: winners are single-* items, nominees are **', () => {
   assert.equal(pairs[1].winnerPage, 'Cyrano de Bergerac (film, 1990)');
 });
 
+// The failure this fixture reproduces was live in the committed seed: the two
+// newest César winners were present with a NULL ceremony year, and the fetch
+// had reported success. An award list grows by one film a year, so the
+// proportional shrink guard cannot tell 49 parsed from 51 — nothing was ever
+// going to catch this except a fixture cut from the markup as it is TODAY.
+test('César: a bullet with no space before the link is still a winner', () => {
+  const page = `
+=== Années 2020 ===
+* [[49e cérémonie des César|2024]] : '''''[[Anatomie d'une chute]]'', réalisé par [[Justine Triet]]'''
+*[[50e cérémonie des César|2025]] : '''''[[Emilia Pérez]]'', réalisé par [[Jacques Audiard]]'''
+*[[51e cérémonie des César|2026]] : '''''[[L'Attachement]]'', réalisé par [[Carine Tardieu]]'''
+** ''[[Un autre film]]'' – [[Quelqu'un]]
+`;
+  const pairs = parseCeremonyWinners(page, CEREMONY_ANCHORS.cesar);
+  assert.equal(pairs.length, 3, 'the spaceless bullets must parse, and the ** must not');
+  assert.equal(pairs[1].ceremonyPage, '50e cérémonie des César');
+  assert.equal(pairs[1].winnerPage, 'Emilia Pérez');
+  assert.equal(pairs[2].ceremonyPage, '51e cérémonie des César');
+  assert.equal(pairs[2].winnerPage, "L'Attachement");
+});
+
 test('BAFTA: the winner is the gold-highlighted, bold-italic row', () => {
   const page = `
 {| class="wikitable" style="width:100%;"
