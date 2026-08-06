@@ -2929,3 +2929,48 @@ rail measures 376, the main column 812, and the lineup inside it computes
 same card size as before any of this, which is the point.
 
 Version 8.6.0.
+
+### 11.4 Closing v8
+
+Six chunks. The version's thesis was *keep the v7 loop, add nothing structural,
+and get it onto the Pi.* Two of those three held, and the one that did not is
+the more interesting half.
+
+**The loop held, and it is still the only thing finding these bugs.** The dead
+media query and the wider body both came from someone using the app on a phone
+and a desktop, not from a review pass. The media query in particular had been
+shipped and looked correct in the source: `@media (max-width: 640px)` inside a
+block already scoped to a wider breakpoint, which never matched anything.
+Nothing catches that except opening it on the device.
+
+**The "nothing structural" half was wrong, and it was wrong in a good way.**
+The largest chunk of v8 gave seed lists a `seed_key`, and it is exactly the
+structural change the version said it would not make. It paid for itself within
+one commit: the nine award lists were renamed to a single grammar immediately
+afterwards, and before the key that would have been nine hand-written
+migrations, because editing a seed file's name is a no-op on any database that
+has already booted. Two versions in a row have now hit this — `builtin_key` for
+vibes in v7, `seed_key` for lists in v8 — and the shape is identical each time:
+**a display name was serving as identity, and nobody noticed until a rename.**
+
+**A process finding, which is why it is written here rather than nowhere.**
+Three of the six chunks have no write-up in this file: the `seed_key` work and
+both halves of the award renaming. Their durable content did survive, in
+`DECISIONS.md` §3 and §4, which is the split doing its job — a cold session
+still cannot re-propose naming an award list after the city. But the reasoning
+that produced them is gone, and a closing section is the last point at which
+that is noticeable at all. The rule that a chunk closes with a report is not
+bookkeeping; it is the only thing standing between a decision and the version
+where somebody re-derives it.
+
+**Two things did not get done, and neither is hidden.** The Pi never happened.
+It led v8, it has been recorded since v6 as the one thing to re-read before
+deploying, and it is now **unscheduled** in `BACKLOG.md` rather than leading a
+third version — parking it honestly is better than a roadmap row that has been
+first in line for three cycles. And the tap targets, deferred from v7 to v8,
+are folded into a v9 chunk that already has that card on a phone being
+measured, rather than given a row of their own to defer once more.
+
+Version 9.0.0.
+
+## 12. v9
