@@ -310,6 +310,32 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   Wikipedia category" is a property to measure per award, never a convention to
   assume.
 
+- **Two more award lists: Sundance and Annecy.** *(Chosen 2026-08-06 from three
+  measured sweeps; the numbers are in
+  [award list candidates](docs/evidence/award-list-candidates.md).)* Both cost
+  **no new code** — `Annecy — Cristal du long métrage` needs no ceremony
+  machinery at all because its `P585` is already dense, and
+  `Sundance — Grand Jury Prize: U.S. Dramatic` is a QID and a minimum. Annecy
+  is the highest-value entry any sweep produced, at 89% new: this library's
+  animation is Ghibli plus the Disney canon and nothing else, and the
+  `animation` and `family` tags already exist to hang it on. Sundance earns its
+  place on 85% new, not on fame — the first sweep demoted it for being
+  anglophone, which was a fault in how it was asked.
+
+  **Everything else measured stays in research**, including Golden Horse, Blue
+  Dragon and Oscar Best Documentary, which an earlier sweep had recommended
+  here.
+
+- **`European Film Award — Best Documentary`** — the European documentary list,
+  asked for 2026-08-06 and measured the same day. Also free: no article, no
+  anchor, no new parsing, because its `P585` is 100% across 30 distinct
+  ceremony years — the one property that could have disqualified it. 23 new
+  films, 97% European by production against BAFTA's 64%, and a better
+  above-10k-votes hit rate than the Oscar documentary list despite a lower
+  median. The evidence file carries why BAFTA's better-looking numbers are a
+  mirage and why the Goya documentary list, which is the one that costs
+  literally nothing to build, is not worth building.
+
 - **A staleness surface, and a source-count probe.** *(2026-08-06.)* The
   measured finding was that **scheduling is not the missing piece** — eight of
   nine award lists already carried their 2026 winner, kept current by accident

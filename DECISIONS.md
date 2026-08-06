@@ -337,6 +337,18 @@ is a lie that survives every guard.
   And everyone can see everyone's: on a household Pi on a home LAN privacy is
   not the goal, not stepping on each other's is — and hiding would break the
   feature's own purpose, since the draw happens on the host's device.
+- **A name in a non-Latin script is ROMANISED, not translated and not left
+  native.** `Jinma Jiang — Zuijia Juqingpian`, not `金馬獎 — 最佳劇情片` and not
+  `Golden Horse — Best Narrative Feature`. The rule above says a list is named
+  in the ceremony's own language, and every example that settled it happened to
+  be Latin script, so it never had to say which of the two properties it meant.
+  It means the LANGUAGE. Its actual reasoning was that a card and the overlay
+  it opens must not disagree about what a film won, and romanisation preserves
+  that exactly while staying legible on a household's devices and sortable
+  beside everything else. Translating to English would break it, because then
+  the award has two names again. Settled before the first such list was built
+  rather than after, so Hebrew and Arabic do not each get decided by whoever
+  ships them.
 - **Watched films are INCLUDED in draws by default.** The README said the
   opposite for two versions while the UI shipped this, and the UI was right: a
   household rewatches, and a film you loved is a good thing to draw again.
