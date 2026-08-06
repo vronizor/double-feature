@@ -48,6 +48,12 @@ const CATALOGUE = [
     genres: [{ id: 18, name: 'Drama' }], director: 'A Director' },
   { id: 110, title: 'Not Yet Cached', release_date: '2003-01-01', original_language: 'en', runtime: 100,
     genres: [{ id: 18, name: 'Drama' }], director: 'A Director' },
+  // Touched by the watchlist tests and by nothing else, so "is this film in
+  // the library yet" has a definite answer there rather than depending on
+  // which earlier test happened to cache it. 110 already reads as cached by
+  // the time those run, despite its name.
+  { id: 111, title: 'Never Cached', release_date: '2004-01-01', original_language: 'en', runtime: 101,
+    genres: [{ id: 18, name: 'Drama' }], director: 'A Director' },
 ];
 
 const detail = (movie) => ({
@@ -869,4 +875,152 @@ test('a second vote cannot be published while one is open', async () => {
   const fourth = await call('/api/sessions', { method: 'POST', body: { tmdb_ids: [101] } });
   assert.equal(fourth.status, 201);
   await call(`/api/sessions/${fourth.body.slug}`, { method: 'DELETE' });
+});
+
+// --- Watchlists ------------------------------------------------------------
+//
+// A watchlist is a list with an owner and nothing else, so what is worth
+// testing here is not "does it store a film" — `list_movies` has done that for
+// eight versions — but the four places the owner changes an answer: creation,
+// the delete guard, the one-film path, and the export's round trip.
+
+test('a watchlist is a list with an owner, and it does not arrive in play', async () => {
+  const created = await call('/api/lists', {
+    method: 'POST',
+    body: { name: "Alice's watchlist", owner: 'alice' },
+  });
+  assert.equal(created.status, 201);
+  assert.equal(created.body.owner, 'alice');
+  assert.equal(created.body.origin, 'custom');
+  // The whole point of the default: saving one film must not widen the pool
+  // for everyone else the next time the app opens.
+  assert.equal(created.body.is_active, 0);
+
+  // An ordinary custom list is unaffected — no owner, and none invented.
+  const plain = await call('/api/lists', { method: 'POST', body: { name: 'A shared list' } });
+  assert.equal(plain.body.owner, null);
+});
+
+test('one watchlist per person, so a forgotten device cannot make a second', async () => {
+  const again = await call('/api/lists', {
+    method: 'POST',
+    body: { name: 'Alice again', owner: 'alice' },
+  });
+  assert.equal(again.status, 400);
+  assert.match(again.body.error, /already has a watchlist/);
+});
+
+test('an empty owner is not an owner', async () => {
+  const created = await call('/api/lists', {
+    method: 'POST',
+    body: { name: 'Blank owner', owner: '   ' },
+  });
+  // Otherwise it would answer to every device's "is this mine?" at once.
+  assert.equal(created.body.owner, null);
+});
+
+test('saving one film takes no TMDB call, and a second tap is not an error', async () => {
+  const { body: lists } = await call('/api/lists');
+  const alice = lists.lists.find((list) => list.owner === 'alice');
+
+  const first = await call(`/api/lists/${alice.id}/entries`, {
+    method: 'POST',
+    body: { tmdb_id: 101 },
+  });
+  assert.equal(first.status, 201);
+  assert.equal(first.body.added, true);
+
+  // Idempotent: this backs a toggle, and a double tap on a phone must report
+  // the film is on the list rather than that something went wrong.
+  const second = await call(`/api/lists/${alice.id}/entries`, {
+    method: 'POST',
+    body: { tmdb_id: 101 },
+  });
+  assert.equal(second.status, 200);
+  assert.equal(second.body.added, false);
+  assert.equal(second.body.entry_id, first.body.entry_id);
+
+  const { body: entries } = await call(`/api/lists/${alice.id}/entries`);
+  assert.equal(entries.entries.length, 1);
+  assert.equal(entries.entries[0].status, 'resolved');
+});
+
+test('a film the library has never seen is refused, not half-created', async () => {
+  const { body: lists } = await call('/api/lists');
+  const alice = lists.lists.find((list) => list.owner === 'alice');
+
+  const refused = await call(`/api/lists/${alice.id}/entries`, {
+    method: 'POST',
+    body: { tmdb_id: 111 },
+  });
+  assert.equal(refused.status, 400);
+  assert.match(refused.body.error, /not in the library/);
+
+  // Caching it first is the two-step the lineup already uses, and then it goes.
+  await call('/api/movies/111');
+  const added = await call(`/api/lists/${alice.id}/entries`, {
+    method: 'POST',
+    body: { tmdb_id: 111 },
+  });
+  assert.equal(added.status, 201);
+});
+
+test('id 0 is refused, but a negative id is not — TV entries are stored negated', async () => {
+  const { body: lists } = await call('/api/lists');
+  const alice = lists.lists.find((list) => list.owner === 'alice');
+
+  const zero = await call(`/api/lists/${alice.id}/entries`, {
+    method: 'POST',
+    body: { tmdb_id: 0 },
+  });
+  assert.equal(zero.status, 400);
+
+  // Not in the library, so a 400 — but for the RIGHT reason. A `!tmdbId` guard
+  // would have rejected it as malformed and made TV entries unsaveable.
+  const negative = await call(`/api/lists/${alice.id}/entries`, {
+    method: 'POST',
+    body: { tmdb_id: -700 },
+  });
+  assert.match(negative.body.error, /not in the library/);
+});
+
+test('a watchlist is not deletable by a stray click, for the opposite reason a seed list is not', async () => {
+  const { body: lists } = await call('/api/lists');
+  const alice = lists.lists.find((list) => list.owner === 'alice');
+
+  const refused = await call(`/api/lists/${alice.id}`, { method: 'DELETE' });
+  assert.equal(refused.status, 400);
+  assert.match(refused.body.error, /alice's watchlist/);
+
+  // Still there, whole.
+  const { body: after } = await call(`/api/lists/${alice.id}/entries`);
+  assert.equal(after.entries.length, 2);
+});
+
+test('the export is the seed-file shape, and it re-imports with no title matching', async () => {
+  const { body: lists } = await call('/api/lists');
+  const alice = lists.lists.find((list) => list.owner === 'alice');
+
+  const { status, body: file } = await call(`/api/lists/${alice.id}/export`);
+  assert.equal(status, 200);
+  assert.equal(file.name, "Alice's watchlist");
+  assert.equal(file.count, 2);
+  assert.deepEqual(file.entries.map((e) => e.tmdb_id).sort((a, b) => a - b), [101, 111]);
+  // Every entry carries an id, which is what makes the round trip exact.
+  assert.ok(file.entries.every((entry) => Number.isInteger(entry.tmdb_id)));
+  assert.ok(file.entries.every((entry) => entry.title));
+  // The owner is NOT exported: a watchlist sent to a friend must land as an
+  // ordinary list, not as something their devices would claim as theirs.
+  assert.equal(file.owner, undefined);
+
+  // The round trip, through the import path that already existed.
+  const target = await call('/api/lists', { method: 'POST', body: { name: 'Imported from Alice' } });
+  const job = await call(`/api/lists/${target.body.id}/import?format=json`, {
+    method: 'POST',
+    text: JSON.stringify(file),
+  });
+  const finished = await waitForImport(job.body.jobId ?? job.body.id);
+  assert.equal(finished.resolved, 2, 'both films resolve by id');
+  assert.equal(finished.needs_review, 0, 'nothing lands in the reconciliation queue');
+  assert.equal(finished.unmatched, 0);
 });

@@ -86,15 +86,30 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
   const name = String(req.body?.name ?? '').trim();
   if (!name) throw badRequest('A list name is required');
+  // A watchlist is a list with an owner, and nothing else distinguishes it.
+  // Empty string is not an owner: it would make a household list answer to
+  // every device's "is this mine?" at once.
+  const owner = String(req.body?.owner ?? '').trim() || null;
 
   const db = getDb();
   if (db.prepare('SELECT 1 FROM lists WHERE name = ?').get(name)) {
     throw badRequest(`A list named "${name}" already exists`);
   }
+  // One per person. Without this, a device that loses its localStorage and
+  // re-announces the same name quietly ends up with two watchlists, and only
+  // one of them has the films in it.
+  if (owner && db.prepare('SELECT 1 FROM lists WHERE owner = ?').get(owner)) {
+    throw badRequest(`${owner} already has a watchlist`);
+  }
 
   const { lastInsertRowid } = db
-    .prepare(`INSERT INTO lists (name, origin, is_active) VALUES (?, 'custom', 0)`)
-    .run(name);
+    .prepare(
+      // is_active = 0, always. A watchlist that arrived in play would widen
+      // everyone else's pool the next time the app opened, on the strength of
+      // one person saving one film.
+      `INSERT INTO lists (name, origin, is_active, owner) VALUES (?, 'custom', 0, ?)`,
+    )
+    .run(name, owner);
 
   res.status(201).json(listWithCounts(db, Number(lastInsertRowid)));
 });
@@ -143,6 +158,14 @@ router.delete('/:id', (req, res) => {
   // one deliberate rather than a stray click.
   if (list.origin === 'seed' && req.query.force !== 'true') {
     throw badRequest('Refusing to delete a seed list without ?force=true');
+  }
+  // A watchlist gets the same guard for the OPPOSITE reason, and the inversion
+  // is the point: a seed list is protected because re-resolving it costs TMDB
+  // calls, but it can always be re-fetched. A watchlist exists nowhere else --
+  // it was assembled a film at a time and no source can rebuild it. Export it
+  // first; that endpoint exists so this one can be survivable.
+  if (list.owner && req.query.force !== 'true') {
+    throw badRequest(`Refusing to delete ${list.owner}'s watchlist without ?force=true`);
   }
 
   db.prepare('DELETE FROM lists WHERE id = ?').run(id);
@@ -442,6 +465,117 @@ router.delete('/entries/:entryId', (req, res) => {
     .run(Number(req.params.entryId));
   if (!changes) throw badRequest('No such entry');
   res.json({ deleted: true });
+});
+
+// --- One film at a time ----------------------------------------------------
+//
+// The import path above is bulk, asynchronous and network-bound because it
+// resolves raw titles. Saving a film you are already looking at is none of
+// those things: the id is known, the movie row already exists, and the answer
+// has to come back inside a button press. So this is a separate route rather
+// than an import of one, and it makes NO TMDB call at all.
+//
+// The consequence for the client is that a film not yet in the library has to
+// be cached first, via GET /api/movies/:tmdbId — which is the same two-step
+// the lineup's "add a specific film" flow already does.
+
+router.post('/:id/entries', (req, res) => {
+  const db = getDb();
+  const id = Number(req.params.id);
+  const list = db.prepare('SELECT * FROM lists WHERE id = ?').get(id);
+  if (!list) throw badRequest('No such list');
+
+  const tmdbId = Number(req.body?.tmdb_id);
+  // Not `!tmdbId`: a TV-sourced entry is stored under a NEGATIVE id and a
+  // manual one below -1,000,000,000, so the only invalid integer here is 0.
+  if (!Number.isInteger(tmdbId) || tmdbId === 0) throw badRequest('A valid tmdb_id is required');
+
+  const movie = db.prepare('SELECT * FROM movies WHERE tmdb_id = ?').get(tmdbId);
+  if (!movie) throw badRequest('That film is not in the library yet — cache it first');
+
+  const existing = db
+    .prepare('SELECT id FROM list_movies WHERE list_id = ? AND tmdb_id = ?')
+    .get(id, tmdbId);
+  // Idempotent rather than an error. This backs a toggle, and a double tap on
+  // a phone must not surface as a failure — the film is on the list either
+  // way, which is what the caller asked for.
+  if (existing) return res.json({ entry_id: existing.id, tmdb_id: tmdbId, added: false });
+
+  // raw_title/raw_year carry the film's own title here rather than something a
+  // host typed, because nothing was typed: the provenance of a saved film is
+  // the film. status is 'resolved' with no matching involved at all, which is
+  // the whole reason this path cannot produce a needs_review row.
+  const { lastInsertRowid } = db
+    .prepare(
+      `INSERT INTO list_movies (list_id, tmdb_id, raw_title, raw_year, status)
+       VALUES (?, ?, ?, ?, 'resolved')`,
+    )
+    .run(id, tmdbId, movie.title, movie.year ?? null);
+
+  res.status(201).json({ entry_id: Number(lastInsertRowid), tmdb_id: tmdbId, added: true });
+});
+
+/**
+ * A list as a file, in EXACTLY the seed-file shape.
+ *
+ * Deliberately not a bespoke export format. `parseImport` already reads this
+ * shape, and `resolveEntry` short-circuits to a single detail call when an
+ * entry carries a tmdb_id — so a watchlist mailed to a friend re-imports
+ * through the path that already exists, with no title matching and nothing
+ * landing in their reconciliation queue. A new format would have meant a new
+ * parser, and the parser is where the traps are.
+ *
+ * title and year travel beside the id even though the id alone would do: it
+ * keeps the file readable by a human, and it degrades to ordinary title
+ * matching if TMDB ever retires an id.
+ */
+router.get('/:id/export', (req, res) => {
+  const db = getDb();
+  const id = Number(req.params.id);
+  const list = db.prepare('SELECT * FROM lists WHERE id = ?').get(id);
+  if (!list) throw badRequest('No such list');
+
+  const entries = db
+    .prepare(
+      `SELECT lm.tmdb_id, lm.rank, lm.award_year, lm.raw_title, lm.raw_year,
+              m.title, m.year
+       FROM list_movies lm
+       LEFT JOIN movies m ON m.tmdb_id = lm.tmdb_id
+       WHERE lm.list_id = ? AND lm.tmdb_id IS NOT NULL
+       ORDER BY lm.rank IS NULL, lm.rank, COALESCE(m.title, lm.raw_title)`,
+    )
+    .all(id)
+    .map((row) => ({
+      title: row.title ?? row.raw_title,
+      year: row.year ?? row.raw_year ?? null,
+      // Present but null on an unranked list, matching the seed files, rather
+      // than absent — an absent key and a null one read the same to a person
+      // and differently to a parser.
+      ...(row.rank === null ? {} : { rank: row.rank }),
+      ...(row.award_year === null ? {} : { award_year: row.award_year }),
+      tmdb_id: row.tmdb_id,
+    }));
+
+  const tags = db
+    .prepare('SELECT tag FROM list_tags WHERE list_id = ? ORDER BY tag')
+    .all(id)
+    .map((row) => row.tag);
+
+  // The OWNER is deliberately not exported. A watchlist sent to a friend
+  // becomes an ordinary list on their machine — importing "Alice's watchlist"
+  // as something their own devices would then claim as theirs is the one way
+  // this feature could confuse two households at once.
+  res.json({
+    name: list.name,
+    ...(tags.length ? { tags } : {}),
+    ...(list.category ? { category: list.category } : {}),
+    ...(list.short_name ? { short_name: list.short_name } : {}),
+    ...(list.source ? { source: list.source } : {}),
+    ...(list.source_url ? { source_url: list.source_url } : {}),
+    exported_at: new Date().toISOString().slice(0, 10),
+    count: entries.length,
+    entries,
+  });
 });
 
 export default router;

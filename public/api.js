@@ -35,7 +35,10 @@ export const api = {
   config: () => request('/api/config'),
 
   lists: () => request('/api/lists'),
-  createList: (name) => request('/api/lists', { method: 'POST', body: { name } }),
+  // `owner` is what makes the new list a watchlist. Omitted for every ordinary
+  // custom list, which belongs to the household rather than to a person.
+  createList: (name, owner = null) =>
+    request('/api/lists', { method: 'POST', body: { name, ...(owner ? { owner } : {}) } }),
   updateList: (id, patch) => request(`/api/lists/${id}`, { method: 'PATCH', body: patch }),
   deleteList: (id, force) =>
     request(`/api/lists/${id}${force ? '?force=true' : ''}`, { method: 'DELETE' }),
@@ -60,6 +63,15 @@ export const api = {
   resolveEntryMany: (entryId, items) =>
     request(`/api/lists/entries/${entryId}/resolve-many`, { method: 'POST', body: { items } }),
   deleteEntry: (entryId) => request(`/api/lists/entries/${entryId}`, { method: 'DELETE' }),
+
+  // One known film onto one list, with no TMDB call and no matching. The film
+  // must already be in the library — `getOrCacheMovie` first for anything that
+  // came straight out of a search.
+  addEntry: (listId, tmdbId) =>
+    request(`/api/lists/${listId}/entries`, { method: 'POST', body: { tmdb_id: tmdbId } }),
+  // The seed-file shape, so it re-imports through the path that already
+  // exists. A URL rather than a fetch: the browser should download it.
+  exportListUrl: (listId) => `/api/lists/${listId}/export`,
 
   searchTmdb: (q, year) => {
     const query = new URLSearchParams({ q, ...(year ? { year } : {}) });
