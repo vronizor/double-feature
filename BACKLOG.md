@@ -363,6 +363,18 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
 Nobody has ruled on these. Where an item is scheduled, `ROADMAP.md` is the
 authority on its state — this file only says why it is worth doing.
 
+- **Visions du Réel — scoped, held as research.** *(2026-08-06. The owner will
+  write the Wikipedia table by hand rather than parse it.)* Both gates passed:
+  automated retrieval is permitted (no scraping clause, and Switzerland has no
+  database right), and 94% of the winners are on TMDB. It is not built because
+  **matching corrects to 71.9% against a 90% floor**, and the gap is two
+  confident wrong matches rather than near-misses. The full 32-row winner list
+  with director-verified TMDB ids is in
+  [visions du réel](docs/evidence/visions-du-reel.md), which is the part worth
+  keeping — re-deriving it is the whole cost. If it is ever seeded it should be
+  a **hand-written** seed keyed on those ids, which is the rule in §5 rather
+  than an extension of the ICAA exception to it.
+
 - **Getting it onto the Pi.** *(Moved here from v8 at its close, 2026-08-06 —
   unscheduled rather than dropped.)* It led v8 and did not happen, so it is
   parked honestly instead of leading a third version. **The one thing to
