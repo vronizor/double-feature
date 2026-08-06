@@ -98,7 +98,17 @@ series either. See [national box office](docs/evidence/national-box-office.md).
 - **Silent Era PSFL as a seed list** — an exhaustive reference database of
   24,500+ films, not a curated "best of". Random draws would be a worse feature.
 - **Per-person watched tracking** — needs accounts, which the whole app is
-  designed around not having.
+  designed around not having. **The line is WHERE the identity is needed, and
+  it was drawn deliberately in v9 rather than routed around.** Per-person
+  watched needs to know who is asking on every **read** — the pool query itself
+  gains an identity — and that is what makes it accounts. A personal watchlist
+  needs one only at **write** time, to decide which list a Save goes to; every
+  read path is the list selection that already exists, and a device that has
+  never claimed a name loses nothing. So the watchlist is not a re-proposal of
+  this, and this is still refused. Per-person watched is also simply the wrong
+  shape for the moment of use: the host builds **one** lineup for a room, so
+  the question a filter should answer is "something none of us has seen", never
+  "new to whoever is holding the remote".
 - **Worker-pooling the refresh job** — the protection already exists; every
   call is gated on a semaphore of 8.
 - **The QR image re-request** — measured 2ms and 1.6KB per poll. Below the bar.
@@ -317,6 +327,16 @@ is a lie that survives every guard.
   worth knowing: no regex can derive this (which is why it is stored, not
   parsed), and an award list shipped without an explicit `short_name` falls
   back to stripping the qualifier and so reads as a **city**.
+- **A personal list is a WATCHLIST, and personal means attributed, not
+  hidden.** "Watchlist" over "queue" (which promises an order the feature does
+  not have) and over "pile" (warmer, and closer to this app's other words, but
+  it needs explaining the first time) — recognisability wins here because the
+  point of the feature is that a family member uses it without a tour. The
+  collision with `watched` is real and is resolved in the button rather than
+  the noun: the control reads **Save / Saved**, the thing is Alice's watchlist.
+  And everyone can see everyone's: on a household Pi on a home LAN privacy is
+  not the goal, not stepping on each other's is — and hiding would break the
+  feature's own purpose, since the draw happens on the host's device.
 - **Watched films are INCLUDED in draws by default.** The README said the
   opposite for two versions while the UI shipped this, and the UI was right: a
   household rewatches, and a film you loved is a good thing to draw again.
@@ -357,6 +377,16 @@ is a lie that survives every guard.
   list — the opposite failure to the one the floor exists to stop.
 - **Take every row a box-office page lists.** No admissions threshold of our
   own; the pages already apply one.
+- **But not the year that is still running.** A year only enters once it has
+  closed. Measured: the just-closed year is rewritten heavily through March and
+  settles in April, so a fetch in August seeds a part-year ranking that is
+  simply wrong by January — and it cannot be repaired, because the seeder is
+  insert-only and a rank is written on insert, so a re-fetch that demotes a
+  film cannot demote it in the database. The alternative, teaching the seeder
+  to delete and re-rank, buys a small correctness win by turning a safe
+  insert-only path into one that can remove films from a list someone is
+  drawing from. Skipping the live year is one condition and no new failure
+  mode.
 - **Francophone by TMDB `original_language`, not by the country column.** The
   country column matches co-production paperwork: a country rule admits Dune and
   Kung Fu Panda 2 on Canadian credits, and drops the 183 rows with no country
@@ -418,6 +448,18 @@ is a lie that survives every guard.
   wrong match is `resolved`, invisible and permanent. The match rate therefore
   guards the recoverable failure while nothing guards the other. Measure the
   false-positive rate separately, by inspecting pairs.
+- **Establish whether the current MAJOR is CLOSED before proposing any work,
+  in the same breath as reading `ROADMAP.md`.** It is one line —
+  `git tag -l` against `package.json` — and skipping it in v9 cost a round
+  trip: the session read two unfinished v8 rows, concluded v8 was open, and
+  recommended holding the version for them. Both halves were wrong. The rows
+  were real but a MAJOR closes with rows outstanding as a matter of course —
+  v7 closed handing the tap targets to v8, in a paragraph in `HISTORY.md`
+  headed "One thing did not get done" — so open rows are not evidence about
+  the version at all. **A row's state and a version's state are different
+  facts**, tracked in different files, and the roadmap's own three states
+  exist precisely so unfinished work can cross a boundary without anyone
+  having to decide what that means. Read the tags, not the tables.
 - **Version numbering.** MAJOR is the roadmap version; **MINOR is the number of
   chunks landed in it** — a chunk being one finished, verified piece of work,
   usually one commit. So v4.12 means twelve pieces of work have landed in v4,

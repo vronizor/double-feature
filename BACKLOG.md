@@ -300,10 +300,70 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   rubric it carries is what produced the 26/40 assessment in
   `docs/evidence/ui-review.md`. **The vocabulary was useful; the tool was not.**
 
+## v10 — deferred with a decision
+
+- **Locarno winners.** *(Scoped 2026-08-06 while planning v9.)* The tenth award
+  list. Deferred rather than folded into v9 because v9 already carries a whole
+  feature and the WIP limit is three, not because anything about it is in doubt.
+  Scoped separately, including which source actually carries it — after the
+  2026 Berlinale turned out to have no `P166` months on, "Wikidata or the
+  Wikipedia category" is a property to measure per award, never a convention to
+  assume.
+
+- **A staleness surface, and a source-count probe.** *(2026-08-06.)* The
+  measured finding was that **scheduling is not the missing piece** — eight of
+  nine award lists already carried their 2026 winner, kept current by accident
+  because the fetchers get run during active development. What is missing is
+  that a source can answer with slightly less than it has and the run still
+  reports success, because an award list grows by exactly one film a year and
+  the shrink guard is proportional. So the build is a `fetched_at` shown beside
+  each list, plus a daily probe that asks each source for a count and compares
+  it to the list's own — **writing no list data**, which is what keeps it clear
+  of the deletion hazard below. Do not surface the newest ceremony year as the
+  staleness signal: it was measured lying, with the newest winner present and
+  its year null.
+
+  Two things ruled out at the same time, so they are not re-proposed.
+  **A cron on the Pi** puts the fetchers on the machine with no git working
+  tree, no credentials by default and the least CPU, to produce an artifact
+  whose only use is a commit. **Full auto-apply is never** — the legitimate
+  annual delta is one film, which no threshold can tell from the failure, and a
+  wrongly-resolved row is invisible and permanent. A monthly GitHub Action
+  opening a PR for the awards only is the one automation worth having later,
+  and the PR diff is what makes it safe: it *is* the human approval step.
+
 ## Unscheduled
 
 Nobody has ruled on these. Where an item is scheduled, `ROADMAP.md` is the
 authority on its state — this file only says why it is worth doing.
+
+- **Getting it onto the Pi.** *(Moved here from v8 at its close, 2026-08-06 —
+  unscheduled rather than dropped.)* It led v8 and did not happen, so it is
+  parked honestly instead of leading a third version. **The one thing to
+  re-read before deploying, not after:** `docker-compose` bind-mounts
+  `./data:/app/data` and passes `.env` into the container, and the working
+  `.env` here carries an absolute macOS `DB_PATH` the container has no way to
+  reach. It has been recorded since v6 and has still never been tested against
+  a real Pi. The database is **never committed** — it holds guests' names
+  against their ballots, and the IMDb-derived numbers are licensed for use and
+  not for redistribution.
+
+- **Watched, solo or together.** *(2026-08-06, from planning v9. Ruled
+  unscheduled the day it was raised — the wording fix ships in v9, this does
+  not.)* `watched` is one household flag, so Alice marking a film she saw alone
+  removes it from a "something new" night for Bob, who never saw it and is
+  never told. The fix that fits this app is **not** per-person watched: marking
+  offers "We watched it" as the primary and "I watched it" beside it, the
+  exclusion drops only the together ones, and every existing row defaults to
+  together so nothing already marked changes meaning. That keeps the pool
+  identical on every device, which is the whole reason it is not accounts —
+  contrast per-person watched, which needs an identity on the **read** path and
+  is ruled out in `DECISIONS.md` §2. It is also the wrong shape for the moment
+  of use: the host builds one lineup for a room, so the question is "something
+  none of us has seen", not "new to whoever holds the remote".
+
+  **Measure before building.** If the real watched set is forty films this is
+  machinery for nothing, and the v9 wording change is the whole answer.
 
 - **Where the database lives.** *(Moved here from v6, 2026-08-02 — deliberately
   unscheduled rather than decided.)* It sits at
