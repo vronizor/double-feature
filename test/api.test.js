@@ -1024,3 +1024,36 @@ test('the export is the seed-file shape, and it re-imports with no title matchin
   assert.equal(finished.needs_review, 0, 'nothing lands in the reconciliation queue');
   assert.equal(finished.unmatched, 0);
 });
+
+test('un-saving is keyed on the film, and removing twice is not an error', async () => {
+  const { body: lists } = await call('/api/lists');
+  const alice = lists.lists.find((list) => list.owner === 'alice');
+
+  const first = await call(`/api/lists/${alice.id}/entries/101`, { method: 'DELETE' });
+  assert.equal(first.status, 200);
+  assert.equal(first.body.removed, true);
+
+  // Idempotent in the same way the POST is, and for the same reason: this
+  // backs a toggle, and another device may have removed it a second earlier.
+  const second = await call(`/api/lists/${alice.id}/entries/101`, { method: 'DELETE' });
+  assert.equal(second.status, 200);
+  assert.equal(second.body.removed, false);
+
+  const { body: left } = await call(`/api/lists/${alice.id}/entries`);
+  assert.deepEqual(left.entries.map((entry) => entry.tmdb_id), [111]);
+});
+
+test('removing from one list leaves the same film on another', async () => {
+  const { body: lists } = await call('/api/lists');
+  const alice = lists.lists.find((list) => list.owner === 'alice');
+  const other = lists.lists.find((list) => list.name === 'Imported from Alice');
+
+  // 111 is on both after the export round trip above.
+  await call(`/api/lists/${alice.id}/entries/111`, { method: 'DELETE' });
+
+  const { body: theirs } = await call(`/api/lists/${other.id}/entries`);
+  assert.ok(
+    theirs.entries.some((entry) => entry.tmdb_id === 111),
+    'a membership is per-list; un-saving must not reach across',
+  );
+});

@@ -516,6 +516,27 @@ router.post('/:id/entries', (req, res) => {
 });
 
 /**
+ * The other half of the toggle, keyed on the FILM rather than on the entry.
+ *
+ * `DELETE /entries/:entryId` above already removes a row, and the
+ * reconciliation screen uses it because that screen is looking at entries. A
+ * Save button is looking at a film: it knows the tmdb_id it just sent and
+ * nothing else. Handing it an entry id would mean the client caching a second
+ * identifier for every saved film purely so it could undo, and that cache
+ * would go stale the moment another device removed the same film.
+ */
+router.delete('/:id/entries/:tmdbId', (req, res) => {
+  const db = getDb();
+  const { changes } = db
+    .prepare('DELETE FROM list_movies WHERE list_id = ? AND tmdb_id = ?')
+    .run(Number(req.params.id), Number(req.params.tmdbId));
+  // Idempotent in the same way the POST is, and for the same reason: this
+  // backs a toggle. Removing a film that is already gone is the state the
+  // caller asked for, not a failure.
+  res.json({ removed: changes > 0 });
+});
+
+/**
  * A list as a file, in EXACTLY the seed-file shape.
  *
  * Deliberately not a bespoke export format. `parseImport` already reads this

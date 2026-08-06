@@ -23,6 +23,9 @@ import { api } from './api.js';
 import { poolState } from './pool-state.js';
 // lineup.js imports nothing at all, so there is no cycle to create here.
 import { lineup } from './lineup.js';
+// Neither does watchlist.js, for the same reason: it is state, and the
+// requests that go with it live here, beside the button that makes them.
+import { watchlist } from './watchlist.js';
 import { applyVibe } from './vibes.js';
 
 // Re-exported so views can keep importing the filter shape from here alongside
@@ -1206,6 +1209,222 @@ function watchedButton(movie) {
   );
 }
 
+// --- The watchlist -------------------------------------------------------
+//
+// `watchlist.js` holds the state and makes no requests; this is the half that
+// talks to the server, and it lives beside the button that triggers it rather
+// than in the store, so the store stays testable without a network.
+
+/**
+ * Brings the store up to date from a /api/lists payload the view already has.
+ *
+ * Called wherever `poolState.seedFrom` is, and deliberately re-run on every
+ * mount rather than once: another device in the house may have saved something
+ * since, and a Save button showing the wrong state is worse than a request.
+ */
+export async function syncWatchlist(lists) {
+  const mine = watchlist.adopt(lists);
+  if (!mine) return;
+  try {
+    const { entries } = await api.entries(mine.id, { limit: 5000 });
+    watchlist.fill(entries.map((entry) => entry.tmdb_id).filter(Boolean));
+  } catch {
+    // A watchlist that will not load must not take the page down with it. The
+    // buttons render as "not saved", which is wrong but harmless: saving again
+    // is idempotent server-side.
+  }
+}
+
+/**
+ * "Who is using this device?", asked exactly once per device.
+ *
+ * Resolves to a trimmed name, or null if they dismissed it — and null has to
+ * mean *cancelled*, so `onClose` covers Escape and the backdrop as well as the
+ * button. Getting that wrong would leave a Save silently doing nothing.
+ */
+function askWhoIsUsing() {
+  return new Promise((resolve) => {
+    let answered = false;
+    openOverlay({
+      label: 'Who is using this device?',
+      cardClass: 'modal-card modal-card--prompt',
+      onClose: () => {
+        if (!answered) resolve(null);
+      },
+      render: (close) => {
+        const input = h('input', {
+          type: 'text',
+          placeholder: 'Alice',
+          'aria-label': 'Your name',
+          onKeydown: (event) => {
+            if (event.key === 'Enter') submit();
+          },
+        });
+        const submit = () => {
+          const name = input.value.trim();
+          if (!name) {
+            toast('A name is needed to keep watchlists apart', 'error');
+            return;
+          }
+          answered = true;
+          close();
+          resolve(name);
+        };
+        // Focused after the overlay has taken focus itself, which it does on
+        // open — this is a prompt with one field, so landing in it is right
+        // even though a dialog normally should not open on a control.
+        queueMicrotask(() => input.focus());
+        return [
+          h('h2', {}, 'Who is using this device?'),
+          h(
+            'p',
+            { class: 'faint' },
+            'So your watchlist stays yours. Everyone in the house can see it — ' +
+              'this only decides whose it is. You can rename it later.',
+          ),
+          input,
+          h(
+            'div',
+            { class: 'modal-actions' },
+            h('button', { class: 'btn-sm', onClick: close }, 'Not now'),
+            h('button', { class: 'btn-sm btn-primary', onClick: submit }, 'That’s me'),
+          ),
+        ];
+      },
+    });
+  });
+}
+
+/**
+ * The list a Save should go to, creating it on the first one.
+ *
+ * Returns null when the person declined to say who they are, which is a real
+ * answer and not an error — the caller does nothing and no toast fires.
+ */
+async function ensureWatchlist() {
+  if (!watchlist.claimed) {
+    const name = await askWhoIsUsing();
+    if (!name) return null;
+    watchlist.claim(name);
+  }
+  if (watchlist.listId) return watchlist.listId;
+
+  // Re-read rather than trusting a stale adopt: this device may be claiming a
+  // name whose watchlist was made on another device in the house.
+  const { lists } = await api.lists();
+  if (watchlist.adopt(lists)) return watchlist.listId;
+
+  const created = await api.createList(watchlist.nameFor(), watchlist.owner);
+  watchlist.adopt([...lists, created]);
+  return watchlist.listId;
+}
+
+/**
+ * The corner toggle on a poster.
+ *
+ * A toggle and not two controls, because the question a saved film asks is
+ * "undo that", and because the card has no room for a third text button —
+ * `.movie-actions` already holds two that are under the 44px touch target.
+ * Bottom-right of the poster: both top corners are taken, by the award flag
+ * and the watched flag, and a film can be all three at once.
+ */
+/**
+ * The action itself, shared by the corner toggle and the overlay's button.
+ *
+ * Returns false when the person declined to say who they are — the caller
+ * repaints nothing and says nothing, because refusing to name yourself is an
+ * answer rather than a failure.
+ */
+async function toggleSaved(movie) {
+  const listId = await ensureWatchlist();
+  if (listId === null) return false;
+
+  if (watchlist.has(movie.tmdb_id)) {
+    await api.removeEntry(listId, movie.tmdb_id);
+    watchlist.forget(movie.tmdb_id);
+  } else {
+    await api.addEntry(listId, movie.tmdb_id);
+    watchlist.remember(movie.tmdb_id);
+  }
+  return true;
+}
+
+/**
+ * Wires a button to the save action and keeps its own label in step.
+ *
+ * `paint` is passed in rather than assumed, because the two controls say the
+ * same thing in different registers: a glyph in the poster corner, a sentence
+ * in the overlay. Sharing the handler and not the wording is the point — the
+ * bug this replaced had the overlay button clicking a detached node, so it
+ * repainted an element nobody could see.
+ */
+function wireSave(node, movie, paint, onChange) {
+  paint(node, watchlist.has(movie.tmdb_id));
+
+  node.addEventListener('click', async (event) => {
+    // The title is a button and the poster shares the same article, so without
+    // this a Save would also open the detail overlay behind it.
+    event.stopPropagation();
+    if (node.disabled) return;
+    node.disabled = true;
+    try {
+      if (await toggleSaved(movie)) {
+        paint(node, watchlist.has(movie.tmdb_id));
+        onChange?.();
+      }
+    } catch (error) {
+      toast(error.message, 'error');
+    } finally {
+      node.disabled = false;
+    }
+  });
+
+  return node;
+}
+
+/**
+ * The corner toggle on a poster.
+ *
+ * A toggle rather than two controls, because what a saved film invites is
+ * "undo that" — and because the card has no room for a third text button:
+ * `.movie-actions` already holds two that sit under the 44px touch target.
+ * Bottom-right of the poster, since both top corners are taken by the award
+ * flag and the watched flag, and a film can be all three at once.
+ */
+function saveToggle(movie, onChange) {
+  return wireSave(
+    h('button', { class: 'save-toggle' }),
+    movie,
+    (node, saved) => {
+      node.classList.toggle('is-saved', saved);
+      node.setAttribute('aria-pressed', String(saved));
+      // The label carries the film's title, because a screen reader crossing
+      // twenty of these in a grid otherwise hears "Save" twenty times.
+      node.setAttribute(
+        'aria-label',
+        saved
+          ? `Remove ${movie.title} from your watchlist`
+          : `Save ${movie.title} to your watchlist`,
+      );
+      node.title = saved ? 'On your watchlist — tap to remove' : 'Save for later';
+      node.textContent = saved ? '★' : '☆';
+    },
+    onChange,
+  );
+}
+
+/** The same action, labelled, for the overlay — there is no corner to hide in. */
+function saveButton(movie, onChange) {
+  return wireSave(
+    h('button', { class: 'btn-sm' }),
+    movie,
+    (node, saved) => {
+      node.textContent = saved ? '★ On your watchlist' : '☆ Save for later';
+    },
+    onChange,
+  );
+}
+
 function addToLineupButton(movie, onChange) {
   const already = lineup.has(movie.tmdb_id);
   return h(
@@ -1249,9 +1468,18 @@ export function movieCard(movie, { extraAction, onChange = null } = {}) {
           awards.length > 1 ? `🏆 ×${awards.length}` : '🏆',
         )
       : null,
-    poster
-      ? h('img', { class: 'movie-poster', src: poster, alt: '', loading: 'lazy' })
-      : h('div', { class: 'movie-poster movie-poster--empty' }, 'No poster'),
+    // The poster gets a frame of its own purely so the Save toggle can sit in
+    // its bottom-right corner. The two flags above stay positioned against
+    // `.movie`, where they already were: they belong to the top of the card
+    // and would be unchanged by this, so moving them would be churn.
+    h(
+      'div',
+      { class: 'movie-poster-frame' },
+      poster
+        ? h('img', { class: 'movie-poster', src: poster, alt: '', loading: 'lazy' })
+        : h('div', { class: 'movie-poster movie-poster--empty' }, 'No poster'),
+      saveToggle(movie, onChange),
+    ),
     h(
       'div',
       { class: 'movie-body' },
@@ -1268,6 +1496,12 @@ export function movieCard(movie, { extraAction, onChange = null } = {}) {
             openMovieModal(movie, {
               actions: (close) => [
                 watchedButton(movie),
+                // Saving does NOT close, unlike adding to the lineup below.
+                // The two are different decisions: adding to the lineup is
+                // about tonight and ends the visit to this film, while saving
+                // is "not tonight, but keep it" — and the overlay is exactly
+                // where someone is still deciding which of those it is.
+                saveButton(movie, onChange),
                 // Adding from the overlay closes it: the decision is made, and
                 // leaving it up would just be asking to be dismissed.
                 addToLineupButton(movie, () => {

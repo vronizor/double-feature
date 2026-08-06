@@ -26,6 +26,7 @@ import {
   createPoolDestination,
   fitRailToViewport,
   movieCard,
+  syncWatchlist,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
 import { poolState } from '../pool-state.js';
@@ -143,6 +144,12 @@ export async function renderDraw(container) {
     // First load only — adopts whatever the Lists tab marked active by
     // default. Subsequent mounts keep whatever the host chose for tonight.
     poolState.seedFrom(lists);
+    // Awaited, and it is worth the round trip. Fire-and-forget would leave
+    // every Save toggle painted from an empty store until something else
+    // caused a repaint — and on a first load with nothing in the lineup,
+    // nothing does. A control that says "not saved" about a saved film is the
+    // silent kind of wrong this project keeps paying for.
+    await syncWatchlist(lists);
 
     // Deliberately NOT `state.poolCount = facets.total`. The facets route
     // derives `total` from the list selection alone, so every other filter is

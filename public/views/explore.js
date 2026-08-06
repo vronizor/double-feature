@@ -9,6 +9,7 @@ import {
   createPoolDestination,
   fitRailToViewport,
   movieCard,
+  syncWatchlist,
 } from '../browse.js';
 import { lineup } from '../lineup.js';
 import { poolState } from '../pool-state.js';
@@ -57,6 +58,9 @@ export async function renderExplore(container) {
     state.facets = facets;
     state.vocabulary = tags;
     poolState.seedFrom(lists);
+    // Awaited for the reason given in draw.js: a toggle painted from an empty
+    // store stays wrong until some other cause repaints it.
+    await syncWatchlist(lists);
   }
 
   /** `reset: true` replaces the grid (filters/sort changed); otherwise appends the next page ("Load more"). */

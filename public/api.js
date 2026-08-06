@@ -69,6 +69,10 @@ export const api = {
   // came straight out of a search.
   addEntry: (listId, tmdbId) =>
     request(`/api/lists/${listId}/entries`, { method: 'POST', body: { tmdb_id: tmdbId } }),
+  // Keyed on the film, not the entry: a Save button knows the tmdb_id it sent
+  // and should not have to cache a second identifier just to undo.
+  removeEntry: (listId, tmdbId) =>
+    request(`/api/lists/${listId}/entries/${tmdbId}`, { method: 'DELETE' }),
   // The seed-file shape, so it re-imports through the path that already
   // exists. A URL rather than a fetch: the browser should download it.
   exportListUrl: (listId) => `/api/lists/${listId}/export`,
