@@ -54,6 +54,16 @@ const CATALOGUE = [
   // the time those run, despite its name.
   { id: 111, title: 'Never Cached', release_date: '2004-01-01', original_language: 'en', runtime: 101,
     genres: [{ id: 18, name: 'Drama' }], director: 'A Director' },
+  // Two films, one title, one year, DIFFERENT popularity. Modelled on the real
+  // pair that exposed the dead ambiguity guard: TMDB serves Maria Augusta
+  // Ramos's "O Processo" in English as "The Trial" (2018), and Sergei
+  // Loznitsa's unrelated "The Trial" is also 2018. The differing popularity is
+  // the whole point of the fixture — equal values would tie, and a tie is the
+  // one case the old guard did catch.
+  { id: 112, title: 'The Trial', release_date: '2018-05-01', original_language: 'en', runtime: 137,
+    popularity: 14.2, genres: [{ id: 99, name: 'Documentary' }], director: 'Popular Director' },
+  { id: 113, title: 'The Trial', release_date: '2018-09-01', original_language: 'pt', runtime: 140,
+    popularity: 2.7, genres: [{ id: 99, name: 'Documentary' }], director: 'Obscure Director' },
 ];
 
 const detail = (movie) => ({
@@ -1056,4 +1066,55 @@ test('removing from one list leaves the same film on another', async () => {
     theirs.entries.some((entry) => entry.tmdb_id === 111),
     'a membership is per-list; un-saving must not reach across',
   );
+});
+
+/**
+ * The guard that could not fire.
+ *
+ * `resolveEntry` used to call a match ambiguous only when the runner-up was
+ * confident AND scored EXACTLY the same. But `scoreCandidate` ends with a
+ * continuous popularity term, so two films sharing a title and a year separate
+ * by a fraction and never tie — the guard was unreachable, and the matcher did
+ * the precise thing its own comment said to avoid: it guessed on popularity,
+ * and stored the guess as `resolved`, where §6 says it is invisible and
+ * permanent.
+ *
+ * Found on the real Visions du Réel palmarès, where "The Trial" (2018) had
+ * four confident candidates, zero ties, and resolved to the wrong film.
+ */
+test('two films sharing a title and a year go to review, not to the more popular one', async () => {
+  const created = await call('/api/lists', { method: 'POST', body: { name: 'Ambiguity' } });
+  const started = await call(`/api/lists/${created.body.id}/import`, {
+    method: 'POST',
+    text: 'The Trial (2018)',
+  });
+  const job = await waitForImport(started.body.id);
+
+  assert.equal(job.resolved, 0, 'popularity must not break the tie');
+  assert.equal(job.needs_review, 1);
+
+  const { body } = await call(`/api/lists/${created.body.id}/entries`);
+  assert.equal(body.entries.length, 1);
+  assert.equal(body.entries[0].status, 'needs_review');
+  assert.equal(body.entries[0].tmdb_id, null, 'nothing may be attached to a row we cannot settle');
+  // Both are offered, so the reconciliation screen can actually resolve it —
+  // the point is to ask a human, not to drop the entry.
+  assert.deepEqual(
+    body.entries[0].candidates.map((c) => c.tmdb_id).sort((a, b) => a - b),
+    [112, 113],
+  );
+});
+
+test('but one confident candidate still resolves without a human', async () => {
+  const created = await call('/api/lists', { method: 'POST', body: { name: 'Unambiguous' } });
+  const started = await call(`/api/lists/${created.body.id}/import`, {
+    method: 'POST',
+    text: 'Vertigo (1958)',
+  });
+  const job = await waitForImport(started.body.id);
+
+  // The fix must not turn every import into a review queue: a single exact
+  // title in the right year is exactly what the matcher exists to settle.
+  assert.equal(job.resolved, 1);
+  assert.equal(job.needs_review, 0);
 });

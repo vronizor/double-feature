@@ -456,10 +456,25 @@ export async function resolveEntry({ title, year, tmdb_id: knownId }) {
   }));
 
   const best = ranked[0];
-  // Two equally exact title matches means we genuinely can't tell which film the
-  // list meant — send it to review rather than guessing on popularity.
-  const ambiguous =
-    ranked.length > 1 && ranked[1].confident && ranked[1].score === best.score;
+  // Two confident candidates means we genuinely cannot tell which film the list
+  // meant — send it to review rather than guessing on popularity.
+  //
+  // This USED to also require `ranked[1].score === best.score`, and that made
+  // the guard unreachable: `scoreCandidate` ends with a continuous popularity
+  // term, so two candidates matching the same title in the same year separate
+  // by a fraction and never tie. The check did the exact thing its own comment
+  // says to avoid — it guessed on popularity — and stored the guess as
+  // `resolved`, which `DECISIONS.md` §6 records as invisible and permanent.
+  //
+  // Measured on the Visions du Réel palmarès: "The Trial" (2018) has FOUR
+  // confident candidates and ZERO ties, and resolved to Loznitsa's film rather
+  // than the Maria Augusta Ramos documentary that actually won — TMDB serves
+  // the latter's English title as "The Trial" too, in the same year.
+  //
+  // `confident` already means "exact title match, within a year", so a second
+  // confident candidate is by definition indistinguishable on everything except
+  // popularity. Nothing else needs to be in this condition.
+  const ambiguous = ranked.length > 1 && ranked[1].confident;
 
   if (best.confident && !ambiguous) {
     const movie = await getMovie(best.candidate.id);

@@ -193,6 +193,18 @@ answer it in one line.
 moment.** Set the height first, then the scroll. Reversed, the rail crept upward
 on every repaint, far enough to hide the group just clicked.
 
+**An equality test against a CONTINUOUS score is never true, so a guard built
+on one is not a guard.** The matcher sent a title to human review only when the
+runner-up was confident *and* scored exactly the same — but the score ends with
+a popularity term, so two candidates matching the same title in the same year
+separate by a fraction and never tie. The condition could not fire. It read as
+protection, its own comment said "rather than guessing on popularity", and
+guessing on popularity is precisely what it did. Found in v9 on a real pair:
+four confident candidates for one title-and-year, zero ties, and the wrong film
+stored as `resolved` — which is the permanent, invisible kind. **Compare
+outcomes, not scores**: the two candidates were already both flagged
+`confident`, which was the whole answer.
+
 **`clear(node).append(...)` is not `h(...)`.** `h` drops null children; `append`
 is the raw DOM method and stringifies them, so a conditional child renders the
 word "null" on the page. Shipped once, under the search box. Use `fill`.
