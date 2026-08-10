@@ -2974,3 +2974,471 @@ measured, rather than given a row of their own to defer once more.
 Version 9.0.0.
 
 ## 12. v9
+
+The thesis: **one feature — a watchlist is a list with an owner — plus whatever
+scoping it turned up.** The feature took five chunks and landed intact. What is
+worth noticing is the other seven: every one came out of looking closely at
+something while building, and three of them were bugs that had been shipped,
+silent, and reporting success.
+
+### 12.1 Two fetchers failing quietly
+
+v9 opened by fixing two things found while scoping it, both of the same family:
+code that did less than it was asked and said it had succeeded.
+
+**The César ceremony anchor rejected a nominee by consuming the character after
+the bullet.** The article distinguishes winners from nominees by asterisk depth
+— one for a winner, two for a nominee — and the anchor ate the following
+character to make that distinction. Two lines had since been rewritten as
+`*[[50e cérémonie` with no space after the bullet, so the consumed character was
+the `[` itself and the link never matched. Two ceremonies went missing.
+
+The reason this is a *quiet* failure is arithmetic, not carelessness. The only
+loud path in this fetcher is parsing nothing at all, and the shrink guard is
+proportional. An award list grows by exactly one film a year, so no proportional
+threshold can tell 49 of 51 from a normal year. The run printed a success and a
+plausible count.
+
+Verified both ways against the real markup shape, with a fixture cut from the
+article as it reads today rather than from the version that used to work: the
+old expression finds 1 of 3 and the new one finds 3 of 3, while both still
+reject the double-asterisk nominee.
+
+**And `backfill-list-fields` skipped every list the host had renamed.** It
+looked its list up by name, while the seeder keys on `seed_key` and honours
+`name_custom` — so a renamed list reported "not seeded yet" and was never
+repaired. A casualty of v8's key migration, and the third appearance of the
+name-as-identity shape. The lookup was extracted so the renamed case could
+actually be tested, and the script picked up the same `main()` guard `seed.mjs`
+already had.
+
+Goya had the same symptom from a different cause, which was **not** guessed at
+here. It went to `ROADMAP.md` as an open row and was not solved until 12.11.
+
+Version 9.1.0.
+
+### 12.2 A watchlist is a list with an owner
+
+The whole feature is one nullable column. `lists.owner`, and that is the entire
+discriminator — deliberately the same shape as "a dynamic list is `query_json IS
+NOT NULL`", which is the precedent this leans on rather than a new idea.
+
+**No third `origin` value**, and the reason is operational rather than
+aesthetic: widening that CHECK constraint means SQLite's full table-rebuild
+dance under a populated table, which `media_type` already refused once. A
+nullable column costs nothing and rebuilds nothing.
+
+**The owner is the identity; the name is display.** That lesson had already cost
+two migrations — `builtin_key` for vibes in v7, `seed_key` for lists in v8 — and
+the failure is identical each time: a device must keep finding its own watchlist
+after the host renames it.
+
+One watchlist per person, because a device that loses its localStorage and
+re-announces itself would otherwise quietly make a second one with none of the
+films in it. `is_active` is 0 always: a watchlist arriving in play would widen
+everyone else's draw pool on the strength of one person saving one film.
+
+Adding one film makes **no TMDB call and does no matching**, so it cannot
+produce a `needs_review` row — the film is already resolved before it is offered
+for saving. It is idempotent because it backs a toggle, and a double tap on a
+phone must report that the film is on the list rather than that something
+failed. It rejects id 0 but deliberately **not** a negative one: TV entries are
+stored negated, and a `!tmdbId` guard would have made every one of them
+unsaveable.
+
+**Export is exactly the seed-file shape**, not a format of its own. `parseImport`
+already reads that shape and `resolveEntry` short-circuits on a supplied
+`tmdb_id`, so a watchlist mailed to a friend comes back through the import path
+that already exists, with nothing landing in their reconciliation queue.
+Round-tripped in the test rather than asserted: 2 resolved, 0 needs_review, 0
+unmatched. The owner is not exported — it is whose list it is here, not a
+property of the films.
+
+Deleting an owned list needs `?force=true`, the same guard a seed list carries
+for the inverted reason. A seed is protected because re-resolving costs TMDB
+calls, but it can always be re-fetched; a watchlist exists nowhere else.
+
+Version 9.2.0.
+
+### 12.3 Settling v10's lists, and writing down what measured them
+
+Four sweeps had produced numbers that existed only in a conversation. This chunk
+moved them into `docs/evidence/`, which is what that directory is for, and
+settled v10's award lists on the strength of them: **Locarno, Annecy, Sundance
+and the EFA documentary list**. Everything else measured stays in research —
+including Golden Horse, Blue Dragon and Oscar Best Documentary, which an earlier
+sweep had recommended, written up as a displacement rather than a silent drop.
+
+Five findings outlive any individual candidate, and they are why this is a file
+rather than a backlog line.
+
+**The route is a property of the award, measured, never a convention.** Across
+thirteen awards where both exist, the Wikipedia category beat Wikidata `P166`
+every time but one — and it reverses wherever no category exists, as for Sitges
+and both Sundance prizes. Neither route is the default.
+
+**TMDB coverage does not discriminate.** 98–100% everywhere, documentary and
+arthouse included. The expectation that it would was simply wrong, and it had
+been quietly shaping which lists looked feasible.
+
+**`P585` density must be checked, never assumed.** One award returns identical
+MIN and MAX ceremony years across 46 films, because the qualifier exists on a
+single edition.
+
+**Median IMDb votes is the watchability proxy**, calibrated against lists already
+held rather than against an absolute. That reframed the documentary question:
+the Oscar documentary list already accepted sits 30× below the Palme d'Or, so
+the household has already priced that axis at ~1,250 median votes, and
+candidates are measured against *that* line rather than against the library.
+
+**An audience award selects for what this library needs and a jury award selects
+against it.** Toronto's People's Choice beat the shipped Palme d'Or on
+redundancy, and Sundance's audience documentary prize beat its own jury prize
+3,077 to 1,535 over the same years and the same genre.
+
+Every refusal carries the measurement that killed it, which is the point of
+writing it down: SAG cannot be re-proposed without meeting the fact that its
+category holds 295 actors, and Telluride cannot be re-proposed at all, being
+non-competitive by design.
+
+Also settled romanisation for non-Latin-script names — before the first such
+list is built rather than after it is half-seeded.
+
+Version 9.3.0.
+
+### 12.4 Who this device is
+
+The client half of the watchlist: a module singleton holding the device's owner
+name and the set of films it has saved. **Pure state, making no requests.** The
+caller does the API call and then tells the store what happened, exactly as
+`lineup.js` works.
+
+That shape is what keeps the only part worth testing hermetic, and it is worth
+testing for a specific reason: **every way the identity half can be wrong writes
+a film onto somebody else's list, and nothing anywhere fails.** There is no
+error path to notice.
+
+The device matches on `owner` and never on the list's name, with a test that
+renames a watchlist and asserts the device still finds it. Third time this
+project has met name-as-identity — `builtin_key`, then `seed_key`, now this —
+and the first time it was caught before shipping rather than after a rename
+broke something.
+
+A blank name is refused, mirroring the server, because two people who both
+skipped the question would otherwise silently share one watchlist. A deleted
+watchlist takes its saved films with it, or every Save button goes on reading
+"Saved" against a list that no longer exists and un-saving 400s on a missing
+entry.
+
+The owner lives under **its own localStorage key** rather than inside the `prefs`
+blob. `prefs` is scoped to how things are shown, never to what gets drawn; who
+you are is neither, and a future "reset preferences" must not be able to orphan
+a watchlist.
+
+`nameFor()` exists so the new list's name is written in exactly one place:
+`lists.name` is UNIQUE, so two call sites disagreeing by an apostrophe would
+produce a 400 that nobody could explain.
+
+Version 9.4.0.
+
+### 12.5 Save a film from anywhere, and the tap targets that were twice deferred
+
+The overlay was free and Explore was free — both already render through the
+shared card. **The card itself was the design question**, and the answer is a
+corner toggle on the poster rather than a third text button. `.movie-actions`
+already holds two buttons that sit under the 44px touch target, and a third
+wraps. Bottom-right specifically, because both top corners are taken by the
+award flag and the watched flag, and a film can be all three at once. 44×44 is
+the size of the *button*, with the star around 20px and the rest padding.
+
+The poster gains a frame purely so the toggle has a corner to sit in. The two
+flags stay positioned against `.movie` where they already were — they belong to
+the top of the card either way, and moving them would be churn.
+
+**Removal is keyed on `tmdb_id`, not an entry id.** A Save button knows the film
+it just sent and nothing else; an entry id would mean caching a second
+identifier per saved film purely to undo, and that cache goes stale the moment
+another device removes the same film. Both directions are idempotent, because
+both back a toggle.
+
+The overlay's Save deliberately does **not** close it, unlike Add to lineup.
+Adding to the lineup is a decision about tonight and ends the visit; saving is
+"not tonight, but keep it", and the overlay is exactly where someone is still
+deciding which of the two it is.
+
+The identity prompt asks once per device and treats Escape and the backdrop as
+*declined* via `onClose`, not just its own button — declining is an answer, so
+nothing happens and nothing is toasted. Its card modifier is written
+`.modal-card.modal-card--prompt` for the reason `DECISIONS.md` §3 keeps
+collecting: a single-class modifier would inherit the `190px 1fr` poster grid
+and render a one-field prompt a third of the card wide.
+
+**Two defects caught while building, neither of which would have failed
+loudly.** The overlay's button first clicked a *detached* toggle node, so it
+would have repainted an element nobody could see and then gone stale on every
+subsequent use; both controls now share one action and paint themselves. And
+`syncWatchlist` was fire-and-forget, so on a first load with an empty lineup
+nothing would ever trigger the second paint, and every toggle would read "not
+saved" about films that were saved.
+
+**The tap targets, deferred from v7 and then from v8, land in the same pass**
+because the card was on a phone being measured anyway. `.vibe-edit` goes from
+16px to 44 — by far the worst, and it is the control that deletes a saved vibe;
+`.chip` 35 to 44; `.tab` 36 to 44. Padding rather than font size, so four rows
+of pills do not re-lay out to fix a thumb problem.
+
+This is the chunk that landed unverified. There was no database and no TMDB key
+on the machine that built it, and the taller chips and tabs change layout
+app-wide rather than adding one control. It sat as the one open row in v9's
+table until it was looked at on a real phone.
+
+Version 9.5.0.
+
+### 12.6 Visions du Réel: keep the winners, not the parser
+
+Scoped as a possible eleventh award list and **held as research on the owner's
+call** — the Wikipedia table gets written by hand one winter evening. What is
+committed is the part that would otherwise have to be re-derived: 32 winners
+with director-verified TMDB ids, checked against the live API.
+
+Both gates passed and it still is not worth a fetcher, which is the finding.
+**Retrieval is permitted** — no scraping clause in the mentions légales, only
+reserved reproduction rights, and Switzerland has no *sui generis* database
+right, so the compilation is not protected either. **Coverage is fine**, 30 of
+32 on TMDB.
+
+**Matching is what kills it.** The corrected rate is 23 of 32 — 71.9% against a
+declared floor of 90% — and the gap is not near-misses. It is two confident
+*wrong* matches, the permanent invisible kind. On top of that the source has a
+systematic year problem the award lists do not: TMDB dates a documentary by
+release and the festival awards it at premiere, and the gap between those
+routinely exceeds the matcher's one-year window.
+
+The parse would be hostile in the ways §3 keeps cataloguing: two markup regimes,
+inconsistent URL slugs so links must be read and never constructed, a heading
+level that drifts within the current design — a first parser returned zero rows
+for 2021 and reported success — a year whose main competition carries no prize
+labels at all, and sibling prizes that make a prize-name regex return 45 rows
+for 32 years. The shrink guard also degenerates at this size: losing the whole
+1995–2001 page is 22% and sails straight through it.
+
+If it is ever seeded, it should be a hand-written seed keyed on those ids, which
+is the rule in §5 rather than an extension of the ICAA exception to it.
+
+Version 9.6.0.
+
+### 12.7 A guard that could not fire
+
+`resolveEntry` sent a title to human review only when the runner-up was
+confident **and** scored exactly the same. But `scoreCandidate` ends with a
+continuous popularity term, so two candidates matching the same title in the
+same year separate by a fraction and never tie. **The condition could not fire.**
+
+It read as protection. Its own comment said "rather than guessing on
+popularity", and guessing on popularity is precisely what it did — then stored
+the guess as `resolved`, which §6 already records as the invisible and permanent
+failure mode.
+
+Found on the Visions du Réel palmarès while doing 12.6. "The Trial" (2018) has
+four confident candidates and zero ties: TMDB serves Maria Augusta Ramos's *O
+Processo* in English as *The Trial*, dated 2018, and Sergei Loznitsa's unrelated
+film is also 2018. The matcher picked Loznitsa.
+
+**The fix is a deletion.** `confident` already means an exact title match within
+a year, so a second confident candidate is by definition indistinguishable on
+everything except popularity. Nothing else belonged in the condition.
+
+Two tests, because this can fail in both directions: one asserts the pair goes
+to review with **both** offered as candidates, so the reconciliation screen can
+settle it rather than the entry being dropped; one asserts that a single
+confident match still resolves without a human, so the fix does not turn every
+import into a review queue. The fixture uses *different* popularity values
+deliberately — equal values tie, and a tie is the one case the old guard did
+catch. Verified as a real regression: it fails on the old condition and passes
+on the new.
+
+The durable half went to `DECISIONS.md` §3, since the shape recurs anywhere
+somebody compares two floats: an equality test against a continuous score is
+never true, so a guard built on one is not a guard. Compare outcomes, not
+scores.
+
+Version 9.7.0.
+
+### 12.8 Counting what the dead guard let through, and writing nothing
+
+12.7 stops new wrong matches. It does nothing about the ones already stored, and
+those are the whole exposure: every list resolved by title may carry rows where
+a second candidate was equally confident and the more popular one silently won,
+sitting as `resolved` — so the reconciliation screen has never shown them and
+never will. The concentration is in the Spanish list, which is fuzzy-matched by
+decision.
+
+The audit re-asks the matcher's own question over each resolved row and **prints
+the pairs**. §6 says inspect values and not volumes, and here that is not a
+formality: a second confident candidate means the matcher could not tell the two
+apart, not that it chose wrongly. On a remake, or on TMDB's own duplicate
+entries, the row it picked is often right, and only looking at the pair answers
+that.
+
+**It writes nothing and contains no write statement.** That is stated in the
+file, because the temptation is obvious and because the `overall_rank` back-fill
+in §3 rewrote rows before anyone had read the values and produced a column that
+was fully populated, densely numbered, and wrong.
+
+It samples 300 rows by default with `--all` to opt in, since a full pass is one
+TMDB search per row across thousands of rows. The sample is a deterministic
+stride rather than random, so two runs of the same size look at the same rows
+and "did it get better" stays answerable. It reports a rate rather than a
+projected count, because a projection invites the number to be quoted as though
+those rows had been inspected.
+
+Unmatched and `needs_review` rows are excluded — they are already on the
+reconciliation screen, so not the failure being hunted — and so are manual
+entries, which nothing ever matched. Both exclusions are pinned by tests,
+because getting either wrong makes the audit report good news it did not earn.
+Failed lookups are counted rather than swallowed, for the same reason.
+
+**Not verified against real data.** There is no library on the machine that
+built it, so a run reports "no resolved rows to audit", which is correct and
+tells you nothing. It wants running on the Pi, and the number it returns decides
+whether a repair pass is worth building at all.
+
+Version 9.8.0.
+
+### 12.9 The watchlist has a home
+
+The list existed and could be saved to from anywhere; what it lacked was
+somewhere to go and look at it. It now leads the picker in a group of its own —
+this device's first, the rest of the household after, alphabetically — and wears
+its owner's name instead of the "custom" badge, which is true of it but not the
+interesting thing about it.
+
+**The group is derived from `owner IS NOT NULL` rather than from a tag**, and
+that is the load-bearing choice. Tags are host-editable, so a tag could be
+removed from a watchlist or applied to a list that structurally is not one, and
+the group would then disagree with the thing it names. The owner column cannot
+drift. The cost, worth knowing before someone reaches for a tag anyway: a vibe
+cannot resolve on it, since `vibe_tags` is the only tag-shaped hook, so a "draw
+from everyone's watchlists" vibe is the point at which to add the tag after all.
+
+Tests cover the double-render trap specifically. An owned list carries no tags,
+so without excluding it from the tag pass it would render in its own group *and*
+in Untagged — and ticking it in one place would tick it in both.
+
+**Adding one film is a search box, not the import panel.** Import is bulk, it
+resolves raw titles over the network as a background job, and it can leave
+things in a review queue. "A friend told me about this one" is a single film
+whose identity you confirm by looking at it. Offered on custom lists only,
+because a hand-added film on a seed list would silently diverge it from the seed
+it is reconciled against on every re-run. It does not call `paint()` while
+searching — `paint()` rebuilds the whole view and would take the input's value
+and the caret with it on every keystroke.
+
+Delete now warns properly. A watchlist takes `?force` like a seed list does, and
+says so rather than reusing the reassuring "its films stay cached", which is
+true and beside the point when the list itself is the unrecoverable part. Export
+is one button along — a plain download link rather than a fetch, because the
+browser already knows how to save a file — and it is offered on every list,
+since a curated custom list is just as unrecoverable as a watchlist.
+
+Also renames the watched filter to say what it actually reads: "films anyone
+here has marked watched". It excludes a household fact, so unticking it drops a
+film **one** person marked after watching it alone, silently, for everyone else.
+The wording is the fix here; the data fix is in `BACKLOG.md` and wants the real
+watched set measured first.
+
+Version 9.9.0.
+
+### 12.10 A box-office year is not taken until it has settled
+
+A box-office year does not close on 31 December. Measured off the revision
+histories of both the French and the US pages, the shape is the same for both:
+the just-closed year is rewritten heavily through March and goes quiet in April.
+Before then the chart is still moving — and all three fetchers were taking the
+**live** year.
+
+That matters more here than it would elsewhere because `seedList` is insert-only
+and `recordEntry` writes `rank` on the insert path alone, so a film seeded at
+rank 4 cannot later be demoted to 7. A part-year chart is not a value that gets
+corrected on the next run; it is permanent. Taking the live year in August seeds
+a half-year top-20 that is simply wrong by January, and the only repair is
+teaching the seeder to delete — which trades a small correctness win for a path
+that can remove films from a list somebody is drawing from tonight.
+
+So `lastSettledYear`: never the running year, and not the just-closed one until
+April. It takes `now` as an argument rather than reading the clock, so the rule
+can be tested at a date rather than only on the day someone happens to run the
+suite, and the April boundary the whole thing turns on is pinned on both sides.
+`fetch-icaa` imports it rather than restating it — three copies of a date rule
+is three chances for one to drift — and drops unsettled years **loudly**,
+because a run that quietly did less than it was asked reads as a run that found
+less.
+
+This does not clean what is already there. 44 rows of half-year 2026 were
+already in the seeds, and hand-editing them out is not available: a seed row's
+`year` is the film's *release* year, not the chart year it came from, so
+filtering on it would quietly delete legitimate rows — the `overall_rank`
+back-fill mistake in a new costume. Parked in `BACKLOG.md` for the April
+refresh, when one re-fetch does both jobs.
+
+Version 9.10.0.
+
+### 12.11 A ceremony can have two winners, and says so by changing register
+
+This is the Goya symptom left open in 12.1, and the cause turned out to be
+shared with César rather than specific to either.
+
+**A year awarded *ex aequo* has two winners, and the articles mark that by
+changing the register rather than by repeating it.** Where a sole winner is
+bold-italic, the tied pair is written in single italic; where a sole winner is
+single-italic, the pair is bold. So a parser keyed on one marker finds *nothing*
+at a tie: no error, and the film count still adds up, because the films arrive
+from the category query and only the year is lost. Live in the Goya list until
+now — the 39th went to *El 47* and *La infiltrada*, and both sat seeded and
+undated while every count agreed.
+
+**The default is unchanged and stays deliberately narrow**: the first
+bold-italic film, and only the first. Widening it is wrong in two measured ways.
+The last anchor's block runs to the end of the article and swallows the "most
+awarded" summary tables, which is 32 bold-italic films in the Goya XL block; and
+BAFTA's blocks carry the winners of its other film categories alongside Best
+Film. A test pins that guard, so the next person to look at this does not
+helpfully relax it.
+
+**The fallback's own trap is that nominees share the tied winners' register.**
+The Goya block for that year holds five single-italic film links — the two
+winners, then three nominees in a bulleted cell — so the list items are dropped
+first. That is the same winner/nominee distinction the César anchor already
+relies on, inverted: there the nominees are the double asterisks. A block with
+neither a bold-italic film nor an *ex aequo* marker still yields nothing, which
+matters because 23 of the César article's anchors are ceremony links elsewhere
+on the page rather than award rows.
+
+Version 9.11.0.
+
+### 12.12 Writing the years the fixed parsers can now see
+
+The parsers landed in 12.11; the committed seeds still held the output of the
+old ones. A re-fetch of the two award lists — the cheap crawl, category and
+Wikidata, no box-office pagination.
+
+Both lists now carry a year on every film, down from four undated. Two are the
+*ex aequo* repair, the 39th Goya's pair, now dated 2025. Two are the César
+anchor repair from 12.1 finally reaching the seed file: *Emilia Pérez* and *The
+Ties That Bind Us*. The 1984 César tie is unchanged and was correctly dated in
+the old seed already — worth recording, because it was the case that looked most
+likely to be a second silently-halved tie and is not one.
+
+**Counts did not move**, 51 and 40. That is the expected shape and it is exactly
+why the bug survived: the films arrive from the category query, so a missed
+winner loses only its year, and every count still agrees.
+
+This does **not** fix a database that already has those rows. `alreadySeeded`
+matches on `tmdb_id`, so a re-seed skips them, and `recordEntry` writes
+`award_year` on the insert path alone. The Pi keeps four undated films until the
+v10 update path lands or those two lists are re-seeded from empty. Same
+insert-only limitation the box-office rows are parked on — now with a third
+instance behind it, which is what moved "let the seeder update a row" from an
+aside in a backlog entry to a v10 item of its own.
+
+Version 9.12.0.

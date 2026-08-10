@@ -29,15 +29,18 @@ the tail, not the feature.
 
 | Item | State | Where it stands |
 |---|---|---|
-| **One look on a real phone** | 🔨 doing | The only thing in v9 that landed **unverified**, and it is the part v7 proved cannot be checked any other way. Two things specifically: the poster-corner Save toggle at 44px, and the taller `.chip` and `.tab`, which change layout **app-wide** rather than just adding a control. Reverting either is cheap; shipping a card that wraps is not |
-| ~~Re-fetch César and Goya~~ | ✅ done | Both seeds now carry a year on every film. What it does **not** fix is a database that already has those rows: the seeder is insert-only, so the Pi keeps four undated films until the v10 update path lands or someone re-seeds those two lists by hand |
 | Whatever the next night turns up | ⏳ ready | The v7 loop found more in an evening of real use than four review passes found in a day, and it held through v8. Keep `NOTES.md` as the inbox and fix from it |
+| ~~One look on a real phone~~ | ✅ done | The poster-corner Save toggle and the taller `.chip` and `.tab`, checked on the device. Nothing reverted |
+| ~~Re-fetch César and Goya~~ | ✅ done | Both seeds now carry a year on every film. What it does **not** fix is a database that already has those rows: the seeder is insert-only, so the Pi keeps four undated films until the v10 update path lands or someone re-seeds those two lists by hand |
 
-**`HISTORY.md` is owed nine chunks.** v8 closed having written up three of six,
-and that was called out in its own closing section as the process finding of
-the version — so leaving v9 in the same state would be the same mistake with
-the note already written. It is not urgent and it is not free; do it before
-v9 closes, not after.
+**v9's twelve chunks are written up**, and nothing is owed. v8 closed having
+written up three of six, and its own closing section called that the process
+finding of the version — leaving v9 the same way would have been the same
+mistake with the note already written.
+
+**Only the standing row is left, so v9 can close whenever you want it to.**
+Closing means the v10 opening, a MAJOR bump, and a GitHub release, which is a
+convention scoped to major closes only.
 
 Deferred so they are not re-proposed early: **v10** — Locarno, and the staleness
 surface with a source-count probe. **Unscheduled** — the Pi deploy, per-person

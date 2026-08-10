@@ -4,8 +4,11 @@ How Double Feature works, end to end. Written for someone who directs this
 project but doesn't write web applications: it assumes you're fluent in SQL,
 pipelines and data modelling, and explains the web-specific machinery instead.
 
-Numbers in this document are real, measured on 2026-08-04 at the close of v7
-(`v8.0.0`).
+Numbers in this document are real. The database figures were measured on
+2026-08-04 at the close of v7 (`v8.0.0`) and are **not** re-measured here — the
+library lives on the Pi, not on the machine this was refreshed from, and an
+invented number is worse than a dated one. Everything drawn from the code and
+the committed seeds is current as of 2026-08-10 (`v9.12.0`).
 
 > **Not startup reading, on purpose.** This is a plain-language tour for
 > someone who directs this project without writing it, and a public-facing
@@ -14,9 +17,10 @@ Numbers in this document are real, measured on 2026-08-04 at the close of v7
 > out of date. `DECISIONS.md` wins for decisions, `ROADMAP.md` for what is
 > being built, and the code wins for what the code does.
 
-> **This is a snapshot, not a living document.** Refreshed 2026-08-04 at the
-> close of v7. Previously refreshed 2026-07-31 at the close of v4; originally
-> written 2026-07-30 against commit `93bf402`. Nothing keeps it in step with the code — unlike
+> **This is a snapshot, not a living document.** Refreshed 2026-08-10 at the
+> close of v9. Previously refreshed 2026-08-04 at the close of v7, and
+> 2026-07-31 at the close of v4; originally written 2026-07-30 against commit
+> `93bf402`. Nothing keeps it in step with the code — unlike
 > `ROADMAP.md` and `BACKLOG.md`, which are updated as decisions land and are
 > the authority when they disagree with this file. Re-generating it is cheap;
 > quietly trusting a stale copy is not. If you are reading this long after that
@@ -140,7 +144,7 @@ back but a reload.
 | `public/views/` | One file per screen. Each exports a `render…(container)` function | `draw.js`, `vote.js`, `session.js` |
 | `scripts/` | Offline ETL. Run by hand, never by the server | `fetch-seed-lists.mjs`, `seed.mjs` |
 | `seeds/` | The extracted lists, committed as JSON. The output of `fetch-seed-lists.mjs`, the input to `seed.mjs` | any file — they share one shape |
-| `test/` | 26 `node:test` suites (344 tests), run with `npm test`. Hermetic: no credentials, no network | `pool.test.js`, `api.test.js` |
+| `test/` | 30 `node:test` suites (399 tests), run with `npm test`. Hermetic: no credentials, no network | `pool.test.js`, `api.test.js` |
 | `docs/evidence/` | The long measurement write-ups behind decisions, including `ui-review.md`, the four-pass review v7 was built from | only when reopening that question |
 | `data/` | The SQLite file (5.6 MB) plus its WAL and pre-migration snapshots. Gitignored, bind-mounted in Docker | — |
 | `.cache/` | Raw Wikipedia wikitext saved by the fetcher so re-running the parser costs no network | — |
@@ -191,6 +195,10 @@ erDiagram
         int  id PK
         text name UK
         text origin "seed or custom"
+        text seed_key "the seed filename: identity, not the name"
+        int name_custom "1 once a host renames a seed list"
+        text short_name "compact form for a badge"
+        text owner "a watchlist is owner IS NOT NULL"
         int hidden "1 for a parametric vibe's slot list"
         int  is_active "opens-by-default"
         text query_json "dynamic lists only"
@@ -214,7 +222,8 @@ erDiagram
         int  list_id FK
         int  tmdb_id FK "NULL when unresolved"
         text raw_title "provenance"
-        int  rank "position on THIS list"
+        int  rank "position on THIS list, WITHIN a year for box office"
+        int  overall_rank "cross-year, NULL where the source has none"
         int  award_year "ceremony year"
         text status "resolved / needs_review / unmatched"
         text candidates_json
@@ -235,7 +244,11 @@ erDiagram
     }
 ```
 
-Current contents:
+Contents **as measured at the close of v7**, and deliberately left at those
+figures. Three box-office lists and a ninth award list have been seeded since,
+so `lists`, `list_movies` and the pool are all substantially larger now: the
+committed seeds total 7,318 entries across 20 lists, against the 16 lists below.
+The shape is what this table is for; for a current row count, query the Pi.
 
 | Table | Rows | Note |
 |---|---:|---|
@@ -507,7 +520,7 @@ it takes an `onClosed` callback that resets the lineup, and **only the caller
 that owns the lineup passes it**. Without that gate, opening last week's result
 from History would wipe the lineup you're building now.
 
-### The two shared-state singletons
+### The shared-state singletons
 
 Each view is torn down and rebuilt from scratch on every navigation, so
 anything held in a view's own variables is lost the moment you switch tabs.
@@ -515,6 +528,8 @@ Two things must survive that, and both use the same mechanism: a module-level
 variable in a file that every view imports. ES modules are evaluated exactly
 once per page load, so every importer gets the *same* object — the browser
 equivalent of a singleton.
+
+(v9 added a third, `public/watchlist.js`, on the same pattern — see §5d.)
 
 **`lineup.js`** — tonight's shortlist. It's an array of film objects, each
 tagged with a `source`: `'draw'` if the machine picked it, `'added'` if a human
@@ -697,6 +712,99 @@ recomputed by construction. Chronological rank was the blocker and it was a
 question of meaning, not mechanism: "his first ten films" is not what "top 10"
 means to anyone.
 
+---
+
+## 5d. What v8–v9 added
+
+### A seed list's identity is its filename, not its name (v8)
+
+The same lesson as the built-in vibe key above, one table over, and it is worth
+seeing twice because the failure looked completely different. `seed.mjs` used to
+look a list up by name, so renaming a list in its seed file created a **second**
+list beside the old one, and every rename of a shipped list needed a migration
+of its own. `lists.seed_key` — the seed filename — is now the identity.
+
+It paid for itself within one commit: the nine award lists were renamed to a
+single grammar immediately afterwards, and before the key that would have been
+nine hand-written migrations. A companion column, `name_custom`, records that a
+*host* renamed a list from the Lists tab, after which the seeder keeps the key
+and stops touching the name — otherwise shipping a better name would silently
+overwrite one they chose.
+
+That grammar, since it is settled and gets re-proposed: an award list is named
+for **the ceremony in its own language** — *Berlin — Goldener Bär*, not "Golden
+Bear (Berlin)". Naming after the city was tried and produces collisions the
+moment a festival has two prizes.
+
+### A watchlist is a list with an owner (v9)
+
+The largest thing v9 added, and it is one nullable column. `lists.owner` is the
+entire discriminator — deliberately the same shape as "a dynamic list is
+`query_json IS NOT NULL`".
+
+The alternative, a third value in the `origin` CHECK constraint, was rejected on
+operational grounds rather than taste: widening that constraint means SQLite's
+full table-rebuild dance under a populated table. A nullable column rebuilds
+nothing.
+
+Everything downstream comes free, which is the point of doing it this way. A
+watchlist joins the pool, survives Top-N, can be pinned by a vibe and browsed on
+Explore, because a custom list already did all of that. Three rules that are not
+free and are worth knowing:
+
+- **It arrives inactive.** A watchlist in play would widen everyone else's draw
+  pool on the strength of one person saving one film.
+- **One per person**, keyed on owner. A device that loses its localStorage and
+  re-announces itself would otherwise quietly make a second one, empty.
+- **The picker group is derived from `owner IS NOT NULL`, never from a tag.**
+  Tags are host-editable, so a tag could be removed from a watchlist or applied
+  to a list that structurally is not one, and the group would then disagree with
+  the thing it names. The cost is that a vibe cannot resolve on it, since
+  `vibe_tags` is the only tag-shaped hook.
+
+The browser half is `public/watchlist.js`, a third shared-state singleton
+alongside the two in §5. Like `lineup.js` it is **pure state that makes no
+requests**: the caller does the API call and then tells the store what happened.
+That matters here more than elsewhere, because every way the identity half can
+be wrong writes a film onto somebody else's list and nothing anywhere fails.
+
+Export is exactly the seed-file shape rather than a format of its own, so a
+watchlist mailed to a friend comes back through the import path that already
+exists — `resolveEntry` short-circuits on a supplied `tmdb_id`, so nothing lands
+in their review queue.
+
+### The matcher had a guard that could not fire (v9)
+
+Worth recording as an architectural hazard rather than a bug. `resolveEntry`
+sent an ambiguous title to human review only when the runner-up was confident
+**and** scored exactly the same — but `scoreCandidate` ends with a continuous
+popularity term, so two candidates never tie. The condition was unreachable, and
+what it was silently doing instead was resolving to whichever film was more
+popular and storing that as `resolved`, where nothing would ever surface it.
+
+The general shape, which now lives in `DECISIONS.md`: **an equality test against
+a continuous score is never true, so a guard built on one is not a guard.**
+Compare outcomes, not scores.
+
+### Seeding is insert-only, and that is now a known limit (v9)
+
+`recordEntry` writes the per-membership facts — `rank`, `overall_rank`,
+`award_year` — on the **insert** path alone, and `alreadySeeded` skips any entry
+already present. So a re-seed can add a row but can never correct one.
+
+This is not a defect so much as a shape with consequences, and v9 met it three
+times: `rank` came up null on fresh installs and silently removed the Top-N
+control, `overall_rank` needed a back-fill script, and `award_year` stayed null
+on the Pi after the parsers that produced it were fixed. Each repair was another
+one-off script written after the damage.
+
+Two things follow. Fetchers must not take data that is still moving — hence
+`lastSettledYear`, which refuses any box-office year before the April in which
+it settles, because a rank written from a part-year chart is permanent. And
+"let the seeder update a matching row" is filed for v10, narrowed to exclude
+deletion: a path that can remove rows can remove films from a list somebody is
+drawing from tonight.
+
 ## 6. The voting mechanism
 
 ### Publish
@@ -793,8 +901,10 @@ permanent historical record.
 | Change the polling interval or failure tolerance | `POLL_MS` / `MAX_POLL_FAILURES` in `views/session.js` and `views/vote.js` |
 | Add an HTTP route | A file in `server/routes/`, mounted in `server/index.js` |
 | Change how titles are matched to TMDB | `server/tmdb.js` → `normalizeTitle` and `scoreCandidate` |
-| Fix a column that's NULL on rows seeded before it existed | `scripts/backfill-list-fields.mjs` (from seed JSON) or `scripts/backfill.mjs` (from TMDB) — **not** a re-run of `seed.mjs`, which skips them |
-| Understand why something was decided | `ROADMAP.md` §2 for reversals, §4 for shipped v2, §5 for v3; `BACKLOG.md` for the measurements behind them |
+| Fix a column that's NULL on rows seeded before it existed | `scripts/backfill-list-fields.mjs` (from seed JSON) or `scripts/backfill.mjs` (from TMDB) — **not** a re-run of `seed.mjs`, which skips them; see §5d for why this keeps happening |
+| Change how a watchlist behaves | `lists.owner` in `server/db.js`, `public/watchlist.js` for the device's half, and `groupListsByTag` in `public/browse.js` for the picker group |
+| Add or rename a box-office year rule | `lastSettledYear` in `scripts/fetch-seed-lists.mjs` — imported by `fetch-icaa.mjs`, so change it once |
+| Understand why something was decided | `DECISIONS.md` first; `HISTORY.md` for the working behind it, by version; `docs/evidence/` for the measurements |
 
 ### Two traps that have bitten more than once
 

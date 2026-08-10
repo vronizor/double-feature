@@ -85,8 +85,13 @@ Seed lists arrive **active**, so you can draw immediately.
 add a film, then publish it as a vote once you're happy with it:
 
 - **Draw random films** — start from a **"Tonight is…"** vibe (Cinephile,
-  Awards, Modern Classics, Family — each sets both the lists and the filters
-  that go with it), or tick lists by hand in **Pool setup**.
+  Awards, Modern Classics, Family, Box office — each sets both the lists and
+  the filters that go with it), or tick lists by hand in **Pool setup**.
+
+  Two vibes take a **parameter** rather than resolving on their own:
+  *Director's night* and *Actor's night* ask you for a person, then build the
+  pool from their filmography. They resolve to nothing until you pick someone,
+  which is why they carry no lists of their own.
 
   Pool setup is a **destination, not a panel that pushes the page down**: a
   sticky rail beside the content on a wide screen, a full-screen sheet on a
@@ -141,6 +146,29 @@ and when — *Palme d'Or 2024 · Oscar 2025*. The **🏆 Awards** switch above t
 grid turns that off if you'd rather not be influenced before voting. Where the
 source doesn't record a ceremony year the badge simply names the award; see
 `BACKLOG.md` for why some are missing and what it'd take to fill them in.
+
+**Watchlists** — the ☆ in the corner of any poster saves that film for later,
+from the Lineup, the detail overlay or Explore. The first time you tap it, the
+app asks who you are; after that it never asks again on that device, and every
+save goes to your own list.
+
+A watchlist is an ordinary list with an owner, which is the whole design — it
+joins the pool, survives Top-N, can be pinned by a vibe and browsed on Explore,
+because all of that already worked for custom lists. Two consequences worth
+knowing: watchlists arrive **inactive**, so one person saving one film does not
+widen everyone else's draw pool until someone ticks it, and each person gets
+exactly one, found by owner rather than by name so renaming it changes nothing.
+
+They live in the **Lists** tab, in their own group at the top of the picker,
+badged with whose they are. There you can look through one, remove films, add a
+single film by searching TMDB — that is the "a friend told me about this one"
+path, distinct from the bulk import below — and **export** it as JSON. The
+export is deliberately in the same shape as the seed files, so a watchlist
+mailed to a friend imports straight into their copy with nothing landing in
+their review queue.
+
+Deleting a watchlist asks twice, because unlike a seed list it cannot be
+re-fetched from anywhere. Export it first if you might want it back.
 
 **Explore tab** — browse the whole active library outside of building a vote:
 the same filters as the Lineup tab, in the same rail, sortable, paginated, with
@@ -238,18 +266,27 @@ them by default — a household rewatches, and a film you loved is a perfectly
 good thing to draw again — and the Pool setup filter excludes them when you
 want something new.
 
+Watched is a **household** fact, not a personal one: there is one flag per film
+for everyone. So unticking that filter also hides a film that one person watched
+alone, for everybody. The control says so rather than implying otherwise, and a
+per-person version is in `BACKLOG.md`.
+
 ## Where the seed lists come from
 
 The original spec assumed all six lists could be pulled from Wikipedia. Only two
 of them actually can, so each list is sourced from wherever it genuinely lives.
 Two more were added later, from their own publisher and (by hand, since its site
-blocks scripted access) a curator on SensCritique — then eight award lists from
-Wikidata and the language Wikipedias:
+blocks scripted access) a curator on SensCritique — then nine award lists from
+Wikidata and the language Wikipedias, and three box-office lists:
+
+An award list is named for **the ceremony in its own language**, not the city or
+the country — *Berlin — Goldener Bär*, not "Golden Bear (Berlin)". That grammar
+is deliberate and settled; see `DECISIONS.md` before renaming one.
 
 | List | Tags | Source | Count |
 |---|---|---|---|
 | The Criterion Collection | collection, canon | Wikidata, spine number `P12279` | 1,251 |
-| Sight & Sound 2022 (critics) | canon | bfi.org.uk — the poll's publisher | 264 |
+| Sight & Sound Greatest Films (2022 critics' poll) | canon | bfi.org.uk — the poll's publisher | 264 |
 | TSPDT 1,000 Greatest Films | canon | theyshootpictures.com — the list's publisher | 1,000 |
 | Disney Animated Canon | collection, family, animation | Wikidata, "WDAS feature film" series | 65 |
 | Studio Ghibli | collection, family, animation | Wikidata, "Studio Ghibli Feature Films" series | 23 |
@@ -257,13 +294,30 @@ Wikidata and the language Wikipedias:
 | Family Films (Ages 6+) | family | A user's curated list on SensCritique | 251 |
 | Oscar — Best Picture | awards | Wikidata, award received `P166` | 97 |
 | Oscar — Best International Feature | awards | Wikidata, award received `P166` | 71 |
-| Palme d'Or (Cannes) | awards, festivals | Wikidata, award received `P166` | 82 |
-| Golden Lion (Venice) | awards, festivals | Wikidata, award received `P166` | 66 |
-| Golden Bear (Berlin) | awards, festivals | Wikidata, award received `P166` | 86 |
+| Cannes — Palme d'Or | awards, festivals | Wikidata, award received `P166` | 82 |
+| Cannes — Grand Prix | awards, festivals | Wikidata, award received `P166` | 63 |
+| Venezia — Leone d'Oro | awards, festivals | Wikidata, award received `P166` | 66 |
+| Berlin — Goldener Bär | awards, festivals | Wikidata, award received `P166` | 86 |
 | BAFTA — Best Film | awards | en.wikipedia category → Wikidata → TMDB | 78 |
 | César — Meilleur Film | awards | fr.wikipedia category → Wikidata → TMDB | 51 |
 | Goya — Mejor Película | awards | es.wikipedia category → Wikidata → TMDB | 40 |
-| Modern Classics (last 10 years) | dynamic | TMDB `/discover` — *see below* | 120 |
+| Box-office France | box-office | fr.wikipedia, "Box-office France *year*" | 1,390 |
+| Box-office España | box-office | ICAA, the Spanish film institute's own catalogue | 1,567 |
+| Box-office US | box-office | en.wikipedia, "List of *year* box office number-one films" | 809 |
+| Modern Classics (last 10 years) | modern | TMDB `/discover` — *see below* | ~120 |
+
+**On the box-office lists:** all three rank *within* a year rather than
+all-time, which is why the Box office vibe cuts them to a top 5 — uncut they are
+3,654 distinct films, most of what the app holds, so the chip would barely
+narrow anything. France and Spain rank by **admissions** (tickets sold) and the
+US by **gross**, which is not a detail: the three are not directly comparable
+and no attempt is made to merge them into one ranking.
+
+A year is only taken once it has **settled**. Charts keep moving after 31
+December — the just-closed year is rewritten heavily through March and goes
+quiet in April — so the fetchers take nothing newer than that, and say which
+years they skipped. This matters because seeding is insert-only: a rank written
+from a part-year chart can never be corrected.
 
 **On the Modern Classics list:** this one is **query-backed**. Its membership
 isn't a fixed set of titles but a TMDB `/discover` query, re-run daily, so it
@@ -295,9 +349,15 @@ incomplete (32 films for BAFTA Best Film, 26 for the César, 12 for the Goya,
 against many decades of ceremonies). Each language Wikipedia curates its own
 national award properly, so those are taken from the relevant **category**
 instead, and each member page is resolved through its Wikidata item to a TMDB
-id — 79/51/41 films at 98–100% id coverage, with no fuzzy title matching
+id — 78/51/40 films at 98–100% id coverage, with no fuzzy title matching
 anywhere. Going via the Wikidata item also sidesteps localisation entirely: the
 French page for a film points at the same item as the English one.
+
+The ceremony year comes from a second pass over the article, and it is the
+fiddly half. A year awarded *ex aequo* has two winners and the articles mark
+that by switching the winner's typographic register rather than by repeating
+it, so a parser that knows only one marker silently loses the year while the
+film count still adds up. Both lists now carry a year on every film.
 
 Each award was measured against the existing pool before being included,
 because the point of an awards list is the films it *adds*, not the label:
@@ -331,10 +391,22 @@ titles that a handful of enthusiastic fans pushed above their vote count's
 worth. Two curated, human-picked lists (above) filled that slot instead. Swap
 in your own via the custom-list import if you want a specific ranking.
 
-Refresh the first five from source with `npm run fetch-seeds`; the committed
-JSON means a normal install never touches those sites. BFI and the SensCritique
-list were captured by hand instead (the latter blocks scripted access outright)
-and don't have a re-fetch script — updating them means repeating that by hand.
+Refresh from source with `npm run fetch-seeds`, which rebuilds every list that
+has a fetcher; pass a name fragment to do just one (`npm run fetch-seeds --
+goya`). Spain is a separate script, `scripts/fetch-icaa.mjs`, because ICAA is
+paginated and session-based rather than a wiki page. The committed JSON means a
+normal install never touches any of those sites.
+
+**BFI and the SensCritique list were captured by hand** (the latter blocks
+scripted access outright) and have no re-fetch script — updating them means
+repeating that by hand.
+
+A fetch that comes back short **refuses to write** rather than shrinking a list
+quietly: each source declares a floor, and anything under half the previous
+count is rejected with the existing file left untouched. The same guard covers
+the metadata — a run that would drop a list's tags or its name is refused too,
+because that failure only surfaces on the next fresh install, where every list
+comes up untagged and every vibe resolves to an empty pool.
 
 ## Notes
 
@@ -354,7 +426,7 @@ and don't have a re-fetch script — updating them means repeating that by hand.
 
 ```bash
 npm install
-npm test          # 344 tests: Borda scoring, ranking, parsing, filters, full API pass
+npm test          # 399 tests: Borda scoring, ranking, parsing, filters, full API pass
 npm run dev       # auto-restarting server
 ```
 
