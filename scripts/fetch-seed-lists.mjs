@@ -604,6 +604,49 @@ export const CEREMONY_ANCHORS = {
  * the first BOLD-ITALIC film link inside it. That marker is the one thing all
  * three editions genuinely share — the nominees around it are never bold-italic.
  */
+/** A year with two winners says so, in Latin, in one of two spellings. */
+const EX_AEQUO = /ex\s*(?:aequo|æquo)/i;
+
+/** Single italic, the register a tied winner is written in. Namespaces excluded. */
+const ITALIC_FILM = /(?<!')''\[\[(?!Fichier:|File:|Image:|Catégorie:|Category:|Anexo:)([^\]|#]+?)(?:\|([^\]]*))?\]\]''/g;
+
+/** Lines that are list items — where the NOMINEES live, in every article here. */
+const withoutBullets = (block) =>
+  block.split('\n').filter((line) => !/^\s*\*/.test(line)).join('\n');
+
+/**
+ * The winner(s) named in one ceremony's block. Usually one; occasionally two.
+ *
+ * The default is unchanged and deliberately narrow: **the first bold-italic
+ * film, and only the first**. Widening it would be wrong in two measured ways
+ * — the LAST anchor's block runs to the end of the article and swallows the
+ * "most awarded" summary tables (the Goya XL block contains 32 bold-italic
+ * films), and BAFTA's blocks carry the winners of its other film categories
+ * alongside Best Film.
+ *
+ * The addition is the tie. A year awarded `ex aequo` has two winners and the
+ * articles write them in whichever register is NOT being used for the sole
+ * winner, so the bold-italic marker finds nothing and the ceremony silently
+ * produced no pair at all. Measured live: the 39th Goya (2024) went to both
+ * El 47 and La infiltrada, and both were seeded with a null ceremony year
+ * while every count still added up to 40 films.
+ *
+ * Nominees are the trap in the fallback, not the winners. The Goya block for
+ * that year holds five single-italic film links — the two winners, then three
+ * nominees in a bulleted cell — so the bullet lines are dropped first. That is
+ * the same winner/nominee distinction the César anchor already relies on, just
+ * inverted: there the nominees are the DOUBLE asterisks.
+ */
+function winnersIn(block) {
+  const tied = EX_AEQUO.test(block);
+  const bold = [...block.matchAll(new RegExp(BOLD_ITALIC_FILM.source, 'g'))];
+
+  if (bold.length) return tied ? bold.map((m) => m[1].trim()) : [bold[0][1].trim()];
+  if (!tied) return [];
+  return [...withoutBullets(block).matchAll(new RegExp(ITALIC_FILM.source, 'g'))]
+    .map((m) => m[1].trim());
+}
+
 export function parseCeremonyWinners(wikitext, anchor) {
   const re = new RegExp(anchor.source, anchor.flags);
   const anchors = [...wikitext.matchAll(re)].map((m) => ({ page: m[1].trim(), at: m.index }));
@@ -612,14 +655,13 @@ export function parseCeremonyWinners(wikitext, anchor) {
   const pairs = [];
   for (let i = 0; i < anchors.length; i += 1) {
     const end = i + 1 < anchors.length ? anchors[i + 1].at : wikitext.length;
-    const winner = BOLD_ITALIC_FILM.exec(wikitext.slice(anchors[i].at, end));
-    if (!winner) continue;
-    const winnerPage = winner[1].trim();
-    // First occurrence wins: a film re-listed in a "most awarded" summary table
-    // must not overwrite the ceremony it actually won at.
-    if (seen.has(winnerPage)) continue;
-    seen.add(winnerPage);
-    pairs.push({ ceremonyPage: anchors[i].page, winnerPage });
+    for (const winnerPage of winnersIn(wikitext.slice(anchors[i].at, end))) {
+      // First occurrence wins: a film re-listed in a "most awarded" summary
+      // table must not overwrite the ceremony it actually won at.
+      if (seen.has(winnerPage)) continue;
+      seen.add(winnerPage);
+      pairs.push({ ceremonyPage: anchors[i].page, winnerPage });
+    }
   }
   return pairs;
 }

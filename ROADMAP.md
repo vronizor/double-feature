@@ -22,17 +22,22 @@ Not a new table: a custom list already carries films, joins the pool, survives
 Top-N, can be pinned by a vibe and browsed on Explore, and all of that is
 downstream code a watchlist needs and does not have to re-earn.
 
+**The feature is built.** A film saves from the card, the overlay and Explore;
+the watchlist has a home in the Lists tab with a one-film search, an export and
+an owner badge; and it has its own group in the picker. What is left below is
+the tail, not the feature.
+
 | Item | State | Where it stands |
 |---|---|---|
-| **`lists.owner`, one-entry add, export** | ⏳ ready | The column, `POST` of a single resolved entry (delete already exists), and a JSON export **in the seed-file shape** — `resolveEntry` honours a supplied `tmdb_id` and the Lists tab's file picker already takes `.json`, so import is the existing path taking its fast branch, not new parsing. Owner is a column rather than a naming convention for the reason `builtin_key` and `seed_key` both exist: the name is not the identity, and a rename must not detach a device from its own list |
-| Device identity and the client store | ⏳ ready | Owner name in localStorage beside `prefs.js`; a module singleton mirroring `lineup.js` so the Save button renders its own state without a round trip per card. First Save on an unclaimed device asks once, creates the list, adds the film. Never asks again |
-| The Save affordance | ⏳ ready | The overlay is free (`actions` is already a parameter) and Explore is free (shared card). The card itself is the open design: a third small button will wrap, and those buttons are already under the 44px the row below wants. **Measure on a real phone before choosing** between a poster-corner toggle and a third button — both poster corners are taken, by the award flag and the watched flag |
-| Tap targets, twice deferred | ⏳ ready | **Measured on a real phone, and the stylesheet guesses were pessimistic**: `.chip` is 35px and `.tab` 36px, not the ~26px the evidence claimed. Still under 44 though, and `.vibe-edit` ("Edit") is **16px** — the worst by far, and it is the control that deletes a saved vibe. Raise the small ones toward 44 with padding rather than font size, starting there. It led v8 and before that v7, so it goes **with the Save affordance above**, while that card is on a phone being measured anyway — not as a row of its own that a third version can defer |
-| The watchlist as a destination | ⏳ ready | See it, remove from it, add manually via the TMDB search the lineup already uses, with `addManualMovie` for anything not on TMDB. Its picker group is **derived from `owner IS NOT NULL`**, not a tag: tags are host-editable, so a tag could be removed or applied to a list that structurally is not a watchlist. A tag becomes right only if a "draw from everyone's watchlists" vibe is wanted, since `vibe_tags` is the only tag-shaped hook |
-| The watched filter says what it does | ⏳ ready | It excludes a household fact, so a film one person watched alone is dropped for everyone — silently, which is the failure mode this repo cares about. The wording changes to name that ("only films nobody here has seen"); the data does not. The fuller fix is in `BACKLOG.md`, unscheduled, and needs a measurement of the real watched set first |
-| Two fetcher one-liners | ⏳ ready | The César ceremony anchor stopped matching when two article lines lost the space after the bullet, so the newest winners are seeded with no ceremony year; Goya has the same symptom from a different cause. And `backfill-list-fields.mjs` looks lists up by name while the seeder keys on `seed_key`, so **any list the host renamed is silently skipped** — a casualty of the v8 key migration |
-| The box-office fetchers skip the live year | ⏳ ready | A part-year top-20 enters the seed and can never be corrected, because the seeder is insert-only and ranks are written on insert. Excluding the live year is the small change; the alternative teaches the seeder to delete, which is a much larger one with a worse failure mode |
+| **One look on a real phone** | 🔨 doing | The only thing in v9 that landed **unverified**, and it is the part v7 proved cannot be checked any other way. Two things specifically: the poster-corner Save toggle at 44px, and the taller `.chip` and `.tab`, which change layout **app-wide** rather than just adding a control. Reverting either is cheap; shipping a card that wraps is not |
+| Re-fetch the three award lists whose years are now parseable | ⏳ ready | The César and Goya parses are fixed but the **committed seeds still carry the old output** — four films across the two with a null `award_year`. Only a re-fetch writes them properly, and it needs credentials. Cheap: these are the category-and-Wikidata lists, not the box-office crawl |
 | Whatever the next night turns up | ⏳ ready | The v7 loop found more in an evening of real use than four review passes found in a day, and it held through v8. Keep `NOTES.md` as the inbox and fix from it |
+
+**`HISTORY.md` is owed nine chunks.** v8 closed having written up three of six,
+and that was called out in its own closing section as the process finding of
+the version — so leaving v9 in the same state would be the same mistake with
+the note already written. It is not urgent and it is not free; do it before
+v9 closes, not after.
 
 Deferred so they are not re-proposed early: **v10** — Locarno, and the staleness
 surface with a source-count probe. **Unscheduled** — the Pi deploy, per-person

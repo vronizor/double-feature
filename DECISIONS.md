@@ -193,6 +193,18 @@ answer it in one line.
 moment.** Set the height first, then the scroll. Reversed, the rail crept upward
 on every repaint, far enough to hide the group just clicked.
 
+**A ceremony can have TWO winners, and the articles mark a tie by changing the
+register rather than by repeating it.** Where a sole winner is bold-italic, the
+tied pair is written in single italic; where a sole winner is single-italic,
+the pair is bold. So a parser keyed on one marker finds *nothing* at a tie and
+the year produces no pair at all — no error, and the film count still adds up,
+because the films come from a category and only the year is lost. Live in the
+Goya list until v9: the 39th went to El 47 and La infiltrada, both seeded
+undated. The fallback's own trap is that **nominees are single-italic too**,
+sitting in a bulleted cell in the same block, so a tie fallback must drop the
+list items first — the same winner/nominee distinction the César anchor
+relies on, inverted.
+
 **An equality test against a CONTINUOUS score is never true, so a guard built
 on one is not a guard.** The matcher sent a title to human review only when the
 runner-up was confident *and* scored exactly the same — but the score ends with

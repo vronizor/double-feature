@@ -125,3 +125,80 @@ test('a ceremony with no bold-italic winner is skipped, not mis-attributed', () 
   assert.equal(pairs.length, 1);
   assert.equal(pairs[0].ceremonyPage, '16e cérémonie des César');
 });
+
+// --- Ties ------------------------------------------------------------------
+//
+// A ceremony with two winners writes them in whichever register is NOT being
+// used for the sole winner, so the bold-italic marker finds nothing and the
+// year silently produces no pair at all. Measured live on the 39th Goya, which
+// went to El 47 AND La infiltrada: both were seeded with a null ceremony year
+// while every count still added up to 40 films.
+
+test('Goya: a tie written in single italic yields BOTH winners, and no nominees', () => {
+  const page = `
+! colspan="8" align="center"| '''[[Anexo:XXXVIII edición de los Premios Goya|XXXVIII edición - 2023]]'''
+|-
+!style="background:#;" align="center" | '''''[[La sociedad de la nieve]]''''' <br />
+! colspan="8" align="center"| '''[[Anexo:XXXIX edición de los Premios Goya|XXXIX edición - 2024]]'''
+|-
+!style="background:#;" align="center" |
+<small><small>(''ex aequo'')</small></small> <br>
+''[[El 47]]'' <br>
+<hr/>
+''[[La infiltrada]]'' <br>
+|style="background:#;" align="center" |
+* ''[[Casa en llamas]]'' ([[Dani de la Orden]])
+* ''[[Segundo premio (película) |Segundo premio]]'' ([[Isaki Lacuesta]])
+`;
+  const pairs = parseCeremonyWinners(page, CEREMONY_ANCHORS.goya);
+
+  assert.equal(pairs.length, 3, 'the sole winner above, plus BOTH tied winners');
+  assert.equal(pairs[0].winnerPage, 'La sociedad de la nieve');
+  assert.deepEqual(
+    pairs.slice(1).map((p) => p.winnerPage),
+    ['El 47', 'La infiltrada'],
+  );
+  // The nominees sit in a bulleted cell in the same block and are also single
+  // italic — dropping the bullet lines is the whole difference between two
+  // winners and five films.
+  assert.ok(!pairs.some((p) => /Casa en llamas|Segundo premio/.test(p.winnerPage)));
+});
+
+test('César: a tie written in BOLD italic also yields both', () => {
+  const page = `
+* [[9e cérémonie des César|1984]] : ''ex aequo'' '''''[[Le Bal (film, 1983)|Le Bal]]''''' et '''''[[À nos amours]]'''''
+* [[10e cérémonie des César|1985]] : '''''[[Les Ripoux]]''''' – [[Claude Zidi]]
+`;
+  const pairs = parseCeremonyWinners(page, CEREMONY_ANCHORS.cesar);
+
+  assert.deepEqual(pairs.map((p) => p.winnerPage), ['Le Bal (film, 1983)', 'À nos amours', 'Les Ripoux']);
+  assert.equal(pairs[1].ceremonyPage, '9e cérémonie des César', 'both are dated by the SAME ceremony');
+});
+
+test('without "ex aequo", only the first bold-italic film still wins', () => {
+  // The guard that must not be widened. A block runs to the next anchor, so
+  // the LAST one swallows the rest of the article — the real Goya XL block
+  // contains 32 bold-italic films from the "most awarded" summary tables. And
+  // BAFTA's blocks carry the winners of its other film categories.
+  const page = `
+! colspan="8" align="center"| '''[[Anexo:XL edición de los Premios Goya|XL edición - 2025]]'''
+|-
+!style="background:#;" align="center" | '''''[[Los domingos]]'''''
+== Más premiadas ==
+'''''[[Mar adentro]]''''' and '''''[[Volver (película de 2006)|Volver]]'''''
+`;
+  const pairs = parseCeremonyWinners(page, CEREMONY_ANCHORS.goya);
+
+  assert.deepEqual(pairs.map((p) => p.winnerPage), ['Los domingos']);
+});
+
+test('a block with neither a bold-italic film nor a tie yields nothing', () => {
+  // 23 of the César article's anchors are ceremony links elsewhere on the page
+  // rather than award rows. They must stay silent, not fall through to the
+  // single-italic fallback and start harvesting nominees.
+  const page = `
+* [[15e cérémonie des César|1990]] : voir aussi la [[16e cérémonie des César|suite]]
+** ''[[Un nominé]]'' – Quelqu'un
+`;
+  assert.deepEqual(parseCeremonyWinners(page, CEREMONY_ANCHORS.cesar), []);
+});
