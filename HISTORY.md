@@ -3442,3 +3442,60 @@ instance behind it, which is what moved "let the seeder update a row" from an
 aside in a backlog entry to a v10 item of its own.
 
 Version 9.12.0.
+
+### 12.13 Closing v9
+
+Thirteen chunks. The thesis — *one feature, plus whatever scoping it turns up* —
+held, and it is the second half that turned out to carry the version.
+
+**The feature landed intact and cost less than it looked like it would.** A
+watchlist is `lists.owner IS NOT NULL` and nothing else: no new table, no third
+`origin` value, no new draw path. Everything downstream — the pool, Top-N,
+vibes, Explore, publishing — worked on the first try, because a custom list
+already did all of it. That is the whole argument for choosing a discriminator
+over a structure, and it is now the second time it has paid off, after
+`query_json IS NOT NULL` for dynamic lists.
+
+**Three shipped bugs were found, and all three reported success.** The César
+anchor lost two ceremonies and printed a plausible count. The ambiguity guard
+could not fire and resolved to the more popular film instead, storing the guess
+as `resolved`. The *ex aequo* register switch lost a year while every film count
+still added up. None of them raised anything. This is now unmistakably **the
+characteristic failure of this project** — not code that breaks, but code that
+succeeds at slightly less than it was asked and has no way to say so — and the
+countermeasures that exist (the shrink guard, the metadata guard, the match-rate
+floor) are all defeated by the same thing: an award list grows by one film a
+year, so no proportional threshold can see a 4% loss.
+
+**Name-as-identity appeared a third time, and was caught before shipping.**
+`builtin_key` in v7 and `seed_key` in v8 were both found by a rename breaking
+something; in 12.4 the device-to-watchlist lookup was keyed on owner from the
+start, with a test that renames the list and asserts the device still finds it.
+Three versions to convert a recurring bug into a reflex.
+
+**Insert-only seeding stopped being a curiosity and became a scheduled item.**
+`rank`, `overall_rank` and `award_year` all landed permanently wrong in an
+existing database within one version, each repaired by another one-off
+back-fill. The pattern is now written down and v10 carries a narrowed fix:
+update a matching row's per-membership facts, and leave deletion out, because a
+path that can remove rows can remove films from a list somebody is drawing from
+tonight.
+
+**The process finding from v8 was acted on, with one honest caveat.** v8 closed
+having written up three of six chunks and named that as its own failure. v9's
+twelve are all written up — but in a single pass at the end, not chunk by chunk
+as the rule intends. That is better than the alternative and worse than the
+rule: writing twelve at once means reconstructing from commit messages rather
+than from the session that produced them, and the commit messages here are
+unusually good precisely because they were carrying that weight. The rule stays
+as written.
+
+**Three things did not get done, and none is hidden.** The Pi still has not
+happened — unscheduled since v8, and now the reason four undated films and 44
+part-year box-office rows sit uncorrected in a database nothing in this
+repository can reach. `audit-matches` has never been run against real data, so
+the size of the wrong-match exposure from 12.7 is still unknown; it needs the
+Pi too. And the 44 part-year rows are parked for the April refresh by decision,
+not by neglect.
+
+Version 10.0.0.
