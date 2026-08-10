@@ -442,3 +442,29 @@ test('"Outside North America" is not North America', () => {
     .replace('==Highest-grossing films (U.S.)==', '===Outside North America===');
   assert.deepEqual(parseYearInFilmPage(page), []);
 });
+
+/**
+ * Which box-office years a fetcher may take.
+ *
+ * A year does not close on 31 December. Measured off the revision histories of
+ * both the French and US pages: the just-closed year is rewritten heavily
+ * through March and settles in April.
+ *
+ * This matters more than it would elsewhere because `seedList` is insert-only
+ * and `recordEntry` writes `rank` on the insert path alone — a film seeded at
+ * rank 4 can never be demoted to 7. A part-year chart is not a value that gets
+ * corrected next run; it is permanent.
+ */
+test('a box-office year is not taken until it has settled', async () => {
+  const { lastSettledYear } = await import('../scripts/fetch-seed-lists.mjs');
+
+  // The running year is never taken, at any point in it.
+  assert.equal(lastSettledYear(new Date('2026-01-15')), 2024);
+  assert.equal(lastSettledYear(new Date('2026-08-06')), 2025);
+  assert.equal(lastSettledYear(new Date('2026-12-31')), 2025);
+
+  // And the just-closed one waits for April, because through March it is
+  // still moving. This is the boundary the whole rule turns on.
+  assert.equal(lastSettledYear(new Date('2027-03-31')), 2025, 'March: 2026 still settling');
+  assert.equal(lastSettledYear(new Date('2027-04-01')), 2026, 'April: 2026 has settled');
+});

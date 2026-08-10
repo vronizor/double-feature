@@ -28,6 +28,10 @@ import { request as httpsRequest } from 'node:https';
 
 import { ROOT } from '../server/config.js';
 import { searchMovie, scoreCandidate, normalizeTitle } from '../server/tmdb.js';
+// One definition of "which box-office years may be taken", shared rather than
+// restated — see the comment on it. Importing is safe: that script only runs
+// its main() when invoked directly.
+import { lastSettledYear } from './fetch-seed-lists.mjs';
 
 const BASE = 'https://sede.mcu.gob.es/CatalogoICAA';
 const PER_PAGE = 24;
@@ -363,13 +367,30 @@ async function main() {
   // than take one contiguous block. Coverage is not uniform in time — TMDB
   // knows 2015 far better than 1955 — so a single decade would report a match
   // rate that says nothing about the years it did not touch.
-  const years = [];
+  let years = [];
   for (const arg of process.argv.slice(2)) {
     const range = /^(\d{4})\.\.(\d{4})$/.exec(arg);
     if (range) for (let y = Number(range[1]); y <= Number(range[2]); y += 1) years.push(y);
     else if (/^\d{4}$/.test(arg)) years.push(Number(arg));
   }
   if (years.length === 0) throw new Error('usage: fetch-icaa.mjs <year> [year…] | <from>..<to>');
+
+  // Same rule as the other two box-office fetchers, and imported from there
+  // rather than restated, because three copies of a date rule is three chances
+  // for one of them to drift. A year still settling would seed a part-year
+  // chart, and the seeder is insert-only so a rank once written cannot be
+  // corrected. Dropped loudly rather than silently: a run that quietly did
+  // less than it was asked reads as a run that found less.
+  const settled = lastSettledYear();
+  const unsettled = years.filter((year) => year > settled);
+  if (unsettled.length) {
+    console.log(
+      `Skipping ${unsettled.join(', ')} — not settled yet. A box-office year is ` +
+        `only taken from April of the following year (see lastSettledYear).`,
+    );
+  }
+  years = years.filter((year) => year <= settled);
+  if (years.length === 0) throw new Error('Every year given is still settling; nothing to fetch.');
   if (CACHE) await mkdir(CACHE, { recursive: true });
 
   await openSession();

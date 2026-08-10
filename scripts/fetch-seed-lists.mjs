@@ -27,6 +27,33 @@ const SEEDS = join(ROOT, 'seeds');
 const UA = 'DoubleFeature/1.0 (self-hosted movie night app; seed list builder)';
 const THIS_YEAR = new Date().getFullYear();
 
+/**
+ * The most recent box-office year that has SETTLED, and so the last one a
+ * fetcher may take.
+ *
+ * A box-office year does not close on 31 December. Measured off the revision
+ * histories of both the French and the US pages, the shape is the same for
+ * both: the just-closed year is rewritten heavily through March and goes quiet
+ * in April. Before then the chart is still moving.
+ *
+ * Why that matters more here than it would elsewhere: `seedList` is
+ * INSERT-ONLY and `recordEntry` writes `rank` on the insert path alone, so a
+ * film seeded at rank 4 cannot later be demoted to 7. A part-year chart is not
+ * a value that will be corrected on the next run — it is permanent. Taking the
+ * live year in August seeds a half-year top-20 that is simply wrong by
+ * January, and the only repair is teaching the seeder to delete, which trades
+ * a small correctness win for a path that can remove films from a list
+ * somebody is drawing from tonight.
+ *
+ * So: never the running year, and not the just-closed one until April. Takes
+ * `now` rather than reading the clock so the rule can be tested at a date
+ * rather than only on the day someone runs the suite.
+ */
+export function lastSettledYear(now = new Date()) {
+  // getMonth() is 0-based, so >= 3 is April onwards.
+  return now.getMonth() >= 3 ? now.getFullYear() - 1 : now.getFullYear() - 2;
+}
+
 async function getText(url, headers = {}) {
   const response = await fetch(url, {
     headers: { 'user-agent': UA, ...headers },
@@ -1005,7 +1032,7 @@ export function parseUsBoxOfficePage(wikitext) {
  * spoken one.
  */
 async function fetchBoxOfficeFrance(meta) {
-  const lastYear = THIS_YEAR;
+  const lastYear = lastSettledYear();
   const perYear = [];
   const best = new Map();
 
@@ -1187,7 +1214,7 @@ async function fetchBoxOfficeUS(meta) {
   const perYear = [];
   const best = new Map();
 
-  for (let year = US_BOX_OFFICE_FIRST_YEAR; year <= THIS_YEAR; year += 1) {
+  for (let year = US_BOX_OFFICE_FIRST_YEAR; year <= lastSettledYear(); year += 1) {
     let rows = [];
     try {
       if (year < US_IN_YEAR_FIRST) {

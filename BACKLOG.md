@@ -336,6 +336,59 @@ from "Unscheduled" below, which is material nobody has ruled on yet.
   mirage and why the Goya documentary list, which is the one that costs
   literally nothing to build, is not worth building.
 
+- **Clear the part-year 2026 box office, at the April refresh.** *(2026-08-06,
+  parked from v9.)* The fetchers stopped taking unsettled years in v9.10.0, but
+  44 rows of half-year 2026 chart were already in the seeds by then — France
+  15, Spain 20, US 9, Spain's being a top-20 for six months of a year.
+  Re-running the three fetchers rewrites the files clean, and **April is the
+  natural moment** because that is when the just-closed year settles, so one
+  run does both jobs.
+
+  **They cannot be hand-edited out**, and the reason is worth knowing before
+  someone tries: a seed row carries `title`, `year`, `tmdb_id` and `rank`, and
+  `year` is the film's RELEASE year, not the chart year it came from. A film
+  released in December that topped January's chart is indistinguishable from a
+  row of the previous year's chart, so filtering on the year would quietly
+  delete legitimate rows — the `overall_rank` back-fill mistake in a new
+  costume. A re-fetch is the only clean route.
+
+  And note what a re-fetch does NOT do: `seedList` is insert-only, so a
+  database already carrying those rows keeps them. Clean seed files are not a
+  clean Pi. That is the same limitation the staleness item below is about, and
+  it is the strongest argument in the repo for eventually letting the seeder
+  remove a row — a case worth deciding on its own rather than as a side effect
+  of this.
+
+- **Let the seeder update or delete a row, not only insert one.** *(2026-08-10.
+  The case above asked for this to be decided on its own; this is that item.)*
+  `recordEntry` writes the per-membership facts on the insert path alone and
+  `alreadySeeded` skips anything already present, so **a value that landed
+  wrong is permanent in any database that already has the row**. Re-fetching
+  fixes the seed file and a fresh install; it does not fix a running Pi.
+
+  Three instances of this in v9 alone, which is why it stops being a curiosity:
+  `rank` came up null on fresh installs and silently removed the Top-N control,
+  `overall_rank` needed a back-fill script of its own, and now `award_year` —
+  the César and Goya films are correctly dated in the seed and will stay undated
+  on the Pi forever. Each was repaired by writing another one-off back-fill
+  script, and that is the actual cost being paid: a script per column, written
+  after the damage, by someone who has to first notice the damage.
+
+  **What makes this hard is not the SQL, it is the deletion.** An update path
+  that can also remove a row can remove films from a list somebody is drawing
+  from tonight, and a source having a bad day is indistinguishable from a source
+  that genuinely dropped a film — the same problem the shrink guard and the
+  never-auto-apply rule already exist to contain. So the shape worth considering
+  is narrower than it first looks: **update the per-membership facts on a row
+  that matches, and leave deletion out of the first version.** That fixes all
+  three instances above and touches nothing a person can see disappear. Deletion
+  is a separate decision that the box-office cleanup wants and nothing else does.
+
+  Decide before building whether an update may overwrite a value a human
+  changed. It must not — that is the same lesson `PRESERVED_KEYS` and the
+  host-rename path already learned the hard way, and it is the one way this
+  change could do real damage.
+
 - **A staleness surface, and a source-count probe.** *(2026-08-06.)* The
   measured finding was that **scheduling is not the missing piece** — eight of
   nine award lists already carried their 2026 winner, kept current by accident
