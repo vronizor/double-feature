@@ -1,6 +1,7 @@
 import {
   h,
   clear,
+  fill,
   posterUrl,
   toast,
   plural,
@@ -608,7 +609,11 @@ export async function renderLists(container) {
           }),
           h('span', { class: 'list-name' }, list.name),
         ),
-        h('span', { class: 'badge badge-origin' }, list.origin),
+        // A watchlist says whose it is instead of saying "custom", which is
+        // true of it but not the interesting thing about it.
+        list.owner
+          ? h('span', { class: 'badge badge-origin' }, `${list.owner}’s`)
+          : h('span', { class: 'badge badge-origin' }, list.origin),
         h('span', { class: 'spacer' }),
         h('span', { class: 'badge' }, `${list.resolved_count} films`),
         list.review_count > 0
@@ -620,8 +625,17 @@ export async function renderLists(container) {
           {
             class: 'btn-sm btn-danger',
             onClick: async () => {
-              const force = list.origin === 'seed';
-              if (!confirm(`Delete "${list.name}"? Its films stay cached but the list goes.`)) return;
+              // A watchlist needs ?force too, for the opposite reason a seed
+              // list does: a seed can always be re-fetched, and a watchlist
+              // exists nowhere else. The warning says so rather than reusing
+              // the reassuring one — "its films stay cached" is true and
+              // beside the point when the list itself is the unrecoverable
+              // part. Export is one button along.
+              const force = list.origin === 'seed' || Boolean(list.owner);
+              const warning = list.owner
+                ? `Delete ${list.owner}’s watchlist? It was built a film at a time and nothing can rebuild it. Export it first if you might want it.`
+                : `Delete "${list.name}"? Its films stay cached but the list goes.`;
+              if (!confirm(warning)) return;
               try {
                 await api.deleteList(list.id, force);
                 if (state.openListId === list.id) state.openListId = null;
@@ -636,6 +650,115 @@ export async function renderLists(container) {
         ),
       ),
       isOpen ? entriesPanel(list) : null,
+    );
+  }
+
+  /**
+   * Add one film, by searching TMDB.
+   *
+   * The import panel above already adds films, but it is the wrong shape for
+   * this: it is bulk, it resolves raw titles over the network as a background
+   * job, and it can leave things in a review queue. "A friend told me about
+   * this one" is a single film whose identity you confirm by looking at it.
+   *
+   * Rendered only for custom lists, watchlists included. Adding one film by
+   * hand to a seed list would silently diverge it from the seed it is
+   * reconciled against on every re-run.
+   *
+   * Deliberately does NOT call paint() while searching. paint() rebuilds this
+   * whole view, which would take the input's value and the caret with it on
+   * every keystroke; the results node is updated in place instead, the same
+   * way the watched button rewrites its own label.
+   */
+  function addOneFilm(list) {
+    const results = h('div', { class: 'stack', style: 'gap:6px' });
+    const input = h('input', {
+      type: 'search',
+      placeholder: 'Search TMDB for a film to add…',
+      'aria-label': `Add a film to ${list.name}`,
+      onKeydown: (event) => {
+        if (event.key === 'Enter') search();
+      },
+    });
+
+    const attach = async (tmdbId, label) => {
+      try {
+        // Two steps, matching the lineup's own "add a specific film" flow: the
+        // add endpoint makes no TMDB call, so anything straight out of a
+        // search has to be cached first.
+        await api.getOrCacheMovie(tmdbId);
+        const { added } = await api.addEntry(list.id, tmdbId);
+        toast(added ? `Added ${label}` : `${label} was already on the list`, 'ok');
+        input.value = '';
+        await refresh();
+        await loadEntries(list.id);
+        paint();
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    };
+
+    async function search() {
+      const query = input.value.trim();
+      if (!query) return;
+      fill(results, h('p', { class: 'muted' }, 'Searching…'));
+      try {
+        const { results: found } = await api.searchTmdb(query);
+        fill(
+          results,
+          found.length === 0
+            ? h('p', { class: 'muted' }, 'Nothing on TMDB matched that.')
+            : null,
+          ...found.slice(0, 6).map((movie) =>
+            h(
+              'button',
+              {
+                class: 'btn-sm',
+                style: 'text-align:left',
+                onClick: () => attach(movie.tmdb_id, movie.title),
+              },
+              `${movie.title}${movie.year ? ` (${movie.year})` : ''}`,
+            ),
+          ),
+          // The rare film TMDB does not have. Same escape hatch the lineup
+          // offers, and it lands as a manual entry with a synthetic id.
+          h(
+            'button',
+            {
+              class: 'btn-sm',
+              onClick: async () => {
+                // A trailing year, split off here rather than reusing
+                // `splitTitleYear` from server/parse.js — that module is
+                // server-side and this is the browser. Three lines beats
+                // making a parser with its own test suite isomorphic for one
+                // rare path, and the two cannot silently disagree: the server
+                // form is fed by pasted lists, this one only by a search box
+                // whose text the person is looking at as they press the
+                // button.
+                const match = /^(.*?)\s*[([]?(\d{4})[)\]]?$/.exec(query);
+                const title = match ? match[1].trim() : query;
+                const year = match ? Number(match[2]) : null;
+                try {
+                  const { movie } = await api.addManualMovie(title, year);
+                  await attach(movie.tmdb_id, movie.title);
+                } catch (error) {
+                  toast(error.message, 'error');
+                }
+              },
+            },
+            `Not on TMDB — add “${query}” by hand`,
+          ),
+        );
+      } catch (error) {
+        fill(results, h('p', { class: 'empty error' }, error.message));
+      }
+    }
+
+    return h(
+      'div',
+      { class: 'stack', style: 'gap:6px' },
+      h('div', { class: 'row', style: 'gap:6px' }, input, h('button', { class: 'btn-sm', onClick: search }, 'Search')),
+      results,
     );
   }
 
@@ -660,6 +783,21 @@ export async function renderLists(container) {
               'Source ↗',
             )
           : null,
+        // A plain download link, not a fetch: the browser already knows how to
+        // save a file, and the endpoint serves the seed-file shape so this is
+        // also the backup for the one thing in the database no source can
+        // rebuild. Offered on every list, since a curated custom list is just
+        // as unrecoverable as a watchlist.
+        h(
+          'a',
+          {
+            href: api.exportListUrl(list.id),
+            download: '',
+            class: 'faint',
+            title: 'Download as JSON, in the same shape the seed files use — it re-imports here or anywhere else',
+          },
+          'Export ↓',
+        ),
         h('span', { class: 'spacer' }),
         h(
           'label',
@@ -692,6 +830,7 @@ export async function renderLists(container) {
           ),
         ),
       ),
+      list.origin === 'custom' ? addOneFilm(list) : null,
       state.entries.length === 0
         ? h(
             'p',

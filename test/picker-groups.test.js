@@ -87,3 +87,75 @@ test('expanding is independent of selecting', () => {
   setGroupOpen(open, 'awards', true);
   assert.deepEqual([...open], ['awards'], 'nothing but the open marker was written');
 });
+
+/**
+ * Watchlists get a group of their own, derived from `owner IS NOT NULL`.
+ *
+ * Not from a tag, and the tests below are the reason: tags are host-editable,
+ * so a tag could be removed from a watchlist or applied to something that is
+ * not one, and the group would then disagree with the thing it names. The
+ * owner column cannot drift.
+ */
+const { groupListsByTag } = await import('../public/browse.js');
+const { watchlist } = await import('../public/watchlist.js');
+
+const VOCAB = [
+  { tag: 'canon', label: 'The canon' },
+  { tag: 'awards', label: 'Awards' },
+];
+
+const LIBRARY = [
+  { id: 1, name: 'Criterion', owner: null, tags: ['canon'] },
+  { id: 2, name: 'Oscar — Best Picture', owner: null, tags: ['awards'] },
+  { id: 3, name: 'A custom list', owner: null, tags: [] },
+  { id: 7, name: 'Zoe’s watchlist', owner: 'Zoe', tags: [] },
+  { id: 8, name: 'Alice’s watchlist', owner: 'Alice', tags: [] },
+];
+
+test('watchlists form their own group, and it leads', () => {
+  watchlist.reset();
+  const groups = groupListsByTag(LIBRARY, VOCAB);
+
+  assert.equal(groups[0].key, '__watchlists');
+  assert.equal(groups[0].label, 'Watchlists');
+  assert.deepEqual(groups[0].lists.map((l) => l.id), [8, 7], 'alphabetical with no device owner');
+});
+
+test('this device’s own watchlist sorts to the top of that group', () => {
+  watchlist.reset();
+  watchlist.claim('Zoe');
+  const groups = groupListsByTag(LIBRARY, VOCAB);
+
+  // Yours is the one you came to tick. Alphabetically Zoe is last, so this
+  // fails if the sort is not owner-aware.
+  assert.deepEqual(groups[0].lists.map((l) => l.id), [7, 8]);
+  watchlist.reset();
+});
+
+test('a watchlist does NOT also fall into Untagged', () => {
+  watchlist.reset();
+  const groups = groupListsByTag(LIBRARY, VOCAB);
+  const untagged = groups.find((g) => g.label === 'Untagged');
+
+  // It carries no tags, so without excluding owned lists from the tag pass it
+  // would render twice — once in its own group and once as an untagged
+  // stray, and ticking it in one place would tick it in both.
+  assert.deepEqual(untagged.lists.map((l) => l.id), [3]);
+});
+
+test('a watchlist someone tagged still renders only once', () => {
+  watchlist.reset();
+  const tagged = LIBRARY.map((l) => (l.id === 8 ? { ...l, tags: ['canon'] } : l));
+  const groups = groupListsByTag(tagged, VOCAB);
+
+  assert.deepEqual(groups.find((g) => g.key === 'canon').lists.map((l) => l.id), [1]);
+  assert.ok(groups[0].lists.some((l) => l.id === 8));
+});
+
+test('with no watchlists at all, nothing changes', () => {
+  watchlist.reset();
+  const groups = groupListsByTag(LIBRARY.filter((l) => !l.owner), VOCAB);
+
+  assert.ok(!groups.some((g) => g.key === '__watchlists'), 'no empty group');
+  assert.deepEqual(groups.map((g) => g.label), ['The canon', 'Awards', 'Untagged']);
+});

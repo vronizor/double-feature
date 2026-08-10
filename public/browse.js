@@ -48,15 +48,49 @@ const UNTAGGED = '__untagged';
  */
 export function groupListsByTag(lists, vocabulary) {
   const groups = [];
+
+  // Watchlists come first, and out of the tag system entirely.
+  //
+  // DERIVED from `owner IS NOT NULL`, not from a tag, and that is deliberate.
+  // Tags are host-editable, so a tag could be removed from a watchlist or
+  // applied to a list that structurally is not one, and the group would then
+  // disagree with the thing it is supposed to name. The owner column cannot
+  // drift. It also keeps §4 intact: every tag names a family of subject
+  // matter, and "belongs to Alice" is not one.
+  //
+  // The consequence, worth knowing before someone reaches for a tag anyway: a
+  // vibe cannot resolve on this, because `vibe_tags` is the only tag-shaped
+  // hook. A "draw from everyone's watchlists" vibe would need the tag after
+  // all, and that is the point at which to add it.
+  const owned = lists.filter((list) => list.owner);
+  if (owned.length) {
+    groups.push({
+      key: '__watchlists',
+      label: 'Watchlists',
+      // This device's own first, then the rest of the household by name. Yours
+      // is the one you came here to tick, and on a shared Pi it would
+      // otherwise sit wherever the alphabet put it.
+      lists: owned.sort((a, b) => {
+        const mine = (list) => (list.owner === watchlist.owner ? 0 : 1);
+        return mine(a) - mine(b) || a.name.localeCompare(b.name);
+      }),
+    });
+  }
+  // Everything below groups by tag, over the lists that are NOT watchlists —
+  // otherwise a watchlist the host had tagged would render in two groups, and
+  // an untagged one (which is all of them, since nothing tags them) would fall
+  // into "Untagged" alongside its own group.
+  const rest = lists.filter((list) => !list.owner);
+
   for (const { tag, label } of vocabulary) {
-    const inTag = lists.filter((list) => (list.tags ?? []).includes(tag));
+    const inTag = rest.filter((list) => (list.tags ?? []).includes(tag));
     if (inTag.length) {
       groups.push({ key: tag, label, lists: inTag.sort((a, b) => a.name.localeCompare(b.name)) });
     }
   }
   // Anything carrying no tag at all still has to be reachable — a custom list
   // the host just created has none until they file it.
-  const untagged = lists.filter((list) => (list.tags ?? []).length === 0);
+  const untagged = rest.filter((list) => (list.tags ?? []).length === 0);
   if (untagged.length) {
     groups.push({
       key: UNTAGGED,
@@ -1152,7 +1186,13 @@ export function renderFilterPanel(
           (onToggleChange ?? onValueChange)();
         },
       }),
-      h('span', {}, 'Include films already marked watched (allow rewatches)'),
+      // Names the household fact this actually reads, rather than implying a
+      // per-person one. `watched` is one flag for the whole house, so
+      // unticking this also drops a film that ONE person marked after
+      // watching it alone — silently, for everyone else. The wording is the
+      // v9 fix; the data fix is in BACKLOG.md, unscheduled, and wants the real
+      // watched set measured first.
+      h('span', {}, 'Include films anyone here has marked watched (allow rewatches)'),
     ),
     h(
       'label',
