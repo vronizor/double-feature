@@ -8,7 +8,7 @@
   "source": "fr.wikipedia category \"César du meilleur film\", resolved to TMDB ids via Wikidata",
   "source_url": "https://fr.wikipedia.org/wiki/C%C3%A9sar_du_meilleur_film",
   "note": "Wikidata's award-received data only covers 26 of these; the French Wikipedia category covers 51.",
-  "fetched_at": "2026-07-30",
+  "fetched_at": "2026-08-10",
   "count": 51,
   "entries": [
     {
@@ -308,13 +308,13 @@
     {
       "title": "Emilia Pérez",
       "year": 2024,
-      "award_year": null,
+      "award_year": 2025,
       "tmdb_id": 974950
     },
     {
       "title": "The Ties That Bind Us",
       "year": 2024,
-      "award_year": null,
+      "award_year": 2026,
       "tmdb_id": 1096642
     }
   ]

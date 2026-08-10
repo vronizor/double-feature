@@ -8,7 +8,7 @@
   "source": "es.wikipedia category \"Películas ganadoras del Premio Goya a la mejor película\", resolved to TMDB ids via Wikidata",
   "source_url": "https://es.wikipedia.org/wiki/Premio_Goya_a_la_mejor_pel%C3%ADcula",
   "note": "Wikidata's award-received data only covers 12 of these; the Spanish Wikipedia category covers 41.",
-  "fetched_at": "2026-07-30",
+  "fetched_at": "2026-08-10",
   "count": 40,
   "entries": [
     {
@@ -242,13 +242,13 @@
     {
       "title": "The 47",
       "year": 2024,
-      "award_year": null,
+      "award_year": 2025,
       "tmdb_id": 1174481
     },
     {
       "title": "Undercover",
       "year": 2024,
-      "award_year": null,
+      "award_year": 2025,
       "tmdb_id": 1215185
     }
   ]
