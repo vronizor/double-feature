@@ -225,6 +225,32 @@ label { display: block; }
 .list-row--picker { flex-wrap: wrap; row-gap: 6px; }
 .list-row--picker .check { flex: 1 1 100%; }
 .list-row-badges { display: flex; gap: 6px; flex: 1 1 100%; }
+
+/* `gap: inherit` keeps the buttons spaced exactly as they were as direct
+   children of the row, whatever gap the row has at the current width. */
+.list-row-actions { display: flex; gap: inherit; flex: none; }
+
+/* The Lists tab's row is one nowrap flex line in which only the name may
+   shrink, so on a phone everything else — origin badge, count, review badge,
+   two buttons, ~380px of it — was paid for out of the name: at 360px wide it
+   got 0px and the row was a column of checkboxes. A 4-digit count plus the
+   review badge also pushed Delete past the row's overflow:hidden, so on that
+   row it was unreachable, not just cramped. Below 640px the row breaks in two:
+   name and origin on top, counts and actions under it. The .spacer becomes the
+   line break (full basis, no height) rather than adding a wrapper element only
+   phones need; the actions group's auto margin then does the right-aligning
+   the spacer did on one line, and if counts and actions don't fit on one line
+   (a 4-digit count plus a review badge, at 360px) the pair drops together,
+   still right-aligned. A full-basis item takes a flex line of its own,
+   so the zero-height spacer sits between two row-gaps: 4px each is the 8px
+   gap the two visible lines actually show. Scoped off the Draw picker, which
+   stacks its own way above. */
+@media (max-width: 640px) {
+  .list-row:not(.list-row--picker) { flex-wrap: wrap; row-gap: 4px; column-gap: 8px; }
+  .list-row:not(.list-row--picker) .check { flex: 1 1 0; }
+  .list-row:not(.list-row--picker) > .spacer { flex: 0 0 100%; height: 0; }
+  .list-row:not(.list-row--picker) > .list-row-actions { margin-left: auto; }
+}
 .badge {
   font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
   background: var(--bg-sunken); color: var(--text-dim); border: 1px solid var(--border);

@@ -619,34 +619,41 @@ export async function renderLists(container) {
         list.review_count > 0
           ? h('span', { class: 'badge badge-warn' }, `${list.review_count} to review`)
           : null,
-        h('button', { class: 'btn-sm', onClick: () => openList(list.id) }, isOpen ? 'Hide' : 'Open'),
+        // Grouped so that on a phone, where this row wraps, the two actions
+        // move to a new line together instead of Delete dropping alone onto a
+        // line of its own. See the narrow .list-row rule in styles.css.
         h(
-          'button',
-          {
-            class: 'btn-sm btn-danger',
-            onClick: async () => {
-              // A watchlist needs ?force too, for the opposite reason a seed
-              // list does: a seed can always be re-fetched, and a watchlist
-              // exists nowhere else. The warning says so rather than reusing
-              // the reassuring one — "its films stay cached" is true and
-              // beside the point when the list itself is the unrecoverable
-              // part. Export is one button along.
-              const force = list.origin === 'seed' || Boolean(list.owner);
-              const warning = list.owner
-                ? `Delete ${list.owner}’s watchlist? It was built a film at a time and nothing can rebuild it. Export it first if you might want it.`
-                : `Delete "${list.name}"? Its films stay cached but the list goes.`;
-              if (!confirm(warning)) return;
-              try {
-                await api.deleteList(list.id, force);
-                if (state.openListId === list.id) state.openListId = null;
-                await refresh();
-                paint();
-              } catch (error) {
-                toast(error.message, 'error');
-              }
+          'span',
+          { class: 'list-row-actions' },
+          h('button', { class: 'btn-sm', onClick: () => openList(list.id) }, isOpen ? 'Hide' : 'Open'),
+          h(
+            'button',
+            {
+              class: 'btn-sm btn-danger',
+              onClick: async () => {
+                // A watchlist needs ?force too, for the opposite reason a seed
+                // list does: a seed can always be re-fetched, and a watchlist
+                // exists nowhere else. The warning says so rather than reusing
+                // the reassuring one — "its films stay cached" is true and
+                // beside the point when the list itself is the unrecoverable
+                // part. Export is one button along.
+                const force = list.origin === 'seed' || Boolean(list.owner);
+                const warning = list.owner
+                  ? `Delete ${list.owner}’s watchlist? It was built a film at a time and nothing can rebuild it. Export it first if you might want it.`
+                  : `Delete "${list.name}"? Its films stay cached but the list goes.`;
+                if (!confirm(warning)) return;
+                try {
+                  await api.deleteList(list.id, force);
+                  if (state.openListId === list.id) state.openListId = null;
+                  await refresh();
+                  paint();
+                } catch (error) {
+                  toast(error.message, 'error');
+                }
+              },
             },
-          },
-          'Delete',
+            'Delete',
+          ),
         ),
       ),
       isOpen ? entriesPanel(list) : null,
