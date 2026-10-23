@@ -6,10 +6,12 @@
     <meta name="color-scheme" content="dark" />
     <title>Double Feature</title>
     <link rel="stylesheet" href="/styles.css" />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E"
-    />
+    <!-- icon.svg is the tab favicon: logo.svg's two tickets without the
+         perforations and with less tilt, because the dashes smear into grey
+         at 16 px. The touch icon is logo.svg rendered square at 180 px; iOS
+         rounds the corners itself and would fill transparent ones black. -->
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
     <div id="app" class="app">
