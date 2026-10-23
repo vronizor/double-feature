@@ -1,5 +1,5 @@
 import { api } from './api.js';
-import { h, clear, showShortcuts } from './dom.js';
+import { h, clear, showShortcuts, brandTitle } from './dom.js';
 import { renderDraw } from './views/draw.js';
 import { renderExplore } from './views/explore.js';
 import { renderLists } from './views/lists.js';
@@ -32,7 +32,7 @@ async function renderHost() {
     h(
       'header',
       { class: 'masthead' },
-      h('h1', {}, 'Double ', h('span', {}, 'Feature')),
+      brandTitle(),
       h(
         'nav',
         { class: 'tabs' },

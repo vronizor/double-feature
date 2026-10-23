@@ -73,8 +73,16 @@ a { color: var(--accent); }
 
 /* --- Header / tabs ------------------------------------------------------ */
 
+/* `center`, not `baseline`: once the brand carries an image, baseline aligns
+   the image's bottom edge with the tabs' text, which hangs the logo below the
+   row. Centring keeps the tickets, the h1 and the tab pills on one axis. */
+/* `wrap` because the brand is `flex: none` (the logo plus a one-line title).
+   On a phone that leaves the tabs too little room, and without wrapping they
+   collapsed into a single column four pills tall. Wrapping moves them to a row
+   of their own under the brand instead, which is shorter than the old layout
+   where the title broke onto two lines beside a 2x2 grid of tabs. */
 .masthead {
-  display: flex; align-items: baseline; gap: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
   padding-bottom: 14px; margin-bottom: 18px;
   border-bottom: 1px solid var(--border);
 }
@@ -83,6 +91,11 @@ a { color: var(--accent); }
    the host's SPA does, so this is the only way home once a ballot resolves to
    results, a 404, or a dropped connection. */
 .masthead-brand { text-decoration: none; color: inherit; display: block; }
+/* Negative margin: logo.svg's tickets sit inside an invisible 64-unit square
+   (its backing is --bg), so at 40px there are ~6px of empty canvas on the left
+   that would otherwise indent the brand past the content column below it. */
+.brand { display: flex; align-items: center; gap: 8px; flex: none; }
+.brand-mark { display: block; width: 40px; height: 40px; margin-left: -6px; }
 
 .tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
 /* Padding, not font-size, is what raises these toward the 44px touch target.
@@ -96,6 +109,17 @@ a { color: var(--accent); }
 }
 .tab:hover { color: var(--text); background: var(--bg-raised); }
 .tab[aria-current="true"] { color: var(--accent); border-color: var(--border-strong); background: var(--bg-raised); }
+/* Once the masthead has wrapped, the tabs start their own row. Pushed right
+   there, they leave the keyboard button no room and it drops to a third row;
+   started from the pill's own inset, Lineup's label lines up with the brand. */
+@media (max-width: 600px) {
+  .tabs { margin-left: -10px; }
+  /* Horizontal only, so the 44px height the padding rule above exists for is
+     untouched. 14px fit at 390px wide but not at 360, the common Android
+     width; 10px buys the 32px that row needs, and the narrowest pill ("Lists")
+     stays about 53px wide. */
+  .tab { padding-left: 10px; padding-right: 10px; }
+}
 
 /* --- Controls ----------------------------------------------------------- */
 

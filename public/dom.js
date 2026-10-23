@@ -105,6 +105,27 @@ export function preserveScroll(root, selector) {
   };
 }
 
+/**
+ * The app's name with its two-tickets mark, as one block for both mastheads —
+ * the host SPA's and the guest's standalone /vote page — so the two cannot
+ * drift apart. The mark is `logo.svg`, the full drawing with perforations, not
+ * `icon.svg`: that one is simplified for 16 px and looks blunt at header size.
+ * Its dark backing square is the page's own --bg, so on the masthead the
+ * tickets read as floating rather than as a tile.
+ *
+ * `alt=""` because the h1 beside it already says the name; a screen reader
+ * would otherwise announce "Double Feature, Double Feature". The path is
+ * absolute because the vote page lives at /vote/:slug.
+ */
+export function brandTitle() {
+  return h(
+    'span',
+    { class: 'brand' },
+    h('img', { class: 'brand-mark', src: '/logo.svg', alt: '', width: 40, height: 40 }),
+    h('h1', {}, 'Double ', h('span', {}, 'Feature')),
+  );
+}
+
 export const POSTER_BASE = 'https://image.tmdb.org/t/p';
 
 export function posterUrl(path, size = 'w342') {

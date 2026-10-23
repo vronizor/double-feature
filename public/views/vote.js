@@ -1,4 +1,4 @@
-import { h, clear, posterUrl, toast, plural, ratingLine, metaLine, keepNameTogether, openMovieModal, originalTitleLine } from '../dom.js';
+import { h, clear, brandTitle, posterUrl, toast, plural, ratingLine, metaLine, keepNameTogether, openMovieModal, originalTitleLine } from '../dom.js';
 import { api } from '../api.js';
 import { toggleRank, rankOf, toBallot } from '../ranking.js';
 import { renderResults } from './session.js';
@@ -49,7 +49,7 @@ export async function renderVote(container, slug) {
         h(
           'a',
           { href: '/', class: 'masthead-brand' },
-          h('h1', {}, 'Double ', h('span', {}, 'Feature')),
+          brandTitle(),
         ),
       ),
       ...body,
