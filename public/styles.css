@@ -538,6 +538,14 @@ label { display: block; }
 @media (hover: hover) {
   .kbd-hint:hover { color: var(--text); border-color: var(--border-strong); }
 }
+/* Gone on touch-only devices: a phone has no keys for the card to list, and on
+   one the button cost the masthead's tab row its last 40px. Keyed on the
+   PRIMARY pointer, so a touchscreen laptop (trackpad primary) keeps it. An
+   iPad with a keyboard but no trackpad still reports coarse and loses the
+   button; "?" still opens the card there, since only the way in is hidden. */
+@media (hover: none) and (pointer: coarse) {
+  .kbd-hint { display: none; }
+}
 
 /* `.modal-card.shortcuts-card`, for the same reason as the sheet: the base
    class is defined further down and wins at equal specificity, so a bare
