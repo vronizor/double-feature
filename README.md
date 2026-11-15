@@ -49,6 +49,8 @@ pin which address guests get.
 docker compose up -d --build
 ```
 
+Update: push a release tag (`git tag v10.1 && git push origin v10.1`, or a release on GitHub). The Pi deploys it within 5 minutes and rolls back if it doesn't come up; pushing to `main` alone deploys nothing. By hand on the Pi: `deploy cine`. Don't `git pull` in the Pi's checkout. Every `v*` tag deploys, so tag a version only once it's ready for the Pi.
+
 Or without Docker (Node 24+):
 
 ```bash
